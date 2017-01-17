@@ -53,6 +53,8 @@ public class PvpFileLoader {
 				rttype.setName(BCUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("to-string")) {
 				rttype.setToStringCode(BCUtil.unmakeXMLSafe(e.getTextTrim()));
+			} else if (e.getName().equals("full-format")) {
+				rttype.setFullFormat(BCUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("field")) {
 				rttype.addField(loadTypeField(e));
 			} else {
@@ -65,6 +67,11 @@ public class PvpFileLoader {
 	
 	private PvpField loadTypeField(final Element fieldElement) {
 		List children = fieldElement.getChildren();
+		
+		String classification = fieldElement.getAttributeValue("classification");
+		if (classification != null && classification.trim().length() == 0) {
+			classification = null;
+		}
 		
 		String name = null;
 		String type = null;
@@ -80,11 +87,11 @@ public class PvpFileLoader {
 		}
 		
 		if (name == null || type == null) {
-			context.notifyWarning("name and type are required:" + fieldElement.getQualifiedName());
+			context.notifyWarning("name and type are required:" + fieldElement.getQualifiedName()); // TODO handle this better
 			
 		}
 		
-		return new PvpField(name, type);
+		return new PvpField(name, type, classification);
 	}
 	
 	public List<PvpRecord> loadRecords(final Element recordsElement) {

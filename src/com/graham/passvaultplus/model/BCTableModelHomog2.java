@@ -17,7 +17,7 @@ public class BCTableModelHomog2 implements BCTableModel {
 	PvpContext context;
 	String currentType;
 	//int currentTypeRowCount;
-	List<String> fieldNamesToDisplay;
+	List<PvpField> fieldsToDisplay;
 	
 	List<FieldAndRecord> cacheData = null;
 	
@@ -46,11 +46,11 @@ public class BCTableModelHomog2 implements BCTableModel {
 		for (int i = 0; i < max; i++) {
 			final PvpRecord r = filter.getRecordAtIndex(i);
 			//final Iterator iter = fieldNamesToDisplay.iterator();
-			for (final String name: fieldNamesToDisplay) {
+			for (final PvpField field: fieldsToDisplay) {
 				//final String name = (String)iter.next();
-				final String val = r.getCustomField(name);
+				final String val = r.getCustomField(field.getName());
 				if (val != null && val.length() > 0) {
-					cacheData.add(new FieldAndRecord(r, name));
+					cacheData.add(new FieldAndRecord(r, field));
 				}
 			}
 			cacheData.add(dummy);
@@ -71,12 +71,15 @@ public class BCTableModelHomog2 implements BCTableModel {
 		final FieldAndRecord fr = (FieldAndRecord)getCacheData().get(rowIndex);
 		
 		if (columnIndex == 0) {
-			return fr.fieldName;
+			return fr.getName();
 		} else if (columnIndex == 1) {
 			if (fr.record == null) {
 				return "";
 			}
-			return fr.record.getCustomField(fr.fieldName);
+			if (fr.field.isClassificationSecret()) {
+				return "******";
+			}
+			return fr.record.getCustomField(fr.field.getName());
 		}
 
 		return null;
@@ -100,7 +103,7 @@ public class BCTableModelHomog2 implements BCTableModel {
 		currentType = r.getType().getName();
 
 		List<PvpField> typeFields = r.getType().getFields();
-		fieldNamesToDisplay = new ArrayList<String>();
+		fieldsToDisplay = new ArrayList<>();
 		//currentTypeRowCount = 0;
 		
 		for (final PvpField f : typeFields) {
@@ -110,7 +113,7 @@ public class BCTableModelHomog2 implements BCTableModel {
 			} else if (f.getName().equals(PvpField.USR_MODIFICATION_DATE)) {
 				
 			} else {
-				fieldNamesToDisplay.add(f.getName());
+				fieldsToDisplay.add(f);
 				//currentTypeRowCount++;
 			}
 		}

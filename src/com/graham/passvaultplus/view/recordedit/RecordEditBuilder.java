@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,7 +21,6 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.actions.CopyFieldToClipboardAction;
 import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -40,6 +40,7 @@ public class RecordEditBuilder {
 		context = contextParam;
 		r = rParam;
 		editContext.editRecord = rParam;
+		editContext.undoManager = context.getUndoManager();
 		isNewRecord = isNewRecordParam;
 	}
 
@@ -96,15 +97,29 @@ public class RecordEditBuilder {
 			leftPanel.add(new JLabel(name + ":", JLabel.RIGHT));
 			JTextField tf = new JTextField(r.getCustomField(name));
 
-			tf.getDocument().addUndoableEditListener(context.getUndoManager());
-			tf.addCaretListener(context.getUndoManager());
-
-			tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(editContext, name)));
-			
-			JButton copyButton = new JButton(new CopyFieldToClipboardAction(null, PvpContext.getIcon("copy-small"), tf));
+			CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"), tf);
+			JButton copyButton = new JButton(copyAction);
 			copyButton.setFocusable(false);
 			leftPanel.add(copyButton);
-			JComboBox cb = buildFieldComboBox(name, tf);
+			PvpField field = r.getType().getField(name);
+			
+			JComponent rightWidget = null;
+			if (field == null) {
+				System.out.println("buildEditorTop: expected field to be not null"); // TODO
+			} else if (field.isClassificationSecret()) {
+				if (!isNewRecord) {
+					JButton showSecretFieldButton = new JButton(new UnlockFieldAction(PvpContext.getIcon("unlock-small"), tf, editContext, copyAction));
+					showSecretFieldButton.setFocusable(false);
+					showSecretFieldButton.setToolTipText("show value");
+					rightWidget = showSecretFieldButton;
+				}
+			} else {
+				rightWidget = buildFieldComboBox(name, tf);
+			}
+			
+			tf.getDocument().addUndoableEditListener(context.getUndoManager());
+			tf.addCaretListener(context.getUndoManager());
+			tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(editContext, name)));
 			
 			p.add(leftPanel, labelConstraints);
 			editContext.editFields.put(name, tf);
@@ -113,10 +128,10 @@ public class RecordEditBuilder {
 			}
 			tf.setBorder(cBorder);
 			
-			if (cb != null) {
+			if (rightWidget != null) {
 				JPanel p55 = new JPanel(new BorderLayout());
 				p55.add(tf, BorderLayout.CENTER);
-				p55.add(cb, BorderLayout.EAST);
+				p55.add(rightWidget, BorderLayout.EAST);
 				p.add(p55, editorConstraints);
 			} else {
 				p.add(tf, editorConstraints);
@@ -161,6 +176,9 @@ public class RecordEditBuilder {
 		editContext.revertAction = new RevertEditorAction(editContext);
 		editContext.revertAction.setEnabled(false);
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		if (r.getType().getFullFormat() != null) {
+			p.add(new JButton(new CopyRecordFullFormatted(r)));
+		}
 		p.add(new JButton(editContext.revertAction));
 		p.add(new JButton(new CancelEditorAction(context, editContext)));
 		p.add(new JButton(editContext.saveAction));

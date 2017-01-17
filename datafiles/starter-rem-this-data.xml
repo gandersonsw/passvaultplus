@@ -11,6 +11,7 @@
       <type>
          <name>Address</name>
          <to-string>First Name</to-string>
+         <full-format>[First Name] [Last Name]\n[Address]\n[City], [State] [Zip]</full-format>
          <field>
             <name>First Name</name>
             <type>String</type>
@@ -63,7 +64,7 @@
             <name>Username</name>
             <type>String</type>
          </field>
-         <field>
+         <field classification="secret">
             <name>Password</name>
             <type>String</type>
          </field>

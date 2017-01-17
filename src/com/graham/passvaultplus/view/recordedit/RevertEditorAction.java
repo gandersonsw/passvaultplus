@@ -15,11 +15,11 @@ public class RevertEditorAction extends AbstractAction {
 
 	public void actionPerformed(ActionEvent e) {
 		try {
-			editContext.ignoreChangeEvents = true;
+			editContext.setIgnoreAllChanges(true);
 			editContext.populateUIFromRecord();
 			editContext.setHasUnsavedChanges(false);
 		} finally {
-			editContext.ignoreChangeEvents = false;
+			editContext.setIgnoreAllChanges(false);
 		}
 	}
 

@@ -23,10 +23,17 @@ public class PvpField {
 
 	private String name;
 	private String type;
+	private String classification; // may be null
 	
 	public PvpField(final String nameParam, final String typeParam) {
 		name = nameParam;
 		type = typeParam;
+	}
+	
+	public PvpField(final String nameParam, final String typeParam, final String classificationParam) {
+		name = nameParam;
+		type = typeParam;
+		classification = classificationParam;
 	}
 
 	public String getName() {
@@ -35,6 +42,14 @@ public class PvpField {
 	
 	public String getType() {
 		return type;
+	}
+	
+	public String getClassification() {
+		return classification;
+	}
+	
+	public boolean isClassificationSecret() {
+		return "secret".equals(classification);
 	}
 	
 	

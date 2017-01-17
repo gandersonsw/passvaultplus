@@ -19,8 +19,8 @@ public class AnyFieldChangedAction extends AbstractAction {
 		fieldName = fieldNameParam;
 	}
 	public void actionPerformed(ActionEvent e) {
-		if (editContext.ignoreChangeEvents) {
-			System.out.println("ignoring change event");
+		if (editContext.shouldIngoreChanges()) {
+			// System.out.println("ignoring change event");
 			return;
 		}
 

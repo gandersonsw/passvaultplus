@@ -153,7 +153,12 @@ public class PvpFileSaver {
 			bw.write(t.getToStringCode());
 			bw.write("</to-string>");
 			bw.newLine();
-			
+			if (t.getFullFormat() != null) {
+				bw.write("         <full-format>");
+				bw.write(t.getToStringCode());
+				bw.write("</full-format>");
+				bw.newLine();
+			}
 			writeTypeFields(t);
 			
 			bw.write("      </type>");
@@ -167,7 +172,13 @@ public class PvpFileSaver {
 	
 	private void writeTypeFields(final PvpType t) throws IOException {
 		for (final PvpField f : t.getFields()) {
-			bw.write("         <field>");
+			bw.write("         <field");
+			if (f.getClassification() != null) {
+				bw.write(" classification=\"");
+				bw.write(f.getClassification());
+				bw.write("\"");
+			}
+			bw.write(">");
 			bw.newLine();
 			bw.write("            <name>");
 			bw.write(f.getName());

@@ -159,6 +159,10 @@ public class PvpRecord {
 		}
 		return (String)getCustomField(rtType.getToStringCode());
 	}
+	
+	public String getFormated() {
+		return rtType.getFullFormatter().format(this);
+	}
 
   //	String getTypeForValidate() {
 //		return typeForValidate;

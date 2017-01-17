@@ -69,7 +69,6 @@ public class PvpContext {
 		}
 			
 		if (loadFailed) {
-			System.out.println("startApp 3:" + context.getDataFilePath());
 			// We might need a password for that data file
 			String userHome = System.getProperty("user.home");
 			String fileSep = System.getProperty("file.separator");

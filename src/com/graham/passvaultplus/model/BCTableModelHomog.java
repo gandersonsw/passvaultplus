@@ -17,7 +17,7 @@ public class BCTableModelHomog implements BCTableModel {
 	PvpContext context;
 	String currentType;
 	int currentTypeRowCount;
-	List<String> fieldNamesToDisplay;
+	List<PvpField> fieldsToDisplay;
 	
 	public BCTableModelHomog(final RecordFilter f, final PvpContext c) {
 		filter = f;
@@ -41,13 +41,17 @@ public class BCTableModelHomog implements BCTableModel {
 		if (fieldIndex >= getSingleTypeRows()) {
 			return "";
 		}
-		String fieldName = (String)fieldNamesToDisplay.get(fieldIndex);
+		PvpField field = fieldsToDisplay.get(fieldIndex);
 		
 		if (columnIndex == 0) {
-			return fieldName;
+			return field.getName();
 		} else if (columnIndex == 1) {
-			PvpRecord rec = getRecordAtRow(rowIndex);
-			return rec.getCustomField(fieldName);
+			if (field.isClassificationSecret()) {
+				return "******";
+			} else {
+				PvpRecord rec = getRecordAtRow(rowIndex);
+				return rec.getCustomField(field.getName());
+			}
 		}
 
 		return null;
@@ -70,7 +74,7 @@ public class BCTableModelHomog implements BCTableModel {
 		currentType = r.getType().getName();
 
 		List<PvpField> typeFields = r.getType().getFields();
-		fieldNamesToDisplay = new ArrayList<String>();
+		fieldsToDisplay = new ArrayList<>();
 		currentTypeRowCount = 0;
 		
 		for (final PvpField f : typeFields) {
@@ -79,7 +83,7 @@ public class BCTableModelHomog implements BCTableModel {
 			} else if (f.getName().equals(PvpField.USR_MODIFICATION_DATE)) {
 				
 			} else {
-				fieldNamesToDisplay.add(f.getName());
+				fieldsToDisplay.add(f);
 				currentTypeRowCount++;
 			}
 		}

@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.passvaultplus.actions;
+package com.graham.passvaultplus.view.recordedit;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -11,18 +11,22 @@ import javax.swing.text.JTextComponent;
 
 public class CopyFieldToClipboardAction extends AbstractAction {
 	private JTextComponent tc;
+	private String overrideText;
 
-	public CopyFieldToClipboardAction(String label, ImageIcon icon, JTextComponent tcParam) {
-		super(label, icon);
+	public CopyFieldToClipboardAction(ImageIcon icon, JTextComponent tcParam) {
+		super(null, icon);
 		tc = tcParam;
 	}
 	public void actionPerformed(ActionEvent e) {
-		String txt = tc.getText();
+		String txt = overrideText == null ? tc.getText() : overrideText;
 		if (txt != null) {
 			if (txt.length() > 0) {
 				StringSelection ss = new StringSelection(txt);
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 			}
 		}
+	}
+	public void setOverrideText(final String s) {
+		overrideText = s;
 	}
 }

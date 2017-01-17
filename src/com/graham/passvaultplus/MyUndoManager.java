@@ -26,6 +26,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	private int currentUndoableEdit = -1;
 	private ArrayList<MyUndoableEdit> undoableEdits = new ArrayList<>();
 	private PvpContext pvpContext;
+	private boolean ignoreAllChanges;
 
 	public MyUndoManager(PvpContext contextParam) {
 		pvpContext = contextParam;
@@ -33,6 +34,9 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 
 	@Override
 	public void undoableEditHappened(UndoableEditEvent e) {
+		if (ignoreAllChanges) {
+			return;
+		}
 		if (e.getSource() == lastEditSource) {
 			//System.out.println("source SAME");
 			undoableEdits.get(currentUndoableEdit).addEditEvent(e, pvpContext.getTabManager().getSelectedComponent());
@@ -89,6 +93,10 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 		}
 		undoAction.setEnabled(canUndo());
 		redoAction.setEnabled(canRedo());
+	}
+	
+	public void setIgnoreAllChanges(boolean b) {
+		ignoreAllChanges = b;
 	}
 
 	class UndoAction extends AbstractAction {

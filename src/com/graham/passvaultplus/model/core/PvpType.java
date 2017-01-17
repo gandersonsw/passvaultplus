@@ -10,6 +10,8 @@ public class PvpType {
 
 	private String name;
 	private String toStringCode; // what field(s) the toString method should use
+	private String fullFormat; // what this record should look like when formatted. May be null
+	private PvpRecordFormatter fullFormatter;
 	private List<PvpField> fields = new ArrayList<PvpField>();
 	
 	public String getName() {
@@ -24,6 +26,15 @@ public class PvpType {
 		fields.add(f);
 	}
 	
+	public PvpField getField(final String fieldName) {
+		for (PvpField f : fields) {
+			if (f.getName().equals(fieldName)) {
+				return f;
+			}
+		}
+		return null;
+	}
+	
 	public List<PvpField> getFields() {
 		return fields;
 	}
@@ -34,6 +45,21 @@ public class PvpType {
 	
 	public String getToStringCode() {
 		return toStringCode;
+	}
+	
+	public void setFullFormat(final String s) {
+		fullFormat = s;
+	}
+	
+	public String getFullFormat() {
+		return fullFormat;
+	}
+	
+	public PvpRecordFormatter getFullFormatter() {
+		if (fullFormatter == null) {
+			fullFormatter = new PvpRecordFormatter(fullFormat);
+		}
+		return fullFormatter;
 	}
 	
 	public String toString() {
