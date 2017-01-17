@@ -1,0 +1,170 @@
+<mydb locale=“en_US”>
+   <types>
+      <type>
+         <name>Category</name>
+         <to-string>Title</to-string>
+         <field>
+            <name>Title</name>
+            <type>String</type>
+         </field>
+      </type>
+      <type>
+         <name>Address</name>
+         <to-string>First Name</to-string>
+         <field>
+            <name>First Name</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Last Name</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Address</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>City</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>State</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Zip</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Cell Phone</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Work Phone</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Home Phone</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Email</name>
+            <type>String</type>
+         </field>
+      </type>
+      <type>
+         <name>Account</name>
+         <to-string>Title</to-string>
+         <field>
+            <name>Title</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Username</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Password</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Url</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Email</name>
+            <type>String</type>
+         </field>
+      </type>
+      <type>
+         <name>Todo</name>
+         <to-string>Title</to-string>
+         <field>
+            <name>Title</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Priority</name>
+            <type>int</type>
+         </field>
+         <field>
+            <name>Complete</name>
+            <type>boolean</type>
+         </field>
+         <field>
+            <name>Complete Date</name>
+            <type>Date</type>
+         </field>
+      </type>
+      <type>
+         <name>Idea</name>
+         <to-string>Title</to-string>
+         <field>
+            <name>Title</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Text</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Related Idea</name>
+            <type>Idea</type>
+         </field>
+      </type>
+      <type>
+         <name>Important Date</name>
+         <to-string>Title</to-string>
+         <field>
+            <name>Title</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Date</name>
+            <type>String</type>
+         </field>
+         <field>
+            <name>Text</name>
+            <type>String</type>
+         </field>
+      </type>
+   </types>
+   <records>
+      <record id="1">
+         <title>Everything</title>
+         <creation-date></creation-date>
+         <type>Category</type>
+         <category></category>
+         <modification-date></modification-date>
+      </record>
+      <record id="2">
+         <title>Work</title>
+         <creation-date></creation-date>
+         <type>Category</type>
+         <category></category>
+         <modification-date></modification-date>
+      </record>
+      <record id="4">
+         <title>Family</title>
+         <creation-date></creation-date>
+         <type>Category</type>
+         <category></category>
+         <modification-date></modification-date>
+      </record>
+      <record id="5">
+         <title>Personal</title>
+         <creation-date></creation-date>
+         <type>Category</type>
+         <category></category>
+         <modification-date></modification-date>
+      </record>
+      <record id="6">
+         <title>House</title>
+         <creation-date></creation-date>
+         <type>Category</type>
+         <category></category>
+         <modification-date></modification-date>
+      </record>
+   </records>
+</mydb>
+               
