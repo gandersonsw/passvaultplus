@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -22,6 +23,8 @@ import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
 public class PvpContext {
+	static final public boolean JAR_BUILD = true;
+	
 	private final MyUndoManager undoManager = new MyUndoManager(this);
 	private final TabManager tabManager = new TabManager(this);
 
@@ -279,8 +282,18 @@ public class PvpContext {
 
 	public static ImageIcon getIcon(final String imageName) {
 		try {
-			//System.out.println("getIcon:" + new File("datafiles/images/" + imageName + ".png").getAbsolutePath());
-			final BufferedImage img = ImageIO.read(new File("datafiles/images/" + imageName + ".png"));
+			
+			BufferedImage img;
+			if (JAR_BUILD) {
+				//System.out.println("getIcon1:" + "datafiles/images/" + imageName + ".png");
+				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
+				InputStream imageStream = PvpContext.class.getResourceAsStream("/datafiles/images/" + imageName + ".png");
+				img = ImageIO.read(imageStream);
+			} else {
+				//System.out.println("getIcon:" + new File("datafiles/images/" + imageName + ".png").getAbsolutePath());
+				img = ImageIO.read(new File("datafiles/images/" + imageName + ".png"));
+			}
+
 			return new ImageIcon(img);
 		} catch (IOException e) {
 			e.printStackTrace();

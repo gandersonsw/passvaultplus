@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -463,17 +464,34 @@ public class BCUtil {
 
 	}
 	
+	public static void copyFile(final InputStream sourceStream, final File destinationFile) throws IOException {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(destinationFile);
+			copyFile(sourceStream, fos);
+		} finally {
+			if (fos != null) {
+				try { fos.close(); } catch (Exception e) { }
+			}
+		}
+	}
+	
+
+	public static void copyFile(final InputStream sourceStream, final OutputStream destStream) throws IOException {
+		byte[] buffer = new byte[1024];
+		int length = 0;
+		while ((length = sourceStream.read(buffer)) > 0) {
+			destStream.write(buffer, 0, length);
+		}
+	}
+	
 	public static void copyFile(final File sourceFile, final File destinationFile) throws IOException {
 		FileInputStream fis = null;
 		FileOutputStream fos = null;
 		try {
 			fis = new FileInputStream(sourceFile);
 			fos = new FileOutputStream(destinationFile);
-			byte[] buffer = new byte[1024];
-			int length = 0;
-			while ((length = fis.read(buffer)) > 0) {
-				fos.write(buffer, 0, length);
-			}
+			copyFile(fis, fos);
 		} finally {
 			if (fis != null) {
 				try { fis.close(); } catch (Exception e) { }

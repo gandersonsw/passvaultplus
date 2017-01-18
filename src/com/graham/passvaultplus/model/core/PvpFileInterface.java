@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -321,9 +322,15 @@ public class PvpFileInterface {
 	}
 	
 	private void createDefaultStarterFile(final File destinationFile) throws IOException {
-		final File sourceFile = new File("datafiles/starter-rem-this-data.xml");
-		System.out.println("sourceFile=" + sourceFile.getAbsolutePath());
-		BCUtil.copyFile(sourceFile, destinationFile);
+		if (PvpContext.JAR_BUILD) {
+			// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
+			InputStream sourceStream = PvpContext.class.getResourceAsStream("/datafiles/starter-rem-this-data.xml");
+			BCUtil.copyFile(sourceStream, destinationFile);
+		} else {
+			File sourceFile = new File("datafiles/starter-rem-this-data.xml");
+			System.out.println("sourceFile=" + sourceFile.getAbsolutePath());
+			BCUtil.copyFile(sourceFile, destinationFile);
+		}
 	}
 
 }
