@@ -105,7 +105,7 @@ public class RecordEditBuilder {
 			
 			JComponent rightWidget = null;
 			if (field == null) {
-				System.out.println("buildEditorTop: expected field to be not null"); // TODO
+				System.out.println("buildEditorTop: expected field to be not null:" + name); // TODO
 			} else if (field.isClassificationSecret()) {
 				if (!isNewRecord) {
 					JButton showSecretFieldButton = new JButton(new UnlockFieldAction(PvpContext.getIcon("unlock-small"), tf, editContext, copyAction));

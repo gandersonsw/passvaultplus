@@ -175,6 +175,8 @@ public class PvpFileInterface {
 				try {
 					cypherStream = new CipherInputStream(new FileInputStream(path), getCipher(false, passwordTried));
 					inStream = cypherStream;
+					
+					
 
 					byte[] check = new byte[8];
 					if (inStream.read(check, 0, 8) == 8) {

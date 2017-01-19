@@ -23,7 +23,7 @@ import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
 public class PvpContext {
-	static final public boolean JAR_BUILD = true;
+	static final public boolean JAR_BUILD = false;
 	
 	private final MyUndoManager undoManager = new MyUndoManager(this);
 	private final TabManager tabManager = new TabManager(this);
