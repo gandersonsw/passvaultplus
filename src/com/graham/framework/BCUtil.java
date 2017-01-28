@@ -336,6 +336,13 @@ public class BCUtil {
 		return ret.toString();
 	}
 	
+	public static String getPluralAppendix(final int count) {
+		if (count == 1) {
+			return "";
+		}
+		return "s";
+	}
+	
 	public static String makeXMLSafe(final String txt) {
 		String ret = txt;
 		ret = replaceAll(ret,"&","&amp;");

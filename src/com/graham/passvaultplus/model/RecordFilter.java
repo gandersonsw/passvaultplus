@@ -3,6 +3,7 @@ package com.graham.passvaultplus.model;
 
 import java.util.List;
 
+import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -48,6 +49,7 @@ public class RecordFilter {
 		PvpDataInterface.FilterResults results = context.getDataInterface().getFilteredRecords(filterByType, filterByText, filterByCategory.getCategory(), checkCategory);
 		data = results.records;
 		allTheSameTypeFlag = results.allTheSameTypeFlag;
+		context.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + BCUtil.getPluralAppendix(data.size()));
 	}
 
 	public int getRecordCount() {

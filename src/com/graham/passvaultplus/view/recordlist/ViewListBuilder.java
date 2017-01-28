@@ -92,6 +92,10 @@ public class ViewListBuilder {
 
 		panel.add(new JLabel("Category:"));
 		panel.add(buildCategoryComboBox(context, filterChangeAction));
+		
+		JLabel rc = new JLabel("");
+		context.getViewListContext().setRecordCountLabel(rc);
+		panel.add(rc);
 
 		return panel;
 	}

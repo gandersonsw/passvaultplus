@@ -4,6 +4,7 @@ package com.graham.passvaultplus.view.recordlist;
 import java.util.*;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
@@ -21,8 +22,9 @@ public class PvpViewListContext {
 	private JTable listTable;
 	private ListTableModel listTableModel;
 	private JTextField filterTextField;
+	private JLabel recordCount;
 
-	public void setTypeComboBox(final JComboBox c) {
+	void setTypeComboBox(final JComboBox c) {
 		typeComboBox = c;
 	}
 	
@@ -30,7 +32,7 @@ public class PvpViewListContext {
 		return typeComboBox;
 	}
 	
-	public void setCategoryComboBox(final JComboBox c) {
+	void setCategoryComboBox(final JComboBox c) {
 		categoryComboBox = c;
 	}
 	
@@ -65,12 +67,12 @@ public class PvpViewListContext {
 		return records.values();
 	}
 	
-	public void setListTable(final JTable t, final ListTableModel tm) {
+	void setListTable(final JTable t, final ListTableModel tm) {
 		listTable = t;
 		listTableModel = tm;
 	}
 	
-	public void setFilterTextField(final JTextField tf) {
+	void setFilterTextField(final JTextField tf) {
 		filterTextField = tf;
 	}
 	
@@ -80,6 +82,14 @@ public class PvpViewListContext {
 
 	public ListTableModel getListTableModel() {
 		return listTableModel;
+	}
+	
+	void setRecordCountLabel(final JLabel rc) {
+		recordCount = rc;
+	}
+	
+	public JLabel getRecordCountLabel() {
+		return recordCount;
 	}
 	
 }
