@@ -7,18 +7,17 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.text.JTextComponent;
 
 public class CopyFieldToClipboardAction extends AbstractAction {
-	private JTextComponent tc;
-	private String overrideText;
 
-	public CopyFieldToClipboardAction(ImageIcon icon, JTextComponent tcParam) {
+	private RecordEditField ref;
+
+	public CopyFieldToClipboardAction(ImageIcon icon) {
 		super(null, icon);
-		tc = tcParam;
+	
 	}
 	public void actionPerformed(ActionEvent e) {
-		String txt = overrideText == null ? tc.getText() : overrideText;
+		String txt = ref.getFieldTextForCopy();
 		if (txt != null) {
 			if (txt.length() > 0) {
 				StringSelection ss = new StringSelection(txt);
@@ -26,7 +25,8 @@ public class CopyFieldToClipboardAction extends AbstractAction {
 			}
 		}
 	}
-	public void setOverrideText(final String s) {
-		overrideText = s;
+	
+	public void setRecordEditField(final RecordEditField refParam) {
+		ref = refParam;
 	}
 }

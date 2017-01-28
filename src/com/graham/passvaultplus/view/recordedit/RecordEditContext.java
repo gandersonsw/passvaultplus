@@ -1,60 +1,30 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.recordedit;
 
-import java.awt.Component;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import com.graham.passvaultplus.MyUndoManager;
-import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
 
 public class RecordEditContext {
 	PvpRecord editRecord;
 	SaveEditorAction saveAction;
 	RevertEditorAction revertAction;
-	Map<String, JComponent> editFields = new HashMap<String, JComponent>();
+	Map<String, RecordEditField> editFields = new HashMap<>();
 	JPanel panelInTabPane;
 	MyUndoManager undoManager;
 	
 	private boolean hasUnsavedChanges;
 	private boolean ignoreAllChanges;
 
-	public PvpRecord getSelectedCategory() {
-		JComboBox catCombo = (JComboBox)editFields.get(PvpField.USR_CATEGORY);
-		if (catCombo.getSelectedItem().equals(PvpRecord.NO_CATEGORY)) {
-			return null;
-		} else {
-			return (PvpRecord)catCombo.getSelectedItem();
-		}
-	}
-
-	public void setSelectedCategory(PvpRecord category) {
-		JComboBox catCombo = (JComboBox) editFields.get(PvpField.USR_CATEGORY);
-		if (category == null) {
-			catCombo.setSelectedItem(PvpRecord.NO_CATEGORY);
-		} else {
-			catCombo.setSelectedItem(category);
-		}
-	}
-
 	public void populateRecordFromUI(final PvpRecord record) {
-		for (final Map.Entry<String, JComponent> e1 : editFields.entrySet()) {
-			String name = e1.getKey();
-			if (!name.equals(PvpField.USR_CATEGORY)) {
-				String txt = ((JTextField)e1.getValue()).getText();
-				record.setCustomField(name, txt);
-			}
+		for (final Map.Entry<String, RecordEditField> e1 : editFields.entrySet()) {
+			e1.getValue().populateRecordFieldFromUI(record);
 		}
-
-		record.setCategory(getSelectedCategory());
 
 		Date now = new Date();
 		record.setModificationDate(now);
@@ -64,19 +34,9 @@ public class RecordEditContext {
 	}
 
 	public void populateUIFromRecord() {
-		for (final Map.Entry<String, JComponent> e1 : editFields.entrySet()) {
-			String name = e1.getKey();
-			if (name.equals(PvpField.USR_CATEGORY)) {
-				setSelectedCategory(editRecord.getCategory());
-			} else {
-				String val = editRecord.getCustomField(name);
-				if (val == null) {
-					val = "";
-				}
-				((JTextField) e1.getValue()).setText(val);
-			}
+		for (final Map.Entry<String, RecordEditField> e1 : editFields.entrySet()) {
+			e1.getValue().populateUIFromRecordField(editRecord);
 		}
-
 	}
 
 	public int getRecordId() {

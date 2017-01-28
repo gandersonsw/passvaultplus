@@ -97,18 +97,21 @@ public class RecordEditBuilder {
 			leftPanel.add(new JLabel(name + ":", JLabel.RIGHT));
 			JTextField tf = new JTextField(r.getCustomField(name));
 
-			CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"), tf);
+			CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"));
 			JButton copyButton = new JButton(copyAction);
 			copyButton.setFocusable(false);
 			leftPanel.add(copyButton);
 			PvpField field = r.getType().getField(name);
 			
 			JComponent rightWidget = null;
+			RecordEditField ref = null;
 			if (field == null) {
 				System.out.println("buildEditorTop: expected field to be not null:" + name); // TODO
 			} else if (field.isClassificationSecret()) {
 				if (!isNewRecord) {
-					JButton showSecretFieldButton = new JButton(new UnlockFieldAction(PvpContext.getIcon("unlock-small"), tf, editContext, copyAction));
+					final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name);
+					ref = refs;
+					JButton showSecretFieldButton = new JButton(new UnlockFieldAction(PvpContext.getIcon("unlock-small"), refs, editContext));
 					showSecretFieldButton.setFocusable(false);
 					showSecretFieldButton.setToolTipText("show value");
 					rightWidget = showSecretFieldButton;
@@ -117,12 +120,17 @@ public class RecordEditBuilder {
 				rightWidget = buildFieldComboBox(name, tf);
 			}
 			
+			if (ref == null) {
+				ref = new RecordEditFieldJTextComponent(tf, name);
+			}
+			copyAction.setRecordEditField(ref);
+			
 			tf.getDocument().addUndoableEditListener(context.getUndoManager());
 			tf.addCaretListener(context.getUndoManager());
-			tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(editContext, name)));
+			tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(editContext, ref)));
 			
 			p.add(leftPanel, labelConstraints);
-			editContext.editFields.put(name, tf);
+			editContext.editFields.put(name, ref);
 			if (cBorder == null) {
 				cBorder = new CompoundBorder(eBorder, tf.getBorder());
 			}
@@ -199,10 +207,11 @@ public class RecordEditBuilder {
 		}
 
 		JComboBox catCombo = new JComboBox(comboItems);
-		editContext.editFields.put(PvpField.USR_CATEGORY, catCombo);
+		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo);
+		editContext.editFields.put(PvpField.USR_CATEGORY, refc);
 		catCombo.setSelectedIndex(selectedIndex);
 
-		catCombo.addActionListener(new AnyFieldChangedAction(editContext, PvpField.USR_CATEGORY));
+		catCombo.addActionListener(new AnyFieldChangedAction(editContext, refc));
 
 		JPanel spacerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		spacerPanel.add(catCombo);
@@ -216,14 +225,14 @@ public class RecordEditBuilder {
 		return p;
 	}
 
-	private JComboBox buildTypeComboBox() {
+	private JComboBox<PvpType> buildTypeComboBox() {
 		List<PvpType> types = context.getDataInterface().getTypes();
-		Object[] typeArray = new Object[types.size()];
+		PvpType[] typeArray = new PvpType[types.size()];
 		for (int i = 0; i < types.size(); i++) {
 			typeArray[i] = types.get(i);
 		}
 
-		JComboBox typeCombo = new JComboBox(typeArray);
+		JComboBox<PvpType> typeCombo = new JComboBox<PvpType>(typeArray);
 		typeCombo.setSelectedItem(r.getType());
 		typeCombo.addActionListener(new NewRecordTypeChangedAction(context, editContext));
 		return typeCombo;

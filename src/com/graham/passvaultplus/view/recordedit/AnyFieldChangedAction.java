@@ -4,19 +4,16 @@ package com.graham.passvaultplus.view.recordedit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.JTextField;
 
-import com.graham.passvaultplus.AppUtil;
-import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
 
 public class AnyFieldChangedAction extends AbstractAction {
-	final private String fieldName;
+	final private RecordEditField ref;
 	final private RecordEditContext editContext;
 
-	public AnyFieldChangedAction(final RecordEditContext editContextParam, String fieldNameParam) {
+	public AnyFieldChangedAction(final RecordEditContext editContextParam, final RecordEditField refParam) {
 		editContext = editContextParam;
-		fieldName = fieldNameParam;
+		ref = refParam;
 	}
 	public void actionPerformed(ActionEvent e) {
 		if (editContext.shouldIngoreChanges()) {
@@ -24,40 +21,18 @@ public class AnyFieldChangedAction extends AbstractAction {
 			return;
 		}
 
-		boolean hasOriginalValue = false;
-		// TODO clean up this if test everywhere
-		if (fieldName.equals(PvpField.USR_CATEGORY)) {
-
-			PvpRecord cat = editContext.getSelectedCategory();
-			if (AppUtil.equalsWithNull(cat, editContext.editRecord.getCategory())) {
-				hasOriginalValue = true;
-			}
-
-		} else {
-			String val = editContext.editRecord.getCustomField(fieldName);
-			if (val == null) {
-				val = "";
-			}
-			JTextField tf = (JTextField)editContext.editFields.get(fieldName);
-			if (val.equals(tf.getText())) {
-				hasOriginalValue = true;
-			}
-		}
-
+		boolean hasOriginalValue = ref.isEdited(editContext.editRecord);
+		
 		boolean recordHasBeenModified = true;
 		// the currently edited field has its original value, so check to see if all the other fields are the same
 		if (hasOriginalValue) {
-			//System.out.println("777 at 1");
 			PvpRecord tempRec = new PvpRecord(editContext.editRecord.getType());
 			editContext.populateRecordFromUI(tempRec);
 			if (tempRec.isSimilar(editContext.editRecord)) {
 				recordHasBeenModified = false;
-				//System.out.println("777 at 2");
 			}
 		}
 
 		editContext.setHasUnsavedChanges(recordHasBeenModified);
-		//editContext.revertAction.setEnabled(recordHasBeenModified);
-		//editContext.saveAction.setEnabled(recordHasBeenModified);
 	}
 }
