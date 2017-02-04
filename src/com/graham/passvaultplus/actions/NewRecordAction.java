@@ -28,7 +28,7 @@ public class NewRecordAction extends AbstractAction {
 		}
 		PvpRecord r = new PvpRecord(type);
 		final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
-		context.getTabManager().addRecordEditor("new", editor); // TODO this is new, make sure to test
+		context.getTabManager().addRecordEditor("new", editor);
 		context.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
 	}
 

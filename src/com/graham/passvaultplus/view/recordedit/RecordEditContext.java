@@ -33,10 +33,14 @@ public class RecordEditContext {
 		}
 	}
 
-	public void populateUIFromRecord() {
+	public void populateUIFromRecord(final PvpRecord editRecordParam) {
 		for (final Map.Entry<String, RecordEditField> e1 : editFields.entrySet()) {
-			e1.getValue().populateUIFromRecordField(editRecord);
+			e1.getValue().populateUIFromRecordField(editRecordParam);
 		}
+	}
+	
+	public void populateUIFromRecord() {
+		populateUIFromRecord(editRecord);
 	}
 
 	public int getRecordId() {

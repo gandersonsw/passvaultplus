@@ -52,7 +52,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			
 			undoableEdits.add(ue);
 			if (currentUndoableEdit > MAX_UNDOS) {
-				undoableEdits.remove(0); // TODO test this
+				undoableEdits.remove(0);
 			} else {
 				currentUndoableEdit++;
 			}

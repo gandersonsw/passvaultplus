@@ -7,6 +7,10 @@ import java.util.Collection;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoableEdit;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -66,12 +70,74 @@ public class DeleteRecord extends AbstractAction {
 			context.getTabManager().removeRecordEditor(ec2);
 		}
 		if (records != null) {
-			for (PvpRecord r : records) {
-				if (r.isPersisted()) {
-					context.getDataInterface().deleteRecord(r);
-				}
-			}
+			context.getDataInterface().deleteRecords(records);
+			context.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
 		}
 
+	}
+	
+	
+	class DRUndoableEdit implements UndoableEdit {
+		
+		final Collection<PvpRecord> records;
+		
+		public DRUndoableEdit(final Collection<PvpRecord> recordsParam) {
+			records = recordsParam;
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			context.getDataInterface().saveRecords(records);
+		}
+
+		@Override
+		public boolean canUndo() {
+			return true;
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			context.getDataInterface().deleteRecords(records);
+		}
+
+		@Override
+		public boolean canRedo() {
+			return true;
+		}
+
+		@Override
+		public void die() {
+		}
+
+		@Override
+		public boolean addEdit(UndoableEdit anEdit) {
+			return false;
+		}
+
+		@Override
+		public boolean replaceEdit(UndoableEdit anEdit) {
+			return false;
+		}
+
+		@Override
+		public boolean isSignificant() {
+			return true;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return "Delete Records";
+		}
+
+		@Override
+		public String getUndoPresentationName() {
+			return "Undo Delete Records";
+		}
+
+		@Override
+		public String getRedoPresentationName() {
+			return "Redo Delete Records";
+		}
+		
 	}
 }

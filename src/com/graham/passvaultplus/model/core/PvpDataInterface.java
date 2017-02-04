@@ -2,9 +2,12 @@
 package com.graham.passvaultplus.model.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.graham.passvaultplus.PvpContext;
 
@@ -14,7 +17,7 @@ import com.graham.passvaultplus.PvpContext;
 public class PvpDataInterface {
 	
 	static final public String TYPE_CATEGORY = "Category";
-
+	
 	static public class FilterResults {
 		public List<PvpRecord> records = new ArrayList<PvpRecord>();
 		public boolean allTheSameTypeFlag = true;
@@ -86,10 +89,47 @@ public class PvpDataInterface {
 	public void deleteRecord(final PvpRecord r) {
 		if (records.contains(r)) {
 			records.remove(r);
+			r.setId(0);
 			context.getFileInterface().save(this);
 			context.getViewListContext().getListTableModel().filterUIChanged();
 		} else {
 			context.notifyWarning("could not delete record because it is not in the list:" + r);
+		}
+	}
+	
+	public void saveRecords(final Collection<PvpRecord> rCol) {
+		if (rCol == null || rCol.size() == 0) {
+			return;
+		}
+		for (PvpRecord r : rCol) {
+			if (r.getId() == 0) {
+				int maxID = context.getFileInterface().getNextMaxID();
+				r.setId(maxID);
+				records.add(r);
+			}
+		}
+		context.getFileInterface().save(this);
+		context.getViewListContext().getListTableModel().filterUIChanged();
+	}
+
+	public void deleteRecords(final Collection<PvpRecord> rCol) {
+		if (rCol == null || rCol.size() == 0) {
+			return;
+		}
+		boolean changed = false;
+		for (PvpRecord r : rCol) {
+			if (records.contains(r)) {
+				records.remove(r);
+				r.setId(0);
+				changed = true;
+			} else {
+				context.notifyWarning("could not delete record because it is not in the list:" + r);
+			}
+		}
+		
+		if (changed) {
+			context.getFileInterface().save(this);
+			context.getViewListContext().getListTableModel().filterUIChanged();
 		}
 	}
 
@@ -128,10 +168,10 @@ public class PvpDataInterface {
 	}
 
 
-  public List<String> getCommonFiledValues(String recordType, String recordFieldName) {
+	public List<String> getCommonFiledValues(String recordType, String recordFieldName) {
 		FilterResults filtered = getFilteredRecords(recordType, "", null, false);
 
-    HashMap<String, Integer> counts = new HashMap<>();
+		HashMap<String, Integer> counts = new HashMap<>();
 
 		for (PvpRecord r : filtered.records) {
 			String val = r.getCustomField(recordFieldName);
@@ -139,7 +179,7 @@ public class PvpDataInterface {
 				val = val.trim();
 				if (val.length() == 0) {
 					// ignore empty strings
-				}else if (counts.containsKey(val)) {
+				} else if (counts.containsKey(val)) {
 					counts.put(val, counts.get(val) + 1);
 				} else {
 					counts.put(val, 1);
@@ -147,61 +187,70 @@ public class PvpDataInterface {
 			}
 		}
 
-		// TODO sort by counts ?  or by aphabetical ?
+		// TODO sort by counts ? or by aphabetical ?
 
 		List<String> values = new ArrayList<>();
 		for (Map.Entry<String, Integer> e : counts.entrySet()) {
 			if (e.getValue() > 1) {
-			  values.add(e.getKey());
-		  }
+				values.add(e.getKey());
+			}
 		}
 
 		return values;
 	}
 
-	public FilterResults getFilteredRecords(String filterByType, String filterByText, PvpRecord filterByCategory, boolean checkCategory) {
+	public FilterResults getFilteredRecords(final String filterByType, final String filterByText, final PvpRecord filterByCategory, final boolean checkCategory) {
+		final long startTime = System.nanoTime();
+		/*
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		*/
 		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
 		boolean checkText = filterByText.length() > 0;
 		List<PvpRecord> allRecords = context.getDataInterface().getRecords();
 
-    	filterByText = filterByText.toLowerCase();
+    	final String filterByTextLC = filterByText.toLowerCase();
 
-   	 	FilterResults results = new FilterResults();
+    	FilterResults results = new FilterResults();
 
-		for (int i = 0; i < allRecords.size(); i++) {
-			PvpRecord r = allRecords.get(i);
+    	Stream<PvpRecord> filteredStream = allRecords.stream().filter(r -> {
 			if (checkType) {
 				if (!r.getType().getName().equals(filterByType)) {
-					continue;
+					return false;
 				}
 			}
 			if (checkCategory) {
 				if (filterByCategory == null) {
 					if (r.getCategory() != null) {
-						continue;
+						return false;
 					}
 				} else if (r.getCategory() == null) {
-					continue;
+					return false;
 				} else if (!(r.getCategory().getId() == filterByCategory.getId())) {
-					continue;
+					return false;
 				}
 			}
 			if (checkText) {
-				if (!recordContainsText(r, filterByText)) {
-					continue;
+				if (!recordContainsText(r, filterByTextLC)) {
+					return false;
 				}
 			}
-
-			if (results.records.size() > 0) {
-				String type = results.records.get(0).getType().getName();
-				if (!type.equals(r.getType().getName())) {
-					results.allTheSameTypeFlag = false;
-				}
-			}
-
-			results.records.add(r);
-		}
-
+			return true;
+   	 	});
+    	
+    	results.records = filteredStream.collect(Collectors.toList());
+    	
+    	if (checkType) {
+    		results.allTheSameTypeFlag = true;
+    	} else {
+    		results.allTheSameTypeFlag = results.records.stream().map(r -> r.getType().getName()).distinct().count() == 1;
+    	}
+    	
+		final long endTime = System.nanoTime();
+		//System.out.println("getFilteredRecords time:" + (endTime - startTime) / 1000 + " : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
 		return results;
 	}
 

@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import javax.swing.*;
 
