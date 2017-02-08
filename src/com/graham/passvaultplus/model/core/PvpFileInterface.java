@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -16,7 +18,8 @@ import java.util.zip.ZipInputStream;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -76,79 +79,6 @@ public class PvpFileInterface {
 		return path.endsWith("." + EXT_ENCRYPT);
 	}
 
-	/**
-	 *
-	 * @param encryptFlag True to encrypt, false to decrypt
-	 * @throws InvalidKeyException
-	 */
-	public Cipher getCipher(boolean encryptFlag, boolean passwordTried) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UserAskToChangeFileException {
-
-		byte b[] = context.getPasswordOrAskUser(passwordTried).getBytes();
-		byte b2[];
-		if (b.length == 0) {
-			throw new InvalidKeyException("empty key not allowed");
-		}
-		if (b.length > 128) { // if more than 128, truncate
-			b2 = new byte[128];
-			for (int i = 0; i < 128; i++) {
-				b2[i] = b[i];
-			}
-		} else {
-			int targetLength;
-			if (b.length < 16) {
-				targetLength = 16;
-			}  else {
-				targetLength = (b.length + 7) >> 3;
-				targetLength = targetLength << 3;
-			}
-			b2 = new byte[targetLength];
-			for (int i = 0; i < b.length; i++) {
-				b2[i] = b[i];
-			}
-			for (int i = b.length; i < targetLength; i++) {
-				b2[i] = ' ';
-			}
-		}
-
-	    SecretKeySpec key = new SecretKeySpec(b2, "AES");
-		   // Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-	    Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-	    if (encryptFlag) {
-	    	cipher.init(Cipher.ENCRYPT_MODE, key);
-	    } else {
-	    	cipher.init(Cipher.DECRYPT_MODE, key);
-	    }
-	    return cipher;
-	}
-
-	  public static void test1() throws Exception {
-		  //  Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		    byte[] input = " www.java2s.com ".getBytes();
-		    byte[] keyBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
-		        0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17 };
-
-		    SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-		   // Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-		    Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-		    System.out.println("input text : " + new String(input));
-
-		    // encryption pass
-
-		    byte[] cipherText = new byte[input.length];
-		    cipher.init(Cipher.ENCRYPT_MODE, key);
-		    int ctLength = cipher.update(input, 0, input.length, cipherText, 0);
-		    ctLength += cipher.doFinal(cipherText, ctLength);
-		    System.out.println("cipher text: " + new String(cipherText) + " bytes: " + ctLength);
-
-		    // decryption pass
-
-		    byte[] plainText = new byte[ctLength];
-		    cipher.init(Cipher.DECRYPT_MODE, key);
-		    int ptLength = cipher.update(cipherText, 0, ctLength, plainText, 0);
-		    ptLength += cipher.doFinal(plainText, ptLength);
-		    System.out.println("plain text : " + new String(plainText) + " bytes: " + ptLength);
-		  }
-
 	public XmlStuff getJdomDoc(boolean getAsString) throws JDOMException, IOException, UserAskToChangeFileException {
 
 		wasXmlError = false;
@@ -163,6 +93,9 @@ public class PvpFileInterface {
 			while (badEncryption) {
 			String path = context.getDataFilePath();
 			File pathFile = new File(path);
+			if (pathFile.isDirectory()) {
+				pathFile = new File(pathFile, "rem-this-data.xml");
+			}
 			if (!pathFile.exists()) {
 				createDefaultStarterFile(pathFile);
 			}
@@ -172,12 +105,20 @@ public class PvpFileInterface {
 		//	System.out.println("path=" + path);
 
 			if (isEncrypted(path)) {
+				FileInputStream fis = null;
 				try {
-					cypherStream = new CipherInputStream(new FileInputStream(path), getCipher(false, passwordTried));
+					fis = new FileInputStream(path);
+					byte[] encryptionHeaderBytes = new byte[CipherWrapper.getEncryptHeaderSize()];
+					int br = fis.read(encryptionHeaderBytes);
+					if (br != CipherWrapper.getEncryptHeaderSize()) {
+						throw new IOException("encrypt header not read:" + br);
+					}
+					final String password = context.getPasswordOrAskUser(passwordTried);
+					CipherWrapper cw = new CipherWrapper(password, encryptionHeaderBytes);
+					
+					cypherStream = new CipherInputStream(fis, cw.cipher);
 					inStream = cypherStream;
 					
-					
-
 					byte[] check = new byte[8];
 					if (inStream.read(check, 0, 8) == 8) {
 						String s = new String(check);
@@ -196,6 +137,15 @@ public class PvpFileInterface {
 				} catch (InvalidKeyException e) {
 					context.notifyBadException("Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy", e, true);
 					throw new RuntimeException(e);
+				} catch (InvalidKeySpecException e) {
+					throw new RuntimeException(e);
+				} catch (InvalidAlgorithmParameterException e) {
+					throw new RuntimeException(e);
+				} finally {
+					// if cypherStream is null, some kind of error happened, so close the file stream
+					if (cypherStream == null && fis != null) {
+						try { fis.close(); } catch (Exception e) { }
+					}
 				}
 
 			} else {

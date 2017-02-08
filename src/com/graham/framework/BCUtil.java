@@ -509,4 +509,20 @@ public class BCUtil {
 		}
 	}
 	
+	public static int dataInString(String s) {
+		byte[] sbytes = s.getBytes();
+		
+		int[] counts = new int[256];
+		for (byte b : sbytes) {
+			int bi = (int)b + 128;
+			counts[bi]++;
+		}
+		int numberOfValues = 0;
+		for (int count : counts) {
+	    	if (count > 0) {
+	    		numberOfValues++;
+	    	}
+		}
+		return (int)((Math.log(numberOfValues) / Math.log(2)) * s.length());
+	}
 }

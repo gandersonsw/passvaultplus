@@ -195,6 +195,7 @@ public class PvpContext {
 			if (badExceptionMessageCount < 10) {
 				badExceptionMessage.append("\n\n" + e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
 				badExceptionMessageCount++;
+				return;
 			}
 		}
 

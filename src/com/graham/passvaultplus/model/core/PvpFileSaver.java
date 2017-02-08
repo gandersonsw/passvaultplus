@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
@@ -73,15 +75,16 @@ public class PvpFileSaver {
 
 		if (PvpFileInterface.isEncrypted(path)) {
 			try {
-				fws.cipherStream = new CipherOutputStream(new FileOutputStream(f), context.getFileInterface().getCipher(true, false));
+				final String password = context.getPasswordOrAskUser(false);
+				final CipherWrapper cw = new CipherWrapper(password);
+				FileOutputStream fos = new FileOutputStream(f);
+				fos.write(cw.createEncryptionHeaderBytes());
+				fws.cipherStream = new CipherOutputStream(fos, cw.cipher);
 				fws.outStream = fws.cipherStream;
+				
 				// write the code so we know it decrypted successfully
 				fws.outStream.write("remthis7".getBytes());
-			} catch (NoSuchAlgorithmException e) {
-				context.notifyBadException("encrypting", e, true);
-			} catch (NoSuchPaddingException e) {
-				context.notifyBadException("encrypting", e, true);
-			} catch (InvalidKeyException e) {
+			} catch (Exception e) {
 				context.notifyBadException("encrypting", e, true);
 			}
 		} else {

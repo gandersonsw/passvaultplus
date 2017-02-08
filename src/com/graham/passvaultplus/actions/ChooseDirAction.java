@@ -20,7 +20,7 @@ public class ChooseDirAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		// TODO probably allow choose of file or directory
 		JFileChooser chooser = new JFileChooser();
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		int returnVal = chooser.showOpenDialog(parent);
 		if(returnVal == JFileChooser.APPROVE_OPTION) {
 			dir.setText(chooser.getSelectedFile().getPath());

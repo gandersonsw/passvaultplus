@@ -98,18 +98,11 @@ public class DataFileDir extends JFrame {
 			// TODO marker101 dup code
 			String path = dir.getText();
 			File f = new File(path);
-			if (path.equals(defaultPath)) {
-				// default path is a file, get the files directory to mkdirs
-				System.out.println("mkdirs:" + f.getAbsolutePath());
-				new File(f.getParent()).mkdirs();
-				//f.mkdirs();
-			} else {
-				if (!f.isFile()) {
-					// TODO not sure this is right
-					JOptionPane.showMessageDialog(DataFileDir.this,"That file does not exist on the file system. Please create it or use a different path.");
-					return;
-				}
-			}
+			
+			// default path is a file, get the files directory to mkdirs
+			System.out.println("mkdirs:" + f.getAbsolutePath());
+			new File(f.getParent()).mkdirs();
+			
 			context.setDataFilePath(path);
 			setVisible(false);
 			if (appFirstStarting) {
