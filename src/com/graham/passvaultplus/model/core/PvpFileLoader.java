@@ -12,14 +12,14 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 
 public class PvpFileLoader {
-	
+
 	private PvpContext context;
 	private int maxID;
-	
+
 	public PvpFileLoader(final PvpContext contextParam) {
 		context = contextParam;
 	}
-	
+
 	public int getMaxID() {
 		return maxID;
 	}
@@ -29,7 +29,7 @@ public class PvpFileLoader {
 		List<PvpType> types = new ArrayList<PvpType>();
 		Set<String> typeNames = new HashSet<String>();
 		for (int i = 0; i < children.size(); i++) {
-			Element e = (Element)children.get(i);
+			Element e = (Element) children.get(i);
 			if (!e.getName().equals("type")) {
 				context.notifyWarning("unexpected element:" + e.getName());
 			}
@@ -42,13 +42,13 @@ public class PvpFileLoader {
 		}
 		return types;
 	}
-	
+
 	private PvpType loadOneType(final Element typeElement) {
 		List children = typeElement.getChildren();
 
 		PvpType rttype = new PvpType();
 		for (int i = 0; i < children.size(); i++) {
-			Element e = (Element)children.get(i);
+			Element e = (Element) children.get(i);
 			if (e.getName().equals("name")) {
 				rttype.setName(BCUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("to-string")) {
@@ -61,22 +61,22 @@ public class PvpFileLoader {
 				context.notifyWarning("unexpected element:" + e.getName());
 			}
 		}
-		
+
 		return rttype;
 	}
-	
+
 	private PvpField loadTypeField(final Element fieldElement) {
 		List children = fieldElement.getChildren();
-		
+
 		String classification = fieldElement.getAttributeValue("classification");
 		if (classification != null && classification.trim().length() == 0) {
 			classification = null;
 		}
-		
+
 		String name = null;
 		String type = null;
 		for (int i = 0; i < children.size(); i++) {
-			Element e = (Element)children.get(i);
+			Element e = (Element) children.get(i);
 			if (e.getName().equals("name")) {
 				name = BCUtil.unmakeXMLSafe(e.getTextTrim());
 			} else if (e.getName().equals("type")) {
@@ -85,21 +85,21 @@ public class PvpFileLoader {
 				context.notifyWarning("unexpected element:" + e.getName());
 			}
 		}
-		
+
 		if (name == null || type == null) {
-			context.notifyWarning("name and type are required:" + fieldElement.getQualifiedName()); // TODO handle this better
-			
+			// TODO handle this better
+			context.notifyWarning("name and type are required:" + fieldElement.getQualifiedName()); 
 		}
-		
+
 		return new PvpField(name, type, classification);
 	}
-	
+
 	public List<PvpRecord> loadRecords(final Element recordsElement) {
 		maxID = 0;
 		List children = recordsElement.getChildren();
 		List<PvpRecord> records = new ArrayList<PvpRecord>();
 		for (int i = 0; i < children.size(); i++) {
-			Element e = (Element)children.get(i);
+			Element e = (Element) children.get(i);
 			if (!e.getName().equals("record")) {
 				context.notifyWarning("unexpected element:" + e.getName());
 			}
@@ -108,11 +108,10 @@ public class PvpFileLoader {
 			} catch (Exception ex) {
 			}
 		}
-		
+
 		return records;
 	}
-	
-	
+
 	private PvpRecord loadOneRecord(final Element recordElement) {
 		List children = recordElement.getChildren();
 
@@ -125,21 +124,21 @@ public class PvpFileLoader {
 		PvpRecord record = new PvpRecord();
 		record.setId(id);
 		for (int i = 0; i < children.size(); i++) {
-			Element e = (Element)children.get(i);
+			Element e = (Element) children.get(i);
 			try {
 				record.setAnyField(BCUtil.unmakeXMLName(e.getName()), BCUtil.unmakeXMLSafe(e.getText()));
 			} catch (final Exception ex) {
 				context.notifyBadException("loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex, true);
 			}
 		}
-		
+
 		// note that RtFileInterface will call validate on it later record.validate(context);
-		
+
 		if (record.getId() > maxID) {
 			maxID = record.getId();
 		}
 
 		return record;
 	}
-	
+
 }
