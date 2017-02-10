@@ -23,23 +23,26 @@ public class PvpDataInterface {
 		public boolean allTheSameTypeFlag = true;
 	}
 
-	List<PvpType> types;
-	List<PvpRecord> records;
-	PvpContext context;
-
+	private final PvpContext context;
+	private List<PvpType> types;
+	private List<PvpRecord> records;
+	private int maxID;
+	
 	public PvpDataInterface(final PvpContext contextParam) {
 		context = contextParam;
 	}
 
-	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, List<PvpRecord> recordsParam) {
+	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, List<PvpRecord> recordsParam, int maxIDParam) {
 		context = contextParam;
 		types = typesParam;
 		records = recordsParam;
+		maxID = maxIDParam;
 	}
 
   	void setData(PvpDataInterface dataTocCopyFrom) {
 		types = dataTocCopyFrom.types;
 		records = dataTocCopyFrom.records;
+		maxID = dataTocCopyFrom.maxID;
 	}
 
 	/**
@@ -78,11 +81,12 @@ public class PvpDataInterface {
 
 	public void saveRecord(final PvpRecord r) {
 		if (r.getId() == 0) {
-			int maxID = context.getFileInterface().getNextMaxID();
-			r.setId(maxID);
+			//int maxID = context.getFileInterface().getNextMaxID();
+			int nextID = getNextMaxID();
+			r.setId(nextID);
 			records.add(r);
 		}
-		context.getFileInterface().save(this);
+		context.getFileInterface().save(this); // TODO remove dependance
 		context.getViewListContext().getListTableModel().filterUIChanged();
 	}
 
@@ -90,7 +94,7 @@ public class PvpDataInterface {
 		if (records.contains(r)) {
 			records.remove(r);
 			r.setId(0);
-			context.getFileInterface().save(this);
+			context.getFileInterface().save(this); // todo remove dependence
 			context.getViewListContext().getListTableModel().filterUIChanged();
 		} else {
 			context.notifyWarning("could not delete record because it is not in the list:" + r);
@@ -103,12 +107,13 @@ public class PvpDataInterface {
 		}
 		for (PvpRecord r : rCol) {
 			if (r.getId() == 0) {
-				int maxID = context.getFileInterface().getNextMaxID();
-				r.setId(maxID);
+				//int maxID = context.getFileInterface().getNextMaxID();
+				int nextID = getNextMaxID();
+				r.setId(nextID);
 				records.add(r);
 			}
 		}
-		context.getFileInterface().save(this);
+		context.getFileInterface().save(this); // TOD remove dependance on getFileInterface
 		context.getViewListContext().getListTableModel().filterUIChanged();
 	}
 
@@ -128,7 +133,7 @@ public class PvpDataInterface {
 		}
 		
 		if (changed) {
-			context.getFileInterface().save(this);
+			context.getFileInterface().save(this); // TODO remove dependence
 			context.getViewListContext().getListTableModel().filterUIChanged();
 		}
 	}
@@ -263,6 +268,11 @@ public class PvpDataInterface {
 			}
 		}
 		return false;
+	}
+	
+	public int getNextMaxID() {
+		maxID++;
+		return maxID;
 	}
 
 }

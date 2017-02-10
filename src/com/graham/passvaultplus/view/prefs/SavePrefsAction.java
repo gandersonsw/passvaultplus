@@ -3,105 +3,145 @@ package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.model.core.PvpFileInterface;
 
 public class SavePrefsAction extends AbstractAction {
-	final private PvpContext context;
+	
+	final private PreferencesConnection conn;
 	final private PreferencesContext prefsContext;
 
-	public SavePrefsAction(final PvpContext contextParam, final PreferencesContext prefsContextParam) {
-		super("Save");
-		context = contextParam;
+	public SavePrefsAction(final PreferencesConnection connParam, final PreferencesContext prefsContextParam) {
+		super(prefsContextParam.configAction.getButtonLabel());
+		conn = connParam;
 		prefsContext = prefsContextParam;
 	}
-
+	
 	public void actionPerformed(ActionEvent e) {
-
-		String newPassword = prefsContext.password.getText();
-		String oldPassword = context.getPassword();
-
-		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
-			prefsContext.errorMessage.setText("Password required when encrypted.");
-			return;
+		if (prefsContext.configAction == ConfigAction.Create) {
+			doCreate();
+		} else if (prefsContext.configAction == ConfigAction.Open) {
+			doOpen();
+		} else if (prefsContext.configAction == ConfigAction.Change) {
+			doChange();
+		} else {
+			throw new RuntimeException("unexpected action: " + prefsContext.configAction);
 		}
-
-		if (doDirStuff()) {
-			return;
-		}
-
-		boolean saveFlag = false;
-		if (oldPassword == null) {
-			oldPassword = "";
-		}
-
-		if (!prefsContext.savePassword.isSelected() && oldPassword.length() > 0) {
-			// User does not want to save password anymore
-			// 1. clear out saved password
-			context.setPassword("", true);
-			// 2. set up this value so the user is not asked for their password until next launch
-			context.setPasswordFromUserForThisRuntime(oldPassword);
-			saveFlag = true;
-		} else if (!oldPassword.equals(newPassword)) {
-			if (prefsContext.savePassword.isSelected()) {
-				context.setPassword(newPassword, true);
-			} else {
-				context.setPassword("", true);
-				context.setPasswordFromUserForThisRuntime(newPassword);
-			}
-			saveFlag = true;
-		}
-
-		if (prefsContext.compressed.isSelected() != prefsContext.compressedFlag || prefsContext.encrypted.isSelected() != prefsContext.encryptedFlag) {
-			String path = BCUtil.getFileNameNoExt(context.getDataFilePath(), true);
-			if (prefsContext.compressed.isSelected()) {
-				path = path + "." + PvpFileInterface.EXT_COMPRESS;
-			}
-			if (prefsContext.encrypted.isSelected()) {
-				path = path + "." +  PvpFileInterface.EXT_ENCRYPT;
-			}
-			if (!prefsContext.encrypted.isSelected() && !prefsContext.compressed.isSelected()) {
-				path = path + "." + PvpFileInterface.EXT_XML;
-			}
-			context.setDataFilePath(path);
-			saveFlag = true;
-		}
-
-		if (saveFlag) {
-			context.getFileInterface().save(context.getDataInterface());
-		}
-
-		context.getTabManager().removeOtherTab(context.getPrefsComponent());
-		context.setPrefsComponent(null);
 	}
 
-	/**
-	 * @return true if there was an error, and should stop the save process.
-	 */
-	private boolean doDirStuff() {
-		// TODO marker101 dup code
-		String path = prefsContext.dir.getText();
-		File f = new File(path);
-		//if (path.equals(defaultPath)) {
-		//	f.mkdirs();
-		//} else {
-			if (!f.isFile()) {
-				// TODO not sure this is right
-				JOptionPane.showMessageDialog(context.getMainFrame(),"That file does not exist on the file system. Please create it or use a different path.");
-				return true;
+	private void doCreate() {
+		final String newPassword = prefsContext.getPasswordText();
+
+		final File dataFile = prefsContext.getDataFile();
+		if (dataFile.isFile()) {
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "When creating a new database, a file must not exist in the choosen location. Please choose a directory where there is no file, or use the \"Open Existing Database\" option.");
+			return;
+		}
+		
+		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
+			//prefsContext.errorMessage.setText("Password required when encrypted.");// TODO delete this ?
+			return;
+		}
+		
+		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
+			boolean mkret = new File(dataFile.getParent()).mkdirs();
+			System.out.println("mkret: " + mkret);
+		}
+		
+		try {
+			createDefaultStarterFile(dataFile); // TODO need to zip/AES - move this to PvpFileReader
+		} catch (Exception ex) {
+			throw new RuntimeException(ex); // TODO handle some errors better
+		}
+			
+		if (prefsContext.savePassword.isSelected()) {
+			conn.setPassword(newPassword, true);
+		}
+		conn.setPasswordFromUserForThisRuntime(newPassword);
+		
+		conn.doOpen(prefsContext.getDataFile());
+	}
+	
+	private void doOpen() {
+		final String newPassword = prefsContext.getPasswordText();
+
+		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
+			//prefsContext.errorMessage.setText("Password required when encrypted."); // TODO delete this
+			return;
+		}
+
+		final File dataFile = prefsContext.getDataFile();
+		if (!dataFile.isFile()) {
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "That file does not exist on the file system. Please create it or use a different path.");
+			return;
+		}
+	
+		if (prefsContext.savePassword.isSelected()) {
+			conn.setPassword(newPassword, true);
+		}
+		conn.setPasswordFromUserForThisRuntime(newPassword);
+
+		conn.doOpen(dataFile);
+	}
+	
+	private void doChange() {
+		final String newPassword = prefsContext.getPasswordText();
+		boolean saveFlag = false;
+		
+		if (prefsContext.encrypted.isSelected()) {
+			if (newPassword.trim().length() == 0) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
+				//prefsContext.errorMessage.setText("Password required when encrypted."); // TODO delete this
+				return;
 			}
-		//}
-		context.setDataFilePath(path);
-		//setVisible(false);
-		//if (appFirstStarting) {
-		//	context.dataFileSelectedForStartup();
-		//}
-		return false;
+			
+			String oldPassword = conn.getPassword();
+			if (oldPassword == null) {
+				oldPassword = "";
+			}
+
+			if (!oldPassword.equals(newPassword)) {
+				saveFlag = true;
+			}
+		}
+		
+		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
+			saveFlag = true;
+		}
+		
+		if (prefsContext.savePassword.isSelected()) {
+			conn.setPassword(newPassword, true);
+		} else {
+			conn.setPassword("", true);
+		}
+		conn.setPasswordFromUserForThisRuntime(newPassword);
+
+		if (prefsContext.compressed.isSelected() != prefsContext.compressedFlag || prefsContext.encrypted.isSelected() != prefsContext.encryptedFlag) {
+			saveFlag = true;
+		}
+
+		conn.doSave(prefsContext.getDataFile(), saveFlag);
+	}
+	
+	private void createDefaultStarterFile(final File destinationFile) throws IOException {
+		if (PvpContext.JAR_BUILD) {
+			// note path starts with "/" - that starts at the root of the jar,
+			// instead of the location of the class.
+			InputStream sourceStream = PvpContext.class.getResourceAsStream("/datafiles/starter-pvp-data.xml");
+			BCUtil.copyFile(sourceStream, destinationFile);
+		} else {
+			File sourceFile = new File("datafiles/starter-pvp-data.xml");
+			System.out.println("sourceFile=" + sourceFile.getAbsolutePath());
+			BCUtil.copyFile(sourceFile, destinationFile);
+		}
 	}
 
 }

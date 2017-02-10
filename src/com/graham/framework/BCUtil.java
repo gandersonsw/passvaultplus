@@ -405,12 +405,12 @@ public class BCUtil {
 	}
 	
 	public static String getFileNameNoExt(String fileName, boolean includeAllExtentions) {
-		if (fileName.indexOf(".") == -1) {
+		if (fileName.indexOf(".", 1) == -1) {
 			return fileName;
 		} else if (includeAllExtentions) {
-			return fileName.substring(0, fileName.indexOf("."));
+			return fileName.substring(0, fileName.indexOf(".", 1));
 		} else {
-			return fileName.substring(0, fileName.lastIndexOf("."));
+			return fileName.substring(0, fileName.lastIndexOf(".", 1));
 		}
 	}
 	
@@ -523,6 +523,6 @@ public class BCUtil {
 	    		numberOfValues++;
 	    	}
 		}
-		return (int)((Math.log(numberOfValues) / Math.log(2)) * s.length());
+		return (int)((Math.log(numberOfValues + 1) / Math.log(2)) * s.length());
 	}
 }

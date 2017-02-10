@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import com.graham.framework.BCUtil;
 
+/**
+ * Format the record in its default human readable plain-text format.
+ */
 public class PvpRecordFormatter {
 	
 	ArrayList<FormatPart> formatParts;

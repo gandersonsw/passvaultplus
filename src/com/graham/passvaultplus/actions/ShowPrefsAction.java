@@ -8,6 +8,7 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.prefs.PreferencesBuilder;
+import com.graham.passvaultplus.view.prefs.PreferencesConnectionTab;
 
 public class ShowPrefsAction extends AbstractAction {
 	final private PvpContext context;
@@ -20,7 +21,7 @@ public class ShowPrefsAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		Component c = context.getPrefsComponent();
 		if (c == null) {
-			c = PreferencesBuilder.buildPrefs(context);
+			c = PreferencesBuilder.buildPrefs(new PreferencesConnectionTab(context));
 			context.setPrefsComponent(c);
 			context.getTabManager().addOtherTab("Preferences", c);
 		}

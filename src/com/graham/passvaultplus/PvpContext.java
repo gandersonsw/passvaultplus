@@ -18,8 +18,8 @@ import javax.swing.*;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
-import com.graham.passvaultplus.view.DataFileDir;
 import com.graham.passvaultplus.view.MainFrame;
+import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
 public class PvpContext {
@@ -31,6 +31,7 @@ public class PvpContext {
 	private PvpFileInterface rtFileInterface;
 	private PvpDataInterface rtDataInterface;
 	private String dataFilePath;
+	private File dataFile;
 	private String password; // used for encryption of data file
 	private String passwordFromUserForThisRuntime;
 	private PvpViewListContext viewListContext = new PvpViewListContext();
@@ -70,12 +71,10 @@ public class PvpContext {
 				loadFailed = false;
 			}
 		}
-			
+		
 		if (loadFailed) {
 			// We might need a password for that data file
-			String userHome = System.getProperty("user.home");
-			String fileSep = System.getProperty("file.separator");
-			new DataFileDir(context, userHome + fileSep + "remthisdata" + fileSep + "rem-this-data.xml", true);
+			new StartupOptionsFrame(context);
 		}
 	}
 
@@ -116,10 +115,18 @@ public class PvpContext {
 		return dataFilePath;
 	}
 
-	public void setDataFilePath(String path) {
+	public void setDataFilePath(final String path) {
 		dataFilePath = path;
+		dataFile = null;
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.put("data_file", path);
+	}
+	
+	public File getDataFile() {
+		if (dataFile == null) {
+			dataFile = new File(dataFilePath);
+		}
+		return dataFile;
 	}
 
 	/**
@@ -176,7 +183,7 @@ public class PvpContext {
 		}
 	}
 
-	public void setPasswordFromUserForThisRuntime(String pw) {
+	public void setPasswordFromUserForThisRuntime(final String pw) {
 		passwordFromUserForThisRuntime = pw;
 	}
 

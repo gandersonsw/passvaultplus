@@ -1,30 +1,76 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 
-public class PvpFileLoader {
-
-	private PvpContext context;
+/**
+ * Creates a database from a stream
+ */
+public class DatabaseReader {
+	private final PvpContext context;
 	private int maxID;
 
-	public PvpFileLoader(final PvpContext contextParam) {
+	public static PvpDataInterface read(final PvpContext contextParam, InputStream inStream) throws Exception {
+		return new DatabaseReader(contextParam).readInternal(inStream);
+	}
+	
+	private DatabaseReader(final PvpContext contextParam) {
 		context = contextParam;
 	}
+	
+	private PvpDataInterface readInternal(InputStream inStream) throws Exception {
+		PvpDataInterface dataInterface;
+		List<PvpType> types = null;
+		List<PvpRecord> records = null;
+		final SAXBuilder builder = new SAXBuilder();
+		final Document jdomDoc = builder.build(inStream);
+		final Element root = jdomDoc.getRootElement();
+		if (!root.getName().equals("mydb")) {
+			context.notifyWarning("unexpected element:" + root.getName());
+		}
+		System.out.println("data file locale=" + root.getAttribute("locale"));
+		final List children = root.getChildren();
+		for (int i = 0; i < children.size(); i++) {
+			Element e = (Element) children.get(i);
+			if (e.getName().equals("types")) {
+				types = loadTypes(e);
+			} else if (e.getName().equals("records")) {
+				records = loadRecords(e);
+			} else {
+				context.notifyWarning("unexpected element:" + e.getName());
+			}
+		}
 
-	public int getMaxID() {
-		return maxID;
+		if (types == null) { // TODO test this , this should be handled better
+			throw new Exception("type data not found"); // PvpException
+		}
+
+		if (records == null) { // TODO this should be handled better
+			throw new Exception("record data not found");
+		}
+
+		dataInterface = new PvpDataInterface(context, types, records, maxID);
+
+		// do any initialization after all the data is loaded
+		for (PvpRecord r : records) {
+			r.initalizeAfterLoad(context, dataInterface);
+		}
+
+		return dataInterface;
 	}
 
-	public List<PvpType> loadTypes(final Element typesElement) {
+	private List<PvpType> loadTypes(final Element typesElement) {
 		List children = typesElement.getChildren();
 		List<PvpType> types = new ArrayList<PvpType>();
 		Set<String> typeNames = new HashSet<String>();
@@ -94,7 +140,7 @@ public class PvpFileLoader {
 		return new PvpField(name, type, classification);
 	}
 
-	public List<PvpRecord> loadRecords(final Element recordsElement) {
+	private List<PvpRecord> loadRecords(final Element recordsElement) {
 		maxID = 0;
 		List children = recordsElement.getChildren();
 		List<PvpRecord> records = new ArrayList<PvpRecord>();
@@ -132,7 +178,7 @@ public class PvpFileLoader {
 			}
 		}
 
-		// note that RtFileInterface will call validate on it later record.validate(context);
+		// TODO update this       note that RtFileInterface will call validate on it later record.validate(context);
 
 		if (record.getId() > maxID) {
 			maxID = record.getId();
@@ -140,5 +186,4 @@ public class PvpFileLoader {
 
 		return record;
 	}
-
 }

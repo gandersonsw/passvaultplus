@@ -1,41 +1,112 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.prefs;
 
+import java.awt.event.ActionEvent;
+import java.io.File;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
 
 public class PreferencesContext {
-	boolean compressedFlag;
-	boolean encryptedFlag;
+	final boolean compressedFlag; // this is not updated, original value only
+	final boolean encryptedFlag;  // this is not updated, original value only
+	
 	JCheckBox compressed;
 	JCheckBox encrypted;
 	JCheckBox savePassword;
-	JTextField password;
-	JLabel errorMessage;
-	JTextField dir;
+	JCheckBox showPassword;
+	JPasswordField password;
+	JTextField passwordClearText;
+	JLabel errorMessage; // TODO probably can delete this 
+	ConfigAction configAction;
+	JComboBox<ConfigAction> actionCombo;
+	JComboBox<String> aesBits;
+	JButton saveButton;
+	JLabel passwordStrength;
 	
-	public PreferencesContext(final PvpContext contextParam) {
-		final String path = contextParam.getDataFilePath();
-		compressedFlag = PvpFileInterface.isCompressed(path);
-		encryptedFlag = PvpFileInterface.isEncrypted(path);
-		
-		compressed = new JCheckBox("Compressed (zip)", compressedFlag);
-		
-		encrypted = new JCheckBox("Encrypted", encryptedFlag);
-		
-		savePassword = new JCheckBox("Save Password", contextParam.isPasswordSaved());
-		savePassword.setToolTipText("If checked, the password will be saved. If not checked, you must enter the password when starting app.");
-		
-		if (contextParam.isPasswordSaved()) {
-			password = new JTextField(contextParam.getPassword(), 20);
+	private JLabel dataFileLabel;
+	private String dataFileString;
+	private File dataFile;
+	
+	public PreferencesContext(final PreferencesConnection connParam) {
+		dataFileString = connParam.getDataFilePath();
+		compressedFlag = PvpFileInterface.isCompressed(dataFileString);
+		encryptedFlag = PvpFileInterface.isEncrypted(dataFileString);
+	}
+	
+	public String getPasswordText() {
+		if (showPassword.isSelected()) {
+			return passwordClearText.getText();
 		} else {
-			password = new JTextField(20);
+			return new String(password.getPassword());
+		}
+	}
+
+	public File getDataFile() {
+		if (dataFile == null) {
+			dataFile = new File(dataFileString);
+		}
+		return dataFile;
+	}
+	
+	public String getDataFileString() {
+		return dataFileString;
+	}
+	
+	public void setDataFile(final File f) {
+		if (f == null) {
+			dataFile = null;
+			dataFileString = "";
+		} else {
+			String fname = f.getName();
+			boolean isCompressed = PvpFileInterface.isCompressed(fname);
+			boolean isEncrypted = PvpFileInterface.isEncrypted(fname);
+			fname = PvpFileInterface.formatFileName(fname, isCompressed, isEncrypted);
+			dataFile = new File(f.getParentFile(), fname);
+			dataFileString = dataFile.getAbsolutePath();
+			compressed.setSelected(isCompressed);
+			encrypted.setSelected(isEncrypted);
 		}
 		
-		errorMessage = new JLabel(" ");
+		dataFileLabel.setText(dataFileString);
 	}
+	
+	public void setDataFileLabel(final JLabel l) {
+		dataFileLabel = l;
+	}
+	
+	public Action getDefaultFileAction() {
+		return new SetDefaultDataFile(getDataFile());
+	}
+	
+	public void setFileExtensionFromCompressedAndEncrypted() {
+		if (dataFile != null) {
+			String fname = PvpFileInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
+			dataFile = new File(dataFile.getParentFile(), fname);
+			dataFileString = dataFile.getAbsolutePath();
+			dataFileLabel.setText(dataFileString);
+		}
+	}
+	
+	class SetDefaultDataFile extends AbstractAction {
+		final private File defaultFile;
+
+		public SetDefaultDataFile(final File f) {
+			super("Default");
+			defaultFile = f;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			setDataFile(defaultFile);
+		}
+	}
+
 }

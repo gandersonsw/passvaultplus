@@ -3,45 +3,46 @@ package com.graham.passvaultplus.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 
-import org.jdom.JDOMException;
-
 import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.UserAskToChangeFileException;
-import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.model.core.PvpFileReader;
 
 public class ExportXmlFile extends AbstractAction {
+	final private PvpContext context;
 
-	final private PvpFileInterface fi;
-
-	public ExportXmlFile(PvpFileInterface paramfi) {
+	public ExportXmlFile(PvpContext contextParam) {
 		super("Save XML...");
-		fi = paramfi;
+		context = contextParam;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		// TODO clean this method up
+		PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
+		String rawXML = "";
+		try {
+			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
+		} catch (Exception ex) {
+			// TODO Auto-generated catch block
+			//context.notifyBadException("cannot load file", e, true);
+			ex.printStackTrace();
+		} finally {
+			fileReader.close();
+		}
+		//} catch (UserAskToChangeFileException e2) {
+		//	System.exit(0); // TODO test this
+		//}
 
 		final JFileChooser fc = new JFileChooser();
 		int retVal = fc.showSaveDialog(null);
 		if (retVal == JFileChooser.CANCEL_OPTION) {
 			return;
 		}
-		File f = fc.getSelectedFile();
-
-		try {
-			String xml = fi.getJdomDoc(true).getRawXml();
-			BCUtil.dumpStringToFile(xml, f);
-		} catch (JDOMException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (UserAskToChangeFileException e2) {
-			System.exit(0); // TODO test this
-		}
+		final File f = fc.getSelectedFile();
+		BCUtil.dumpStringToFile(rawXML, f);
 	}
 }

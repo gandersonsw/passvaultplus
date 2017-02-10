@@ -3,84 +3,176 @@ package com.graham.passvaultplus.view.prefs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
-import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.actions.*;
+import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
 
 public class PreferencesBuilder {
 	
-	public static Component buildPrefs(final PvpContext contextParam) {
-		return new PreferencesBuilder(contextParam).build();
+	private final Dimension indentDim = new Dimension(30, 2); 
+	
+	public static Component buildPrefs(final PreferencesConnection connParam) {
+		return new PreferencesBuilder(connParam).build();
 	}
 	
-	final private PvpContext context;
+	final private PreferencesConnection conn;
 	final private PreferencesContext prefsContext;
 	
-	private PreferencesBuilder(final PvpContext contextParam) {
-		context = contextParam;
-		prefsContext = new PreferencesContext(context);
+	private PreferencesBuilder(final PreferencesConnection connParam) {
+		conn = connParam;
+		prefsContext = new PreferencesContext(conn);
 	}
 	
 	private Component build() {
-		JPanel p = new JPanel(new BorderLayout());
+		final JPanel p = new JPanel(new BorderLayout());
 		p.add(buildTop(), BorderLayout.CENTER);
 		p.add(buildBottom(p), BorderLayout.SOUTH);
 		return p;
 	}
 	
 	private Component buildBottom(final JPanel panelToBeReturned) {
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		prefsContext.errorMessage = new JLabel(" ");
 		p.add(prefsContext.errorMessage);
-		p.add(new JButton(new CancelPrefsAction(context)));
-		p.add(new JButton(new SavePrefsAction(context, prefsContext)));
+		p.add(new JButton(conn.getCancelAction()));
+		prefsContext.saveButton = new JButton(new SavePrefsAction(conn, prefsContext));
+		p.add(prefsContext.saveButton);
 		return p;
 	}
 	
 	private Component buildTop() {
-		EmptyBorder border1 = new EmptyBorder(0,40,0,0);
-		
-		JPanel p = new JPanel(new GridLayout(5,1));
-		p.add(new JLabel("Save file options", JLabel.LEFT));
-		
-		JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p2.add(prefsContext.compressed);
-		p2.add(prefsContext.encrypted);
-		p2.add(prefsContext.savePassword);
-		p2.setBorder(border1);
-		p.add(p2);
-		
-		JPanel p3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p3.add(new JLabel("Password:", JLabel.LEFT));
-		p3.setBorder(border1);
-		p3.add(prefsContext.password);
-		p.add(p3);
-
-		JPanel p4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p4.add(new JLabel("Data File:", JLabel.LEFT));
-		prefsContext.dir = new JTextField(context.getDataFilePath());
-		p4.add(prefsContext.dir);
-		p.add(p4);
-
-		JPanel p5 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-		AbstractAction defaultAction = new SetJTextFieldAction("Default", prefsContext.dir, context.getDataFilePath());
-		JButton defBut = new JButton(defaultAction);
-		p5.add(defBut);
-		AbstractAction chooseDirAction = new ChooseDirAction(prefsContext.dir, context.getMainFrame());
-		JButton chooseBut = new JButton(chooseDirAction);
-		p5.add(chooseBut);
-
-		p.add(p5);
+		final JPanel p = new JPanel();
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		p.add(buildActionCombo());
+		p.add(buildFileText());
+		p.add(buildFileButtons());
+		p.add(buildCompressButtons());
+		p.add(buildEncryptedButtons());
+		p.add(buildPassword());
+		p.add(buildPasswordOptions());
+		p.add(buildAESBits());
 		
 		JPanel bp = new JPanel(new BorderLayout());
 		bp.add(p, BorderLayout.NORTH);
 		
 		return bp;
+	}
+	
+	private JPanel buildActionCombo() {
+		final ConfigAction[] actions = new ConfigAction[conn.supportsChangeDataFileOptions() ? 3 : 2];
+		actions[0] = ConfigAction.Create;
+		actions[1] = ConfigAction.Open;
+		if (conn.supportsChangeDataFileOptions()) {
+			actions[2] = ConfigAction.Change;
+		}
+		final JComboBox<ConfigAction> cb = new JComboBox<>(actions);
+		if (conn.supportsChangeDataFileOptions()) { // make assumption here that if it is supported, it should be the default
+			cb.setSelectedIndex(2);
+			prefsContext.configAction = ConfigAction.Change;
+		} else {
+			prefsContext.configAction = ConfigAction.Create;
+		}
+		cb.setFocusable(false);
+		cb.addActionListener(new ConfigActionChanged(conn, prefsContext));
+		prefsContext.actionCombo = cb;
+	
+		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(cb);
+		return p;
+	}
+	
+	private JPanel buildFileText() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(new JLabel("  Data File: "));
+		final JLabel jl = new JLabel(prefsContext.getDataFileString());
+		prefsContext.setDataFileLabel(jl);
+		p.add(jl);
+		return p;
+	}
+	
+	private JPanel buildFileButtons() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(Box.createRigidArea(indentDim));
+		final Action defaultAction = prefsContext.getDefaultFileAction();
+		JButton defBut = new JButton(defaultAction);
+		p.add(defBut);
+		final Action chooseDirAction = new ChooseDirAction(prefsContext, conn.getSuperFrame());
+		final JButton chooseBut = new JButton(chooseDirAction);
+		p.add(chooseBut);
+		return p;
+	}
+	
+	private JPanel buildCompressButtons() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.compressedFlag);
+		prefsContext.compressed.addActionListener(e -> prefsContext.setFileExtensionFromCompressedAndEncrypted());
+		p.add(prefsContext.compressed);
+		return p;
+	}
+	
+	private JPanel buildEncryptedButtons() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.encryptedFlag);
+		prefsContext.encrypted.addActionListener(e -> prefsContext.setFileExtensionFromCompressedAndEncrypted());
+		p.add(prefsContext.encrypted);
+		return p;
+	}
+	
+	private JPanel buildPassword() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(Box.createRigidArea(indentDim));
+		p.add(new JLabel("  Password:", JLabel.LEFT));
+		
+		final JTextField pwct = new JTextField(27);
+		pwct.setVisible(false);
+		JPasswordField pw;
+		if (conn.isPasswordSaved()) {
+			pw = new JPasswordField(conn.getPassword(), 27);
+		} else {
+			pw = new JPasswordField(27);
+		}
+		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
+		final TextFieldChangeForwarder tfcf = new TextFieldChangeForwarder(pca);
+		pw.getDocument().addDocumentListener(tfcf);
+		pwct.getDocument().addDocumentListener(tfcf);
+		prefsContext.password = pw;
+		prefsContext.passwordClearText = pwct;
+
+		p.add(pw);
+		p.add(pwct);
+		prefsContext.showPassword = new JCheckBox("Show");
+		prefsContext.showPassword.addActionListener(new ShowPasswordAction(prefsContext));
+		p.add(prefsContext.showPassword);
+		return p;
+	}
+	
+	private JPanel buildPasswordOptions() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(Box.createRigidArea(indentDim));
+		p.add(Box.createRigidArea(indentDim));
+		prefsContext.savePassword = new JCheckBox("Save Password", conn.isPasswordSaved());
+		prefsContext.savePassword.setToolTipText("If checked, the password will be saved. If not checked, you must enter the password when starting app.");
+		p.add(prefsContext.savePassword);
+		p.add(Box.createRigidArea(indentDim));
+		p.add(new JLabel("Password Strength: "));
+		prefsContext.passwordStrength = new JLabel(" ");
+		p.add(prefsContext.passwordStrength);
+		return p;
+	}
+	
+	private JPanel buildAESBits() {
+		final String[] bits = {"128", "192", "256"};
+		final JComboBox<String> cb = new JComboBox<>(bits);
+		prefsContext.aesBits = cb;
+		
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(Box.createRigidArea(indentDim));
+		p.add(new JLabel("  Key Size in bits:"));
+		p.add(cb);
+		return p;
 	}
 	
 }
