@@ -5,12 +5,14 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.model.core.MyCipherFactory;
 
 public class SavePrefsAction extends AbstractAction {
 	
@@ -44,10 +46,17 @@ public class SavePrefsAction extends AbstractAction {
 			return;
 		}
 		
-		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
-			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-			//prefsContext.errorMessage.setText("Password required when encrypted.");// TODO delete this ?
-			return;
+		final PrefsSettingsParam psp = createPspFromContext();
+		
+		if (prefsContext.encrypted.isSelected()) {
+			if (newPassword.trim().length() == 0) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
+				//prefsContext.errorMessage.setText("Password required when encrypted.");// TODO delete this ?
+				return;
+			}
+			if (checkEncryptionStrength(psp.aesBits)) {
+				return;
+			}
 		}
 		
 		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
@@ -60,13 +69,8 @@ public class SavePrefsAction extends AbstractAction {
 		} catch (Exception ex) {
 			throw new RuntimeException(ex); // TODO handle some errors better
 		}
-			
-		if (prefsContext.savePassword.isSelected()) {
-			conn.setPassword(newPassword, true);
-		}
-		conn.setPasswordFromUserForThisRuntime(newPassword);
 		
-		conn.doOpen(prefsContext.getDataFile());
+		conn.doOpen(psp);
 	}
 	
 	private void doOpen() {
@@ -84,17 +88,14 @@ public class SavePrefsAction extends AbstractAction {
 			return;
 		}
 	
-		if (prefsContext.savePassword.isSelected()) {
-			conn.setPassword(newPassword, true);
-		}
-		conn.setPasswordFromUserForThisRuntime(newPassword);
-
-		conn.doOpen(dataFile);
+		final PrefsSettingsParam psp = createPspFromContext();
+		conn.doOpen(psp);
 	}
 	
 	private void doChange() {
 		final String newPassword = prefsContext.getPasswordText();
 		boolean saveFlag = false;
+		final PrefsSettingsParam psp = createPspFromContext();
 		
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
@@ -111,24 +112,50 @@ public class SavePrefsAction extends AbstractAction {
 			if (!oldPassword.equals(newPassword)) {
 				saveFlag = true;
 			}
+			
+			if (psp.aesBits != conn.getAesBits()) {
+				saveFlag = true;
+			}
+			
+			if (checkEncryptionStrength(psp.aesBits)) {
+				return;
+			}
 		}
 		
 		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
 			saveFlag = true;
 		}
-		
-		if (prefsContext.savePassword.isSelected()) {
-			conn.setPassword(newPassword, true);
-		} else {
-			conn.setPassword("", true);
-		}
-		conn.setPasswordFromUserForThisRuntime(newPassword);
 
 		if (prefsContext.compressed.isSelected() != prefsContext.compressedFlag || prefsContext.encrypted.isSelected() != prefsContext.encryptedFlag) {
 			saveFlag = true;
 		}
-
-		conn.doSave(prefsContext.getDataFile(), saveFlag);
+		
+		conn.doSave(psp, saveFlag);
+	}
+	
+	private PrefsSettingsParam createPspFromContext() {
+		final PrefsSettingsParam psp = new PrefsSettingsParam();
+		psp.pw = prefsContext.getPasswordText();
+		psp.f = prefsContext.getDataFile();
+		psp.spw = prefsContext.savePassword.isSelected();
+		try { psp.aesBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { psp.aesBits = 128; }
+		return psp;
+	}
+	
+	private boolean checkEncryptionStrength(final int aesBits) {
+		try {
+			final int maxKL = MyCipherFactory.getMaxAllowedAESKeyLength();
+			if (maxKL < aesBits) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Strong AES is not enabled on this computer TODO.  Maximum key size:" + maxKL + " bits"); // TODO make a link with instractions how to do this
+				return true;
+			}
+		} catch (NoSuchAlgorithmException e) {
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Unexpected encryption error:" + e.getMessage());
+			return true;
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		}
+		return false;
 	}
 	
 	private void createDefaultStarterFile(final File destinationFile) throws IOException {

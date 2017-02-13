@@ -4,7 +4,7 @@ package com.graham.passvaultplus;
 public class PassVaultPlus {
 	
 	public static void main(String[] args) {
-		PvpContext.startApp();
+		PvpContext.startApp(false, null);
 	}
 
 }

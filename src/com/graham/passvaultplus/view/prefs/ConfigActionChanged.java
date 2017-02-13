@@ -26,7 +26,7 @@ public class ConfigActionChanged extends AbstractAction {
 		
 		context.saveButton.setText(ca.getButtonLabel());
 		if (ca == ConfigAction.Create) {
-			context.setDataFile(new File(conn.getDataFilePath())); // TODO can datFilePath be null ?
+			context.setDataFile(new File(conn.getDataFilePath()), 0); // TODO can datFilePath be null ?
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(true);
@@ -46,10 +46,10 @@ public class ConfigActionChanged extends AbstractAction {
 				// a file exists here,
 				// context.setCompressAndEncryptFromFile(f);
 			} else {
-				context.setDataFile(null);
+				context.setDataFile(null, 0);
 			}
 		} else if (ca == ConfigAction.Change) {
-			context.setDataFile(new File(conn.getDataFilePath())); // TODO can datFilePath be null ?
+			context.setDataFile(new File(conn.getDataFilePath()), conn.getAesBits()); // TODO can datFilePath be null ?
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(context.compressedFlag);
 			context.encrypted.setEnabled(true);

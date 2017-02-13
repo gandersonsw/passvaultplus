@@ -91,6 +91,10 @@ public class BCUtil {
 		return bodyFont;
 	}
 	
+	public static void makeButtonSmall(final JButton b) {
+		b.putClientProperty("JComponent.sizeVariant", "small");
+	}
+	
 	public static void showStopDialog(Frame owner, String message, Exception e) {
 		BCUtil u = new BCUtil();
 		if (message == null)

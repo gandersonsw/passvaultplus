@@ -1,0 +1,11 @@
+/* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
+package com.graham.passvaultplus.view.prefs;
+
+import java.io.File;
+
+public class PrefsSettingsParam {
+	public File f;
+	public String pw;
+	public boolean spw;
+	public int aesBits;
+}

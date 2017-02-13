@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -10,6 +9,7 @@ import javax.swing.JFrame;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpException;
 
 /**
  * When the app is first starting and the just the preferences are displayed.
@@ -34,22 +34,19 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	}
 
 	@Override
-	public void doSave(final File dataFile, final boolean wasChanges) {
+	public void doSave(final PrefsSettingsParam psp, final boolean wasChanges) {
 		throw new RuntimeException("unsupported operation");
 	}
 	
 	@Override
-	public void doOpen(final File dataFile) {
-		context.setDataFilePath(dataFile.getAbsolutePath());
+	public void doOpen(final PrefsSettingsParam psp) {
+		setContextFromPsp(psp);
 		startupOptionsFrame.setVisible(false);
-		
 		try {
 			context.dataFileSelectedForStartup();
 		} catch (Exception e1) {
-			System.out.println("- - - - - DataFileDir OK - - - - - - -");
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			startupOptionsFrame.setVisible(true);
+			context.notifyBadException(e1, false, PvpException.GeneralErrCode.CantOpenMainWindow);
+			// TODO test this error     Auto-generated catch block
 		}
 	}
 
@@ -62,6 +59,11 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	public String getDataFilePath() {
 		// when starting up, just use the default when asking, we don't want to save anything the user has entered that is not valid
 		return defaultDataFilePath; 
+	}
+	
+	@Override
+	public int getAesBits() {
+		return 128;
 	}
 	
 	@Override

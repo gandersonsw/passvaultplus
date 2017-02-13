@@ -61,7 +61,7 @@ public class PreferencesContext {
 		return dataFileString;
 	}
 	
-	public void setDataFile(final File f) {
+	public void setDataFile(final File f, final int aesBits) {
 		if (f == null) {
 			dataFile = null;
 			dataFileString = "";
@@ -74,9 +74,22 @@ public class PreferencesContext {
 			dataFileString = dataFile.getAbsolutePath();
 			compressed.setSelected(isCompressed);
 			encrypted.setSelected(isEncrypted);
+			setSelectedBits(aesBits);
 		}
 		
 		dataFileLabel.setText(dataFileString);
+	}
+	
+	public void setSelectedBits(final int bits) {
+		if (bits == 0) {
+			// if its 0, dont change it
+		}else if (bits == 256) {
+			aesBits.setSelectedIndex(2);
+		} else if (bits == 192) {
+			aesBits.setSelectedIndex(1);
+		} else {
+			aesBits.setSelectedIndex(0);
+		}
 	}
 	
 	public void setDataFileLabel(final JLabel l) {
@@ -98,14 +111,12 @@ public class PreferencesContext {
 	
 	class SetDefaultDataFile extends AbstractAction {
 		final private File defaultFile;
-
 		public SetDefaultDataFile(final File f) {
 			super("Default");
 			defaultFile = f;
 		}
-
 		public void actionPerformed(ActionEvent e) {
-			setDataFile(defaultFile);
+			setDataFile(defaultFile, 0); // TODO test this 0
 		}
 	}
 

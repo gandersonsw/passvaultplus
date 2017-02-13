@@ -165,7 +165,8 @@ public class DatabaseReader {
 		try {
 			id = recordElement.getAttribute("id").getIntValue();
 		} catch (Exception e) {
-			context.notifyBadException("no id attribute for " + recordElement.getName(), e, true);
+			context.notifyWarning("no id attribute for " + recordElement.getName(), e);
+			//context.notifyBadException("no id attribute for " + recordElement.getName(), e, true);
 		}
 		PvpRecord record = new PvpRecord();
 		record.setId(id);
@@ -174,7 +175,7 @@ public class DatabaseReader {
 			try {
 				record.setAnyField(BCUtil.unmakeXMLName(e.getName()), BCUtil.unmakeXMLSafe(e.getText()));
 			} catch (final Exception ex) {
-				context.notifyBadException("loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex, true);
+				context.notifyWarning("loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
 			}
 		}
 

@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
 import com.graham.framework.BCUtil;
@@ -47,10 +48,11 @@ public class PvpFileWriter {
 		try {
 			if (PvpFileInterface.isEncrypted(fileName)) {
 				final String password = context.getPasswordOrAskUser(false);
-				final CipherWrapper cw = new CipherWrapper(password);
+				final EncryptionHeader header = new EncryptionHeader(context.getEncryptionStrengthBits());
+				Cipher cer = MyCipherFactory.createCipher(password, header, Cipher.ENCRYPT_MODE);
 				FileOutputStream fos = new FileOutputStream(fileToWrite);
-				fos.write(cw.createEncryptionHeaderBytes());
-				cipherStream = new CipherOutputStream(fos, cw.cipher);
+				fos.write(header.createEncryptionHeaderBytes());
+				cipherStream = new CipherOutputStream(fos, cer);
 				outStream = cipherStream;
 	
 				// write the code so we know it decrypted successfully

@@ -8,6 +8,10 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
+import com.graham.passvaultplus.model.core.EncryptionHeader;
+import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.PvpFileReader;
+
 public class ChooseDirAction extends AbstractAction {
 	final private PreferencesContext context;
 	final private JFrame parent;
@@ -21,26 +25,35 @@ public class ChooseDirAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		
 		final JFileChooser chooser = new JFileChooser();
-		int returnVal;
 		
 		if (context.configAction == ConfigAction.Create || context.configAction == ConfigAction.Change) {
 			final File f = context.getDataFile();
 			if (f != null) {
 				chooser.setSelectedFile(f);
 			}
-			//chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-			returnVal = chooser.showSaveDialog(parent);
+			final int returnVal = chooser.showSaveDialog(parent);
+			if (returnVal == JFileChooser.APPROVE_OPTION) { 
+				context.setDataFile(chooser.getSelectedFile(), 0);
+			}
 		} else if (context.configAction == ConfigAction.Open) {
-			//chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			//chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-			returnVal = chooser.showOpenDialog(parent);
+			final int returnVal = chooser.showOpenDialog(parent);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				final File f = chooser.getSelectedFile();
+				
+				try {
+					int encryptBits = 0;
+					if (PvpFileInterface.isEncrypted(f.getName())) {
+						final EncryptionHeader header = PvpFileReader.getEncryptHeader(f);
+						encryptBits = header.aesStrengthBits;
+					}
+					context.setDataFile(f, encryptBits);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		} else {
 			throw new RuntimeException("unexpection action: " + context.configAction);
 		}
-		
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			context.setDataFile(chooser.getSelectedFile());
-		}
-		
 	}
 }
