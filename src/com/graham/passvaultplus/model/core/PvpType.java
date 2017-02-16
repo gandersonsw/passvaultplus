@@ -49,6 +49,7 @@ public class PvpType {
 	
 	public void setFullFormat(final String s) {
 		fullFormat = s;
+		fullFormatter = null;
 	}
 	
 	public String getFullFormat() {
@@ -65,5 +66,27 @@ public class PvpType {
 	public String toString() {
 		return name;
 	}
+	
+	public static boolean sameType(final PvpType t1, final PvpType t2) {
+		if (t1 == null || t2 == null) {
+			return false;
+		}
+		if (t1.getName() == null || t2.getName() == null) {
+			return false;
+		}
+		return t1.getName().equals(t2.getName());
+	}
+	
+	public static boolean sameType(final PvpType t1, final String t2) {
+		if (t1 == null) {
+			return false;
+		}
+		if (t1.getName() == null || t2 == null) {
+			return false;
+		}
+		return t1.getName().equals(t2);
+	}
+	
+	
 	
 }

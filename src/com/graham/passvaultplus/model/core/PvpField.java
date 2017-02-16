@@ -2,7 +2,7 @@
 package com.graham.passvaultplus.model.core;
 
 public class PvpField {
-	
+
 	// common for all types, these are the fields as they would appear as XML element names
 	final static public String XML_CATEGORY = "category";
 	final static public String XML_CREATION_DATE = "creation-date";
@@ -20,7 +20,9 @@ public class PvpField {
 	// for category type only
 	final static public String USR_CATEGORY_TITLE = "Title";
 	
-
+	// classifications
+	final static public String CLASSIFICATION_SECRET = "secret";
+	
 	private String name;
 	private String type;
 	private String classification; // may be null
@@ -49,8 +51,20 @@ public class PvpField {
 	}
 	
 	public boolean isClassificationSecret() {
-		return "secret".equals(classification);
+		return CLASSIFICATION_SECRET.equals(classification);
 	}
 	
+	
+	public void setName(String n) {
+		name = n;
+	}
+	
+	public void setType(String t) {
+		type = t;
+	}
+	
+	public void setClassification(String c) {
+		classification = c;
+	}
 	
 }

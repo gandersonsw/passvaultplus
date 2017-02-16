@@ -259,6 +259,14 @@ public class PvpContext {
 	public TabManager getTabManager() {
 		return tabManager;
 	}
+	
+	/**
+	 * To be called when a big change is made, and the database should be saved to the file, and the data view should be refreshed
+	 */
+	public void saveAndRefreshDataList() {
+		getFileInterface().save(getDataInterface());
+		getViewListContext().getListTableModel().filterUIChanged();
+	}
 
 	public static ImageIcon getIcon(final String imageName) {
 		try {

@@ -56,7 +56,7 @@ public class PvpDataInterface {
 		// TODO optimize this
 		List<PvpRecord> ret = new ArrayList<PvpRecord>();
 		for (PvpRecord r : records) {
-			if (TYPE_CATEGORY.equals(r.getType().getName())) {
+			if (PvpType.sameType(r.getType(), TYPE_CATEGORY)) {
 				ret.add(r);
 			}
 		}
@@ -65,7 +65,7 @@ public class PvpDataInterface {
 
 	public PvpType getType(final String typeName) {
 		for (PvpType t : types) {
-			if (t.getName().equals(typeName)) {
+			if (PvpType.sameType(t, typeName)) {
 				return t;
 			}
 		}
@@ -106,13 +106,12 @@ public class PvpDataInterface {
 		}
 		for (PvpRecord r : rCol) {
 			if (r.getId() == 0) {
-				//int maxID = context.getFileInterface().getNextMaxID();
 				int nextID = getNextMaxID();
 				r.setId(nextID);
 				records.add(r);
 			}
 		}
-		context.getFileInterface().save(this); // TOD remove dependance on getFileInterface
+		context.getFileInterface().save(this); // TODO remove dependance on getFileInterface
 		context.getViewListContext().getListTableModel().filterUIChanged();
 	}
 
@@ -222,7 +221,7 @@ public class PvpDataInterface {
 
     	Stream<PvpRecord> filteredStream = allRecords.stream().filter(r -> {
 			if (checkType) {
-				if (!r.getType().getName().equals(filterByType)) {
+				if (!PvpType.sameType(r.getType(), filterByType)) {
 					return false;
 				}
 			}

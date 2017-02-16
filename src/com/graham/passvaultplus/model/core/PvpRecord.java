@@ -109,7 +109,11 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_TYPE)) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
-		fields.put(fieldName, fieldValue);
+		if (fieldValue == null) {
+			fields.remove(fieldName);
+		} else {
+			fields.put(fieldName, fieldValue);
+		}
 	}
 
 	/**
@@ -191,13 +195,7 @@ public class PvpRecord {
 		if (otherRec == null) {
 			return false;
 		}
-		if (otherRec.getType() == null) {
-			return false;
-		}
-		if (this.getType() == null) {
-			return false;
-		}
-		if (!otherRec.getType().getName().equals(this.getType().getName())) {
+		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
 			return false;
 		}
 		if (!AppUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
@@ -209,7 +207,7 @@ public class PvpRecord {
 
 		final Set<String> keySet1 = fields1.keySet();
 		final Set<String> keySet2 = fields2.keySet();
-		final Set<String> allKeys = new HashSet();
+		final Set<String> allKeys = new HashSet<>();
 		allKeys.addAll(keySet1);
 		allKeys.addAll(keySet2);
 

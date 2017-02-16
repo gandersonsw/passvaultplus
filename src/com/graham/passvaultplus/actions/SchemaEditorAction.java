@@ -18,7 +18,6 @@ public class SchemaEditorAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		
 		Component c = context.getSchemaEditComponent();
 		if (c == null) {
 			c = SchemaEditBuilder.buildEditor(context);
@@ -26,11 +25,5 @@ public class SchemaEditorAction extends AbstractAction {
 			context.getTabManager().addOtherTab("Schema", c);
 		}
 		context.getTabManager().setSelectedComponent(c);
-		
-		
-	//	final JPanel p = SchemaEditBuilder.buildEditor(context);
-
-		System.out.println("schema editor"); // TODO
-
 	}
 }

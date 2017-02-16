@@ -7,6 +7,7 @@ import java.util.List;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.passvaultplus.model.core.PvpType;
 
 /**
  * All the same type.
@@ -15,7 +16,7 @@ public class BCTableModelHomog implements BCTableModel {
 
 	final RecordFilter filter;
 	PvpContext context;
-	String currentType;
+	PvpType currentType;
 	int currentTypeRowCount;
 	List<PvpField> fieldsToDisplay;
 	
@@ -68,10 +69,10 @@ public class BCTableModelHomog implements BCTableModel {
 		
 		PvpRecord r = filter.getRecordAtIndex(0);
 		
-		if (r.getType().getName().equals(currentType)) {
+		if (PvpType.sameType(r.getType(), currentType)) {
 			return currentTypeRowCount;
 		}
-		currentType = r.getType().getName();
+		currentType = r.getType();
 
 		List<PvpField> typeFields = r.getType().getFields();
 		fieldsToDisplay = new ArrayList<>();
