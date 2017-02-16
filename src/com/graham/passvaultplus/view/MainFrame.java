@@ -2,11 +2,14 @@
 package com.graham.passvaultplus.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.*;
@@ -34,6 +37,7 @@ public class MainFrame extends JFrame {
 
 		setLocation(100,100);
 		setSize(904, 500);
+		setMinimumSize(new Dimension(400, 240));
 
 		JTabbedPane tabPane = new JTabbedPane();
 		context.getTabManager().setMainTabPane(tabPane);
@@ -43,10 +47,26 @@ public class MainFrame extends JFrame {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.add(toolBar, BorderLayout.NORTH);
 		mainPanel.add(tabPane, BorderLayout.CENTER);
+		mainPanel.add(initFooter(context), BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
 		setVisible(true);
+	}
+	
+	private JPanel initFooter(final PvpContext context) {
+		final JPanel p = new JPanel(new BorderLayout());
+		final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt"));
+		logo.setBorder(new EmptyBorder(0,8,4,3));
+		p.add(logo, BorderLayout.WEST);
+		
+		final JPanel ipanel = new JPanel(new BorderLayout());
+		final JLabel info = context.getInfoLabel();
+		info.setBorder(new EmptyBorder(3,3,7,10));
+		ipanel.add(info, BorderLayout.SOUTH);
+		
+		p.add(ipanel, BorderLayout.EAST);
+		return p;
 	}
 
 	private JPanel initToolBar(final PvpContext context) {

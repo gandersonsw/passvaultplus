@@ -1,8 +1,10 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view;
 
+import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -14,8 +16,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
+import com.graham.passvaultplus.PvpContext;
 
 /**
  * Password Dialog
@@ -38,19 +42,30 @@ public class PwDialog {
 	
 	public PwAction askForPw(final boolean passwordWasBad, final String path) {
 		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+		d.getContentPane().setLayout(new BorderLayout());
 		
-		d.getContentPane().setLayout(new BoxLayout(d.getContentPane(), BoxLayout.Y_AXIS));
+		final JPanel centerPanel = new JPanel();
+		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+		d.getContentPane().add(centerPanel, BorderLayout.CENTER);
+		
+		{
+			final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt90deg"));
+			logo.setBorder(new EmptyBorder(5,3,0,6));
+			final JPanel westLayout = new JPanel(new BorderLayout());
+			westLayout.add(logo, BorderLayout.NORTH);
+			d.getContentPane().add(westLayout, BorderLayout.WEST);
+		}
 		
 		if (passwordWasBad) {
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			p.add(new JLabel("That password is not correct. Please try again."));
-			d.getContentPane().add(p);
+			centerPanel.add(p);
 		}
 		
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			p.add(new JLabel("Password:"));
-			d.getContentPane().add(p);
+			centerPanel.add(p);
 		}
 	
 		{
@@ -61,21 +76,34 @@ public class PwDialog {
 			pf = new JPasswordField(27);
 			p.add(tf);
 			p.add(pf);
-			d.getContentPane().add(p);
+			centerPanel.add(p);
 		}
 		
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			show = new JCheckBox("Show");
 			p.add(show);
-			d.getContentPane().add(p);
+			centerPanel.add(p);
 			show.addActionListener(new ShowPwAction());
 		}
 	
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			p.add(new JLabel("File: " + path));
-			d.getContentPane().add(p);
+			JLabel file = new JLabel("File: " + path);
+			final Font fnt = file.getFont().deriveFont(file.getFont().getSize() - 1.0f);
+			file.setFont(fnt);
+			p.add(file);
+			centerPanel.add(p);
+		}
+		
+		{
+			// add some spacers to make the button align to bottom and everythign else tot he top
+			final JPanel sp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			sp1.add(new JLabel(" "));
+			centerPanel.add(sp1);
+			final JPanel sp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			sp2.add(new JLabel(" "));
+			centerPanel.add(sp2);
 		}
 	
 		{
@@ -84,12 +112,13 @@ public class PwDialog {
 			p.add(new JButton(new GoToSetupAction()));
 			final JButton okB = new JButton(new OkAction());
 			p.add(okB);
-			d.getContentPane().add(p);
+			centerPanel.add(p);
 			d.getRootPane().setDefaultButton(okB);
 		}
 		
 		d.pack();
 		BCUtil.center(d);
+		d.setResizable(false);
 		d.setVisible(true); // this is the line that causes the dialog to Block
 		return actionHit;
 	}

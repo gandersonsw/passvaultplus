@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.JScrollPane;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.prefs.PreferencesBuilder;
@@ -21,7 +22,8 @@ public class ShowPrefsAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		Component c = context.getPrefsComponent();
 		if (c == null) {
-			c = PreferencesBuilder.buildPrefs(new PreferencesConnectionTab(context));
+			Component npc = PreferencesBuilder.buildPrefs(new PreferencesConnectionTab(context));
+			c = new JScrollPane(npc);
 			context.setPrefsComponent(c);
 			context.getTabManager().addOtherTab("Preferences", c);
 		}

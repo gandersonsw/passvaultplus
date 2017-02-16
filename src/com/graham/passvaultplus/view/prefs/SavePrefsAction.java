@@ -136,7 +136,12 @@ public class SavePrefsAction extends AbstractAction {
 		psp.pw = prefsContext.getPasswordText();
 		psp.f = prefsContext.getDataFile();
 		psp.spw = prefsContext.savePassword.isSelected();
-		try { psp.aesBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { psp.aesBits = 128; }
+		if (this.prefsContext.encrypted.isSelected()) {
+			try { psp.aesBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { psp.aesBits = 128; }
+		} else {
+			psp.aesBits = 0;
+		}
+		
 		return psp;
 	}
 	

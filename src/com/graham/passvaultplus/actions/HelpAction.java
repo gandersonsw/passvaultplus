@@ -42,7 +42,7 @@ public class HelpAction extends AbstractAction {
 		p55.setLayout(new BoxLayout(p55, BoxLayout.PAGE_AXIS));
 		p55.add(new JLabel(" "));
 
-		JLabel l = new JLabel("Pass Vault Plus 1.0 Beta");
+		JLabel l = new JLabel("Pass Vault Plus " + PvpContext.VERSION);
 		l.setHorizontalAlignment(SwingConstants.CENTER);
 		l.setFont(l.getFont().deriveFont(20.0f));
 		JPanel cp = new JPanel(new BorderLayout());

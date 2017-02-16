@@ -2,6 +2,7 @@
 package com.graham.passvaultplus;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
@@ -26,6 +28,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  */
 public class PvpContext {
 	static final public boolean JAR_BUILD = false;
+	static public String VERSION = "1.0";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
@@ -47,6 +50,7 @@ public class PvpContext {
 	private Component prefsComponent;
 	private Component schemaEditComponent;
 	private MainFrame mainFrame;
+	private JLabel infoLabel;
 	private ErrorFrame eframe;
 	private StringBuilder warnings = new StringBuilder();
 
@@ -131,7 +135,7 @@ public class PvpContext {
 	public void setDataFilePath(final String path, final int esb) {
 		dataFilePath = path;
 		dataFile = null;
-		encryptionStrengthBits = esb;
+		setEncryptionStrengthBits(esb);
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.put("data_file", path);
 	}
@@ -214,6 +218,7 @@ public class PvpContext {
 	public void setEncryptionStrengthBits(final int esb) {
 		// this is not saved because it is saved in the file header
 		encryptionStrengthBits = esb;
+		getInfoLabel().setText(getInfoLabelText());
 	}
 
 	/**
@@ -266,6 +271,27 @@ public class PvpContext {
 	public void saveAndRefreshDataList() {
 		getFileInterface().save(getDataInterface());
 		getViewListContext().getListTableModel().filterUIChanged();
+	}
+	
+	private String getInfoLabelText() {
+		int bits = getEncryptionStrengthBits();
+		String encrytpStr;
+		if (bits == 0) {
+			encrytpStr = "None";
+		} else {
+			encrytpStr = bits + "bit AES";
+		}
+		return "v" + VERSION + " © 2017    Encryption:" + encrytpStr;
+	}
+	
+	public JLabel getInfoLabel() {
+		if (infoLabel == null) {
+			infoLabel = new JLabel(getInfoLabelText());
+			final Font f = infoLabel.getFont().deriveFont(infoLabel.getFont().getSize() - 2.0f);
+			infoLabel.setFont(f);
+		}
+		
+		return infoLabel;
 	}
 
 	public static ImageIcon getIcon(final String imageName) {
