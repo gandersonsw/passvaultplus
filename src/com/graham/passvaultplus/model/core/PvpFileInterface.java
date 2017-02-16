@@ -57,10 +57,8 @@ public class PvpFileInterface {
 		} catch (UserAskToChangeFileException ucf) {
 			throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
 		} catch (InvalidKeyException e) {
-			//context.notifyBadException("Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy", e, false, PvpException.GeneralErrCode.InvalidKey);
 			throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 		} catch (Exception e) {
-			//context.notifyBadException("cannot open data file", e, false, PvpException.GeneralErrCode.CantOpenDataFile);
 			throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription("File: " + context.getDataFile());
 		}
 		
@@ -71,27 +69,25 @@ public class PvpFileInterface {
 		} catch (UserAskToChangeFileException ucf) {
 			throw ucf;
 		} catch (Exception e) {
-			// todo test this and improve handling
-			//context.notifyBadException("cannot parse xml", e, false, new ExportXmlFile(context), PvpException.GeneralErrCode.CantParseXml);
 			throw new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context)).setAdditionalDescription("File: " + context.getDataFile());
 		} finally {
-			// TODO note that close is called 2 times if Exception thrown from fileReader.getStream(). Fix this?
+			// note that close is called 2 times when an error happens
 			fileReader.close();
 		}
 	}
 	
 	public void save(PvpDataInterface dataInterface) {
-		PvpFileWriter fileWriter = new PvpFileWriter(context.getDataFile(), context);
+		PvpFileWriter fileWriter = null;
 		try {
+			fileWriter = new PvpFileWriter(context.getDataFile(), context);
 			DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
 		} catch (Exception e) {
-			// TODO test this and improve handling
 			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
-			// TODO should we throw this exception?
-			//throw new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e);
 		} finally {
-			// TODO note that close is called 2 times if Exception thrown from fileWriter.getWriter(). Fix this?
-			fileWriter.close();
+			// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
+			if (fileWriter != null) {
+				fileWriter.close();
+			}
 		}
 	}
 

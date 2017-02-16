@@ -7,6 +7,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JComboBox;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
 
@@ -15,21 +16,23 @@ public class NewRecordTypeChangedAction  extends AbstractAction {
 	final private RecordEditContext editContext;
 
 	public NewRecordTypeChangedAction(final PvpContext contextParam, final RecordEditContext editContextParam) {
-		//super("Cancel");
 		context = contextParam;
 		editContext = editContextParam;
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		JComboBox typeSelector = (JComboBox)arg0.getSource();
-		PvpType type = (PvpType)typeSelector.getSelectedItem();
-		context.getTabManager().removeRecordEditor(editContext);
-
-		PvpRecord newRecord = new PvpRecord(type);
-		final RecordEditContext newContext = RecordEditBuilder.buildEditor(context, newRecord, true);
-		context.getTabManager().addRecordEditor("New", newContext); // this is new, make sure to test
-		//context.getMainTabPane().add("New", newContext.getPanelInTabPane());
-		context.getTabManager().setSelectedComponent(newContext.getPanelInTabPane());
+		try {
+			JComboBox typeSelector = (JComboBox)arg0.getSource();
+			PvpType type = (PvpType)typeSelector.getSelectedItem();
+			context.getTabManager().removeRecordEditor(editContext);
+	
+			PvpRecord newRecord = new PvpRecord(type);
+			final RecordEditContext newContext = RecordEditBuilder.buildEditor(context, newRecord, true);
+			context.getTabManager().addRecordEditor("New", newContext);
+			context.getTabManager().setSelectedComponent(newContext.getPanelInTabPane());
+		} catch (Exception e) {
+			context.notifyBadException(e, true, PvpException.GeneralErrCode.OtherErr);
+		}
 	}
 
 }

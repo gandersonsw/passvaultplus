@@ -84,8 +84,6 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_CREATION_DATE) ||
 				fieldName.equals(PvpField.USR_MODIFICATION_DATE) ||
 				fieldName.equals(PvpField.USR_TYPE)) {
-			System.out.println("2 dont call with:" + fieldName);
-			new Exception().printStackTrace();
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 
@@ -109,8 +107,6 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_CREATION_DATE) ||
 				fieldName.equals(PvpField.USR_MODIFICATION_DATE) ||
 				fieldName.equals(PvpField.USR_TYPE)) {
-			System.out.println("1 dont call with:" + fieldName);
-			new Exception().printStackTrace();
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 		fields.put(fieldName, fieldValue);
@@ -164,14 +160,6 @@ public class PvpRecord {
 		return rtType.getFullFormatter().format(this);
 	}
 
-  //	String getTypeForValidate() {
-//		return typeForValidate;
-//	}
-
-	//String getCategoryIdForValidate() {
-	//	return categoryIdForValidate;
-	//}
-
 	/**
 	 * Called after all fields have been set using setAnyField
 	 */
@@ -179,7 +167,7 @@ public class PvpRecord {
 
 		rtType = dataInterface.getType(typeForValidate);
 		if (rtType == null) {
-			context.notifyWarning("type not found:" + typeForValidate);
+			context.notifyWarning("WARN113 type not found:" + typeForValidate);
 		}
 
 		if (categoryIdForValidate == null || categoryIdForValidate.length() == 0) {
@@ -189,17 +177,15 @@ public class PvpRecord {
 				int catId = Integer.parseInt(categoryIdForValidate);
 				category = dataInterface.getRecord(catId);
 				if (category == null) {
-					context.notifyWarning("for object id:" + id + " category not found:" + categoryIdForValidate);
+					context.notifyWarning("WARN114 for object id:" + id + " category not found:" + categoryIdForValidate);
 				}
 			} catch (final Exception e) {
-				e.printStackTrace();
-				context.notifyWarning("for object id:" + id + " category not valid:" + categoryIdForValidate);
+				context.notifyWarning("WARN115 for object id:" + id + " category not valid:" + categoryIdForValidate, e);
 				category = null;
 			}
 		}
 
 	}
-
 
 	public boolean isSimilar(PvpRecord otherRec) {
 		if (otherRec == null) {
@@ -236,7 +222,6 @@ public class PvpRecord {
 			if (v2 == null) {
 				v2 = "";
 			}
-			//System.out.println("equals2 " + k + " >" + v1 + "=" + v2 + "<");
 			if (!v1.equals(v2)) {
 				return false;
 			}
@@ -249,18 +234,4 @@ public class PvpRecord {
 		return this.id > 0;
 	}
 
-/*
-	public int hashCode2() {
-		if (id == 0) {
-			StringBuilder sb = new StringBuilder();
-			for (String s : fields.values()) {
-				if (s != null) {
-					sb.append(s);
-				}
-			}
-			return sb.hashCode();
-		}
-		return id;
-	}
-*/
 }

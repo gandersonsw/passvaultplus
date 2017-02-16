@@ -433,46 +433,22 @@ public class BCUtil {
             e.setContent(t);
         }
     }
-    
-    public static void dumpInputStream(InputStream s) {
-		byte b[] = new byte[1024];
-		int bytes;
-		try {
-			while ((bytes = s.read(b)) > 0) {
-				System.out.write(b, 0, bytes);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
-	public static String dumpInputStreamToString(InputStream s) {
+	public static String dumpInputStreamToString(InputStream s) throws IOException {
 		byte b[] = new byte[1024];
 		int bytes;
 		StringBuilder sb = new StringBuilder();
-		try {
-			while ((bytes = s.read(b)) > 0) {
-				String str = new String(b, 0, bytes);
-				sb.append(str);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		while ((bytes = s.read(b)) > 0) {
+			String str = new String(b, 0, bytes);
+			sb.append(str);
 		}
-
 		return sb.toString();
 	}
 
-	public static void dumpStringToFile(String s, File f) {
-		try {
-			PrintWriter pw = new PrintWriter(f);
-			pw.print(s);
-			pw.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
+	public static void dumpStringToFile(String s, File f) throws FileNotFoundException {
+		final PrintWriter pw = new PrintWriter(f);
+		pw.print(s);
+		pw.close();
 	}
 	
 	public static void copyFile(final InputStream sourceStream, final File destinationFile) throws IOException {

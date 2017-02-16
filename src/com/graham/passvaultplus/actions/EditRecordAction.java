@@ -23,14 +23,11 @@ public class EditRecordAction extends AbstractAction {
 		PvpRecord r = context.getViewListContext().getFirstSelectedRecord();
 		if (r != null) {
 			RecordEditContext editor = context.getTabManager().getRecordEditor(r);
-		//	final Component c;
 			if (editor == null) {
 				editor = RecordEditBuilder.buildEditor(context, r, false);
 				context.getTabManager().addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
-				//context.getTabManager().getMainTabPane().add(AppUtil.limitStrLen(r.toString(), 30), editor.getPanelInTabPane());
-			} //else {
-			//	c = editor.getPanelInTabPane();
-			//}
+				
+			}
 			context.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
 		}
 	}

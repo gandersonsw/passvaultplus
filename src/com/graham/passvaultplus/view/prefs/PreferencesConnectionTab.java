@@ -43,8 +43,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 			}
 		}
 
-		// TODO test this
-		// TODO for now, dont support multiple databases open at once.
+		// for now, dont support multiple databases open at once
 		context.getMainFrame().setVisible(false);
 		setContextFromPsp(psp);
 		

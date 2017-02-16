@@ -31,6 +31,8 @@ import com.graham.passvaultplus.PvpException;
 
 public class ErrorFrame {
 	
+	public final static String PVP_HELP_URL_ERR_BASE = "http://passvaultplus.com/help/errors/";
+	
 	private JTextArea detailsText;
 	private JScrollPane detailsScroll;
 	private int badExceptionMessageCount;
@@ -38,7 +40,7 @@ public class ErrorFrame {
 	private JButton showDetails;
 	private JTextArea helpLink;
 	
-	public void notify(final Exception e, final boolean canContinue, final PvpException.GeneralErrCode gErrCode) {
+	public void notify(final Exception e, final boolean canContinue, final PvpException.GeneralErrCode gErrCode, final StringBuilder warnings) {
 
 		if (detailsText != null) {
 			if (badExceptionMessageCount < 10) {
@@ -75,7 +77,7 @@ public class ErrorFrame {
 
 		eFrame.getContentPane().add(buildTopPanel(errTitle, errDesc, errHelpId), BorderLayout.NORTH);
 
-		eFrame.getContentPane().add(buildDetailsPanel(e), BorderLayout.CENTER);
+		eFrame.getContentPane().add(buildDetailsPanel(e, warnings), BorderLayout.CENTER);
 		
 		eFrame.getContentPane().add(buildButtonPanel(canContinue, optionalAction), BorderLayout.SOUTH);
 
@@ -114,7 +116,7 @@ public class ErrorFrame {
 			helpLink.setBackground(tileLabel.getBackground());
 			helpLink.setForeground(Color.BLUE);
 			helpLink.setFont(f1);
-			helpLink.setText("http://passvaultplus.com/help/errors/" + errHelpId);
+			helpLink.setText(PVP_HELP_URL_ERR_BASE + errHelpId);
 			helpLink.setEditable(false);
 			helpLink.setBorder(new EmptyBorder(1, 24, 8, 8));
 			final JPanel leftAlignPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -137,9 +139,13 @@ public class ErrorFrame {
 		return p;
 	}
 	
-	private JScrollPane buildDetailsPanel(final Exception e) {
+	private JScrollPane buildDetailsPanel(final Exception e, final StringBuilder warnings) {
 		detailsText = new JTextArea();
-		detailsText.setText(e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
+		if (warnings.length() > 0) {
+			detailsText.setText(e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e) + "\n\nWarnings:\n" + warnings.toString());
+		} else {
+			detailsText.setText(e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
+		}
 		detailsText.setEditable(false);
 		detailsScroll = new JScrollPane(detailsText);
 		detailsScroll.setVisible(false);

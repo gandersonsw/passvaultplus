@@ -4,7 +4,6 @@ package com.graham.passvaultplus.model.core;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -101,7 +100,7 @@ public class PvpFileReader {
 					final String s = new String(check);
 					if (s.equals("remthis7")) {
 						// this is how we know the password worked. this is not an exception
-						passwordIsGood = true; // TODO test this, message to user
+						passwordIsGood = true;
 					}
 				}
 				passwordTried = true;
@@ -132,7 +131,6 @@ public class PvpFileReader {
 		final byte[] encryptionHeaderBytes = new byte[EncryptionHeader.getEncryptHeaderSize()];
 		final int br = fStream.read(encryptionHeaderBytes);
 		if (br != EncryptionHeader.getEncryptHeaderSize()) {
-			// TODO test this exception
 			final String msg = "bytes read: " + br + " bytes expected: " + EncryptionHeader.getEncryptHeaderSize();
 			throw new PvpException(PvpException.SpecificErrCode.EncryptionHeaderNotRead, msg);
 		}
@@ -140,7 +138,6 @@ public class PvpFileReader {
 	}
 	
 	public void close() {
-		// TODO check order of these
 		if (bufInStream != null) {
 			try {
 				bufInStream.close();
@@ -150,7 +147,6 @@ public class PvpFileReader {
 		}
 		
 		closeCypherAndFile();
-		// bufInStream.close() will also close inStream
 
 		if (zipfile != null) {
 			try {

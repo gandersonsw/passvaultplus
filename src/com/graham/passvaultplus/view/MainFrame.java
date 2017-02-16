@@ -13,9 +13,7 @@ import com.graham.passvaultplus.actions.*;
 import com.graham.passvaultplus.view.recordlist.ViewListBuilder;
 
 public class MainFrame extends JFrame {
-
-	//static final ButtonHiliteMouseListener buttonMouseoverListener = new ButtonHiliteMouseListener();
-
+	
 	class ThisWindAdapter extends java.awt.event.WindowAdapter {
 		final QuitAction qa;
 		public ThisWindAdapter(QuitAction qaParam) {
@@ -54,10 +52,6 @@ public class MainFrame extends JFrame {
 	private JPanel initToolBar(final PvpContext context) {
 		JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
-		// TODO  test the error case where an exception is thrown from here
-
-		//System.out.println("initToolBar:" + new File("strawberry.jpg").getAbsolutePath());
-
 		JButton jbQuit = createImageButton(new QuitAction(context), KeyEvent.VK_Q);
 		jbQuit.setToolTipText("[Q]uit");
 		toolBar.add(jbQuit);
@@ -66,9 +60,8 @@ public class MainFrame extends JFrame {
 		jbSettings.setToolTipText("[ , ] Settings");
 		toolBar.add(jbSettings);
 
-		JButton jbSchema = createImageButton(new SchemaEditorAction(), 0); // TODO
+		JButton jbSchema = createImageButton(new SchemaEditorAction(context), 0);
 		jbSchema.setToolTipText("Schema Editor");
-		jbSchema.setEnabled(false);
 		toolBar.add(jbSchema);
 
 		toolBar.add(Box.createHorizontalStrut(30));

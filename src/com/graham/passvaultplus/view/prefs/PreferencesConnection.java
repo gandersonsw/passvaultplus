@@ -20,7 +20,7 @@ public abstract class PreferencesConnection {
 	public abstract Action getCancelAction();
 	
 	public String getPassword() {
-		return context.getPassword(); // TODO
+		return context.getPassword();
 	}
 	
 	public boolean isPasswordSaved() {
@@ -48,12 +48,7 @@ public abstract class PreferencesConnection {
 	}
 	
 	protected void setContextFromPsp(final PrefsSettingsParam psp) {
-		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits); // TODO check that the aesBits works here
-		if (psp.spw) { // persist password
-			context.setPassword(psp.pw, true);
-		} else {
-			context.setPassword("", true); // clear persisted value
-			context.setPassword(psp.pw, false);
-		}
+		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
+		context.setPassword(psp.pw, psp.spw);
 	}
 }

@@ -106,7 +106,7 @@ public class RecordEditBuilder {
 			JComponent rightWidget = null;
 			RecordEditField ref = null;
 			if (field == null) {
-				System.out.println("buildEditorTop: expected field to be not null:" + name); // TODO
+				context.notifyWarning("WARN117 buildEditorTop: expected field to be not null:" + name);
 			} else if (field.isClassificationSecret()) {
 				if (!isNewRecord) {
 					final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name);

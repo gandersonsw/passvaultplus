@@ -46,7 +46,6 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 			context.dataFileSelectedForStartup();
 		} catch (Exception e1) {
 			context.notifyBadException(e1, false, PvpException.GeneralErrCode.CantOpenMainWindow);
-			// TODO test this error     Auto-generated catch block
 		}
 	}
 

@@ -3,9 +3,11 @@ package com.graham.passvaultplus.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
@@ -21,21 +23,16 @@ public class ExportXmlFile extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO clean this method up
-		PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
+		final PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
 		String rawXML = "";
 		try {
 			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
 		} catch (Exception ex) {
-			// TODO Auto-generated catch block
-			//context.notifyBadException("cannot load file", e, true);
-			ex.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Could not get XML: " + ex.getMessage());
+			return;
 		} finally {
 			fileReader.close();
 		}
-		//} catch (UserAskToChangeFileException e2) {
-		//	System.exit(0); // TODO test this
-		//}
 
 		final JFileChooser fc = new JFileChooser();
 		int retVal = fc.showSaveDialog(null);
@@ -43,6 +40,10 @@ public class ExportXmlFile extends AbstractAction {
 			return;
 		}
 		final File f = fc.getSelectedFile();
-		BCUtil.dumpStringToFile(rawXML, f);
+		try {
+			BCUtil.dumpStringToFile(rawXML, f);
+		} catch (FileNotFoundException fnfe) {
+			JOptionPane.showMessageDialog(null, "Could not save XML: " + fnfe.getMessage());
+		}
 	}
 }

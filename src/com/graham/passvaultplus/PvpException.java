@@ -3,6 +3,8 @@ package com.graham.passvaultplus;
 
 import javax.swing.Action;
 
+import com.graham.passvaultplus.view.JceDialog;
+
 public class PvpException extends Exception {
 	private static final long serialVersionUID = 1L;
 
@@ -38,12 +40,19 @@ public class PvpException extends Exception {
 	
 	public enum GeneralErrCode implements ErrCode {
 		// Here are the general errors - not to be used with an exception.
-		GeneralErr("There was an error", "No more information is available. This message should never be displayed"),
+		FallBackErr("There was an error", "No more information is available. This message should never be displayed"),
+		OtherErr("There was an error", "This is an error that does not have a specific description. See details or website for possible fixes."),
 		CantOpenDataFile("There was an error that prevented the data from loading", "Cant open the data file stream"), // trying to open the data file
 		CantParseXml("There was an error that prevented the data from loading", "Can't parse the XML format"), // trying to parse the xml for the database
 		CantWriteDataFile("There was an error that prevented the data from saving", null), // any error when writing the database to the file
-		InvalidKey("There was an error that prevented the encryption from working", "Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy"), // Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy
-		CantOpenMainWindow("There was an error that prevented the application from starting", null);
+		InvalidKey("There was an error with the encryption", null) { 
+			@Override
+			public String getDescription() {
+				return JceDialog.generateErrorDescription();
+			}
+		}, 
+		CantOpenMainWindow("There was an error that prevented the application from starting", null),
+		CantCreateNewDatabase("There was an error that prevented the data file from being created.", null);
 		final String title;
 		final String description;
 		GeneralErrCode(final String titleParam, final String descParam) {
@@ -98,7 +107,7 @@ public class PvpException extends Exception {
 			return gecode;
 		}
 		// Should never get here
-		return GeneralErrCode.GeneralErr;
+		return GeneralErrCode.FallBackErr;
 	}
 	
 	public String getPvpErrorTitle() {

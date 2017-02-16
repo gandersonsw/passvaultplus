@@ -45,19 +45,21 @@ public class PvpContext {
 	
 	private PvpViewListContext viewListContext = new PvpViewListContext();
 	private Component prefsComponent;
+	private Component schemaEditComponent;
 	private MainFrame mainFrame;
 	private ErrorFrame eframe;
+	private StringBuilder warnings = new StringBuilder();
 
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
 	 *    needPassword        -> show Password Dialog
 	 *    fileLoaded          -> new MainFrame(this)
-	 *    error               -> ???
+	 *    error               -> show ErrorFrame
 	 *    Quit button clicked -> System.exit(0)
 	 * Action B: Show Password Dialog: getPasswordOrAskUser()
 	 *    Password entered and no errors -> new MainFrame(this)
-	 *    Password entered and errors    -> ???
-	 *    user clicked cancel            -> Select data file   (TODO change button to "Change Data File"
+	 *    Password entered and errors    -> show ErrorFrame
+	 *    user clicked cancel            -> Select data file
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
 		PvpContext context = new PvpContext();
@@ -95,6 +97,14 @@ public class PvpContext {
 
 	public void setPrefsComponent(final Component c) {
 		prefsComponent = c;
+	}
+	
+	public Component getSchemaEditComponent() {
+		return schemaEditComponent;
+	}
+
+	public void setSchemaEditComponent(final Component c) {
+		schemaEditComponent = c;
 	}
 
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
@@ -178,9 +188,17 @@ public class PvpContext {
 
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
+		final String passwordToPersit;
 		if (makePersistant) {
+			passwordToPersit = password;
+		} else if (isPasswordSavedState == PWS_SAVED) {
+			passwordToPersit = "";
+		} else {
+			passwordToPersit = null;
+		}
+		if (passwordToPersit != null) {
 			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			userPrefs.put("cp", password); // cipher pw
+			userPrefs.put("cp", passwordToPersit); // cipher pw
 		}
 		if (makePersistant) {
 			isPasswordSavedState = PWS_SAVED;
@@ -206,15 +224,21 @@ public class PvpContext {
 		if (eframe == null) {
 			eframe = new ErrorFrame();
 		}
-		eframe.notify(e, canContinue, gErrCode);
+		eframe.notify(e, canContinue, gErrCode, warnings);
 	}
 
 	public void notifyWarning(String s) {
+		warnings.append(s);
+		warnings.append("\n");
 		// TODO
 		System.out.println(s);
 	}
 	
 	public void notifyWarning(String s, Exception e) {
+		warnings.append(s);
+		warnings.append("::");
+		warnings.append(e.getMessage());
+		warnings.append("\n");
 		// TODO
 		System.out.println(s);
 		e.printStackTrace();

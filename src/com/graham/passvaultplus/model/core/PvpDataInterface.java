@@ -81,7 +81,6 @@ public class PvpDataInterface {
 
 	public void saveRecord(final PvpRecord r) {
 		if (r.getId() == 0) {
-			//int maxID = context.getFileInterface().getNextMaxID();
 			int nextID = getNextMaxID();
 			r.setId(nextID);
 			records.add(r);
@@ -94,10 +93,10 @@ public class PvpDataInterface {
 		if (records.contains(r)) {
 			records.remove(r);
 			r.setId(0);
-			context.getFileInterface().save(this); // todo remove dependence
+			context.getFileInterface().save(this); // TODO remove dependence
 			context.getViewListContext().getListTableModel().filterUIChanged();
 		} else {
-			context.notifyWarning("could not delete record because it is not in the list:" + r);
+			context.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
 		}
 	}
 	
@@ -128,7 +127,7 @@ public class PvpDataInterface {
 				r.setId(0);
 				changed = true;
 			} else {
-				context.notifyWarning("could not delete record because it is not in the list:" + r);
+				context.notifyWarning("WARN112 could not delete record because it is not in the list:" + r);
 			}
 		}
 		

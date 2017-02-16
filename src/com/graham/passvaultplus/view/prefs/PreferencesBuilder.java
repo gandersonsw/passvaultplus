@@ -35,8 +35,8 @@ public class PreferencesBuilder {
 	
 	private Component buildBottom(final JPanel panelToBeReturned) {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		prefsContext.errorMessage = new JLabel(" ");
-		p.add(prefsContext.errorMessage);
+	//	prefsContext.errorMessage = new JLabel(" ");
+	//	p.add(prefsContext.errorMessage);
 		p.add(new JButton(conn.getCancelAction()));
 		prefsContext.saveButton = new JButton(new SavePrefsAction(conn, prefsContext));
 		p.add(prefsContext.saveButton);
@@ -54,6 +54,10 @@ public class PreferencesBuilder {
 		p.add(buildPassword());
 		p.add(buildPasswordOptions());
 		p.add(buildAESBits());
+		
+		// set the intial password strength
+		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
+		pca.actionPerformed(null);
 		
 		JPanel bp = new JPanel(new BorderLayout());
 		bp.add(p, BorderLayout.NORTH);
@@ -167,6 +171,7 @@ public class PreferencesBuilder {
 		final String[] bits = {"128", "192", "256"};
 		final JComboBox<String> cb = new JComboBox<>(bits);
 		prefsContext.aesBits = cb;
+		prefsContext.setSelectedBits(conn.getAesBits());
 		
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));

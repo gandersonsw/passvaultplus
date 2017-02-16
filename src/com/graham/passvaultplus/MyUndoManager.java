@@ -38,10 +38,8 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			return;
 		}
 		if (e.getSource() == lastEditSource) {
-			//System.out.println("source SAME : " + currentUndoableEdit);
 			undoableEdits.get(currentUndoableEdit).addEditEvent(e, pvpContext.getTabManager().getSelectedComponent());
 		} else {
-			//System.out.println("source DIFF : " + currentUndoableEdit);
 			MyUndoableEdit ue = new MyUndoableEdit(e.getEdit(), pvpContext.getTabManager().getSelectedComponent());
 			if (currentUndoableEdit < undoableEdits.size() - 1) {
 				// if an undo has been done by the user, there are events after it that can be redone, we need to remove those now
@@ -77,7 +75,6 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 		// TODO the way lastEditSource is cleared need to be tested, like when user hits return, or they do a lot of typing
 		if (Math.abs(e.getDot() - lastDot) > 1) {
 			lastEditSource = null;
-			//System.out.println("caretUpdate - reset:" + Math.abs(e.getDot() - lastDot));
 		}
 		lastDot = e.getDot();
 	}
@@ -107,7 +104,6 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 
 		public void actionPerformed(ActionEvent e) {
 			lastEditSource = null;
-			//System.out.println("undoAction:" + currentUndoableEdit);
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit);
 			currentUndoableEdit--;
 			pvpContext.getTabManager().setSelectedComponent(ue.tabPane);

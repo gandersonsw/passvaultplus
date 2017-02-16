@@ -20,11 +20,8 @@ public class MyCipherFactory {
 	 */
 	public static Cipher createCipher(final String password, final EncryptionHeader header, int mode) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
         final IvParameterSpec ivps = new IvParameterSpec(header.ivseed);
-        
-        System.out.println("MyCipherFactory: header.aesStrengthBits=" + header.aesStrengthBits);
         final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), header.salt, header.iterationCount, header.aesStrengthBits);
         final SecretKeySpec aesKey = generateAESKey(spec);
-        
 	    final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 	    cipher.init(mode, aesKey, ivps);
 	    return cipher;

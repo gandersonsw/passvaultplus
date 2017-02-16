@@ -16,6 +16,7 @@ import javax.crypto.CipherOutputStream;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.UserAskToChangeFileException;
 
 /**
  * Get a Writer for the database file. Take care of encryption and compression.
@@ -24,7 +25,8 @@ public class PvpFileWriter {
 	
 	private final File fileToWrite;
 	private final String fileName;
-	private final PvpContext context;
+	private String password;
+	private int encryptionStrength;
 
 	private FileOutputStream fileStream;
 	private ZipOutputStream zipStream;
@@ -33,10 +35,20 @@ public class PvpFileWriter {
 	private BufferedWriter bufWriter;
 	private OutputStream outStream; // do not close this, this is used as the last output
 
-	public PvpFileWriter(final File f, final PvpContext contextParam) {
+	public PvpFileWriter(final File f, final PvpContext contextParam) throws UserAskToChangeFileException {
 		fileToWrite = f;
 		fileName = f.getName();
-		context = contextParam;
+		if (PvpFileInterface.isEncrypted(fileName)) {
+			password = contextParam.getPasswordOrAskUser(false);
+			encryptionStrength = contextParam.getEncryptionStrengthBits();
+		}
+	}
+	
+	public PvpFileWriter(final File f, final String passwordParam, final int encryptionStrengthParam) {
+		fileToWrite = f;
+		fileName = f.getName();
+		password = passwordParam;
+		encryptionStrength = encryptionStrengthParam;
 	}
 
 	/**
@@ -47,8 +59,7 @@ public class PvpFileWriter {
 
 		try {
 			if (PvpFileInterface.isEncrypted(fileName)) {
-				final String password = context.getPasswordOrAskUser(false);
-				final EncryptionHeader header = new EncryptionHeader(context.getEncryptionStrengthBits());
+				final EncryptionHeader header = new EncryptionHeader(encryptionStrength);
 				Cipher cer = MyCipherFactory.createCipher(password, header, Cipher.ENCRYPT_MODE);
 				FileOutputStream fos = new FileOutputStream(fileToWrite);
 				fos.write(header.createEncryptionHeaderBytes());

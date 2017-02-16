@@ -2,17 +2,21 @@
 package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
+import java.io.FileReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
+import com.graham.passvaultplus.model.core.PvpFileWriter;
+import com.graham.passvaultplus.view.JceDialog;
 
 public class SavePrefsAction extends AbstractAction {
 	
@@ -51,7 +55,6 @@ public class SavePrefsAction extends AbstractAction {
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				//prefsContext.errorMessage.setText("Password required when encrypted.");// TODO delete this ?
 				return;
 			}
 			if (checkEncryptionStrength(psp.aesBits)) {
@@ -61,13 +64,14 @@ public class SavePrefsAction extends AbstractAction {
 		
 		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
 			boolean mkret = new File(dataFile.getParent()).mkdirs();
-			System.out.println("mkret: " + mkret);
+			System.out.println("mkret: " + mkret); // TODO
 		}
 		
 		try {
-			createDefaultStarterFile(dataFile); // TODO need to zip/AES - move this to PvpFileReader
+			createDefaultStarterFile(psp);
 		} catch (Exception ex) {
-			throw new RuntimeException(ex); // TODO handle some errors better
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
+			return;
 		}
 		
 		conn.doOpen(psp);
@@ -78,7 +82,6 @@ public class SavePrefsAction extends AbstractAction {
 
 		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-			//prefsContext.errorMessage.setText("Password required when encrypted."); // TODO delete this
 			return;
 		}
 
@@ -100,23 +103,18 @@ public class SavePrefsAction extends AbstractAction {
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				//prefsContext.errorMessage.setText("Password required when encrypted."); // TODO delete this
 				return;
 			}
-			
 			String oldPassword = conn.getPassword();
 			if (oldPassword == null) {
 				oldPassword = "";
 			}
-
 			if (!oldPassword.equals(newPassword)) {
 				saveFlag = true;
 			}
-			
 			if (psp.aesBits != conn.getAesBits()) {
 				saveFlag = true;
 			}
-			
 			if (checkEncryptionStrength(psp.aesBits)) {
 				return;
 			}
@@ -146,28 +144,54 @@ public class SavePrefsAction extends AbstractAction {
 		try {
 			final int maxKL = MyCipherFactory.getMaxAllowedAESKeyLength();
 			if (maxKL < aesBits) {
-				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Strong AES is not enabled on this computer TODO.  Maximum key size:" + maxKL + " bits"); // TODO make a link with instractions how to do this
+				final JceDialog jced = new JceDialog();
+				jced.showDialog(conn.getSuperFrame(), maxKL);
 				return true;
 			}
 		} catch (NoSuchAlgorithmException e) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Unexpected encryption error:" + e.getMessage());
 			return true;
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 		}
 		return false;
 	}
 	
-	private void createDefaultStarterFile(final File destinationFile) throws IOException {
-		if (PvpContext.JAR_BUILD) {
-			// note path starts with "/" - that starts at the root of the jar,
-			// instead of the location of the class.
-			InputStream sourceStream = PvpContext.class.getResourceAsStream("/datafiles/starter-pvp-data.xml");
-			BCUtil.copyFile(sourceStream, destinationFile);
-		} else {
-			File sourceFile = new File("datafiles/starter-pvp-data.xml");
-			System.out.println("sourceFile=" + sourceFile.getAbsolutePath());
-			BCUtil.copyFile(sourceFile, destinationFile);
+	private void createDefaultStarterFile(final PrefsSettingsParam psp) throws Exception {
+		InputStream sourceStream = null;
+		InputStreamReader isr = null;
+		BufferedReader bufR = null;
+		PvpFileWriter fileWriter = null;
+		try {
+			if (PvpContext.JAR_BUILD) {
+				// note path starts with "/" - that starts at the root of the jar,
+				// instead of the location of the class.
+				sourceStream = PvpContext.class.getResourceAsStream("/datafiles/starter-pvp-data.xml");
+				isr = new InputStreamReader(sourceStream);
+			} else {
+				File sourceFile = new File("datafiles/starter-pvp-data.xml");
+				isr = new FileReader(sourceFile);
+			}
+			
+			bufR = new BufferedReader(isr);
+			fileWriter = new PvpFileWriter(psp.f, psp.pw, psp.aesBits);
+			final BufferedWriter bw = fileWriter.getWriter();
+			String line;
+			while ((line = bufR.readLine()) != null) {
+				bw.write(line);
+				bw.newLine();
+			}
+		} finally {
+			if (fileWriter != null) {
+				fileWriter.close();
+			}
+			if (bufR != null) {
+				try { bufR.close(); } catch (Exception e) { }
+			}
+			if (isr != null) {
+				try { isr.close(); } catch (Exception e) { }
+			}
+			if (sourceStream != null) {
+				try { sourceStream.close(); } catch (Exception e) { }
+			}
 		}
 	}
 

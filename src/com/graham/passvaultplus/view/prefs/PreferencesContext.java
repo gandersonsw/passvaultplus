@@ -25,7 +25,6 @@ public class PreferencesContext {
 	JCheckBox showPassword;
 	JPasswordField password;
 	JTextField passwordClearText;
-	JLabel errorMessage; // TODO probably can delete this 
 	ConfigAction configAction;
 	JComboBox<ConfigAction> actionCombo;
 	JComboBox<String> aesBits;
@@ -116,7 +115,7 @@ public class PreferencesContext {
 			defaultFile = f;
 		}
 		public void actionPerformed(ActionEvent e) {
-			setDataFile(defaultFile, 0); // TODO test this 0
+			setDataFile(defaultFile, 0);
 		}
 	}
 
