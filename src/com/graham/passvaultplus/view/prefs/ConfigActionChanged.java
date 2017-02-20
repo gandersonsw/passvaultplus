@@ -7,11 +7,9 @@ import java.io.File;
 import javax.swing.AbstractAction;
 
 public class ConfigActionChanged extends AbstractAction {
-	final private PreferencesConnection conn;
 	final private PreferencesContext context;
 	
-	public ConfigActionChanged(final PreferencesConnection connParam, final PreferencesContext contextParam) {
-		conn = connParam;
+	public ConfigActionChanged(final PreferencesContext contextParam) {
 		context = contextParam;
 	}
 	
@@ -26,7 +24,7 @@ public class ConfigActionChanged extends AbstractAction {
 		
 		context.saveButton.setText(ca.getButtonLabel());
 		if (ca == ConfigAction.Create) {
-			context.setDataFile(new File(conn.getDataFilePath()), 0);
+			context.setDataFile(new File(context.conn.getDataFilePath()), 0);
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(true);
@@ -49,7 +47,7 @@ public class ConfigActionChanged extends AbstractAction {
 				context.setDataFile(null, 0);
 			}
 		} else if (ca == ConfigAction.Change) {
-			context.setDataFile(new File(conn.getDataFilePath()), conn.getAesBits());
+			context.setDataFile(new File(context.conn.getDataFilePath()), context.conn.getAesBits());
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(context.compressedFlag);
 			context.encrypted.setEnabled(true);

@@ -35,10 +35,8 @@ public class PreferencesBuilder {
 	
 	private Component buildBottom(final JPanel panelToBeReturned) {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	//	prefsContext.errorMessage = new JLabel(" ");
-	//	p.add(prefsContext.errorMessage);
 		p.add(new JButton(conn.getCancelAction()));
-		prefsContext.saveButton = new JButton(new SavePrefsAction(conn, prefsContext));
+		prefsContext.saveButton = new JButton(new SavePrefsAction(prefsContext));
 		p.add(prefsContext.saveButton);
 		return p;
 	}
@@ -82,7 +80,7 @@ public class PreferencesBuilder {
 			prefsContext.configAction = ConfigAction.Create;
 		}
 		cb.setFocusable(false);
-		cb.addActionListener(new ConfigActionChanged(conn, prefsContext));
+		cb.addActionListener(new ConfigActionChanged(prefsContext));
 		prefsContext.actionCombo = cb;
 	
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -201,7 +199,6 @@ public class PreferencesBuilder {
 		prefsContext.showPin = new JCheckBox("Show");
 		prefsContext.showPin.addActionListener(new ShowPinAction(prefsContext));
 		p.add(prefsContext.showPin);
-		
 		
 		final String[] timeouts = {"2", "5", "10", "15", "20", "30", "45", "60", "120", "300", "Never"};
 		prefsContext.timeoutCombo = new JComboBox<>(timeouts);

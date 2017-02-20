@@ -18,6 +18,7 @@ import com.graham.passvaultplus.model.core.PvpFileInterface;
 public class PreferencesContext {
 	final boolean compressedFlag; // this is not updated, original value only
 	final boolean encryptedFlag;  // this is not updated, original value only
+	final PreferencesConnection conn;
 	
 	JCheckBox compressed;
 	JCheckBox encrypted;
@@ -43,6 +44,7 @@ public class PreferencesContext {
 	private File dataFile;
 	
 	PreferencesContext(final PreferencesConnection connParam) {
+		conn = connParam;
 		dataFileString = connParam.getDataFilePath();
 		compressedFlag = PvpFileInterface.isCompressed(dataFileString);
 		encryptedFlag = PvpFileInterface.isEncrypted(dataFileString);

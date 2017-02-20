@@ -128,7 +128,7 @@ public class HelpAction extends AbstractAction {
 			final JTextArea helpText = new JTextArea();
 			helpText.setBackground(spacerLabel1.getBackground());
 			helpText.setEditable(false);
-			helpText.setText(getHelpText());
+			helpText.setText(context.getResourceText("help"));
 			helpText.setLineWrap(true);
 			helpText.setWrapStyleWord(true);
 			helpText.setPreferredSize(new Dimension(800, 2000));
@@ -148,47 +148,6 @@ public class HelpAction extends AbstractAction {
 		mainPanel.add(sp55, BorderLayout.CENTER);
 		
 		return mainPanel;
-	}
-	
-	private String getHelpText() {
-		InputStream sourceStream = null;
-		InputStreamReader isr = null;
-		BufferedReader bufR = null;
-		try {
-			if (PvpContext.JAR_BUILD) {
-				// note path starts with "/" - that starts at the root of the jar,
-				// instead of the location of the class.
-				sourceStream = PvpContext.class.getResourceAsStream("/datafiles/help.txt");
-				isr = new InputStreamReader(sourceStream);
-			} else {
-				File sourceFile = new File("datafiles/help.txt");
-				isr = new FileReader(sourceFile);
-			}
-			
-			bufR = new BufferedReader(isr);
-			
-			StringBuilder sb = new StringBuilder();
-			String line;
-			while ((line = bufR.readLine()) != null) {
-				sb.append(line);
-				sb.append("\n");
-			}
-			return sb.toString();
-		
-		} catch (Exception e) {
-			context.notifyWarning("WARN118 cant load help text", e);
-			return "";
-		} finally {
-			if (bufR != null) {
-				try { bufR.close(); } catch (Exception e) { }
-			}
-			if (isr != null) {
-				try { isr.close(); } catch (Exception e) { }
-			}
-			if (sourceStream != null) {
-				try { sourceStream.close(); } catch (Exception e) { }
-			}
-		}
 	}
 
 	static class CopyEmail extends AbstractAction {

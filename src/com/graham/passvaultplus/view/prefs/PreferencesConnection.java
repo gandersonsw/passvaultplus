@@ -47,6 +47,10 @@ public abstract class PreferencesConnection {
 		return false;
 	}
 	
+	public PvpContext getPvpContext() {
+		return context;
+	}
+	
 	protected void setContextFromPsp(final PrefsSettingsParam psp) {
 		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
 		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);

@@ -8,6 +8,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.EncryptionHeader;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
 import com.graham.passvaultplus.model.core.PvpFileReader;
@@ -48,8 +49,7 @@ public class ChooseDirAction extends AbstractAction {
 					}
 					context.setDataFile(f, encryptBits);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					context.conn.getPvpContext().notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncytpyionHeader);
 				}
 			}
 		} else {

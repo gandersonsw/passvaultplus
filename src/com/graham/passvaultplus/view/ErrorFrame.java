@@ -40,7 +40,7 @@ public class ErrorFrame {
 	private JButton showDetails;
 	private JTextArea helpLink;
 	
-	public void notify(final Exception e, final boolean canContinue, final PvpException.GeneralErrCode gErrCode, final StringBuilder warnings) {
+	public void notify(final Exception e, final boolean canContinue, final boolean canGoToSetup, final PvpException.GeneralErrCode gErrCode, final StringBuilder warnings) {
 
 		if (detailsText != null) {
 			if (badExceptionMessageCount < 10) {
@@ -79,7 +79,7 @@ public class ErrorFrame {
 
 		eFrame.getContentPane().add(buildDetailsPanel(e, warnings), BorderLayout.CENTER);
 		
-		eFrame.getContentPane().add(buildButtonPanel(canContinue, optionalAction), BorderLayout.SOUTH);
+		eFrame.getContentPane().add(buildButtonPanel(canContinue, canGoToSetup, optionalAction), BorderLayout.SOUTH);
 
 		eFrame.pack();
 		//eFrame.setResizable(false);
@@ -152,12 +152,14 @@ public class ErrorFrame {
 		return detailsScroll;
 	}
 	
-	private JPanel buildButtonPanel(final boolean canContinue, final Action optionalAction) {
+	private JPanel buildButtonPanel(final boolean canContinue, final boolean canGoToSetup, final Action optionalAction) {
 		final JPanel p = new JPanel();
 		p.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		showDetails = new JButton(new ShowErrorDetailsAction());
 		p.add(showDetails);
-		p.add(new JButton(new SetupAction()));
+		if (canGoToSetup) {
+			p.add(new JButton(new SetupAction()));
+		}
 		p.add(new JButton(new QuitAction()));
 		if (canContinue) {
 			p.add(new JButton(new ContinueAction()));

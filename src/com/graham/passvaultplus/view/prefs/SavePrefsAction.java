@@ -23,9 +23,9 @@ public class SavePrefsAction extends AbstractAction {
 	final private PreferencesConnection conn;
 	final private PreferencesContext prefsContext;
 
-	public SavePrefsAction(final PreferencesConnection connParam, final PreferencesContext prefsContextParam) {
+	public SavePrefsAction(final PreferencesContext prefsContextParam) {
 		super(prefsContextParam.configAction.getButtonLabel());
-		conn = connParam;
+		conn = prefsContextParam.conn;
 		prefsContext = prefsContextParam;
 	}
 	
@@ -67,7 +67,9 @@ public class SavePrefsAction extends AbstractAction {
 		
 		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
 			boolean mkret = new File(dataFile.getParent()).mkdirs();
-			System.out.println("mkret: " + mkret); // TODO
+			if (!mkret) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "There was a problem creating the directory:" + dataFile.getParent());
+			}
 		}
 		
 		try {

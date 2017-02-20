@@ -4,9 +4,12 @@ package com.graham.passvaultplus;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.prefs.Preferences;
 
@@ -18,6 +21,7 @@ import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
 import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.ErrorFrame;
+import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.PinDialog;
 import com.graham.passvaultplus.view.PwDialog;
@@ -82,6 +86,11 @@ public class PvpContext {
 		context.rtDataInterface = new PvpDataInterface(context);
 		if (pw != null) {
 			context.setPassword(pw, false);
+		}
+		
+		if (!context.isDataFilePresent()) {
+			final EulaDialog eula = new EulaDialog();
+			eula.showEula(context);
 		}
 		
 		if (!alwaysShowStartupOptions && context.isDataFilePresent()) {
@@ -299,7 +308,7 @@ public class PvpContext {
 		}
 	}
 	
-	public void cancelPinTimerTask() {
+	private void cancelPinTimerTask() {
 		if (pinTimer != null) {
 			pinTimer.cancel();
 		}
@@ -364,7 +373,18 @@ public class PvpContext {
 		if (eframe == null) {
 			eframe = new ErrorFrame();
 		}
-		eframe.notify(e, canContinue, gErrCode, warnings);
+		eframe.notify(e, canContinue, true, gErrCode, warnings);
+	}
+	
+	/**
+	 * To be used when a bad exception happens somewhere in the application.
+	 * @canContinue If false, force the application to quit
+	 */
+	public void notifyBadException(final Exception e, final boolean canContinue, final boolean canGoToSetup, final PvpException.GeneralErrCode gErrCode) {
+		if (eframe == null) {
+			eframe = new ErrorFrame();
+		}
+		eframe.notify(e, canContinue, canGoToSetup, gErrCode, warnings);
 	}
 
 	public void notifyWarning(String s) {
@@ -446,6 +466,48 @@ public class PvpContext {
 		} catch (IOException e) {
 			e.printStackTrace(); // TODO
 			return null;
+		}
+	}
+	
+
+	public String getResourceText(final String rname) {
+		InputStream sourceStream = null;
+		InputStreamReader isr = null;
+		BufferedReader bufR = null;
+		try {
+			if (PvpContext.JAR_BUILD) {
+				// note path starts with "/" - that starts at the root of the jar,
+				// instead of the location of the class.
+				sourceStream = PvpContext.class.getResourceAsStream("/datafiles/" + rname + ".txt");
+				isr = new InputStreamReader(sourceStream);
+			} else {
+				File sourceFile = new File("datafiles/" + rname + ".txt");
+				isr = new FileReader(sourceFile);
+			}
+			
+			bufR = new BufferedReader(isr);
+			
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = bufR.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			return sb.toString();
+		
+		} catch (Exception e) {
+			this.notifyWarning("WARN118 cant load resource text:" + rname, e);
+			return "";
+		} finally {
+			if (bufR != null) {
+				try { bufR.close(); } catch (Exception e) { }
+			}
+			if (isr != null) {
+				try { isr.close(); } catch (Exception e) { }
+			}
+			if (sourceStream != null) {
+				try { sourceStream.close(); } catch (Exception e) { }
+			}
 		}
 	}
 
