@@ -46,7 +46,7 @@ public class SavePrefsAction extends AbstractAction {
 
 		final File dataFile = prefsContext.getDataFile();
 		if (dataFile.isFile()) {
-			JOptionPane.showMessageDialog(conn.getSuperFrame(), "When creating a new database, a file must not exist in the choosen location. Please choose a directory where there is no file, or use the \"Open Existing Database\" option.");
+			JOptionPane.showMessageDialog(conn.getSuperFrame(), "When creating a new database, a file must not exist in the choosen location. \nPlease choose a directory where there is no file, or use the \"Open Existing Database\" option.");
 			return;
 		}
 		

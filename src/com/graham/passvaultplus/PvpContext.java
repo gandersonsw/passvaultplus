@@ -202,26 +202,20 @@ public class PvpContext {
 					
 					if (tryToGetPassword) {
 						try {
-							//System.out.println("encryptedPassword bytes=" + encryptedPassword.length + "   pin:" + pin);
 							password = StringEncrypt.decryptString(encryptedPassword, pin, usePin);
 							if (password != null) {
 								tryingToGetValidPin = false;
 							} else {
 								pin = "";
-								
 								try {
-									Thread.sleep(pinWasBadCount * 1000);  // sleep for number of seconds for how may tries this is
+									Thread.sleep(pinWasBadCount * 1000); // sleep for number of seconds for how may tries this is
 								} catch (InterruptedException e) {
 									this.notifyWarning("getPasswordOrAskUser:sleep" +  e.getMessage());
 								}
-								
 							}
-							//System.out.println("decrypt: password is:" + password);
 						} catch (PvpException e) {
 							pin = "";
 							this.notifyBadException(e, true, null);
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
 					}
 					pinWasBadCount++;
@@ -327,13 +321,9 @@ public class PvpContext {
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
 		try {
-			//System.out.println("encrypt: password is:" + passwordParam + "   pin:" + pin);
 			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
-			//System.out.println("sp: encryptedPassword bytes=" + encryptedPassword.length);
 		} catch (PvpException e) {
 			this.notifyBadException(e, true, null);
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		byte[] passwordToPersist;
 		if (makePersistant) {
@@ -344,7 +334,6 @@ public class PvpContext {
 			passwordToPersist = null;
 		}
 		if (passwordToPersist != null) {
-			//System.out.println("saving password" + passwordToPersist.length);
 			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 			userPrefs.putByteArray("ecp", passwordToPersist); // ecp = encrypted cipher password
 		}

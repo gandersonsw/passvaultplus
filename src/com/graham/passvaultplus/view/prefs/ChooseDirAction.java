@@ -49,7 +49,7 @@ public class ChooseDirAction extends AbstractAction {
 					}
 					context.setDataFile(f, encryptBits);
 				} catch (Exception e1) {
-					context.conn.getPvpContext().notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncytpyionHeader);
+					context.conn.getPvpContext().notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncryptionHeader);
 				}
 			}
 		} else {

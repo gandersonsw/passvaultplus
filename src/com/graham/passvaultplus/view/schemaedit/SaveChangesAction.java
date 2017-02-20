@@ -146,13 +146,11 @@ public class SaveChangesAction extends AbstractAction {
 			if (fm.isDeleted) {
 				final PvpField f = t.getField(fm.originalName);
 				if (f == null) {
-					System.out.println("field not found in type: " + fm.originalName);
 					// this can happen if they add a new field, and then select delete
 				} else if (isCatType && fm.originalName.equals(PvpField.USR_CATEGORY_TITLE)) {
 					pvpContext.notifyWarning("can't delete Title field in Category type");
 				} else {
 					for (PvpRecord r : fr.records) {
-						System.out.println("at 222");
 						r.setCustomField(fm.originalName, null);
 					}
 					t.getFields().remove(f);
@@ -168,17 +166,14 @@ public class SaveChangesAction extends AbstractAction {
 				final PvpField f = t.getField(fm.originalName);
 				if (!fm.newName.equals(fm.originalName)) {
 					for (PvpRecord r : fr.records) {
-						System.out.println("at 111");
 						final String val = r.getCustomField(fm.originalName);
 						r.setCustomField(fm.originalName, null);
 						r.setCustomField(fm.newName, val);
 					}
 					f.setName(fm.newName);
-					System.out.println("field name change:" + fm.originalName + " -> " + fm.newName);
 				}
 				if (fm.isSecret != f.isClassificationSecret()) {
 					f.setClassification(fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
-					System.out.println("classification  change: " + fm.originalName);
 				}
 			}
 		}

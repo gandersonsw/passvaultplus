@@ -19,16 +19,14 @@ public class PasswordChangedAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		final int bits = BCUtil.dataInString(context.getPasswordText());
 		String rating;
-		if (bits > 200) {
-			rating = "Excellent * 2";
-		} else if (bits > 150) {
+		if (bits > 128) {
 			rating = "Excellent";
-		} else if (bits > 100) {
+		} else if (bits > 64) {
 			rating = "Good";
-		} else if (bits > 60) { // TODO determine this number, ALL these numbers
-			rating = "Acceptable";
+		} else if (bits > 44) {
+			rating = "Average";
 		} else {
-			rating = "Poor";
+			rating = "Weak";
 		}
 		
 		context.passwordStrength.setText(bits + " bits (" + rating + ")");

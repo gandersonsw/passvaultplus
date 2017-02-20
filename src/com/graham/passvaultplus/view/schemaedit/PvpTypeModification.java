@@ -93,7 +93,6 @@ public class PvpTypeModification {
 					break;
 				}
 			}
-			System.out.println("addField:foundIt=" + foundIt);
 		}
 	}
 	

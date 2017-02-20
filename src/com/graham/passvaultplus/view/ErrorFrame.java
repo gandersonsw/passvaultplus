@@ -116,7 +116,7 @@ public class ErrorFrame {
 			helpLink.setBackground(tileLabel.getBackground());
 			helpLink.setForeground(Color.BLUE);
 			helpLink.setFont(f1);
-			helpLink.setText(PVP_HELP_URL_ERR_BASE + errHelpId);
+			helpLink.setText(PVP_HELP_URL_ERR_BASE + errHelpId + ".html");
 			helpLink.setEditable(false);
 			helpLink.setBorder(new EmptyBorder(1, 24, 8, 8));
 			final JPanel leftAlignPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));

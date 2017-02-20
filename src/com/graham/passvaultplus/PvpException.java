@@ -51,7 +51,7 @@ public class PvpException extends Exception {
 				return JceDialog.generateErrorDescription();
 			}
 		}, 
-		CantReadEncytpyionHeader("There was an error that prevented the encryption information from loading.", null),
+		CantReadEncryptionHeader("There was an error that prevented the encryption information from loading.", null),
 		CantOpenMainWindow("There was an error that prevented the application from starting", null),
 		CantCreateNewDatabase("There was an error that prevented the data file from being created.", null),
 		CantDecryptPassword("There was an error that prevented the password from being decrypted.", null),
