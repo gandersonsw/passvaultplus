@@ -8,4 +8,7 @@ public class PrefsSettingsParam {
 	public String pw;
 	public boolean spw;
 	public int aesBits;
+	public String pin;
+	public boolean usePin;
+	public int pinTimeout;
 }

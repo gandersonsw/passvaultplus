@@ -21,28 +21,26 @@ import javax.swing.border.EmptyBorder;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 
-/**
- * Password Dialog
- */
-public class PwDialog {
+public class PinDialog {
 	private JDialog d;
 	private JTextField tf;
 	private JPasswordField pf;
 	private JCheckBox show;
-	private PwAction actionHit;
+	private PinAction actionHit;
 	private boolean showConfigButton = true;
 
-	public enum PwAction {
+	public enum PinAction {
 		Okay,
-		Quit,
-		Configure
+	//	Quit, there is a quit button, but System.exit is called in that case
+		Configure,
+		UsePassword
 	}
 	
 	public void setShowConfigButton(final boolean scb) {
 		showConfigButton = scb;
 	}
 	
-	public PwAction askForPw(final boolean passwordWasBad, final String path) {
+	public PinAction askForPin(final int pinWasBadCount) {
 		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 		
@@ -58,15 +56,15 @@ public class PwDialog {
 			d.getContentPane().add(westLayout, BorderLayout.WEST);
 		}
 		
-		if (passwordWasBad) {
+		if (pinWasBadCount > 0) {
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			p.add(new JLabel("That password is not correct. Please try again."));
+			p.add(new JLabel("That PIN is not correct. Please try again."));
 			centerPanel.add(p);
 		}
 		
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			p.add(new JLabel("Password:"));
+			p.add(new JLabel("PIN:"));
 			centerPanel.add(p);
 		}
 	
@@ -88,18 +86,9 @@ public class PwDialog {
 			centerPanel.add(p);
 			show.addActionListener(new ShowPwAction());
 		}
-	
-		{
-			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JLabel file = new JLabel("File: " + path);
-			final Font fnt = file.getFont().deriveFont(file.getFont().getSize() - 1.0f);
-			file.setFont(fnt);
-			p.add(file);
-			centerPanel.add(p);
-		}
 		
 		{
-			// add some spacers to make the button align to bottom and everythign else tot he top
+			// add some spacers to make the button align to bottom and everything else to the top
 			final JPanel sp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			sp1.add(new JLabel(" "));
 			centerPanel.add(sp1);
@@ -111,6 +100,7 @@ public class PwDialog {
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			p.add(new JButton(new QuitAction()));
+			p.add(new JButton(new GoToPasswordAction()));
 			if (showConfigButton) {
 				p.add(new JButton(new GoToSetupAction()));
 			}
@@ -127,7 +117,7 @@ public class PwDialog {
 		return actionHit;
 	}
 	
-	public String getPw() {
+	public String getPin() {
 		if (show.isSelected()) {
 			return tf.getText();
 		} else {
@@ -149,7 +139,7 @@ public class PwDialog {
 			super("Continue");
 		}
 		public void actionPerformed(ActionEvent e) {
-			actionHit = PwAction.Okay;
+			actionHit = PinAction.Okay;
 			d.setVisible(false);
 		}
 	}
@@ -159,7 +149,7 @@ public class PwDialog {
 			super("Go to Setup");
 		}
 		public void actionPerformed(ActionEvent e) {
-			actionHit = PwAction.Configure;
+			actionHit = PinAction.Configure;
 			d.setVisible(false);
 		}
 	}
@@ -185,5 +175,14 @@ public class PwDialog {
 			}
 		}
 	}
-
+	
+	class GoToPasswordAction extends AbstractAction {
+		GoToPasswordAction() {
+			super("Use Password");
+		}
+		public void actionPerformed(ActionEvent e) {
+			actionHit = PinAction.UsePassword;
+			d.setVisible(false);
+		}
+	}
 }

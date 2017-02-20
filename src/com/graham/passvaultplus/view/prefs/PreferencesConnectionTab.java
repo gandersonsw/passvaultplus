@@ -60,6 +60,16 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	}
 	
 	@Override
+	public String getPassword() {
+		return context.getPassword();
+	}
+	
+	@Override
+	public boolean isPasswordSaved() {
+		return context.isPasswordSaved();
+	}
+	
+	@Override
 	public String getDataFilePath() {
 		return context.getDataFilePath();
 	}
@@ -90,6 +100,21 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	@Override
 	public boolean supportsChangeDataFileOptions() {
 		return true;
+	}
+	
+	@Override
+	public String getPin() {
+		return context.getPin();
+	}
+	
+	@Override
+	public boolean getUsePin() {
+		return context.getUsePin();
+	}
+	
+	@Override
+	public int getPinTimeout() {
+		return context.getPinTimeout();
 	}
 	
 	class CancelPrefsAction extends AbstractAction {

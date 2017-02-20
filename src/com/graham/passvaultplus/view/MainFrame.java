@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.view;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
@@ -36,7 +35,7 @@ public class MainFrame extends JFrame {
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		setLocation(100,100);
-		setSize(904, 500);
+		setSize(904, 520);
 		setMinimumSize(new Dimension(400, 240));
 
 		JTabbedPane tabPane = new JTabbedPane();

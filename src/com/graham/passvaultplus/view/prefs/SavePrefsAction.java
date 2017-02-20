@@ -51,7 +51,10 @@ public class SavePrefsAction extends AbstractAction {
 		}
 		
 		final PrefsSettingsParam psp = createPspFromContext();
-		
+		if (!validatePin()) {
+			return;
+		}
+	
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
@@ -82,6 +85,10 @@ public class SavePrefsAction extends AbstractAction {
 
 		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
+			return;
+		}
+		
+		if (!validatePin()) {
 			return;
 		}
 
@@ -120,6 +127,10 @@ public class SavePrefsAction extends AbstractAction {
 			}
 		}
 		
+		if (!validatePin()) {
+			return;
+		}
+		
 		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
 			saveFlag = true;
 		}
@@ -129,6 +140,21 @@ public class SavePrefsAction extends AbstractAction {
 		}
 		
 		conn.doSave(psp, saveFlag);
+	}
+	
+	private boolean validatePin() {
+		if (prefsContext.usePin.isSelected()) {
+			final String pin = prefsContext.getPinText();
+			if (pin.length() == 0) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Pin must be at least 1 character long.");
+				return false;
+			}
+			if (pin.length() > 200) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Pin cant be longer than 200 characters.");
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private PrefsSettingsParam createPspFromContext() {
@@ -141,7 +167,13 @@ public class SavePrefsAction extends AbstractAction {
 		} else {
 			psp.aesBits = 0;
 		}
-		
+		psp.pin = prefsContext.getPinText();
+		psp.usePin = prefsContext.usePin.isSelected();
+		if (this.prefsContext.encrypted.isSelected()) {
+			try { psp.pinTimeout = Integer.parseInt(prefsContext.timeoutCombo.getSelectedItem().toString()); } catch (Exception e) { psp.pinTimeout = 0; }
+		} else {
+			psp.pinTimeout = 0;
+		}	
 		return psp;
 	}
 	

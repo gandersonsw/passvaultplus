@@ -19,16 +19,16 @@ public abstract class PreferencesConnection {
 	
 	public abstract Action getCancelAction();
 	
-	public String getPassword() {
-		return context.getPassword();
-	}
+	public abstract String getPassword();
 	
-	public boolean isPasswordSaved() {
-		return context.isPasswordSaved();
-	}
+	public abstract boolean isPasswordSaved();
 	
-	public void setPassword(final String passwordParam, final boolean makePersistant) {
-		context.setPassword(passwordParam, makePersistant);
+	public abstract String getPin();
+	
+	public abstract boolean getUsePin();
+	
+	public int getPinTimeout() {
+		return 30; // 30 minutes is the default
 	}
 	
 	public abstract String getDataFilePath();
@@ -49,6 +49,7 @@ public abstract class PreferencesConnection {
 	
 	protected void setContextFromPsp(final PrefsSettingsParam psp) {
 		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
-		context.setPassword(psp.pw, psp.spw);
+		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
+		context.setPinTimeout(psp.pinTimeout);
 	}
 }

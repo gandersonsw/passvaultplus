@@ -61,8 +61,27 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	}
 	
 	@Override
+	public String getPassword() {
+		return "";
+	}
+	
+	@Override
+	public boolean isPasswordSaved() {
+		return false;
+	}
+	@Override
 	public int getAesBits() {
 		return 128;
+	}
+	
+	@Override
+	public String getPin() {
+		return "";
+	}
+	
+	@Override
+	public boolean getUsePin() {
+		return false;
 	}
 	
 	@Override

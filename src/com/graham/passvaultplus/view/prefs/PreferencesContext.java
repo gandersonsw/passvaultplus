@@ -25,6 +25,13 @@ public class PreferencesContext {
 	JCheckBox showPassword;
 	JPasswordField password;
 	JTextField passwordClearText;
+	
+	JPasswordField pin;
+	JTextField pinClearText;
+	JCheckBox showPin;
+	JCheckBox usePin;
+	JComboBox<String> timeoutCombo;
+	
 	ConfigAction configAction;
 	JComboBox<ConfigAction> actionCombo;
 	JComboBox<String> aesBits;
@@ -35,32 +42,40 @@ public class PreferencesContext {
 	private String dataFileString;
 	private File dataFile;
 	
-	public PreferencesContext(final PreferencesConnection connParam) {
+	PreferencesContext(final PreferencesConnection connParam) {
 		dataFileString = connParam.getDataFilePath();
 		compressedFlag = PvpFileInterface.isCompressed(dataFileString);
 		encryptedFlag = PvpFileInterface.isEncrypted(dataFileString);
 	}
 	
-	public String getPasswordText() {
+	String getPasswordText() {
 		if (showPassword.isSelected()) {
 			return passwordClearText.getText();
 		} else {
 			return new String(password.getPassword());
 		}
 	}
+	
+	String getPinText() {
+		if (showPin.isSelected()) {
+			return pinClearText.getText();
+		} else {
+			return new String(pin.getPassword());
+		}
+	}
 
-	public File getDataFile() {
+	File getDataFile() {
 		if (dataFile == null) {
 			dataFile = new File(dataFileString);
 		}
 		return dataFile;
 	}
 	
-	public String getDataFileString() {
+	String getDataFileString() {
 		return dataFileString;
 	}
 	
-	public void setDataFile(final File f, final int aesBits) {
+	void setDataFile(final File f, final int aesBits) {
 		if (f == null) {
 			dataFile = null;
 			dataFileString = "";
@@ -79,7 +94,7 @@ public class PreferencesContext {
 		dataFileLabel.setText(dataFileString);
 	}
 	
-	public void setSelectedBits(final int bits) {
+	void setSelectedBits(final int bits) {
 		if (bits == 0) {
 			// if its 0, dont change it
 		}else if (bits == 256) {
@@ -91,20 +106,59 @@ public class PreferencesContext {
 		}
 	}
 	
-	public void setDataFileLabel(final JLabel l) {
+	void setPinTimeout(final int to) {
+		if (to < 2 || to > 300) {
+			timeoutCombo.setSelectedItem("Never");
+		} else {
+			timeoutCombo.setSelectedItem(Integer.toString(to));
+		}
+	}
+	
+	void setDataFileLabel(final JLabel l) {
 		dataFileLabel = l;
 	}
 	
-	public Action getDefaultFileAction() {
+	Action getDefaultFileAction() {
 		return new SetDefaultDataFile(getDataFile());
 	}
 	
-	public void setFileExtensionFromCompressedAndEncrypted() {
+	void setFileExtensionFromCompressedAndEncrypted() {
 		if (dataFile != null) {
-			String fname = PvpFileInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
+			final String fname = PvpFileInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
 			dataFile = new File(dataFile.getParentFile(), fname);
 			dataFileString = dataFile.getAbsolutePath();
 			dataFileLabel.setText(dataFileString);
+		}
+		
+		if (encrypted.isSelected()) {
+			this.password.setEnabled(true);
+			this.passwordClearText.setEnabled(true);
+			this.savePassword.setEnabled(true);
+			this.aesBits.setEnabled(true);
+		} else {
+			this.password.setEnabled(false);
+			this.passwordClearText.setEnabled(false);
+			this.savePassword.setSelected(false);
+			this.savePassword.setEnabled(false);
+			this.usePin.setSelected(false);
+			this.aesBits.setEnabled(false);
+		}
+		
+		setPinEnabled();
+	}
+	
+	void setPinEnabled() {
+		if (this.savePassword.isSelected()) {
+			this.usePin.setEnabled(true);
+			this.pin.setEnabled(true);
+			this.pinClearText.setEnabled(true);
+			this.timeoutCombo.setEnabled(true);
+		} else {
+			this.usePin.setSelected(false);
+			this.usePin.setEnabled(false);
+			this.pin.setEnabled(false);
+			this.pinClearText.setEnabled(false);
+			this.timeoutCombo.setEnabled(false);
 		}
 	}
 	

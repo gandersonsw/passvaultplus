@@ -33,7 +33,7 @@ public class PvpFileReader {
 	private BufferedInputStream bufInStream = null;
 	private InputStream inStream = null;
 	private ZipInputStream zipfile = null;
-	private CipherInputStream cypherStream = null;
+	private CipherInputStream cipherStream = null;
 	private FileInputStream fileStream = null;
 	private EncryptionHeader eHeader;
 
@@ -92,8 +92,8 @@ public class PvpFileReader {
 				eHeader = getEncryptHeader(fileStream);
 				final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
 	
-				cypherStream = new CipherInputStream(fileStream, cer);
-				inStream = cypherStream;
+				cipherStream = new CipherInputStream(fileStream, cer);
+				inStream = cipherStream;
 	
 				byte[] check = new byte[8];
 				if (inStream.read(check, 0, 8) == 8) {
@@ -106,7 +106,7 @@ public class PvpFileReader {
 				passwordTried = true;
 			} finally {
 				if (!passwordIsGood) {
-					closeCypherAndFile();
+					closeCipherAndFile();
 				}
 			}
 		}
@@ -146,7 +146,7 @@ public class PvpFileReader {
 			bufInStream = null;
 		}
 		
-		closeCypherAndFile();
+		closeCipherAndFile();
 
 		if (zipfile != null) {
 			try {
@@ -157,13 +157,13 @@ public class PvpFileReader {
 		}
 	}
 	
-	private void closeCypherAndFile() {
-		if (cypherStream != null) {
+	private void closeCipherAndFile() {
+		if (cipherStream != null) {
 			try {
-				cypherStream.close();
+				cipherStream.close();
 			} catch (IOException ioe) {
 			}
-			cypherStream = null;
+			cipherStream = null;
 		}
 		if (fileStream != null) {
 			try {

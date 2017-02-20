@@ -53,7 +53,9 @@ public class PreferencesBuilder {
 		p.add(buildEncryptedButtons());
 		p.add(buildPassword());
 		p.add(buildPasswordOptions());
+		p.add(buildPin());
 		p.add(buildAESBits());
+		prefsContext.setFileExtensionFromCompressedAndEncrypted();
 		
 		// set the intial password strength
 		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
@@ -159,6 +161,7 @@ public class PreferencesBuilder {
 		p.add(Box.createRigidArea(indentDim));
 		prefsContext.savePassword = new JCheckBox("Save Password", conn.isPasswordSaved());
 		prefsContext.savePassword.setToolTipText("If checked, the password will be saved. If not checked, you must enter the password when starting app.");
+		prefsContext.savePassword.addActionListener(e -> prefsContext.setPinEnabled());
 		p.add(prefsContext.savePassword);
 		p.add(Box.createRigidArea(indentDim));
 		p.add(new JLabel("Password Strength: "));
@@ -177,6 +180,35 @@ public class PreferencesBuilder {
 		p.add(Box.createRigidArea(indentDim));
 		p.add(new JLabel("  Key Size in bits:"));
 		p.add(cb);
+		return p;
+	}
+	
+	private JPanel buildPin() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		p.add(Box.createRigidArea(indentDim));
+		p.add(Box.createRigidArea(indentDim));
+		p.add(Box.createRigidArea(indentDim));
+		prefsContext.usePin = new JCheckBox("Use PIN:");
+		if (conn.getUsePin()) {
+			prefsContext.usePin.setSelected(true);
+		}
+		p.add(prefsContext.usePin);
+		prefsContext.pinClearText = new JTextField(10);
+		prefsContext.pinClearText.setVisible(false);
+		prefsContext.pin = new JPasswordField(conn.getPin(), 10);
+		p.add(prefsContext.pin);
+		p.add(prefsContext.pinClearText);
+		prefsContext.showPin = new JCheckBox("Show");
+		prefsContext.showPin.addActionListener(new ShowPinAction(prefsContext));
+		p.add(prefsContext.showPin);
+		
+		
+		final String[] timeouts = {"2", "5", "10", "15", "20", "30", "45", "60", "120", "300", "Never"};
+		prefsContext.timeoutCombo = new JComboBox<>(timeouts);
+		prefsContext.timeoutCombo.setToolTipText("Timeout in minutes. You will be asked to enter PIN after this many minutes");
+		prefsContext.setPinTimeout(conn.getPinTimeout());
+		p.add(new JLabel("Timeout:"));
+		p.add(prefsContext.timeoutCombo);
 		return p;
 	}
 	

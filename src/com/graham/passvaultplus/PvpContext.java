@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Timer;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -15,8 +16,10 @@ import javax.swing.JLabel;
 
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.MainFrame;
+import com.graham.passvaultplus.view.PinDialog;
 import com.graham.passvaultplus.view.PwDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
@@ -28,7 +31,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  */
 public class PvpContext {
 	static final public boolean JAR_BUILD = false;
-	static public String VERSION = "1.0";
+	static public String VERSION = "1.1";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
@@ -43,6 +46,9 @@ public class PvpContext {
 	private String dataFilePath;
 	private File dataFile;
 	private String password; // used for encryption of data file
+	private String pin = ""; // used for encryption of PIN, and UI timeout
+	private boolean usePin;
+	private int pinTimeout = -1;
 	private int isPasswordSavedState = PWS_NOT_KNOWN;
 	private int encryptionStrengthBits;
 	
@@ -53,6 +59,7 @@ public class PvpContext {
 	private JLabel infoLabel;
 	private ErrorFrame eframe;
 	private StringBuilder warnings = new StringBuilder();
+	private byte[] encryptedPassword;
 
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -114,6 +121,11 @@ public class PvpContext {
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
 		getFileInterface().load(getDataInterface());
 		mainFrame = new MainFrame(this);
+		if (getUsePin() && getPinTimeout() > 0) {
+			// System.out.println("dataFileSelectedForStartup: " + getPinTimeout());
+			final Timer tmr = new Timer();
+			tmr.schedule(new PinTimerTask(this), getPinTimeout() * 60 * 1000);
+		}
 	}
 
 	public PvpFileInterface getFileInterface() {
@@ -153,9 +165,66 @@ public class PvpContext {
 	 * @return
 	 */
 	public String getPasswordOrAskUser(boolean passwordWasBad) throws UserAskToChangeFileException {
-		final String pw = getPassword();
-		if (pw != null && pw.trim().length() > 0 && !passwordWasBad) {
-			return pw;
+
+		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
+			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			usePin = userPrefs.getBoolean("usepin", false);
+			encryptedPassword = userPrefs.getByteArray("ecp", null); // ecp = encrypted cipher password
+			if (!isBlankEncryptedPassword()) {
+				isPasswordSavedState = PWS_SAVED;
+				
+				boolean tryingToGetValidPin = true;
+				int pinWasBadCount = 0;
+				while (tryingToGetValidPin) {
+					boolean tryToGetPassword = true;
+					if (usePin && pin.length() == 0) {
+						final PinDialog pd = new PinDialog();
+						final PinDialog.PinAction action = pd.askForPin(pinWasBadCount);
+						if (action == PinDialog.PinAction.Configure) {
+							throw new UserAskToChangeFileException();
+						}
+						pin = pd.getPin();
+						if (action == PinDialog.PinAction.UsePassword) {
+							tryToGetPassword = false;
+							tryingToGetValidPin = false;
+						}
+					} else {
+						tryingToGetValidPin = false;
+					}
+					
+					if (tryToGetPassword) {
+						try {
+							//System.out.println("encryptedPassword bytes=" + encryptedPassword.length + "   pin:" + pin);
+							password = StringEncrypt.decryptString(encryptedPassword, pin, usePin);
+							if (password != null) {
+								tryingToGetValidPin = false;
+							} else {
+								pin = "";
+								
+								try {
+									Thread.sleep(pinWasBadCount * 1000);  // sleep for number of seconds for how may tries this is
+								} catch (InterruptedException e) {
+									this.notifyWarning("getPasswordOrAskUser:sleep" +  e.getMessage());
+								}
+								
+							}
+							//System.out.println("decrypt: password is:" + password);
+						} catch (PvpException e) {
+							pin = "";
+							this.notifyBadException(e, true, null);
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					pinWasBadCount++;
+				}
+			}  else {
+				isPasswordSavedState = PWS_NOT_SAVED;
+			}
+		}
+		
+		if (password != null && password.trim().length() > 0 && !passwordWasBad) {
+			return password;
 		}
 		
 		final PwDialog pd = new PwDialog();
@@ -169,6 +238,21 @@ public class PvpContext {
 		password = pd.getPw();
 		return password;
 	}
+	
+	private boolean isBlankEncryptedPassword() {
+		if (encryptedPassword == null) {
+			return true;
+		}
+		if (encryptedPassword.length > 4) {
+			return false;
+		}
+		for (int i = 0; i < encryptedPassword.length; i++) {
+			if (encryptedPassword[i] != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public boolean isPasswordSaved() {
 		if (isPasswordSavedState == PWS_NOT_KNOWN) {
@@ -178,31 +262,69 @@ public class PvpContext {
 	}
 
 	public String getPassword() {
-		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
-			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			password = userPrefs.get("cp", null); // cipher pw
-			if (password != null && password.trim().length() > 0) {
-				isPasswordSavedState = PWS_SAVED;
-			} else {
-				isPasswordSavedState = PWS_NOT_SAVED;
-			}
-		}
 		return password;
 	}
+	
+	public String getPin() {
+		return pin;
+	}
+	
+	public boolean getUsePin() {
+		if (isPasswordSavedState == PWS_NOT_KNOWN) {
+			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			usePin = userPrefs.getBoolean("usepin", false);
+		}
+		
+		return usePin;
+	}
+	
+	public int getPinTimeout() {
+		if (pinTimeout == -1) {
+			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			pinTimeout = userPrefs.getInt("pintineout", 30);
+		}
+		return pinTimeout;
+	}
+	
+	public void setPinTimeout(final int t) {
+		pinTimeout = t;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putInt("pintineout", pinTimeout);
+	}
 
+	public void setPasswordAndPin(String passwordParam, boolean makePersistant, String pinParam, boolean usePinParam) {
+		pin = pinParam;
+		if (usePin != usePinParam) {
+			usePin = usePinParam;
+			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			userPrefs.putBoolean("usepin", usePin);
+		}
+		setPassword(passwordParam, makePersistant);
+	}
+	
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
-		final String passwordToPersit;
-		if (makePersistant) {
-			passwordToPersit = password;
-		} else if (isPasswordSavedState == PWS_SAVED) {
-			passwordToPersit = "";
-		} else {
-			passwordToPersit = null;
+		try {
+			//System.out.println("encrypt: password is:" + passwordParam + "   pin:" + pin);
+			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
+			//System.out.println("sp: encryptedPassword bytes=" + encryptedPassword.length);
+		} catch (PvpException e) {
+			this.notifyBadException(e, true, null);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		if (passwordToPersit != null) {
+		byte[] passwordToPersist;
+		if (makePersistant) {
+			passwordToPersist = encryptedPassword;
+		} else if (isPasswordSavedState == PWS_SAVED) {
+			passwordToPersist = new byte[4];
+		} else {
+			passwordToPersist = null;
+		}
+		if (passwordToPersist != null) {
+			//System.out.println("saving password" + passwordToPersist.length);
 			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			userPrefs.put("cp", passwordToPersit); // cipher pw
+			userPrefs.putByteArray("ecp", passwordToPersist); // ecp = encrypted cipher password
 		}
 		if (makePersistant) {
 			isPasswordSavedState = PWS_SAVED;

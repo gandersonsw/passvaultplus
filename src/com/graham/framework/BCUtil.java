@@ -348,6 +348,9 @@ public class BCUtil {
 	}
 	
 	public static String makeXMLSafe(final String txt) {
+		if (txt == null) {
+			return "";
+		}
 		String ret = txt;
 		ret = replaceAll(ret,"&","&amp;");
 		ret = replaceAll(ret,"<","&lt;");
@@ -357,6 +360,9 @@ public class BCUtil {
 	}
 	
 	public static String unmakeXMLSafe(final String txt) {
+		if (txt == null) {
+			return "";
+		}
 		String ret = txt;
 		ret = replaceAll(ret,"&lt;","<");
 		ret = replaceAll(ret,"&gt;",">");

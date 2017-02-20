@@ -26,27 +26,12 @@ public class DatabaseWriter {
 	}
 
 	private void writeInternal(final PvpDataInterface dataInterface) throws IOException {
-		// final List<PvpType> types, final List<PvpRecord> records
-
-		//bw = null;
-		//FileWriteState fws = new FileWriteState();
-
-	//	try {
-		//	openWriter(fws);
-			//bw = fws.bufWriter;
-
 		writeStart();
 		writeTypes(dataInterface.getTypes());
 		writeRecords(dataInterface.getRecords());
 		writeEnd();
-	//	} catch (final Exception e) {
-	//		context.notifyBadException("cannot save file", e, true);
-	//	} finally {
-	//		closeWriter(fws);
-	//	}
 	}
 	
-
 	private void writeStart() throws IOException {
 		bw.write("<mydb locale=\"en_US\">");
 		bw.newLine();
@@ -60,16 +45,16 @@ public class DatabaseWriter {
 			bw.write("      <type>");
 			bw.newLine();
 			bw.write("         <name>");
-			bw.write(t.getName());
+			bw.write(BCUtil.makeXMLSafe(t.getName()));
 			bw.write("</name>");
 			bw.newLine();
 			bw.write("         <to-string>");
-			bw.write(t.getToStringCode());
+			bw.write(BCUtil.makeXMLSafe(t.getToStringCode()));
 			bw.write("</to-string>");
 			bw.newLine();
-			if (t.getFullFormat() != null) {
+			if (t.getFullFormat() != null && t.getFullFormat().length() > 0) {
 				bw.write("         <full-format>");
-				bw.write(t.getToStringCode());
+				bw.write(BCUtil.makeXMLSafe(t.getFullFormat()));
 				bw.write("</full-format>");
 				bw.newLine();
 			}
@@ -88,17 +73,17 @@ public class DatabaseWriter {
 			bw.write("         <field");
 			if (f.getClassification() != null) {
 				bw.write(" classification=\"");
-				bw.write(f.getClassification());
+				bw.write(BCUtil.makeXMLSafe(f.getClassification()));
 				bw.write("\"");
 			}
 			bw.write(">");
 			bw.newLine();
 			bw.write("            <name>");
-			bw.write(f.getName());
+			bw.write(BCUtil.makeXMLSafe(f.getName()));
 			bw.write("</name>");
 			bw.newLine();
 			bw.write("            <type>");
-			bw.write(f.getType());
+			bw.write(BCUtil.makeXMLSafe(f.getType()));
 			bw.write("</type>");
 			bw.newLine();
 			bw.write("         </field>");

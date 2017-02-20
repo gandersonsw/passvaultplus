@@ -113,7 +113,7 @@ public class DatabaseReader {
 	private PvpField loadTypeField(final Element fieldElement) {
 		List children = fieldElement.getChildren();
 
-		String classification = fieldElement.getAttributeValue("classification");
+		String classification = BCUtil.unmakeXMLSafe(fieldElement.getAttributeValue("classification"));
 		if (classification != null && classification.trim().length() == 0) {
 			classification = null;
 		}

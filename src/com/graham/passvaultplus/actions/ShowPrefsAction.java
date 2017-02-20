@@ -25,7 +25,7 @@ public class ShowPrefsAction extends AbstractAction {
 			Component npc = PreferencesBuilder.buildPrefs(new PreferencesConnectionTab(context));
 			c = new JScrollPane(npc);
 			context.setPrefsComponent(c);
-			context.getTabManager().addOtherTab("Preferences", c);
+			context.getTabManager().addOtherTab("Settings", c);
 		}
 		context.getTabManager().setSelectedComponent(c);
 	}
