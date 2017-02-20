@@ -46,9 +46,12 @@ public class PvpContext {
 	private String dataFilePath;
 	private File dataFile;
 	private String password; // used for encryption of data file
+	
 	private String pin = ""; // used for encryption of PIN, and UI timeout
 	private boolean usePin;
 	private int pinTimeout = -1;
+	private Timer pinTimer;
+	
 	private int isPasswordSavedState = PWS_NOT_KNOWN;
 	private int encryptionStrengthBits;
 	
@@ -121,11 +124,7 @@ public class PvpContext {
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
 		getFileInterface().load(getDataInterface());
 		mainFrame = new MainFrame(this);
-		if (getUsePin() && getPinTimeout() > 0) {
-			// System.out.println("dataFileSelectedForStartup: " + getPinTimeout());
-			final Timer tmr = new Timer();
-			tmr.schedule(new PinTimerTask(this), getPinTimeout() * 60 * 1000);
-		}
+		schedulePinTimerTask();
 	}
 
 	public PvpFileInterface getFileInterface() {
@@ -291,6 +290,20 @@ public class PvpContext {
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.putInt("pintineout", pinTimeout);
 	}
+	
+	public void schedulePinTimerTask() {
+		cancelPinTimerTask();
+		if (getUsePin() && getPinTimeout() > 0) {
+			pinTimer = new Timer();
+			pinTimer.schedule(new PinTimerTask(this), getPinTimeout() * 60 * 1000);
+		}
+	}
+	
+	public void cancelPinTimerTask() {
+		if (pinTimer != null) {
+			pinTimer.cancel();
+		}
+	}
 
 	public void setPasswordAndPin(String passwordParam, boolean makePersistant, String pinParam, boolean usePinParam) {
 		pin = pinParam;
@@ -392,7 +405,7 @@ public class PvpContext {
 	 */
 	public void saveAndRefreshDataList() {
 		getFileInterface().save(getDataInterface());
-		getViewListContext().getListTableModel().filterUIChanged();
+		getViewListContext().filterUIChanged();
 	}
 	
 	private String getInfoLabelText() {

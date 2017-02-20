@@ -15,7 +15,7 @@ public class ListFilterChangedAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		context.getViewListContext().getListTableModel().filterUIChanged();
+		context.getViewListContext().filterUIChanged();
 	}
 
 }

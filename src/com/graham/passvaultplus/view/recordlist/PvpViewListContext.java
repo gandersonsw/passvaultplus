@@ -70,6 +70,7 @@ public class PvpViewListContext {
 	void setListTable(final JTable t, final ListTableModel tm) {
 		listTable = t;
 		listTableModel = tm;
+		setTableHeaders();
 	}
 	
 	void setFilterTextField(final JTextField tf) {
@@ -80,16 +81,22 @@ public class PvpViewListContext {
 		return filterTextField;
 	}
 
-	public ListTableModel getListTableModel() {
-		return listTableModel;
-	}
-	
 	void setRecordCountLabel(final JLabel rc) {
 		recordCount = rc;
 	}
 	
 	public JLabel getRecordCountLabel() {
 		return recordCount;
+	}
+	
+	public void filterUIChanged() {
+		listTableModel.filterUIChanged();
+		setTableHeaders();
+	}
+	
+	private void setTableHeaders() {
+		listTable.getColumnModel().getColumn(0).setHeaderValue("Field");
+		listTable.getColumnModel().getColumn(1).setHeaderValue("Value");
 	}
 	
 }

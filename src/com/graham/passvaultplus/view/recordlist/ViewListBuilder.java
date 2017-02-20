@@ -35,51 +35,6 @@ public class ViewListBuilder {
 	}
 
 	static private Component buildTopPanel(final PvpContext context) {
-/*
-        GridBagConstraints labelConstraints = new GridBagConstraints();
-        labelConstraints.anchor = GridBagConstraints.EAST;
-        labelConstraints.gridx = 0;
-       // labelConstraints.gridwidth = GridBagConstraints.RELATIVE;
-        //labelConstraints.fill = GridBagConstraints.NONE;
-        labelConstraints.weightx = 0.0;
-
-        GridBagConstraints middleConstraints = new GridBagConstraints();
-        middleConstraints.anchor = GridBagConstraints.WEST;
-        middleConstraints.gridx = 1;
-        //middleConstraints.gridwidth = GridBagConstraints.RELATIVE;
-        //middleConstraints.fill = GridBagConstraints.NONE;
-        middleConstraints.weightx = 0.0;
-
-        GridBagConstraints buttonConstraints = new GridBagConstraints();
-        buttonConstraints.anchor = GridBagConstraints.WEST;
-        buttonConstraints.gridx = 2;
-       // buttonConstraints.gridwidth = GridBagConstraints.REMAINDER;
-        //buttonConstraints.fill = GridBagConstraints.NONE;
-        buttonConstraints.weightx = 1.0;
-        buttonConstraints.insets = new Insets(1,6,1,1);
-
-		final ListFilterChangedAction filterChangeAction = new ListFilterChangedAction(context);
-		final JPanel panel = new JPanel(new GridBagLayout());
-
-		labelConstraints.gridy = middleConstraints.gridy = buttonConstraints.gridy = 0;
-		panel.add(new JLabel("Type:"), labelConstraints);
-		panel.add(buildTypeComboBox(context, filterChangeAction), middleConstraints);
-		panel.add(new JButton(new NewRecordAction(context)), buttonConstraints);
-
-		labelConstraints.gridy = middleConstraints.gridy = buttonConstraints.gridy = 1;
-		panel.add(new JLabel("Category:"), labelConstraints);
-		panel.add(buildCategoryComboBox(context, filterChangeAction), middleConstraints);
-		panel.add(new JButton(erAction), buttonConstraints);
-
-		labelConstraints.gridy = middleConstraints.gridy = buttonConstraints.gridy = 2;
-		panel.add(new JLabel("Filter:"), labelConstraints);
-		panel.add(buildFilterTextField(context, filterChangeAction), middleConstraints);
-		//panel.add(new JButton("More"));
-		panel.add(new JButton(new DeleteRecord(context)), buttonConstraints);
-
-		return panel;
-		*/
-
 		final ListFilterChangedAction filterChangeAction = new ListFilterChangedAction(context);
 
 		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));

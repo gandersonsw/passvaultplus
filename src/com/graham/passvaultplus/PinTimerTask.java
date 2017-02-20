@@ -1,7 +1,6 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import java.util.Timer;
 import java.util.TimerTask;
 
 import com.graham.passvaultplus.view.PinDialog;
@@ -9,17 +8,14 @@ import com.graham.passvaultplus.view.PinDialog.PinAction;
 import com.graham.passvaultplus.view.PwDialog;
 import com.graham.passvaultplus.view.PwDialog.PwAction;
 
-/**
- * Note from javadoc
- * @author graham
- *
- */
 public class PinTimerTask extends TimerTask {
 	
 	final private PvpContext context;
+	final private String pinAtCreate;
 	
 	public PinTimerTask(final PvpContext contextParam) {
 		context = contextParam;
+		pinAtCreate = context.getPin();
 	}
 
 	@Override
@@ -40,10 +36,9 @@ public class PinTimerTask extends TimerTask {
 				context.notifyWarning("PinTimerTask:PinDialog:Action=Configure");
 			} else { // user pressed Okay
 				final String pin = pd.getPin();
-				if (pin.equals(context.getPin())) {
+				if (pin.equals(pinAtCreate)) {
 					context.getMainFrame().setVisible(true);
-					final Timer tmr = new Timer();
-					tmr.schedule(new PinTimerTask(context), context.getPinTimeout() * 60 * 1000);
+					context.schedulePinTimerTask();
 					return;
 				} else {
 					try {
@@ -72,8 +67,7 @@ public class PinTimerTask extends TimerTask {
 				final String pw = pd.getPw();
 				if (pw.equals(context.getPassword())) {
 					context.getMainFrame().setVisible(true);
-					final Timer tmr = new Timer();
-					tmr.schedule(new PinTimerTask(context), context.getPinTimeout() * 60 * 1000);
+					context.schedulePinTimerTask();
 					return;
 				}
 			}
