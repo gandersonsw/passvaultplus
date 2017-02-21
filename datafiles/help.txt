@@ -1,0 +1,63 @@
+Getting Started
+
+What most describes how you want to do right now:
+
+
+I want to get going quick and try it out
+	
+In that case, you may want to to leave the encryption turned off. You can turn it on later at any time. This will allow you to test out the features without having to remember a password.
+
+
+I have fairly sensitive data, I want it to be easy to access
+
+In that case you want to get a password that has a "good" amount of entropy. You can use the save password option along with a PIN so that you don't need to enter the entire password every time. It is very important that you don't forget your password. Perhaps write it down and put it in a very secure place. Ideally, you would just want to commit it to memory. If you forget your PIN, you can always use the password to reset the PIN. The timeout is the time in minutes until you have to re-enter the PIN. This is a way to lock out people if you are away from your computer. You data file will be very secure if you upload it to the cloud or have it on physical backup disk. If your computer was stolen or hard-drive copied, it would be possible to get access to you data, but it would still have a good level of security even in that case.
+
+
+I have very sensitive data and I want to make sure it is secure.
+	
+In that case, you should check the "Encrypted" checkbox, and use a password that is 22 characters long. In general 128 bit encryption is good enough. You can use the 256 bit encryption if you have very sensitive data. This is the solution that has the tightest security and it would be very difficult for some else to get access to your data even if your computer was stolen. You can use the same PIN as the password you used.
+
+
+My hard-drive is encrypted
+	
+In that case you have a little more security. It would be safer to choose the "Save Password" option. And if you wish to backup your data on the cloud or other physical device, or email it, you can do so without worry about the data being accessible.
+
+
+Automatic cloud backup
+
+There are several options such as Google Drive or iCloud that will automatically back you data up to the cloud. To use PassVaultPlus with those services save the data file to a directory that is automatically backed up with the cloud service
+
+
+Detailed Help
+
+The “Records” tab
+
+When first starting, the Records tab is shown. Is shows all the records you have saved. You can narrow the displayed records by typing text into the “Filter” field. It is not case sensitive and all fields will be searched. You can also limit to a certain type of record or by a certain category. Double-clicking on the list will open up the detailed editor for that record.
+
+The buttons	
+Quit - Quits the application. Checks if there is unsaved data first.
+
+Settings - Opens the setting panel. The data file format can be changed here. The data file can be compressed and/or encrypted. If it is encrypted, you can enter the password here, and the password can be saved independently of the file.
+
+Schema Editor - This allows you to change existing datatypes or create new ones. To edit an existing type, choose it from the type menu and press "Edit". Press add field to add a new field. Check the delete field checkbox to remove one. It will be deleted when you press the "Save Changes" button. The values of the fields will be deleted also. The "to string (short)" must be one of the fields in the type. The value of "formatted" can be any text. Values from the type will be inserted into the string when the name is inside the square brackets. For example, if you have an address type with a "City" and "State" fields, and you set it to "[City] , [State]", and the address was for Chicago Illinois, the formatted sting would be "Chicago , Illinois". You can use "\n" to indicate a newline should be added. When deleting a type, all the records of that type will be deleted also.
+	
+New Record - Create a new record. When creating a new record, you can change the type.
+
+Edit Record - Edit the selected record in the record list. If many are selected, only the first editor will be opened. In the record editor panel, there are buttons on the left to copy the entire field. If it is a hidden field, it will still be copied. If a field has values that are reused 3 or more times, a drop down menu will appear on the right of that field to auto-fill the value. If the field is a secure field, its value will be shown as “******” and an unlock button will show up on the right that will allow you to see the field and edit it. On the bottom there is a button to revert all the field. A button to cancel - closing the tab and disregarding any edits you made. And a save button to save all the values and close the tab. The first time you save a record, the creation date will be set. Whenever you edit a record and save it, the modification date will be updated.
+	
+Delete Record - Delete the selected records in the list or if a record editor is open, delete the record for that editor. The data file is immediately updated.
+	
+Undo - Undo the last action. Up to 50 undos are saved.
+
+Redo - Redo the last action.
+
+Cut - Cut the selected text
+
+Copy - Copy the selected Text.
+
+Paste - Paste text
+	
+Select All - Select all the items or text.
+
+Help - Bring up help screen
+
