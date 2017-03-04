@@ -1,14 +1,20 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.CharConversionException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import com.graham.framework.BCUtil;
@@ -29,12 +35,89 @@ public class DatabaseReader {
 		context = contextParam;
 	}
 	
+	static class BadChar {
+		final int theByte;
+		final int theIndex;
+		BadChar(int b, int i) {
+			theByte = b;
+			theIndex = i;
+		}
+	}
+	
+	private InputStream cleanStreamUTF8(InputStream inStream) throws IOException {
+		byte[] goodData = new byte[1000000];
+		int b;
+		int goodDataCount = 0;
+		//int[] counts = new int[256];
+		List<BadChar> badChars = new ArrayList<>();
+		while ((b = inStream.read()) != -1) {
+			//counts[b]++;
+			if (b < 128) {
+				goodData[goodDataCount] = (byte) b;
+				goodDataCount++;
+			} else {
+				badChars.add(new BadChar(b, goodDataCount));
+			}
+		}
+		
+		//for (int i = 0; i < 256; i++) {
+		//	if (counts[i] > 0) {
+		//		System.out.println(i + " : " + counts[i]);
+		//	}
+		//}
+		
+		StringBuilder sb = new StringBuilder("There were bad characters in the file. Consider opening from a backup.\n");
+		for (BadChar bc : badChars) {
+			sb.append("\nChar:").append(bc.theByte);
+			int start = bc.theIndex - 8;
+			if (start < 0) {
+				start = 0;
+			}
+			int length = 16;
+			if (start + length >= goodDataCount) {
+				length = goodDataCount - 1 - start;
+			}
+			sb.append(" Text:");
+			sb.append(new String(goodData, start, length));
+		}
+		
+		JOptionPane.showMessageDialog(null, sb.toString());
+		
+		return new ByteArrayInputStream(goodData, 0, goodDataCount);
+	}
+	
+	private Document getJDom(InputStream inStream) throws JDOMException, IOException {
+		// if builder.build throws an exception maybe there is some bad characters in the data?
+		// in that case, call cleanStreamUTF8 to try to remove them and alert the user
+		Document jdomDoc = null;
+		final SAXBuilder builder = new SAXBuilder();
+		try {
+			if  (inStream.markSupported()) {
+				inStream.mark(1000000);
+			}
+			jdomDoc = builder.build(inStream);
+		} catch (CharConversionException originalException) {
+			context.notifyWarning("WARN119 builder.build CharConversionException", originalException);
+			try {
+				if  (inStream.markSupported()) {
+					inStream.reset();
+					inStream = cleanStreamUTF8(inStream);
+					jdomDoc = builder.build(inStream);
+				}
+			} catch (Exception e2) {
+				// if an exception happens, don't use it as the main exception, just log it
+				context.notifyWarning("cleanStreamUTF8 error", e2);
+				throw originalException;
+			}
+		}
+		return jdomDoc;
+	}
+	
 	private PvpDataInterface readInternal(InputStream inStream) throws Exception {
 		PvpDataInterface dataInterface;
 		List<PvpType> types = null;
 		List<PvpRecord> records = null;
-		final SAXBuilder builder = new SAXBuilder();
-		final Document jdomDoc = builder.build(inStream);
+		final Document jdomDoc = getJDom(inStream);
 		final Element root = jdomDoc.getRootElement();
 		if (!root.getName().equals("mydb")) {
 			context.notifyWarning("WARN101 unexpected element:" + root.getName());

@@ -6,6 +6,8 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
+import com.graham.passvaultplus.model.core.PvpFileInterface;
+
 public class ConfigActionChanged extends AbstractAction {
 	final private PreferencesContext context;
 	
@@ -30,29 +32,41 @@ public class ConfigActionChanged extends AbstractAction {
 			context.encrypted.setEnabled(true);
 			context.encrypted.setSelected(false);
 			//context.password.setText("");
-			context.aesBits.setEnabled(true);
+			//context.aesBits.setEnabled(false);
+			context.setFileExtensionFromCompressedAndEncrypted();
 		} else if (ca == ConfigAction.Open) {
 			context.compressed.setEnabled(false);
 			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(false);
 			context.encrypted.setSelected(false);
 			//context.password.setText("");
-			context.aesBits.setEnabled(false);
+			//context.aesBits.setEnabled(false);
 			
 			File f = context.getDataFile();
 			if (f != null && f.isFile()) {
 				// a file exists here,
 				// context.setCompressAndEncryptFromFile(f);
+				final String fname = f.getName();
+				context.compressed.setSelected(PvpFileInterface.isCompressed(fname));
+				context.encrypted.setSelected(PvpFileInterface.isEncrypted(fname));
 			} else {
 				context.setDataFile(null, 0);
 			}
+			context.setFileExtensionFromCompressedAndEncrypted();
 		} else if (ca == ConfigAction.Change) {
 			context.setDataFile(new File(context.conn.getDataFilePath()), context.conn.getAesBits());
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(context.compressedFlag);
 			context.encrypted.setEnabled(true);
-			context.encrypted.setSelected(context.compressedFlag);
-			//context.password.setText("");
+			context.encrypted.setSelected(context.encryptedFlag);
+			context.password.setText(context.conn.getPassword());
+			context.passwordClearText.setText(context.conn.getPassword());
+			context.savePassword.setSelected(context.conn.isPasswordSaved());
+			context.pin.setText(context.conn.getPin());
+			context.pinClearText.setText(context.conn.getPin());
+			context.usePin.setSelected(context.conn.getUsePin());
+			//context.setSelectedBits(context.conn.getAesBits());
+			context.setFileExtensionFromCompressedAndEncrypted();
 		} else {
 			throw new RuntimeException("unexpected action: " + ca);
 		}

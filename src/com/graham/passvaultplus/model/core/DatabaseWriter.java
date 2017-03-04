@@ -33,6 +33,8 @@ public class DatabaseWriter {
 	}
 	
 	private void writeStart() throws IOException {
+		bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		bw.newLine();
 		bw.write("<mydb locale=\"en_US\">");
 		bw.newLine();
 	}

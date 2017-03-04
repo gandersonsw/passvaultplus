@@ -81,7 +81,7 @@ public class PvpFileWriter {
 				outStream = zipStream;
 			}
 	
-			writer = new OutputStreamWriter(outStream);
+			writer = new OutputStreamWriter(outStream, "UTF-8");
 			bufWriter = new BufferedWriter(writer);
 		} catch (Exception e) {
 			// if an error happened, close anything that may be opened, as we are only partially set-up

@@ -35,7 +35,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  */
 public class PvpContext {
 	static final public boolean JAR_BUILD = false;
-	static public String VERSION = "1.1";
+	static final public String VERSION = "1.1.2";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
