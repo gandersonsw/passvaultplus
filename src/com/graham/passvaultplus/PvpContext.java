@@ -34,7 +34,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  * be one instance of this active at any time.
  */
 public class PvpContext {
-	static final public boolean JAR_BUILD = false;
+	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.1.2";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs

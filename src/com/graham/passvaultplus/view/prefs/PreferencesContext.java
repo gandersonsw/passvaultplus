@@ -124,7 +124,10 @@ public class PreferencesContext {
 		return new SetDefaultDataFile(getDataFile());
 	}
 	
-	void setFileExtensionFromCompressedAndEncrypted() {
+	/**
+	 * Call when the compressed checkbox or encrypted checkbox changed
+	 */
+	void updateBecauseCompressedOrEncryptedChanged() {
 		if (dataFile != null) {
 			final String fname = PvpFileInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
 			dataFile = new File(dataFile.getParentFile(), fname);
@@ -132,6 +135,10 @@ public class PreferencesContext {
 			dataFileLabel.setText(dataFileString);
 		}
 		
+		setItemsDependentOnEncryptedEnabled();
+	}
+	
+	void setItemsDependentOnEncryptedEnabled() {
 		if (encrypted.isSelected()) {
 			this.password.setEnabled(true);
 			this.passwordClearText.setEnabled(true);

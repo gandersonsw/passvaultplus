@@ -53,7 +53,7 @@ public class PreferencesBuilder {
 		p.add(buildPasswordOptions());
 		p.add(buildPin());
 		p.add(buildAESBits());
-		prefsContext.setFileExtensionFromCompressedAndEncrypted();
+		prefsContext.updateBecauseCompressedOrEncryptedChanged();
 		
 		// set the intial password strength
 		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
@@ -112,7 +112,7 @@ public class PreferencesBuilder {
 	private JPanel buildCompressButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.compressedFlag);
-		prefsContext.compressed.addActionListener(e -> prefsContext.setFileExtensionFromCompressedAndEncrypted());
+		prefsContext.compressed.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
 		p.add(prefsContext.compressed);
 		return p;
 	}
@@ -120,7 +120,7 @@ public class PreferencesBuilder {
 	private JPanel buildEncryptedButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.encryptedFlag);
-		prefsContext.encrypted.addActionListener(e -> prefsContext.setFileExtensionFromCompressedAndEncrypted());
+		prefsContext.encrypted.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
 		p.add(prefsContext.encrypted);
 		return p;
 	}

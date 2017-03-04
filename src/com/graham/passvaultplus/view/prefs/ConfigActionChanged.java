@@ -33,7 +33,7 @@ public class ConfigActionChanged extends AbstractAction {
 			context.encrypted.setSelected(false);
 			//context.password.setText("");
 			//context.aesBits.setEnabled(false);
-			context.setFileExtensionFromCompressedAndEncrypted();
+			context.updateBecauseCompressedOrEncryptedChanged();
 		} else if (ca == ConfigAction.Open) {
 			context.compressed.setEnabled(false);
 			context.compressed.setSelected(false);
@@ -52,7 +52,7 @@ public class ConfigActionChanged extends AbstractAction {
 			} else {
 				context.setDataFile(null, 0);
 			}
-			context.setFileExtensionFromCompressedAndEncrypted();
+			context.setItemsDependentOnEncryptedEnabled();
 		} else if (ca == ConfigAction.Change) {
 			context.setDataFile(new File(context.conn.getDataFilePath()), context.conn.getAesBits());
 			context.compressed.setEnabled(true);
@@ -66,7 +66,7 @@ public class ConfigActionChanged extends AbstractAction {
 			context.pinClearText.setText(context.conn.getPin());
 			context.usePin.setSelected(context.conn.getUsePin());
 			//context.setSelectedBits(context.conn.getAesBits());
-			context.setFileExtensionFromCompressedAndEncrypted();
+			context.setItemsDependentOnEncryptedEnabled();
 		} else {
 			throw new RuntimeException("unexpected action: " + ca);
 		}

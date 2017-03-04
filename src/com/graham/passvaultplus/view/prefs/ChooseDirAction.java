@@ -48,6 +48,8 @@ public class ChooseDirAction extends AbstractAction {
 						encryptBits = header.aesStrengthBits;
 					}
 					context.setDataFile(f, encryptBits);
+					context.setItemsDependentOnEncryptedEnabled();
+					context.aesBits.setEnabled(false); // user cant change this when opening
 				} catch (Exception e1) {
 					context.conn.getPvpContext().notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncryptionHeader);
 				}
