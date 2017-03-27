@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
+import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
@@ -47,6 +48,7 @@ public class SchemaEditBuilder {
 		List<PvpType> types = context.getDataInterface().getTypes();
 		
 		scContext.typeCB = new JComboBox<>();
+		scContext.typeCB.setMaximumRowCount(20);
 		for (PvpType t : types) {
 			scContext.typeCB.addItem(t);
 		}
@@ -87,10 +89,18 @@ public class SchemaEditBuilder {
 		}
 		
 		for (PvpTypeModification.PvpFieldModification fm : fieldMods) {
+			final JPanel fieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			
+			fm.typeCB = new JComboBox<String>(PvpField.TYPES);
+			fm.typeCB.setMaximumRowCount(20);
+			addIfNotIncluded(fm.typeCB, fm.newType);
+			fm.typeCB.setSelectedItem(fm.newType);
+			fieldPanel.add(fm.typeCB);
+			
 			fm.tf = new JTextField(16);
 			fm.tf.setText(fm.newName);
-			final JPanel fieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			fieldPanel.add(fm.tf);
+			
 			fm.secretCB = new JCheckBox("Secret");
 			if (fm.isSecret) {
 				fm.secretCB.setSelected(true);
@@ -235,6 +245,15 @@ public class SchemaEditBuilder {
 			context.getTabManager().removeOtherTab(context.getSchemaEditComponent());
 			context.setSchemaEditComponent(null);
 		}
+	}
+	
+	private void addIfNotIncluded(JComboBox<String> cb, String s) {
+		for (int i = 0; i < cb.getItemCount(); i++) {
+			if (cb.getItemAt(i).equals(s)) {
+				return;
+			}
+		}
+		cb.addItem(s);
 	}
 
 }

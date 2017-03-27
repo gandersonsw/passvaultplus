@@ -1,6 +1,9 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PvpField {
 
 	// common for all types, these are the fields as they would appear as XML element names
@@ -22,6 +25,11 @@ public class PvpField {
 	
 	// classifications
 	final static public String CLASSIFICATION_SECRET = "secret";
+	
+	// for PvpField.type
+	final static public String TYPE_STRING = "String";
+	final static public String TYPE_DATE = "Date"; // May have a year, may have a time, may have seconds
+	final static public String[] TYPES = new String[]{TYPE_STRING, TYPE_DATE};
 	
 	private String name;
 	private String type;

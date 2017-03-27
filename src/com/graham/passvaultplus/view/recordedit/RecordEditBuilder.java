@@ -93,15 +93,18 @@ public class RecordEditBuilder {
 
 		for (int i = 0; i < fieldNamesToDisplay.size(); i++) {
 			String name = (String)fieldNamesToDisplay.get(i);
+			PvpField field = r.getType().getField(name);
+			
 			JPanel leftPanel = new JPanel(new FlowLayout());
 			leftPanel.add(new JLabel(name + ":", JLabel.RIGHT));
 			JTextField tf = new JTextField(r.getCustomField(name));
+			tf.addFocusListener(new TextFieldFocusListener(context.getMainFrame(), tf, field));
 
 			CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"));
 			JButton copyButton = new JButton(copyAction);
 			copyButton.setFocusable(false);
 			leftPanel.add(copyButton);
-			PvpField field = r.getType().getField(name);
+			
 			
 			JComponent rightWidget = null;
 			RecordEditField ref = null;
@@ -172,6 +175,7 @@ public class RecordEditBuilder {
 			arr[i] = values.get(i);
 		}
 		JComboBox cb = new JComboBox<String>(arr);
+		cb.setMaximumRowCount(20);
 		cb.setPrototypeDisplayValue("");
 		cb.addActionListener (new TypeAheadListener(cb, tf));
 		cb.setFocusable(false);
@@ -207,6 +211,7 @@ public class RecordEditBuilder {
 		}
 
 		JComboBox catCombo = new JComboBox(comboItems);
+		catCombo.setMaximumRowCount(20);
 		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo);
 		editContext.editFields.put(PvpField.USR_CATEGORY, refc);
 		catCombo.setSelectedIndex(selectedIndex);
@@ -233,6 +238,7 @@ public class RecordEditBuilder {
 		}
 
 		JComboBox<PvpType> typeCombo = new JComboBox<PvpType>(typeArray);
+		typeCombo.setMaximumRowCount(20);
 		typeCombo.setSelectedItem(r.getType());
 		typeCombo.addActionListener(new NewRecordTypeChangedAction(context, editContext));
 		return typeCombo;

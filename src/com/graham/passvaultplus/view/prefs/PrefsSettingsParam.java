@@ -11,4 +11,5 @@ public class PrefsSettingsParam {
 	public String pin;
 	public boolean usePin;
 	public int pinTimeout;
+	public boolean showDashBoard;
 }

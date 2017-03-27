@@ -12,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.*;
+import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
 import com.graham.passvaultplus.view.recordlist.ViewListBuilder;
 
 public class MainFrame extends JFrame {
@@ -38,14 +39,13 @@ public class MainFrame extends JFrame {
 		setSize(904, 520);
 		setMinimumSize(new Dimension(400, 240));
 
-		JTabbedPane tabPane = new JTabbedPane();
-		context.getTabManager().setMainTabPane(tabPane);
-		tabPane.add("Records", ViewListBuilder.buildViewList(context));
+		context.checkDashboard();
+		context.getTabManager().addOtherTab("Records", ViewListBuilder.buildViewList(context));
 
 		JPanel toolBar = initToolBar(context);
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.add(toolBar, BorderLayout.NORTH);
-		mainPanel.add(tabPane, BorderLayout.CENTER);
+		mainPanel.add(context.getTabManager().getMainTabPane(), BorderLayout.CENTER);
 		mainPanel.add(initFooter(context), BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);

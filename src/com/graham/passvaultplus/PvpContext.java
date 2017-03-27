@@ -26,6 +26,7 @@ import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.PinDialog;
 import com.graham.passvaultplus.view.PwDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
+import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
 /**
@@ -34,8 +35,8 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  * be one instance of this active at any time.
  */
 public class PvpContext {
-	static final public boolean JAR_BUILD = true;
-	static final public String VERSION = "1.1.2";
+	static final public boolean JAR_BUILD = false;
+	static final public String VERSION = "1.1.3";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
@@ -62,11 +63,14 @@ public class PvpContext {
 	private PvpViewListContext viewListContext = new PvpViewListContext();
 	private Component prefsComponent;
 	private Component schemaEditComponent;
+	private Component dashboardComponent;
 	private MainFrame mainFrame;
 	private JLabel infoLabel;
 	private ErrorFrame eframe;
 	private StringBuilder warnings = new StringBuilder();
 	private byte[] encryptedPassword;
+	
+	private boolean showDashboard = true; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.  This should be saved in the data file
 
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -354,6 +358,30 @@ public class PvpContext {
 		getInfoLabel().setText(getInfoLabelText());
 	}
 
+	public boolean getShowDashboard() {
+		return showDashboard;
+	}
+	
+	public void setShowDashboard(final boolean s) {
+		showDashboard = s;
+		checkDashboard();
+	}
+	
+	public void checkDashboard() {
+		if (getShowDashboard() && dashboardComponent == null) {
+			try {
+				dashboardComponent = DashBoardBuilder.buildDashBoard(this);
+				getTabManager().addOtherTab("Dashboard", dashboardComponent);
+			} catch (Exception e) {
+				// if the dashboard fails to load, dont crash the app
+				e.printStackTrace();
+			}
+		} else if (!getShowDashboard() && dashboardComponent != null) {
+			getTabManager().removeOtherTab(dashboardComponent);
+			dashboardComponent = null;
+		}
+	}
+	
 	/**
 	 * To be used when a bad exception happens somewhere in the application.
 	 * @canContinue If false, force the application to quit

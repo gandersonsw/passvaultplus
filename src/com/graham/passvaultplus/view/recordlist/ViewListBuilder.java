@@ -64,6 +64,7 @@ public class ViewListBuilder {
 		}
 
 		JComboBox typeCombo = new JComboBox(typeArray);
+		typeCombo.setMaximumRowCount(20);
 		typeCombo.addActionListener(filterChangeAction);
 		context.getViewListContext().setTypeComboBox(typeCombo);
 		return typeCombo;
@@ -91,6 +92,7 @@ public class ViewListBuilder {
 		categoryHelper(categoryTree, 0, menuItems);
 
 		JComboBox categoryCombo = new JComboBox(menuItems.toArray());
+		categoryCombo.setMaximumRowCount(20);
 		categoryCombo.addActionListener(filterChangeAction);
 		context.getViewListContext().setCategoryComboBox(categoryCombo);
 		return categoryCombo;

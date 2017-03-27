@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 /**

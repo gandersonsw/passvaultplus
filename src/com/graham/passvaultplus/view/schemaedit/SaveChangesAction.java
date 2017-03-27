@@ -88,7 +88,7 @@ public class SaveChangesAction extends AbstractAction {
 			if (fm.isDeleted) {
 				// do nothing because it doesn't exist yet
 			} else {
-				PvpField f = new PvpField(fm.newName, "String", fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
+				PvpField f = new PvpField(fm.newName, fm.newType, fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
 				t.getFields().add(f);
 			}
 		}
@@ -156,7 +156,7 @@ public class SaveChangesAction extends AbstractAction {
 					t.getFields().remove(f);
 				}
 			} else if (fm.isNew) {
-				PvpField f = new PvpField(fm.newName, "String", fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
+				PvpField f = new PvpField(fm.newName, fm.newType, fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
 				t.getFields().add(f); // TODO handle the order
 			} else if (isCatType && fm.originalName.equals(PvpField.USR_CATEGORY_TITLE)) {
 				if (!fm.newName.equals(fm.originalName)) {

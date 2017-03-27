@@ -11,7 +11,7 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 public class TabManager {
-	private JTabbedPane mainTabPane;
+	private JTabbedPane mainTabPane = new JTabbedPane();
 	private List<RecordEditContext> recordEditors = new ArrayList<>();
 	private PvpContext context;
 	
@@ -58,13 +58,6 @@ public class TabManager {
 		context.getUndoManager().notifyCloseTab(c);
 	}
 	
-	public void setMainTabPane(final JTabbedPane p) {
-		if (mainTabPane != null) {
-			throw new RuntimeException("main tab pane already set");
-		}
-		mainTabPane = p;
-	}
-
 	public boolean isCurrentTabList() {
 		return mainTabPane.getSelectedIndex() == 0;
 	}
@@ -91,5 +84,12 @@ public class TabManager {
 	
 	public void setSelectedComponent(final Component c) {
 		mainTabPane.setSelectedComponent(c);
+	}
+	
+	/**
+	 * This should only be called by MainFrame
+	 */
+	public JTabbedPane getMainTabPane() {
+		return mainTabPane;
 	}
 }

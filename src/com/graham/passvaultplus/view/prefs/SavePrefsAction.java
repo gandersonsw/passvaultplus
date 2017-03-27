@@ -176,6 +176,7 @@ public class SavePrefsAction extends AbstractAction {
 		} else {
 			psp.pinTimeout = 0;
 		}	
+		psp.showDashBoard = prefsContext.showDashboard.isSelected();
 		return psp;
 	}
 	

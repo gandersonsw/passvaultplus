@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 import com.graham.passvaultplus.model.core.PvpField;
@@ -17,23 +18,30 @@ public class PvpTypeModification {
 	static class PvpFieldModification {
 		String originalName;
 		String newName;
+		String originalType;
+		String newType;
 		boolean isDeleted;
 		boolean isNew;
 		boolean isSecret;
 		int id;
 		JTextField tf;
 		JCheckBox deletedCB;
+		JComboBox<String> typeCB;
 		JCheckBox secretCB;
 		PvpFieldModification(final PvpField f, final int idParam) {
 			id = idParam;
 			originalName = f.getName();
 			newName = originalName;
+			originalType = f.getType();
+			newType = originalType;
 			isSecret = f.isClassificationSecret();
 		}
 		PvpFieldModification(final int idParam) {
 			id = idParam;
 			originalName = "";
 			newName = originalName;
+			originalType = PvpField.TYPE_STRING;
+			newType = originalType;
 			isNew = true;
 		}
 	}
@@ -105,6 +113,7 @@ public class PvpTypeModification {
 		List<PvpFieldModification> fmods = getFieldMods();
 		for (PvpFieldModification fm : fmods) {
 			fm.newName = fm.tf.getText().trim();
+			fm.newType = (String)fm.typeCB.getSelectedItem();
 			fm.isDeleted = fm.deletedCB.isSelected();
 			fm.isSecret = fm.secretCB.isSelected();
 		}

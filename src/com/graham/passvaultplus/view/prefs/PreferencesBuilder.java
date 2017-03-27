@@ -53,6 +53,7 @@ public class PreferencesBuilder {
 		p.add(buildPasswordOptions());
 		p.add(buildPin());
 		p.add(buildAESBits());
+		p.add(buildDashboard());
 		prefsContext.updateBecauseCompressedOrEncryptedChanged();
 		
 		// set the intial password strength
@@ -181,6 +182,14 @@ public class PreferencesBuilder {
 		return p;
 	}
 	
+	private JPanel buildDashboard() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		prefsContext.showDashboard = new JCheckBox("Show Dashboard");
+		prefsContext.showDashboard.setSelected(conn.getShowDashboard());
+		p.add(prefsContext.showDashboard);
+		return p;
+	}
+	
 	private JPanel buildPin() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
@@ -202,6 +211,7 @@ public class PreferencesBuilder {
 		
 		final String[] timeouts = {"2", "5", "10", "15", "20", "30", "45", "60", "120", "300", "Never"};
 		prefsContext.timeoutCombo = new JComboBox<>(timeouts);
+		prefsContext.timeoutCombo.setMaximumRowCount(20);
 		prefsContext.timeoutCombo.setToolTipText("Timeout in minutes. You will be asked to enter PIN after this many minutes");
 		prefsContext.setPinTimeout(conn.getPinTimeout());
 		p.add(new JLabel("Timeout:"));

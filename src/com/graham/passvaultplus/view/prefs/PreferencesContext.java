@@ -39,6 +39,8 @@ public class PreferencesContext {
 	JButton saveButton;
 	JLabel passwordStrength;
 	
+	JCheckBox showDashboard;
+	
 	private JLabel dataFileLabel;
 	private String dataFileString;
 	private File dataFile;

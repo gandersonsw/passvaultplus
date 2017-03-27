@@ -55,5 +55,10 @@ public abstract class PreferencesConnection {
 		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
 		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
 		context.setPinTimeout(psp.pinTimeout);
+		context.setShowDashboard(psp.showDashBoard);
+	}
+	
+	public boolean getShowDashboard() {
+		return context.getShowDashboard();
 	}
 }

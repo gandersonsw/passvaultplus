@@ -14,11 +14,13 @@ public class AppUtil {
 
 	// Format like: "May 2, 2010 4:41 PM"
 	private static DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
+	private static DateFormat dfNoTime = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
 	
 	public static String formatDate1(final Date d) {
 		if (d == null) {
 			return "";
 		}
+		
 		return df.format(d);
 	}
 
@@ -26,7 +28,113 @@ public class AppUtil {
 		if (d == null || d.length() == 0) {
 			return null;
 		}
-		return df.parse(d);
+
+		try {
+			return df.parse(d);
+		} catch (Exception e) {
+			return dfNoTime.parse(d);
+		}
+	}
+	
+	/**
+	 * Parse a date String. Then set the year so that it is the next one in the future starting from today. Return null if it wasn't parseable
+	 */
+	public static Date parseUpcomingDate(final String s) {
+		Date d = null;
+		try {
+			d = AppUtil.parseDate1(s);
+			Calendar cal2 = Calendar.getInstance();
+			int curYear = cal2.get(Calendar.YEAR);
+			cal2.setTime(d);
+			cal2.set(Calendar.YEAR, curYear);
+			if (!cal2.getTime().after(new Date())) {
+				cal2.add(Calendar.YEAR, 1);
+			}
+			return cal2.getTime();
+		} catch (Exception e) {
+			return tryParseMonthDay(s);
+		}
+	}
+	
+	public static Date tryParseMonthDay(final String s) {
+		String[] parts = s.split("\\s");
+		if (parts.length > 1) {
+			int calMonth = getCalMonth(parts[0]);
+			if (calMonth == -99) {
+				return null;
+			}
+			
+			int day = 0;
+			try {
+				day = Integer.parseInt(getIntegerOnly(parts[1]));
+			} catch (Exception e) {
+				return null;
+			}
+			
+			Calendar cal = Calendar.getInstance();
+			cal.set(Calendar.MONTH, calMonth);
+			cal.set(Calendar.DAY_OF_MONTH, day);
+			
+			if (cal.getTime().after(new Date())) {
+				return cal.getTime();
+			} else {
+				cal.add(Calendar.YEAR, 1);
+				return cal.getTime();
+			}
+		}
+	
+		return null;
+	}
+	
+	private static String getIntegerOnly(final String s) {
+		int i = 0;
+		while (i < s.length() && Character.isDigit(s.charAt(i))) {
+			i++;
+		}
+		if (i == s.length()) {
+			return s;
+		} else {
+			return s.substring(0, i);
+		}
+	}
+	
+	private static int getCalMonth(final String monthRaw) {
+		
+		if (monthRaw == null || monthRaw.length() < 2) {
+			return -99;
+		}
+		
+		String month = monthRaw.substring(0, 3).toLowerCase();
+		
+		int calMonth = -1;
+		if (month.equals("jan")) {
+			calMonth = Calendar.JANUARY;
+		} else if (month.equals("feb")) {
+			calMonth = Calendar.FEBRUARY;
+		} else if (month.equals("mar")) {
+			calMonth = Calendar.MARCH;
+		} else if (month.equals("apr")) {
+			calMonth = Calendar.APRIL;
+		} else if (month.equals("may")) {
+			calMonth = Calendar.MAY;
+		} else if (month.equals("jun")) {
+			calMonth = Calendar.JUNE;
+		} else if (month.equals("jul")) {
+			calMonth = Calendar.JULY;
+		} else if (month.equals("aug")) {
+			calMonth = Calendar.AUGUST;
+		} else if (month.equals("sep")) {
+			calMonth = Calendar.SEPTEMBER;
+		} else if (month.equals("oct")) {
+			calMonth = Calendar.OCTOBER;
+		} else if (month.equals("nov")) {
+			calMonth = Calendar.NOVEMBER;
+		} else if (month.equals("dec")) {
+			calMonth = Calendar.DECEMBER;
+		} else {
+			calMonth = -99;
+		}
+		return calMonth;
 	}
 
 	public static String limitStrLen(final String s, final int maxLen) {
