@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.prefs.Preferences;
 
@@ -466,7 +468,12 @@ public class PvpContext {
 		return infoLabel;
 	}
 
+	private static final Map<String, ImageIcon> cachedIcons = new HashMap<>();
+	
 	public static ImageIcon getIcon(final String imageName) {
+		if (cachedIcons.containsKey(imageName)) {
+			return cachedIcons.get(imageName);
+		}
 		try {
 			BufferedImage img;
 			if (JAR_BUILD) {
@@ -479,13 +486,15 @@ public class PvpContext {
 				img = ImageIO.read(new File("datafiles/images/" + imageName + ".png"));
 			}
 
-			return new ImageIcon(img);
+			final ImageIcon i = new ImageIcon(img);
+			cachedIcons.put(imageName, i);
+			return i;
 		} catch (IOException e) {
+			System.out.println(imageName);
 			e.printStackTrace(); // TODO
 			return null;
 		}
 	}
-	
 
 	public String getResourceText(final String rname) {
 		InputStream sourceStream = null;

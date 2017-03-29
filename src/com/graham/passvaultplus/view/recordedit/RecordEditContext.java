@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import com.graham.passvaultplus.MyUndoManager;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -16,6 +17,8 @@ public class RecordEditContext {
 	RevertEditorAction revertAction;
 	Map<String, RecordEditField> editFields = new HashMap<>();
 	JPanel panelInTabPane;
+	JScrollPane centerPaneWithFields;
+	JPanel maximizedTextAreaPanel;
 	MyUndoManager undoManager;
 	
 	private boolean hasUnsavedChanges;

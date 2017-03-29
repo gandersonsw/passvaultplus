@@ -175,6 +175,7 @@ public class SaveChangesAction extends AbstractAction {
 				if (fm.isSecret != f.isClassificationSecret()) {
 					f.setClassification(fm.isSecret ? PvpField.CLASSIFICATION_SECRET : null);
 				}
+				f.setType(fm.newType);
 			}
 		}
 		

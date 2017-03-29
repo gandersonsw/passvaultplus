@@ -32,6 +32,10 @@ public class PvpType {
 				return f;
 			}
 		}
+		if (PvpField.USR_NOTES.equals(fieldName)) {
+			// The notes field is different because it is always present.
+			return new PvpField(PvpField.USR_NOTES, PvpField.TYPE_STRING);
+		}
 		return null;
 	}
 	

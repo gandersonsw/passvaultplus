@@ -28,8 +28,9 @@ public class PvpField {
 	
 	// for PvpField.type
 	final static public String TYPE_STRING = "String";
+	final static public String TYPE_LONG_STRING = "Long String"; // multi-line string
 	final static public String TYPE_DATE = "Date"; // May have a year, may have a time, may have seconds
-	final static public String[] TYPES = new String[]{TYPE_STRING, TYPE_DATE};
+	final static public String[] TYPES = new String[]{TYPE_STRING, TYPE_LONG_STRING, TYPE_DATE};
 	
 	private String name;
 	private String type;

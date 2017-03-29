@@ -10,10 +10,11 @@ import javax.swing.ImageIcon;
 
 public class CopyFieldToClipboardAction extends AbstractAction {
 
-	private RecordEditField ref;
+	private final RecordEditField ref;
 
-	public CopyFieldToClipboardAction(ImageIcon icon) {
+	CopyFieldToClipboardAction(ImageIcon icon, final RecordEditField refParam) {
 		super(null, icon);
+		ref = refParam;
 	
 	}
 	public void actionPerformed(ActionEvent e) {
@@ -26,7 +27,4 @@ public class CopyFieldToClipboardAction extends AbstractAction {
 		}
 	}
 	
-	public void setRecordEditField(final RecordEditField refParam) {
-		ref = refParam;
-	}
 }
