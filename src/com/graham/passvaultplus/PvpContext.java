@@ -489,7 +489,7 @@ public class PvpContext {
 			final ImageIcon i = new ImageIcon(img);
 			cachedIcons.put(imageName, i);
 			return i;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println(imageName);
 			e.printStackTrace(); // TODO
 			return null;
