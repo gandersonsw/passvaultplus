@@ -4,10 +4,8 @@ package com.graham.passvaultplus.view.recordedit;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -67,10 +65,10 @@ class RecordEditFieldBuilder {
 			textComponent = sp;
 		} else {
 			JTextField textField = new JTextField(reb.record.getCustomField(name));
-			textField.addFocusListener(new TextFieldFocusListener(reb.context.getMainFrame(), textField, field));
-			if (!field.isClassificationSecret()) {
-				rightWidget = buildFieldComboBox(name, textField);
-			}
+			TextFieldPopUpHandler fieldListener = new TextFieldPopUpHandler(reb.context.getMainFrame(), textField, field, reb.record.getType(), reb.context.getDataInterface());
+			textField.addFocusListener(fieldListener);
+			fieldListener.addInputAndActionMapItems();
+			textField.getDocument().addDocumentListener(fieldListener.getDocumentListener());
 			tf = textField;
 			textComponent = textField;
 		}
@@ -124,20 +122,4 @@ class RecordEditFieldBuilder {
 		}
 	}
 	
-	private JComboBox<String> buildFieldComboBox(String fieldName, JTextField tf) {
-		List<String> values = reb.context.getDataInterface().getCommonFiledValues(reb.record.getType().getName(), fieldName);
-		if (values.size() == 0) {
-			return null;
-		}
-		String[] arr = new String[values.size()];
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = values.get(i);
-		}
-		JComboBox<String> cb = new JComboBox<>(arr);
-		cb.setMaximumRowCount(20);
-		cb.setPrototypeDisplayValue("");
-		cb.addActionListener (new TypeAheadListener(cb, tf));
-		cb.setFocusable(false);
-		return cb;
-	}
 }

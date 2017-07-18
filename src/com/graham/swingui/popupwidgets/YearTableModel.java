@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.datepicker;
+package com.graham.swingui.popupwidgets;
 
 import java.util.Calendar;
 

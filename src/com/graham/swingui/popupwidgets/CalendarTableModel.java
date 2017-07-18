@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.datepicker;
+package com.graham.swingui.popupwidgets;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -64,6 +64,14 @@ public class CalendarTableModel extends AbstractTableModel {
 		c2.setTime(firstDay.getTime());
 		c2.add(Calendar.DAY_OF_YEAR, daysToAdd);
 		return c2.get(Calendar.MONTH) == month;
+	}
+	
+	public boolean isCurrentDay(int rowIndex, int columnIndex, Calendar now) {
+		int daysToAdd = rowIndex * 7 + columnIndex;
+		Calendar c2 = Calendar.getInstance();
+		c2.setTime(firstDay.getTime());
+		c2.add(Calendar.DAY_OF_YEAR, daysToAdd);
+		return c2.get(Calendar.YEAR) == now.get(Calendar.YEAR) && c2.get(Calendar.MONTH) == now.get(Calendar.MONTH) && c2.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH);
 	}
 	
 	public Date getDate(int rowIndex, int columnIndex) {

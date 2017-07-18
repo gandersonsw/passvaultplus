@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.datepicker;
+package com.graham.swingui.popupwidgets;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -7,7 +7,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,21 +19,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class DatePicker {
+public class DatePicker extends AbstractPopupWidget {
 	//static final DateFormat dateTimeFormat =  DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
 	
 	static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
 	
-	private final JWindow w;
 	private final Runnable cancel;
-	private final JFrame owner;
 	
 	private Calendar cal = Calendar.getInstance();
 	private JTable yearTable;
@@ -60,34 +56,25 @@ public class DatePicker {
 	}
 	
 	public DatePicker(final JFrame o, final JTextField tf, final boolean showTime) {
-		owner = o;
+		super(o, tf);
+		//owner = o;
 		final String originalText = tf.getText();
 	
 		cancel =  () -> tf.setText(originalText);
 		cal.setTime(tryToParseDate(tf.getText()));
-		w = new JWindow(owner);
-		w.setType(Window.Type.POPUP);
-		w.setAutoRequestFocus(false);
-		w.setFocusableWindowState(false);
-		w.setFocusable(false);
-		w.add(buildUI(new DayChangedListener(tf), new YearOrMonthChangedListener(tf)), BorderLayout.CENTER);
-		w.pack();
+	
+		popupWindow.add(buildUI(new DayChangedListener(tf), new YearOrMonthChangedListener(tf)), BorderLayout.CENTER);
+		popupWindow.pack();
 		
-		final Point p = tf.getLocationOnScreen();
-		p.translate(0, (int)tf.getSize().getHeight());
-		w.setLocation(p);
+		updateLocationRelativeToParent();
 
-		w.setVisible(true);
+		popupWindow.setVisible(true);
 	}
 	
 	//public void setEvents(List<Event> e) {
 	//public void setDate(final Date d) {
 	//public void show(final Date d, final int x, final int y) {
 	//}
-	
-	public void close() {
-		w.setVisible(false);
-	}
 	
 	private JPanel buildUI(ListSelectionListener dayChangedL, ListSelectionListener yearOrMonthL) {
 		JPanel p = new JPanel(new BorderLayout());
@@ -153,6 +140,8 @@ public class DatePicker {
 		
 		dayTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		dayTable.setCellSelectionEnabled(true);
+		dayTable.getTableHeader().setReorderingAllowed(false);
+		dayTable.getTableHeader().setResizingAllowed(false);
 		
 		dayTable.getColumnModel().getColumn(0).setHeaderValue("Sun");
 		dayTable.getColumnModel().getColumn(1).setHeaderValue("Mon");
@@ -186,7 +175,7 @@ public class DatePicker {
 		int year = cal.get(Calendar.YEAR);
 		YearTableModel tm = (YearTableModel)yearTable.getModel();
 		int row = year - tm.startYear;
-		yearTable.getSelectionModel().addSelectionInterval(row, row);
+		yearTable.getSelectionModel().addSelectionInterval(row, row); // TODO if year is not in table, an exception will happen
 		if (scrollFlag) {
 			Rectangle r = yearTable.getCellRect(row - 3, 0, true);
 			yearTableScroll.getViewport().scrollRectToVisible(r);
@@ -258,10 +247,10 @@ public class DatePicker {
 					setToNow = true;
 				} else if (dayTable.getSelectedColumn() == 5) { // X
 					cancel.run();
-					w.setVisible(false);
+					popupWindow.setVisible(false);
 					return;
 				} else if (dayTable.getSelectedColumn() == 6) { // OK
-					w.setVisible(false);
+					popupWindow.setVisible(false);
 					return;
 				}
 			} else {
@@ -327,6 +316,10 @@ public class DatePicker {
 	}
 
 	static class DayTableCellRenderer extends DefaultTableCellRenderer {
+		final Calendar now;
+		public DayTableCellRenderer() {
+			now = Calendar.getInstance();
+		}
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int col) {
@@ -346,7 +339,9 @@ public class DatePicker {
 					}
 				} else {
 					CalendarTableModel tableModel = (CalendarTableModel) table.getModel();
-					if (tableModel.inCurrentMonth(row, col)) {
+					if (tableModel.isCurrentDay(row, col, now)) {
+						l.setBackground(Color.DARK_GRAY);
+					} else if (tableModel.inCurrentMonth(row, col)) {
 						l.setBackground(Color.WHITE);
 					} else {
 						l.setBackground(Color.LIGHT_GRAY);
