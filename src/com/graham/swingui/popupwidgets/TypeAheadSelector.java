@@ -24,13 +24,16 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class TypeAheadSelector extends AbstractPopupWidget {
+import com.graham.passvaultplus.MyUndoManager;
+
+public class TypeAheadSelector extends AbstractPopupWidget<JTextField> {
 	
-	private final JTextField parentTextField;
+	private final MyUndoManager undoManager;
 	
 	private JTable valueTable;
 	private JScrollPane valueTableScroll;
 	private TypeAheadTableModel tableModel;
+	
 	
 	/**
 	 * @param isAForcedShow if true, the user did something to try to force the dropdown to show, so be less restrictive about if it is shown
@@ -41,13 +44,13 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 		return m.shouldShow(isAForcedShow);
 	}
 	
-	public TypeAheadSelector(final JFrame o, final JTextField tf, List<String> values) {
+	public TypeAheadSelector(final JFrame o, final JTextField tf, List<String> values, MyUndoManager undoManagerParam) {
 		super(o, tf);
 		
-		parentTextField = tf;
+		undoManager = undoManagerParam;
 		
 		tableModel = new TypeAheadTableModel(values);
-		tableModel.computeMatches(parentTextField.getText());
+		tableModel.computeMatches(parentComponent.getText());
 		
 		tf.getDocument().addDocumentListener(new TextFieldChangeListener());
 	
@@ -61,7 +64,13 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 	
 	@Override
 	public void handleEnter() {
-		parentTextField.setText(tableModel.getValueAt(0, 0).toString());
+		setParentText(tableModel.getValueAt(0, 0).toString());
+	}
+	
+	private void setParentText(final String txt) {
+		undoManager.setForceMergeIfSameEditSource(true);
+		parentComponent.setText(txt);
+		undoManager.setForceMergeIfSameEditSource(false);
 	}
 	
 	private JScrollPane buildValueTable() {
@@ -83,7 +92,8 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 	
 	
 	public static class TypeAheadTableModel extends AbstractTableModel {
-
+		private static final long serialVersionUID = 1L;
+		
 		private final List<String> originalValues;
 		private List<MatchedValue> values;
 		
@@ -195,7 +205,7 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 			if (valueTable.getSelectedRow() >= 0 && valueTable.getSelectedColumn() >= 0) {
 				Object val = tableModel.getValueAt(valueTable.getSelectedRow(), valueTable.getSelectedColumn());
 				if (val != null) {
-					parentTextField.setText(val.toString());
+					setParentText(val.toString());
 				}
 			}
 		}
@@ -203,7 +213,7 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 	
 	class TextFieldChangeListener implements DocumentListener {
 		public void checkTextFieldValue() {
-			tableModel.computeMatches(parentTextField.getText());
+			tableModel.computeMatches(parentComponent.getText());
 			tableModel.fireTableDataChanged();
 		}
 		@Override
@@ -221,6 +231,8 @@ public class TypeAheadSelector extends AbstractPopupWidget {
 	}
 
 	static class ValueTableCellRenderer extends DefaultTableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int col) {

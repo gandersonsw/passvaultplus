@@ -27,6 +27,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	private ArrayList<MyUndoableEdit> undoableEdits = new ArrayList<>();
 	private PvpContext pvpContext;
 	private boolean ignoreAllChanges;
+	private boolean forceMergeChanges;
 
 	public MyUndoManager(PvpContext contextParam) {
 		pvpContext = contextParam;
@@ -72,9 +73,11 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 
 	@Override
 	public void caretUpdate(CaretEvent e) {
-		// TODO the way lastEditSource is cleared need to be tested, like when user hits return, or they do a lot of typing
-		if (Math.abs(e.getDot() - lastDot) > 1) {
-			lastEditSource = null;
+		if (!forceMergeChanges) {
+			// TODO the way lastEditSource is cleared need to be tested, like when user hits return, or they do a lot of typing
+			if (Math.abs(e.getDot() - lastDot) > 1) {
+				lastEditSource = null;
+			}
 		}
 		lastDot = e.getDot();
 	}
@@ -95,13 +98,17 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	public void setIgnoreAllChanges(boolean b) {
 		ignoreAllChanges = b;
 	}
+	
+	public void setForceMergeIfSameEditSource(boolean b) {
+		forceMergeChanges = b;
+	}
 
 	class UndoAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
 		public UndoAction() {
 			super(null, PvpContext.getIcon("undo"));
 			setEnabled(false);
 		}
-
 		public void actionPerformed(ActionEvent e) {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit);
@@ -114,11 +121,11 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	}
 
 	class RedoAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
 		public RedoAction() {
 			super(null, PvpContext.getIcon("redo"));
 			setEnabled(false);
 		}
-
 		public void actionPerformed(ActionEvent e) {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit + 1);

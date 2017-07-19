@@ -25,12 +25,15 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class DatePicker extends AbstractPopupWidget {
+import com.graham.passvaultplus.MyUndoManager;
+
+public class DatePicker extends AbstractPopupWidget<JTextField> {
 	//static final DateFormat dateTimeFormat =  DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
 	
 	static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
 	
 	private final Runnable cancel;
+	private final MyUndoManager undoManager;
 	
 	private Calendar cal = Calendar.getInstance();
 	private JTable yearTable;
@@ -55,15 +58,15 @@ public class DatePicker extends AbstractPopupWidget {
 		Color color;
 	}
 	
-	public DatePicker(final JFrame o, final JTextField tf, final boolean showTime) {
+	public DatePicker(final JFrame o, final JTextField tf, final boolean showTime, MyUndoManager undoManagerParam) {
 		super(o, tf);
-		//owner = o;
 		final String originalText = tf.getText();
 	
 		cancel =  () -> tf.setText(originalText);
+		undoManager = undoManagerParam;
 		cal.setTime(tryToParseDate(tf.getText()));
 	
-		popupWindow.add(buildUI(new DayChangedListener(tf), new YearOrMonthChangedListener(tf)), BorderLayout.CENTER);
+		popupWindow.add(buildUI(new DayChangedListener(), new YearOrMonthChangedListener()), BorderLayout.CENTER);
 		popupWindow.pack();
 		
 		updateLocationRelativeToParent();
@@ -75,6 +78,12 @@ public class DatePicker extends AbstractPopupWidget {
 	//public void setDate(final Date d) {
 	//public void show(final Date d, final int x, final int y) {
 	//}
+	
+	private void setParentText(final String txt) {
+		undoManager.setForceMergeIfSameEditSource(true);
+		parentComponent.setText(txt);
+		undoManager.setForceMergeIfSameEditSource(false);
+	}
 	
 	private JPanel buildUI(ListSelectionListener dayChangedL, ListSelectionListener yearOrMonthL) {
 		JPanel p = new JPanel(new BorderLayout());
@@ -223,11 +232,6 @@ public class DatePicker extends AbstractPopupWidget {
 	}
 	
 	class DayChangedListener implements ListSelectionListener {
-		final private JTextField tf;
-		public DayChangedListener(final JTextField tfParam) {
-			tf = tfParam;
-		}
-		
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting()) {
@@ -254,7 +258,7 @@ public class DatePicker extends AbstractPopupWidget {
 					return;
 				}
 			} else {
-				System.out.println("D year=" + getSelectedYear() + "  month=" + getSelectedMonth() + "  day=" + getSelectedDay());
+				//System.out.println("D year=" + getSelectedYear() + "  month=" + getSelectedMonth() + "  day=" + getSelectedDay());
 				d = tm.getDate(dayTable.getSelectedRow(), dayTable.getSelectedColumn());
 			}
 			Calendar c3 = Calendar.getInstance();
@@ -275,17 +279,12 @@ public class DatePicker extends AbstractPopupWidget {
 				}
 			}
 			
-			tf.setText(dateFormat.format(cal.getTime()));
+			setParentText(dateFormat.format(cal.getTime()));
 			ignoreListSel = false;
 		}
 	}
 	
 	class YearOrMonthChangedListener implements ListSelectionListener {
-		final private JTextField tf;
-		public YearOrMonthChangedListener(final JTextField tfParam) {
-			tf = tfParam;
-		}
-		
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting()) {
@@ -310,12 +309,14 @@ public class DatePicker extends AbstractPopupWidget {
 			
 			setSelectedDay();
 			
-			tf.setText(dateFormat.format(cal.getTime()));
+			setParentText(dateFormat.format(cal.getTime()));
 			ignoreListSel = false;
 		}
 	}
 
 	static class DayTableCellRenderer extends DefaultTableCellRenderer {
+		private static final long serialVersionUID = 1L;
+		
 		final Calendar now;
 		public DayTableCellRenderer() {
 			now = Calendar.getInstance();

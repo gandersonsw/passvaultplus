@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.table.AbstractTableModel;
 
 public class CalendarTableModel extends AbstractTableModel {
-	
+	private static final long serialVersionUID = 1L;
+
 	static public final int CONTROL_ROW = 10;
 	
 	private int year;

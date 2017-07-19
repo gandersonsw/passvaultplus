@@ -65,10 +65,7 @@ class RecordEditFieldBuilder {
 			textComponent = sp;
 		} else {
 			JTextField textField = new JTextField(reb.record.getCustomField(name));
-			TextFieldPopUpHandler fieldListener = new TextFieldPopUpHandler(reb.context.getMainFrame(), textField, field, reb.record.getType(), reb.context.getDataInterface());
-			textField.addFocusListener(fieldListener);
-			fieldListener.addInputAndActionMapItems();
-			textField.getDocument().addDocumentListener(fieldListener.getDocumentListener());
+			new TextFieldPopUpHandler(reb.context.getMainFrame(), textField, field, reb.record.getType(), reb.context.getDataInterface(), reb.context.getUndoManager());
 			tf = textField;
 			textComponent = textField;
 		}

@@ -6,7 +6,8 @@ import java.util.Calendar;
 import javax.swing.table.AbstractTableModel;
 
 public class YearTableModel extends AbstractTableModel {
-
+	private static final long serialVersionUID = 1L;
+	
 	int startYear;
 	
 	public void setStartYear(final Calendar cal) {

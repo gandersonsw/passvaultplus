@@ -10,13 +10,13 @@ import java.awt.event.ComponentListener;
 import javax.swing.JFrame;
 import javax.swing.JWindow;
 
-public abstract class AbstractPopupWidget implements ComponentListener {
+public abstract class AbstractPopupWidget<C extends Component> implements ComponentListener {
 
 	final JFrame parentFrame;
 	final JWindow popupWindow;
-	final Component parentComponent;
+	final C parentComponent;
 	
-	public AbstractPopupWidget(final JFrame o, final Component c) {
+	public AbstractPopupWidget(final JFrame o, final C c) {
 		parentFrame = o;
 		parentComponent = c;
 		popupWindow = new JWindow(parentFrame);

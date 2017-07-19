@@ -11,8 +11,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.event.DocumentListener;
 
+import com.graham.passvaultplus.MyUndoManager;
 import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpField;
@@ -31,19 +31,24 @@ public class TextFieldPopUpHandler implements FocusListener {
 	private final JTextField textField;
 	private final PvpDataInterface dataInterface;
 	private final PvpType recordType;
-	private final TextFieldChangeForwarder documentListener;
+	private final MyUndoManager undoManager;
+	
 	private boolean pressedEscape = false;
 	private boolean pressedEnter = false;
 	
-	private AbstractPopupWidget popup;
+	private AbstractPopupWidget<JTextField> popup;
 	
-	public TextFieldPopUpHandler(final JFrame mf, final JTextField tf, final PvpField f, final PvpType recordTypeParam, PvpDataInterface di) {
+	public TextFieldPopUpHandler(final JFrame mf, final JTextField tf, final PvpField f, final PvpType recordTypeParam, PvpDataInterface di, MyUndoManager undoManagerParam) {
 		field = f;
 		mainFrame = mf;
 		textField = tf;
 		dataInterface = di;
 		recordType = recordTypeParam;
-		documentListener = new TextFieldChangeForwarder(new DocumentAnyChangeListener());
+		undoManager = undoManagerParam;
+		
+		textField.addFocusListener(this);
+		this.addInputAndActionMapItems();
+		textField.getDocument().addDocumentListener(new TextFieldChangeForwarder(new DocumentAnyChangeListener()));
 	}
 
 	@Override
@@ -77,13 +82,13 @@ public class TextFieldPopUpHandler implements FocusListener {
 		}
 		
 		if (field.getType().equals(PvpField.TYPE_DATE)) {
-			popup = new DatePicker(mainFrame, textField, false);
+			popup = new DatePicker(mainFrame, textField, false, undoManager);
 			return;
 		}
 		
 		List<String> values = dataInterface.getCommonFiledValues(recordType.getName(), field.getName());
 		if (TypeAheadSelector.shouldShow(textField, values, pressedEnter)) {
-			popup = new TypeAheadSelector(mainFrame, textField, values);
+			popup = new TypeAheadSelector(mainFrame, textField, values, undoManager);
 			return;
 		}
 	}
@@ -100,10 +105,6 @@ public class TextFieldPopUpHandler implements FocusListener {
 		}
 	}
 	
-	public DocumentListener getDocumentListener() {
-		return documentListener;
-	}
-	
 	public void addInputAndActionMapItems() {
 		textField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapepuw");
 		textField.getActionMap().put("escapepuw", new EscapeHandler());
@@ -113,6 +114,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 	}
 	
 	class DocumentAnyChangeListener extends AbstractAction {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (lastFocused == TextFieldPopUpHandler.this) {
@@ -122,6 +124,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 	}
 	
 	class EscapeHandler extends AbstractAction {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			pressedEscape = true;
@@ -131,6 +134,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 	}
 	
 	class EnterHandler extends AbstractAction {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
