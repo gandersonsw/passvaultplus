@@ -27,8 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
-import org.jdom.Element;
-import org.jdom.Text;
+import org.jdom2.Element;
+import org.jdom2.Text;
 
 /**
  * @author graham

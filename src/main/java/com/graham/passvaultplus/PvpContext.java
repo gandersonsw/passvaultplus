@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  */
 public class PvpContext {
 	static final public boolean JAR_BUILD = false;
-	static final public String VERSION = "1.1.3";
+	static final public String VERSION = "1.1.4";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
@@ -477,13 +476,13 @@ public class PvpContext {
 		try {
 			BufferedImage img;
 			if (JAR_BUILD) {
-				//System.out.println("getIcon1:" + "datafiles/images/" + imageName + ".png");
+				//System.out.println("getIcon1:" + "resources/images/" + imageName + ".png");
 				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
-				InputStream imageStream = PvpContext.class.getResourceAsStream("/datafiles/images/" + imageName + ".png");
+				InputStream imageStream = PvpContext.class.getResourceAsStream("/resources/images/" + imageName + ".png");
 				img = ImageIO.read(imageStream);
 			} else {
-				//System.out.println("getIcon:" + new File("datafiles/images/" + imageName + ".png").getAbsolutePath());
-				img = ImageIO.read(new File("datafiles/images/" + imageName + ".png"));
+				System.out.println("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
+				img = ImageIO.read(new File("src/main/resources/images/" + imageName + ".png"));
 			}
 
 			final ImageIcon i = new ImageIcon(img);
@@ -504,10 +503,10 @@ public class PvpContext {
 			if (PvpContext.JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
-				sourceStream = PvpContext.class.getResourceAsStream("/datafiles/" + rname + ".txt");
+				sourceStream = PvpContext.class.getResourceAsStream("/resources/" + rname + ".txt");
 				isr = new InputStreamReader(sourceStream);
 			} else {
-				File sourceFile = new File("datafiles/" + rname + ".txt");
+				File sourceFile = new File("src/main/resources/" + rname + ".txt");
 				isr = new FileReader(sourceFile);
 			}
 			

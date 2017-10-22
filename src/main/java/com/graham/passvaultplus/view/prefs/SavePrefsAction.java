@@ -204,10 +204,10 @@ public class SavePrefsAction extends AbstractAction {
 			if (PvpContext.JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
-				sourceStream = PvpContext.class.getResourceAsStream("/datafiles/starter-pvp-data.xml");
+				sourceStream = PvpContext.class.getResourceAsStream("/resources/starter-pvp-data.xml");
 				isr = new InputStreamReader(sourceStream);
 			} else {
-				File sourceFile = new File("datafiles/starter-pvp-data.xml");
+				File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
 				isr = new FileReader(sourceFile);
 			}
 			

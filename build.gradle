@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'com.graham.passvaultplus.PassVaultPlus'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = '1.1.4'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.jdom', name: 'jdom', version: '2.0.0'
+    compile 'com.google.api-client:google-api-client:1.23.0'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+    compile 'com.google.apis:google-api-services-drive:v3-rev87-1.23.0'
+}
