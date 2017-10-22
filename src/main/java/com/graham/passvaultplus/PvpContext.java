@@ -481,7 +481,7 @@ public class PvpContext {
 				InputStream imageStream = PvpContext.class.getResourceAsStream("/resources/images/" + imageName + ".png");
 				img = ImageIO.read(imageStream);
 			} else {
-				System.out.println("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
+				//System.out.println("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
 				img = ImageIO.read(new File("src/main/resources/images/" + imageName + ".png"));
 			}
 
