@@ -213,7 +213,7 @@ public class PvpDataInterface {
 		*/
 		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
 		boolean checkText = filterByText.length() > 0;
-		List<PvpRecord> allRecords = context.getDataInterface().getRecords();
+		List<PvpRecord> allRecords = context.getDataInterface().getRecords(); // TODO delete context.getDataInterface().
 
     	final String filterByTextLC = filterByText.toLowerCase();
 

@@ -17,11 +17,17 @@ public class PvpFileInterface {
 	public static final String EXT_COMPRESS = "zip";
 	public static final String EXT_ENCRYPT = "bmn";
 	public static final String EXT_XML = "xml";
+	
+	private static PvpBackingStore[] backingStores;
 
 	final private PvpContext context;
 
 	public PvpFileInterface(final PvpContext contextParam) {
 		context = contextParam;
+		PvpBackingStore[] bsTmp = {
+			new PvpBackingStoreFile(context)
+		};
+		backingStores = bsTmp;
 	}
 
 	public static boolean isCompressed(final String path) {
@@ -49,6 +55,7 @@ public class PvpFileInterface {
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
+		//backingStores[0].getInputStream()
 		final PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
 		
 		BufferedInputStream inStream = null;

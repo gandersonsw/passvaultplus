@@ -40,6 +40,7 @@ public class PreferencesContext {
 	JLabel passwordStrength;
 	
 	JCheckBox showDashboard;
+	JCheckBox useGoogleDrive;
 	
 	private JLabel dataFileLabel;
 	private String dataFileString;

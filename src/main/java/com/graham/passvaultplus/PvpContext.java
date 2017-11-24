@@ -71,8 +71,11 @@ public class PvpContext {
 	private StringBuilder warnings = new StringBuilder();
 	private byte[] encryptedPassword;
 	
+	private boolean userPrefsLoaded = false;
 	private boolean showDashboard = true; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.  This should be saved in the data file
-
+	private boolean useGoogleDrive = false; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.
+	private PvpGoogleDrive googleDrive = new PvpGoogleDrive(this);
+	
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
 	 *    needPassword        -> show Password Dialog
@@ -359,12 +362,25 @@ public class PvpContext {
 		getInfoLabel().setText(getInfoLabelText());
 	}
 
+	private void loadUserPrefs() {
+		if (userPrefsLoaded) {
+			return;
+		}
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		showDashboard = userPrefs.getBoolean("showDashboard", false);
+		useGoogleDrive = userPrefs.getBoolean("useGoogleDrive", false);
+		userPrefsLoaded = true;
+	}
+	
 	public boolean getShowDashboard() {
+		loadUserPrefs();
 		return showDashboard;
 	}
 	
 	public void setShowDashboard(final boolean s) {
 		showDashboard = s;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putBoolean("showDashboard", showDashboard);
 		checkDashboard();
 	}
 	
@@ -381,6 +397,22 @@ public class PvpContext {
 			getTabManager().removeOtherTab(dashboardComponent);
 			dashboardComponent = null;
 		}
+	}
+	
+	public boolean getUseGoogleDrive() {
+		loadUserPrefs();
+		return useGoogleDrive;
+	}
+	
+	public void setUseGoogleDrive(final boolean s) {
+		useGoogleDrive = s;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putBoolean("useGoogleDrive", useGoogleDrive);
+		checkGoogleDrive();
+	}
+	
+	public void checkGoogleDrive() {
+		System.out.println("checking google drive:" + useGoogleDrive);
 	}
 	
 	/**
@@ -534,6 +566,10 @@ public class PvpContext {
 				try { sourceStream.close(); } catch (Exception e) { }
 			}
 		}
+	}
+	
+	public PvpGoogleDrive getGoogleDriveInterface() {
+		return googleDrive;
 	}
 
 }

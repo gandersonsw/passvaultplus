@@ -12,4 +12,5 @@ public class PrefsSettingsParam {
 	public boolean usePin;
 	public int pinTimeout;
 	public boolean showDashBoard;
+	public boolean useGoogleDrive;
 }

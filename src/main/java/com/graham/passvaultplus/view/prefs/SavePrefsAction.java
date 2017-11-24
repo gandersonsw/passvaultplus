@@ -177,6 +177,7 @@ public class SavePrefsAction extends AbstractAction {
 			psp.pinTimeout = 0;
 		}	
 		psp.showDashBoard = prefsContext.showDashboard.isSelected();
+		psp.useGoogleDrive = prefsContext.useGoogleDrive.isSelected();
 		return psp;
 	}
 	

@@ -56,9 +56,14 @@ public abstract class PreferencesConnection {
 		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
 		context.setPinTimeout(psp.pinTimeout);
 		context.setShowDashboard(psp.showDashBoard);
+		context.setUseGoogleDrive(psp.useGoogleDrive);
 	}
 	
 	public boolean getShowDashboard() {
 		return context.getShowDashboard();
+	}
+	
+	public boolean getUseGoogleDrive() {
+		return context.getUseGoogleDrive();
 	}
 }
