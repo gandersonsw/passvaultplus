@@ -73,8 +73,7 @@ public class PvpContext {
 	
 	private boolean userPrefsLoaded = false;
 	private boolean showDashboard = true; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.  This should be saved in the data file
-	private boolean useGoogleDrive = false; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.
-	private PvpGoogleDrive googleDrive = new PvpGoogleDrive(this);
+	private boolean useGoogleDrive = false;
 	
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -408,11 +407,6 @@ public class PvpContext {
 		useGoogleDrive = s;
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.putBoolean("useGoogleDrive", useGoogleDrive);
-		checkGoogleDrive();
-	}
-	
-	public void checkGoogleDrive() {
-		System.out.println("checking google drive:" + useGoogleDrive);
 	}
 	
 	/**
@@ -474,7 +468,7 @@ public class PvpContext {
 	 * To be called when a big change is made, and the database should be saved to the file, and the data view should be refreshed
 	 */
 	public void saveAndRefreshDataList() {
-		getFileInterface().save(getDataInterface());
+		getFileInterface().save(getDataInterface(), PvpPersistenceInterface.SaveTrigger.major);
 		getViewListContext().filterUIChanged();
 	}
 	
@@ -566,10 +560,6 @@ public class PvpContext {
 				try { sourceStream.close(); } catch (Exception e) { }
 			}
 		}
-	}
-	
-	public PvpGoogleDrive getGoogleDriveInterface() {
-		return googleDrive;
 	}
 
 }

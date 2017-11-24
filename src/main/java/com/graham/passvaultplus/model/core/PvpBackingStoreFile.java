@@ -9,15 +9,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.graham.passvaultplus.AppUtil;
+import com.graham.passvaultplus.PvpContext;
 
 public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	
-	private final File f;
-	private final String fileName;
+	private final PvpContext context;
 
-	public PvpBackingStoreFile(File fParam) {
-		f = fParam;
-		fileName = f.getName();
+	public PvpBackingStoreFile(PvpContext contextParam) {
+		context = contextParam;
 	}
 	
 	@Override
@@ -32,23 +31,23 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(f);
+		return new FileInputStream(context.getDataFile());
 	}
 
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		checkBackupFileHourly(f); // TODO - is this correct? if this called and save does not happen - bad things will happen
-		return new FileOutputStream(f);
+		checkBackupFileHourly(context.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
+		return new FileOutputStream(context.getDataFile());
 	}
 	
 	@Override
 	public boolean isCompressed() {
-		return PvpPersistenceInterface.isCompressed(fileName);
+		return PvpPersistenceInterface.isCompressed(context.getDataFile().getName());
 	}
 	
 	@Override
 	public boolean isEncrypted() {
-		return PvpPersistenceInterface.isEncrypted(fileName);
+		return PvpPersistenceInterface.isEncrypted(context.getDataFile().getName());
 	}
 	
 	

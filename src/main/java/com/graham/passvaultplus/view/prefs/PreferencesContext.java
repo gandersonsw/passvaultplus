@@ -18,6 +18,7 @@ import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 public class PreferencesContext {
 	final boolean compressedFlag; // this is not updated, original value only
 	final boolean encryptedFlag;  // this is not updated, original value only
+	final boolean useGoogleDriveFlag; // this is not updated, original value only
 	final PreferencesConnection conn;
 	
 	JCheckBox compressed;
@@ -51,6 +52,7 @@ public class PreferencesContext {
 		dataFileString = connParam.getDataFilePath();
 		compressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
 		encryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
+		useGoogleDriveFlag = connParam.getUseGoogleDrive();
 	}
 	
 	String getPasswordText() {

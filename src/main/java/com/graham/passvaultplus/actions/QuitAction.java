@@ -27,9 +27,12 @@ public class QuitAction extends AbstractAction {
 		}
 
 		if (shouldQuit) {
-			if (context.getGoogleDriveInterface().writeTo()) {
+			if (context.getFileInterface().appQuiting()) {
 				System.exit(0);
 			}
+			//if (context.getGoogleDriveInterface().writeTo()) {
+			//	System.exit(0);
+			//}
 		}
 	}
 

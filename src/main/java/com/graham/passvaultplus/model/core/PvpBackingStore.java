@@ -72,6 +72,10 @@ public interface PvpBackingStore {
 	
 	OutputStream openOutputStream() throws IOException;
 	
+	boolean supportsFileUpload();
+	
+	void doFileUpload();
+	
 	boolean isDirty();
 	
 	void setDirty(boolean dirty);

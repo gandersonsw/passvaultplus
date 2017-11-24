@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
-import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
+import com.graham.passvaultplus.model.core.PvpBackingStoreOtherFile;
 import com.graham.passvaultplus.model.core.PvpOutStreamer;
 import com.graham.passvaultplus.view.JceDialog;
 
@@ -142,6 +142,10 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 		
+		if (prefsContext.useGoogleDrive.isSelected() && !prefsContext.useGoogleDriveFlag) {
+			saveFlag = true;
+		}
+		
 		conn.doSave(psp, saveFlag);
 	}
 	
@@ -214,7 +218,7 @@ public class SavePrefsAction extends AbstractAction {
 			}
 			
 			bufR = new BufferedReader(isr);
-			fileWriter = new PvpOutStreamer(new PvpBackingStoreFile(psp.f), psp.pw, psp.aesBits);
+			fileWriter = new PvpOutStreamer(new PvpBackingStoreOtherFile(psp.f), psp.pw, psp.aesBits);
 			final BufferedWriter bw = fileWriter.getWriter();
 			String line;
 			while ((line = bufR.readLine()) != null) {

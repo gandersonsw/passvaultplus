@@ -16,20 +16,24 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
  * All methods to load data into RtDataInterface from the file
  */
 public class PvpPersistenceInterface {
+	public enum SaveTrigger {
+		quit, // the application it quiting
+		cud,  // there was a Create, Update or Delete
+		major // some major change
+	}
+	
 	public static final String EXT_COMPRESS = "zip";
 	public static final String EXT_ENCRYPT = "bmn";
 	public static final String EXT_XML = "xml";
 	
 	final private PvpContext context;
+	final private List<PvpBackingStore> backingStores;
 
 	public PvpPersistenceInterface(final PvpContext contextParam) {
 		context = contextParam;
-	}
-	
-	private List<PvpBackingStore> getBackingStores() {
-		List<PvpBackingStore> bs = new ArrayList<PvpBackingStore>();
-		bs.add(new PvpBackingStoreFile(context.getDataFile()));
-		return bs;
+		backingStores = new ArrayList<PvpBackingStore>();
+		backingStores.add(new PvpBackingStoreFile(context)); // File needs to be the first Backing Store in the list
+		backingStores.add(new PvpBackingStoreGoogleDocs(context));
 	}
 
 	public static boolean isCompressed(final String path) {
@@ -57,8 +61,7 @@ public class PvpPersistenceInterface {
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
-		final List<PvpBackingStore> bs = getBackingStores();
-		final PvpInStreamer fileReader = new PvpInStreamer(bs.get(0), context);
+		final PvpInStreamer fileReader = new PvpInStreamer(backingStores.get(0), context);
 		
 		BufferedInputStream inStream = null;
 		try {
@@ -85,20 +88,66 @@ public class PvpPersistenceInterface {
 		}
 	}
 	
-	public void save(PvpDataInterface dataInterface) {
-		final List<PvpBackingStore> bs = getBackingStores();
-		PvpOutStreamer fileWriter = null;
-		try {
-			fileWriter = new PvpOutStreamer(bs.get(0), context);
-			DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
-		} catch (Exception e) {
-			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
-		} finally {
-			// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
-			if (fileWriter != null) {
-				fileWriter.close();
+	/**
+	 * return true to Quit. Return false to cancel Quit, and keep app running
+	 */
+	public boolean appQuiting() {
+		save(context.getDataInterface(), SaveTrigger.quit);
+		return true;
+	}
+	
+	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
+		for (PvpBackingStore bs : backingStores) {
+			if (bs.isEnabled()) {
+				switch (bs.getChattyLevel()) {
+					case unlimited:
+					case localLevel:
+					case remoteHeavy:
+						if (saveTrig == SaveTrigger.quit) {
+							if (bs.isDirty()) {
+								saveOneBackingStore(dataInterface, bs);
+							}
+						} else {
+							saveOneBackingStore(dataInterface, bs);
+						}
+						break;
+					case remoteMedium:
+					case remoteLight:
+					case mostRestricted:
+						if (saveTrig == SaveTrigger.quit) {
+							if (bs.isDirty()) {
+								saveOneBackingStore(dataInterface, bs);
+							}
+						} else if (saveTrig == SaveTrigger.major) {
+							saveOneBackingStore(dataInterface, bs);
+						} else {
+							bs.setDirty(true);
+						}
+						break;
+				}
 			}
 		}
+	}
+	
+	private void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
+		System.out.println("SAVING BACKING STORE:" + bs.getClass().getName());
+		if (bs.supportsFileUpload()) {
+			bs.doFileUpload();
+		} else {
+			PvpOutStreamer fileWriter = null;
+			try {
+				fileWriter = new PvpOutStreamer(bs, context);
+				DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
+			} catch (Exception e) {
+				context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
+			} finally {
+				// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
+				if (fileWriter != null) {
+					fileWriter.close();
+				}
+			}
+		}
+		bs.setDirty(false);
 	}
 
 }

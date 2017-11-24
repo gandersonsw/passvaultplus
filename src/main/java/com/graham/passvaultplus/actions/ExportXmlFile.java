@@ -25,7 +25,7 @@ public class ExportXmlFile extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO this always use the File, may want to check other BackingStores
-		final PvpInStreamer fileReader = new PvpInStreamer(new PvpBackingStoreFile(context.getDataFile()), context);
+		final PvpInStreamer fileReader = new PvpInStreamer(new PvpBackingStoreFile(context), context);
 		String rawXML = "";
 		try {
 			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());

@@ -85,7 +85,7 @@ public class PvpDataInterface {
 			r.setId(nextID);
 			records.add(r);
 		}
-		context.getFileInterface().save(this); // TODO remove dependance
+		context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance
 		context.getViewListContext().filterUIChanged();
 	}
 
@@ -93,7 +93,7 @@ public class PvpDataInterface {
 		if (records.contains(r)) {
 			records.remove(r);
 			r.setId(0);
-			context.getFileInterface().save(this); // TODO remove dependence
+			context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
 			context.getViewListContext().filterUIChanged();
 		} else {
 			context.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
@@ -111,7 +111,7 @@ public class PvpDataInterface {
 				records.add(r);
 			}
 		}
-		context.getFileInterface().save(this); // TODO remove dependance on getFileInterface
+		context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance on getFileInterface
 		context.getViewListContext().filterUIChanged();
 	}
 
@@ -131,7 +131,7 @@ public class PvpDataInterface {
 		}
 		
 		if (changed) {
-			context.getFileInterface().save(this); // TODO remove dependence
+			context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
 			context.getViewListContext().filterUIChanged();
 		}
 	}

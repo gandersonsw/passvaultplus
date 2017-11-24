@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 /**
@@ -28,7 +28,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		// if changes made don't require file rewrite, don't do it
 		if (wasChanges) {
 			//context.setDataFilePath(dataFile.getAbsolutePath());
-			context.getFileInterface().save(context.getDataInterface()); // TODO if there is an exception here the changes from line 27 should not be applied
+			context.getFileInterface().save(context.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major); // TODO if there is an exception here the changes from line 27 should not be applied
 		}
 
 		context.getTabManager().removeOtherTab(context.getPrefsComponent());
