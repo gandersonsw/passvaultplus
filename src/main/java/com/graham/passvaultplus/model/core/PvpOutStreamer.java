@@ -2,8 +2,6 @@
 package com.graham.passvaultplus.model.core;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -14,39 +12,34 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
 import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 
 /**
  * Get a Writer for the database file. Take care of encryption and compression.
  */
-public class PvpFileWriter {
+public class PvpOutStreamer {
 	
-	private final File fileToWrite;
-	private final String fileName;
+	private final PvpBackingStore backingStore;
 	private String password;
 	private int encryptionStrength;
-
-	private FileOutputStream fileStream;
+	private OutputStream bsOutStream;
 	private ZipOutputStream zipStream;
 	private CipherOutputStream cipherStream;
 	private OutputStreamWriter writer;
 	private BufferedWriter bufWriter;
 	private OutputStream outStream; // do not close this, this is used as the last output
 
-	public PvpFileWriter(final File f, final PvpContext contextParam) throws UserAskToChangeFileException {
-		fileToWrite = f;
-		fileName = f.getName();
-		if (PvpFileInterface.isEncrypted(fileName)) {
+	public PvpOutStreamer(final PvpBackingStore bs, final PvpContext contextParam) throws UserAskToChangeFileException {
+		backingStore = bs;
+		if (backingStore.isEncrypted()) {
 			password = contextParam.getPasswordOrAskUser(false);
 			encryptionStrength = contextParam.getEncryptionStrengthBits();
 		}
 	}
 	
-	public PvpFileWriter(final File f, final String passwordParam, final int encryptionStrengthParam) {
-		fileToWrite = f;
-		fileName = f.getName();
+	public PvpOutStreamer(final PvpBackingStore bs, final String passwordParam, final int encryptionStrengthParam) {
+		backingStore = bs;
 		password = passwordParam;
 		encryptionStrength = encryptionStrengthParam;
 	}
@@ -55,28 +48,28 @@ public class PvpFileWriter {
 	 * When writing, encryption happens first, then compression.
 	 */
 	public BufferedWriter getWriter() throws Exception {
-		AppUtil.checkBackupFileHourly(fileToWrite);
+		//AppUtil.checkBackupFileHourly(fileToWrite);
 
 		try {
-			if (PvpFileInterface.isEncrypted(fileName)) {
+			if (backingStore.isEncrypted()) {
 				final EncryptionHeader header = new EncryptionHeader(encryptionStrength);
 				Cipher cer = MyCipherFactory.createCipher(password, header, Cipher.ENCRYPT_MODE);
-				FileOutputStream fos = new FileOutputStream(fileToWrite);
-				fos.write(header.createEncryptionHeaderBytes());
-				cipherStream = new CipherOutputStream(fos, cer);
+				OutputStream bsos = backingStore.openOutputStream();
+				bsos.write(header.createEncryptionHeaderBytes());
+				cipherStream = new CipherOutputStream(bsos, cer);
 				outStream = cipherStream;
 	
 				// write the code so we know it decrypted successfully
 				outStream.write("remthis7".getBytes());
 			} else {
-				fileStream = new FileOutputStream(fileToWrite);
-				outStream = fileStream;
+				bsOutStream = backingStore.openOutputStream();
+				outStream = bsOutStream;
 			}
 	
-			if (PvpFileInterface.isCompressed(fileName)) {
+			if (backingStore.isCompressed()) {
 				zipStream = new ZipOutputStream(outStream);
-				String zippedFileName = BCUtil.setFileExt(fileName,
-						PvpFileInterface.isEncrypted(fileName) ? PvpFileInterface.EXT_ENCRYPT : PvpFileInterface.EXT_XML, true);
+				String zippedFileName = BCUtil.setFileExt("PvpData",
+						backingStore.isEncrypted() ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;
 			}
@@ -126,12 +119,12 @@ public class PvpFileWriter {
 			}
 			zipStream = null;
 		}
-		if (fileStream != null) {
+		if (bsOutStream != null) {
 			try {
-				fileStream.close();
+				bsOutStream.close();
 			} catch (IOException e) {
 			}
-			fileStream = null;
+			bsOutStream = null;
 		}
 	}
 }

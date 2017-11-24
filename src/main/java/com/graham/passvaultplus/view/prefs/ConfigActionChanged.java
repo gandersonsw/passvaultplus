@@ -6,7 +6,7 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
-import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 
 public class ConfigActionChanged extends AbstractAction {
 	final private PreferencesContext context;
@@ -47,8 +47,8 @@ public class ConfigActionChanged extends AbstractAction {
 				// a file exists here,
 				// context.setCompressAndEncryptFromFile(f);
 				final String fname = f.getName();
-				context.compressed.setSelected(PvpFileInterface.isCompressed(fname));
-				context.encrypted.setSelected(PvpFileInterface.isEncrypted(fname));
+				context.compressed.setSelected(PvpPersistenceInterface.isCompressed(fname));
+				context.encrypted.setSelected(PvpPersistenceInterface.isEncrypted(fname));
 			} else {
 				context.setDataFile(null, 0);
 			}

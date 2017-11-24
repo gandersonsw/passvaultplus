@@ -24,36 +24,34 @@ import com.graham.passvaultplus.UserAskToChangeFileException;
 /**
  * Get a stream for the database file. Take care of encryption and compression.
  */
-public class PvpFileReader {
+public class PvpInStreamer {
 	
-	private final File fileToRead;
-	private final String fileName;
 	private final PvpContext context;
+	private final PvpBackingStore backingStore;
 	
 	private BufferedInputStream bufInStream = null;
 	private InputStream inStream = null;
 	private ZipInputStream zipfile = null;
 	private CipherInputStream cipherStream = null;
-	private FileInputStream fileStream = null;
+	private InputStream bsInputStream = null;
 	private EncryptionHeader eHeader;
-
-	public PvpFileReader(final File f, final PvpContext contextParam) {
-		fileToRead = f;
-		fileName = f.getName();
+	
+	public PvpInStreamer(final PvpBackingStore bs, final PvpContext contextParam) {
+		backingStore = bs;
 		context = contextParam;
 	}
 	
 	public BufferedInputStream getStream() throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
 			// 4 possible file extensions: .xml .zip .bmn.zip .bmn
-			if (PvpFileInterface.isEncrypted(fileName)) {
+			if (backingStore.isEncrypted()) {
 				openCipherInputStream();
 			} else {
-				fileStream = new FileInputStream(fileToRead);
-				inStream = fileStream;
+				bsInputStream = backingStore.openInputStream(); //  new FileInputStream(fileToRead);
+				inStream = bsInputStream;
 			}
 			
-			if (PvpFileInterface.isCompressed(fileName)) {
+			if (backingStore.isCompressed()) {
 				zipfile = new ZipInputStream(inStream);
 				ZipEntry entry = zipfile.getNextEntry();
 				if (entry != null) {
@@ -86,13 +84,13 @@ public class PvpFileReader {
 		boolean passwordTried = false;
 		while (!passwordIsGood) {
 			try {
-				fileStream = new FileInputStream(fileToRead);
+				bsInputStream = backingStore.openInputStream();
 				
 				final String password = context.getPasswordOrAskUser(passwordTried);
-				eHeader = getEncryptHeader(fileStream);
+				eHeader = getEncryptHeader(bsInputStream);
 				final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
 	
-				cipherStream = new CipherInputStream(fileStream, cer);
+				cipherStream = new CipherInputStream(bsInputStream, cer);
 				inStream = cipherStream;
 	
 				byte[] check = new byte[8];
@@ -127,9 +125,9 @@ public class PvpFileReader {
 		}
 	}
 	
-	private static EncryptionHeader getEncryptHeader(final FileInputStream fStream ) throws IOException, PvpException {
+	private static EncryptionHeader getEncryptHeader(final InputStream iStream ) throws IOException, PvpException {
 		final byte[] encryptionHeaderBytes = new byte[EncryptionHeader.getEncryptHeaderSize()];
-		final int br = fStream.read(encryptionHeaderBytes);
+		final int br = iStream.read(encryptionHeaderBytes);
 		if (br != EncryptionHeader.getEncryptHeaderSize()) {
 			final String msg = "bytes read: " + br + " bytes expected: " + EncryptionHeader.getEncryptHeaderSize();
 			throw new PvpException(PvpException.SpecificErrCode.EncryptionHeaderNotRead, msg);
@@ -165,12 +163,12 @@ public class PvpFileReader {
 			}
 			cipherStream = null;
 		}
-		if (fileStream != null) {
+		if (bsInputStream != null) {
 			try {
-				fileStream.close();
+				bsInputStream.close();
 			} catch (IOException ioe) {
 			}
-			fileStream = null;
+			bsInputStream = null;
 		}
 	}
 }

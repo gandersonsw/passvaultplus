@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 
 public class PreferencesContext {
 	final boolean compressedFlag; // this is not updated, original value only
@@ -49,8 +49,8 @@ public class PreferencesContext {
 	PreferencesContext(final PreferencesConnection connParam) {
 		conn = connParam;
 		dataFileString = connParam.getDataFilePath();
-		compressedFlag = PvpFileInterface.isCompressed(dataFileString);
-		encryptedFlag = PvpFileInterface.isEncrypted(dataFileString);
+		compressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
+		encryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
 	}
 	
 	String getPasswordText() {
@@ -86,9 +86,9 @@ public class PreferencesContext {
 			dataFileString = "";
 		} else {
 			String fname = f.getName();
-			boolean isCompressed = PvpFileInterface.isCompressed(fname);
-			boolean isEncrypted = PvpFileInterface.isEncrypted(fname);
-			fname = PvpFileInterface.formatFileName(fname, isCompressed, isEncrypted);
+			boolean isCompressed = PvpPersistenceInterface.isCompressed(fname);
+			boolean isEncrypted = PvpPersistenceInterface.isEncrypted(fname);
+			fname = PvpPersistenceInterface.formatFileName(fname, isCompressed, isEncrypted);
 			dataFile = new File(f.getParentFile(), fname);
 			dataFileString = dataFile.getAbsolutePath();
 			compressed.setSelected(isCompressed);
@@ -132,7 +132,7 @@ public class PreferencesContext {
 	 */
 	void updateBecauseCompressedOrEncryptedChanged() {
 		if (dataFile != null) {
-			final String fname = PvpFileInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
+			final String fname = PvpPersistenceInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
 			dataFile = new File(dataFile.getParentFile(), fname);
 			dataFileString = dataFile.getAbsolutePath();
 			dataFileLabel.setText(dataFileString);

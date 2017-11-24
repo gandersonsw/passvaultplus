@@ -15,7 +15,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
-import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.google.api.services.drive.Drive;
 
 import java.io.IOException;
@@ -93,10 +93,10 @@ public class PvpGoogleDrive {
 	        System.out.println("at writeTo 2" );
 			
 			String localFile = context.getDataFile().getName();
-			String fileName = PvpFileInterface.formatFileName(
+			String fileName = PvpPersistenceInterface.formatFileName(
 					"PassVaultPlusDataGDAPI", 
-					PvpFileInterface.isCompressed(localFile), 
-					PvpFileInterface.isEncrypted(localFile));
+					PvpPersistenceInterface.isCompressed(localFile), 
+					PvpPersistenceInterface.isEncrypted(localFile));
 			
 			File fileMetadata = new File();
 			fileMetadata.setName(fileName);

@@ -3,6 +3,8 @@ package com.graham.passvaultplus.model.core;
 
 import java.io.BufferedInputStream;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
@@ -13,21 +15,21 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
 /**
  * All methods to load data into RtDataInterface from the file
  */
-public class PvpFileInterface {
+public class PvpPersistenceInterface {
 	public static final String EXT_COMPRESS = "zip";
 	public static final String EXT_ENCRYPT = "bmn";
 	public static final String EXT_XML = "xml";
 	
-	private static PvpBackingStore[] backingStores;
-
 	final private PvpContext context;
 
-	public PvpFileInterface(final PvpContext contextParam) {
+	public PvpPersistenceInterface(final PvpContext contextParam) {
 		context = contextParam;
-		PvpBackingStore[] bsTmp = {
-			new PvpBackingStoreFile(context)
-		};
-		backingStores = bsTmp;
+	}
+	
+	private List<PvpBackingStore> getBackingStores() {
+		List<PvpBackingStore> bs = new ArrayList<PvpBackingStore>();
+		bs.add(new PvpBackingStoreFile(context.getDataFile()));
+		return bs;
 	}
 
 	public static boolean isCompressed(final String path) {
@@ -43,20 +45,20 @@ public class PvpFileInterface {
 	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
 		String fname = BCUtil.getFileNameNoExt(fnameWithExt, true);
 		if (compressed) {
-			fname = fname + "." + PvpFileInterface.EXT_COMPRESS;
+			fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
 		}
 		if (encrypted) {
-			fname = fname + "." +  PvpFileInterface.EXT_ENCRYPT;
+			fname = fname + "." +  PvpPersistenceInterface.EXT_ENCRYPT;
 		}
 		if (!compressed && !encrypted) {
-			fname = fname + "." + PvpFileInterface.EXT_XML;
+			fname = fname + "." + PvpPersistenceInterface.EXT_XML;
 		}
 		return fname;
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
-		//backingStores[0].getInputStream()
-		final PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
+		final List<PvpBackingStore> bs = getBackingStores();
+		final PvpInStreamer fileReader = new PvpInStreamer(bs.get(0), context);
 		
 		BufferedInputStream inStream = null;
 		try {
@@ -84,9 +86,10 @@ public class PvpFileInterface {
 	}
 	
 	public void save(PvpDataInterface dataInterface) {
-		PvpFileWriter fileWriter = null;
+		final List<PvpBackingStore> bs = getBackingStores();
+		PvpOutStreamer fileWriter = null;
 		try {
-			fileWriter = new PvpFileWriter(context.getDataFile(), context);
+			fileWriter = new PvpOutStreamer(bs.get(0), context);
 			DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
 		} catch (Exception e) {
 			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);

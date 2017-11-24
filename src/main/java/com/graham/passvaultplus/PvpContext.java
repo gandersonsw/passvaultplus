@@ -19,7 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import com.graham.passvaultplus.model.core.PvpDataInterface;
-import com.graham.passvaultplus.model.core.PvpFileInterface;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.EulaDialog;
@@ -46,7 +46,7 @@ public class PvpContext {
 	private final MyUndoManager undoManager = new MyUndoManager(this);
 	private final TabManager tabManager = new TabManager(this);
 
-	private PvpFileInterface rtFileInterface;
+	private PvpPersistenceInterface rtFileInterface;
 	private PvpDataInterface rtDataInterface;
 	
 	private String dataFilePath;
@@ -90,7 +90,7 @@ public class PvpContext {
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
 		PvpContext context = new PvpContext();
 
-		context.rtFileInterface = new PvpFileInterface(context);
+		context.rtFileInterface = new PvpPersistenceInterface(context);
 		context.rtDataInterface = new PvpDataInterface(context);
 		if (pw != null) {
 			context.setPassword(pw, false);
@@ -144,7 +144,7 @@ public class PvpContext {
 		schedulePinTimerTask();
 	}
 
-	public PvpFileInterface getFileInterface() {
+	public PvpPersistenceInterface getFileInterface() {
 		return this.rtFileInterface;
 	}
 

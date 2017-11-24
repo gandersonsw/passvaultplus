@@ -68,12 +68,16 @@ public interface PvpBackingStore {
 	
 	boolean isEnabled();
 	
-	InputStream getInputStream() throws IOException;
+	InputStream openInputStream() throws IOException;
 	
-	OutputStream getOutputStream() throws IOException;
+	OutputStream openOutputStream() throws IOException;
 	
 	boolean isDirty();
 	
 	void setDirty(boolean dirty);
+	
+	boolean isCompressed();
+	
+	boolean isEncrypted();
 
 }

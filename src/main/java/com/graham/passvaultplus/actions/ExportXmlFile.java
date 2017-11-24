@@ -11,7 +11,8 @@ import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.model.core.PvpFileReader;
+import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
+import com.graham.passvaultplus.model.core.PvpInStreamer;
 
 public class ExportXmlFile extends AbstractAction {
 	final private PvpContext context;
@@ -23,7 +24,8 @@ public class ExportXmlFile extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		final PvpFileReader fileReader = new PvpFileReader(context.getDataFile(), context);
+		// TODO this always use the File, may want to check other BackingStores
+		final PvpInStreamer fileReader = new PvpInStreamer(new PvpBackingStoreFile(context.getDataFile()), context);
 		String rawXML = "";
 		try {
 			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());

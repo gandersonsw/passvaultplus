@@ -10,8 +10,8 @@ import javax.swing.JFrame;
 
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.EncryptionHeader;
-import com.graham.passvaultplus.model.core.PvpFileInterface;
-import com.graham.passvaultplus.model.core.PvpFileReader;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
+import com.graham.passvaultplus.model.core.PvpInStreamer;
 
 public class ChooseDirAction extends AbstractAction {
 	final private PreferencesContext context;
@@ -43,8 +43,8 @@ public class ChooseDirAction extends AbstractAction {
 				
 				try {
 					int encryptBits = 0;
-					if (PvpFileInterface.isEncrypted(f.getName())) {
-						final EncryptionHeader header = PvpFileReader.getEncryptHeader(f);
+					if (PvpPersistenceInterface.isEncrypted(f.getName())) {
+						final EncryptionHeader header = PvpInStreamer.getEncryptHeader(f);
 						encryptBits = header.aesStrengthBits;
 					}
 					context.setDataFile(f, encryptBits);

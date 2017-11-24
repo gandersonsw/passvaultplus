@@ -1,7 +1,6 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -143,19 +142,6 @@ public class AppUtil {
 		}
 
 		return s.substring(0, maxLen - 3) + "...";
-	}
-
-	/**
-	 * Check to see if a backup file has been created in the last hour. If it has not, rename the given file to the backup file name.
-	 */
-	public static void checkBackupFileHourly(final File f) {
-		String filenameParts[] = getFileNameParts(f.getName());
-		String timeStamp = getHourlyTimeStamp();
-		File backupFile = new File(f.getParentFile(), filenameParts[0] + "-" + timeStamp + "." + filenameParts[1]);
-		// don't backup if a backup has been done within the last hour
-		if (! backupFile.exists()) {
-			f.renameTo(backupFile);
-		}
 	}
 
 	/**
