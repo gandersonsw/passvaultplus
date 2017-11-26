@@ -41,12 +41,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 	
 	@Override
-	public boolean isCompressed() {
+	public boolean isCompressed(boolean inFlag) {
 		return PvpPersistenceInterface.isCompressed(context.getDataFile().getName());
 	}
 	
 	@Override
-	public boolean isEncrypted() {
+	public boolean isEncrypted(boolean inFlag) {
 		return PvpPersistenceInterface.isEncrypted(context.getDataFile().getName());
 	}
 	
@@ -62,6 +62,11 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 		if (! backupFile.exists()) {
 			f.renameTo(backupFile);
 		}
+	}
+
+	@Override
+	public long getLastUpdatedDate() {
+		return context.getDataFile().lastModified();
 	}
 
 }

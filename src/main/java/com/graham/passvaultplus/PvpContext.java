@@ -74,6 +74,7 @@ public class PvpContext {
 	private boolean userPrefsLoaded = false;
 	private boolean showDashboard = true; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.  This should be saved in the data file
 	private boolean useGoogleDrive = false;
+	private String googleDriveDocId;
 	
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -368,6 +369,7 @@ public class PvpContext {
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		showDashboard = userPrefs.getBoolean("showDashboard", false);
 		useGoogleDrive = userPrefs.getBoolean("useGoogleDrive", false);
+		googleDriveDocId = userPrefs.get("googleDriveDocId", "");
 		userPrefsLoaded = true;
 	}
 	
@@ -407,6 +409,17 @@ public class PvpContext {
 		useGoogleDrive = s;
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.putBoolean("useGoogleDrive", useGoogleDrive);
+	}
+	
+	public String getGoogleDriveDocId() {
+		loadUserPrefs();
+		return googleDriveDocId;
+	}
+	
+	public void setGoogleDriveDocId(final String id) {
+		googleDriveDocId = id;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.put("googleDriveDocId", googleDriveDocId);
 	}
 	
 	/**

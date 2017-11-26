@@ -44,9 +44,55 @@ public class PvpDataInterface {
 		records = dataTocCopyFrom.records;
 		maxID = dataTocCopyFrom.maxID;
 	}
+  	
+  	/**
+  	 * return true if the original data has been appended or updated, so it should be written out ot the file
+  	 */
+  	boolean mergeData(PvpDataInterface dataTocMergeFrom) {
+  		
+  		System.out.println(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataTocMergeFrom.maxID);
+  		
+  		int typesMatched = 0;
+  		boolean wasChanged = false;
+  		
+  		for (PvpType newType : dataTocMergeFrom.types) {
+  			PvpType existingType = getType(newType.getName());
+  			if (existingType == null) {
+  				System.out.println("adding type:" + newType.getName());
+  				types.add(newType);
+  				wasChanged = true;
+  			} else {
+  				// TODO compare and modify
+  				typesMatched++;
+  			}
+  		}
+  		
+  		int recordsMatched = 0;
+  		for (int i = 0; i < dataTocMergeFrom.records.size(); i++) {
+  			PvpRecord newRec = dataTocMergeFrom.getRecordAtIndex(i);
+  			PvpRecord existingRec = getRecordAtIndex(i);
+  			if (newRec.getId() != existingRec.getId()) {
+  				System.out.println("id did not match by index");
+  				existingRec = getRecord(newRec.getId());
+  			}
+  			if (existingRec == null) {
+  				System.out.println("adding a record");
+  				int nextID = getNextMaxID();
+  				newRec.setId(nextID);
+  				records.add(newRec);
+  				wasChanged = true;
+  			} else {
+  				// TODO compare and modify
+  				recordsMatched++;
+  			}
+  		}
+  		
+  		System.out.println(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
+  		return wasChanged;
+  	}
 
 	/**
-	 * @return List of RtType
+	 * @return List of PvpType
 	 */
 	public List<PvpType> getTypes() {
 		return types;
@@ -144,22 +190,6 @@ public class PvpDataInterface {
 		return records.get(index);
 	}
 
-	/*
-	public void mergeFile(File f) {
-
-	}
-	*/
-
-	/*
-	public void saveXsd(File xsdFile) {
-
-	}
-	*/
-
-//	private String getXmlFilePath() {
-//		return context.getDataFilePath();
-//	}
-
 	public PvpRecord getRecord(final int recordID) {
 		// TODO optimize this
 		for (PvpRecord r : records) {
@@ -169,7 +199,6 @@ public class PvpDataInterface {
 		}
 		return null;
 	}
-
 
 	public List<String> getCommonFiledValues(String recordType, String recordFieldName) {
 		FilterResults filtered = getFilteredRecords(recordType, "", null, false);

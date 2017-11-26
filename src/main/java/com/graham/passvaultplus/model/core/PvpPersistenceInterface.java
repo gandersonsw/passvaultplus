@@ -2,8 +2,12 @@
 package com.graham.passvaultplus.model.core;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import com.graham.framework.BCUtil;
@@ -61,30 +65,78 @@ public class PvpPersistenceInterface {
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
-		final PvpInStreamer fileReader = new PvpInStreamer(backingStores.get(0), context);
 		
-		BufferedInputStream inStream = null;
-		try {
-			inStream = fileReader.getStream();
-		} catch (UserAskToChangeFileException ucf) {
-			throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
-		} catch (InvalidKeyException e) {
-			throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
-		} catch (Exception e) {
-			throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription("File: " + context.getDataFile());
+		for (PvpBackingStore bs: backingStores) {
+			bs.clearTransientData();
 		}
 		
-		try {
-			PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-			dataInterface.setData(newDataInterface);
-			context.setEncryptionStrengthBits(fileReader.getAesBits());
-		} catch (UserAskToChangeFileException ucf) {
-			throw ucf;
-		} catch (Exception e) {
-			throw new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context)).setAdditionalDescription("File: " + context.getDataFile());
-		} finally {
-			// note that close is called 2 times when an error happens
-			fileReader.close();
+		// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
+		PvpBackingStore[] sortedBSArr = new PvpBackingStore[backingStores.size()];
+		sortedBSArr = backingStores.toArray(sortedBSArr);
+		Arrays.sort(sortedBSArr, (bs1, bs2) -> { return Long.compare(bs2.getLastUpdatedDate(), bs1.getLastUpdatedDate()); } );
+		
+		boolean doMerge = false;
+		boolean wasChanged = false; // TODO way to write out if it was changed?
+		for (PvpBackingStore bs: sortedBSArr) {
+			if (bs.isEnabled()) {
+				System.out.println("loading bs : " + bs.getClass().getName());
+				System.out.println("update date: " + new Date(bs.getLastUpdatedDate()));
+				final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
+				
+				BufferedInputStream inStream = null;
+				try {
+					inStream = fileReader.getStream();
+				} catch (UserAskToChangeFileException ucf) {
+					throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
+				} catch (InvalidKeyException e) {
+					bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
+					break;
+					//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
+				} catch (Exception e) {
+					bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs)));
+					break;
+					//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
+				} 
+					
+				// TODO does fileReader.close(); need to be called if we dont get here?
+				
+				
+				try {
+					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+					if (doMerge) {
+						if (dataInterface.mergeData(newDataInterface)) {
+							wasChanged = true;
+						}
+					} else {
+						dataInterface.setData(newDataInterface);
+						doMerge = true;
+					}
+					context.setEncryptionStrengthBits(fileReader.getAesBits());
+				} catch (UserAskToChangeFileException ucf) {
+					throw ucf;
+				} catch (Exception e) {
+					bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(getFileDesc(bs)));
+				} finally {
+					// note that close is called 2 times when an error happens
+					fileReader.close();
+				}
+			}
+		}
+		
+		if (!doMerge) { // if this is false, nothing was loaded -> we have a problem
+			throw backingStores.get(0).getException();
+		}
+		
+		if (wasChanged) {
+			System.out.println("was changed is TRUE");
+		}
+	}
+	
+	private String getFileDesc(PvpBackingStore bs) {
+		if (bs instanceof PvpBackingStoreGoogleDocs) {
+			return "Google Doc: " + PvpBackingStoreGoogleDocs.DOC_NAME;
+		} else {
+			return "File: " + context.getDataFile();
 		}
 	}
 	
@@ -99,6 +151,7 @@ public class PvpPersistenceInterface {
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
 		for (PvpBackingStore bs : backingStores) {
 			if (bs.isEnabled()) {
+				bs.clearTransientData();
 				switch (bs.getChattyLevel()) {
 					case unlimited:
 					case localLevel:

@@ -44,14 +44,14 @@ public class PvpInStreamer {
 	public BufferedInputStream getStream() throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
 			// 4 possible file extensions: .xml .zip .bmn.zip .bmn
-			if (backingStore.isEncrypted()) {
+			if (backingStore.isEncrypted(true)) {
 				openCipherInputStream();
 			} else {
 				bsInputStream = backingStore.openInputStream(); //  new FileInputStream(fileToRead);
 				inStream = bsInputStream;
 			}
 			
-			if (backingStore.isCompressed()) {
+			if (backingStore.isCompressed(true)) {
 				zipfile = new ZipInputStream(inStream);
 				ZipEntry entry = zipfile.getNextEntry();
 				if (entry != null) {
@@ -87,6 +87,7 @@ public class PvpInStreamer {
 				bsInputStream = backingStore.openInputStream();
 				
 				final String password = context.getPasswordOrAskUser(passwordTried);
+				System.out.println("password=" + password);
 				eHeader = getEncryptHeader(bsInputStream);
 				final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
 	
@@ -126,10 +127,19 @@ public class PvpInStreamer {
 	}
 	
 	private static EncryptionHeader getEncryptHeader(final InputStream iStream ) throws IOException, PvpException {
+		int ehs = EncryptionHeader.getEncryptHeaderSize();
+		int totalBytesRead = 0;
 		final byte[] encryptionHeaderBytes = new byte[EncryptionHeader.getEncryptHeaderSize()];
-		final int br = iStream.read(encryptionHeaderBytes);
-		if (br != EncryptionHeader.getEncryptHeaderSize()) {
-			final String msg = "bytes read: " + br + " bytes expected: " + EncryptionHeader.getEncryptHeaderSize();
+		while (totalBytesRead < ehs) {
+			// This while loop is here because in GoogleDocs API, sometimes it will not return the full data on the first call
+			final int br = iStream.read(encryptionHeaderBytes, totalBytesRead, EncryptionHeader.getEncryptHeaderSize() - totalBytesRead);
+			if (br == -1) {
+				break;
+			}
+			totalBytesRead += br;
+		}
+		if (totalBytesRead != EncryptionHeader.getEncryptHeaderSize()) {
+			final String msg = "bytes read: " + totalBytesRead + " bytes expected: " + EncryptionHeader.getEncryptHeaderSize();
 			throw new PvpException(PvpException.SpecificErrCode.EncryptionHeaderNotRead, msg);
 		}
 		return new EncryptionHeader(encryptionHeaderBytes);

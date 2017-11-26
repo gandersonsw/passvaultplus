@@ -32,7 +32,7 @@ public class PvpOutStreamer {
 
 	public PvpOutStreamer(final PvpBackingStore bs, final PvpContext contextParam) throws UserAskToChangeFileException {
 		backingStore = bs;
-		if (backingStore.isEncrypted()) {
+		if (backingStore.isEncrypted(false)) {
 			password = contextParam.getPasswordOrAskUser(false);
 			encryptionStrength = contextParam.getEncryptionStrengthBits();
 		}
@@ -51,7 +51,7 @@ public class PvpOutStreamer {
 		//AppUtil.checkBackupFileHourly(fileToWrite);
 
 		try {
-			if (backingStore.isEncrypted()) {
+			if (backingStore.isEncrypted(false)) {
 				final EncryptionHeader header = new EncryptionHeader(encryptionStrength);
 				Cipher cer = MyCipherFactory.createCipher(password, header, Cipher.ENCRYPT_MODE);
 				OutputStream bsos = backingStore.openOutputStream();
@@ -66,10 +66,10 @@ public class PvpOutStreamer {
 				outStream = bsOutStream;
 			}
 	
-			if (backingStore.isCompressed()) {
+			if (backingStore.isCompressed(false)) {
 				zipStream = new ZipOutputStream(outStream);
 				String zippedFileName = BCUtil.setFileExt("PvpData",
-						backingStore.isEncrypted() ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
+						backingStore.isEncrypted(false) ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;
 			}

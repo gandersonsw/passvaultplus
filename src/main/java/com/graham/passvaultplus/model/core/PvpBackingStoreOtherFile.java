@@ -37,13 +37,18 @@ public class PvpBackingStoreOtherFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean isCompressed() {
+	public boolean isCompressed(boolean inFlag) {
 		return PvpPersistenceInterface.isCompressed(f.getName());
 	}
 	
 	@Override
-	public boolean isEncrypted() {
+	public boolean isEncrypted(boolean inFlag) {
 		return PvpPersistenceInterface.isEncrypted(f.getName());
+	}
+
+	@Override
+	public long getLastUpdatedDate() {
+		return f.lastModified();
 	}
 
 }

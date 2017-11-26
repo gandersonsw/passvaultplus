@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.graham.passvaultplus.PvpException;
+
 /**
  * Interface for anything we use to interface to a backing storage. Could be file system, 
  * or some server, or anything that will save out data for when we 
@@ -12,7 +14,7 @@ import java.io.OutputStream;
  */
 public interface PvpBackingStore {
 	
-	enum ChattyLevel {
+	public enum ChattyLevel {
 		/**
 		 * This level would be used for something like in memory data. 
 		 * A very fast backing store.
@@ -80,8 +82,26 @@ public interface PvpBackingStore {
 	
 	void setDirty(boolean dirty);
 	
-	boolean isCompressed();
+	boolean isCompressed(boolean inFlag);
 	
-	boolean isEncrypted();
+	boolean isEncrypted(boolean inFlag);
+	
+	/**
+	 * Call this before doing a group of work.
+	 * 
+	 * For example, when a load operation is done, the BackingStore will cache some information.
+	 * If another load is done like 60 minutes later, call this before starting the group of 
+	 * work, so that stale data is cleared out.
+	 */
+	void clearTransientData();
+	
+	/**
+	 * @return If an error, return Long.MAX_VALUE
+	 */
+	long getLastUpdatedDate();
+	
+	void setException(PvpException e);
+	
+	PvpException getException();
 
 }
