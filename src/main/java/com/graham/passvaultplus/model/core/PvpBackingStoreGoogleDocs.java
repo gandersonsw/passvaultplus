@@ -16,6 +16,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -25,7 +26,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.PvpException;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	
@@ -89,8 +89,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		try {
 			driveService = getDriveService();
 		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-			return null;
+			throw new IOException(e);
 		}
 		return driveService.files().get(id).executeMediaAsInputStream();
 	}
@@ -121,37 +120,41 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 	
 	@Override
-	public void doFileUpload() {
+	public void doFileUpload() throws IOException {
     	System.out.println("at doFileUpload" );
+
+        Drive driveService;
 		try {
-			 // Build a new authorized API client service.
-	        final Drive driveService = getDriveService();
-			final FileContent mediaContent = new FileContent(null, context.getDataFile()); // TODO not sure null is correct
-			
-			File file;
-			final String id = context.getGoogleDriveDocId();
-			if (id == null || id.length() == 0) {
-				System.out.println("creating new file ");
-				File fileMetadata = new File();
-				fileMetadata.setName(getFileName(false));
-				file = driveService.files().create(fileMetadata, mediaContent)
-					    .setFields("id")
-					    .execute();
-			} else {
-				System.out.println("updating file file " + id);
-				file = driveService.files().get(id).execute();
-				File updatedFile = driveService.files().update(id, file, mediaContent).execute();
-			}
-			
-			context.setGoogleDriveDocId(file.getId());
-			
-			System.out.println("File ID: " + file.getId());
-			
-		} catch (Exception e) {
-			System.out.println("at writeTo E: " + e.getMessage() );
-			context.notifyBadException(e, true, PvpException.GeneralErrCode.GoogleDrive);
+			driveService = getDriveService();
+		} catch (GeneralSecurityException e) {
+			throw new IOException(e);
 		}
 		
+		final FileContent mediaContent = new FileContent(null, context.getDataFile()); // TODO not sure null is correct
+		File returnedFileMetaData = null;
+		final String id = context.getGoogleDriveDocId();
+		final File newFileMetadata = new File();
+		newFileMetadata.setName(getFileName(false));
+		
+		if (id == null || id.length() == 0) {
+			System.out.println("creating new file ");
+			returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
+		} else {
+			System.out.println("updating file file " + id);
+			try {
+				final File ignored = driveService.files().update(id, newFileMetadata, mediaContent).execute();
+			} catch (HttpResponseException e) {
+				System.out.println("at HttpResponseException : " + e.getStatusCode() );
+				if (e.getStatusCode() == 404) {
+					returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
+				}
+			}
+		}
+		
+		if  (returnedFileMetaData != null) {
+			context.setGoogleDriveDocId(returnedFileMetaData.getId());
+			System.out.println("File ID: " + returnedFileMetaData.getId());
+		}
 	}
 
 	@Override
@@ -237,6 +240,11 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			remoteFileName = null;
 			super.clearTransientData();
 		}
+	}
+	
+	@Override
+	public String getDisplayableResourceLocation() {
+		return "Google Doc: " + getFileName(true);
 	}
 
 }

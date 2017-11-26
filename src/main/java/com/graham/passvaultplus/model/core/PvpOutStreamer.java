@@ -33,7 +33,7 @@ public class PvpOutStreamer {
 	public PvpOutStreamer(final PvpBackingStore bs, final PvpContext contextParam) throws UserAskToChangeFileException {
 		backingStore = bs;
 		if (backingStore.isEncrypted(false)) {
-			password = contextParam.getPasswordOrAskUser(false);
+			password = contextParam.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
 			encryptionStrength = contextParam.getEncryptionStrengthBits();
 		}
 	}

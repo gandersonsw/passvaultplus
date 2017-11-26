@@ -32,6 +32,7 @@ public class PvpPersistenceInterface {
 	
 	final private PvpContext context;
 	final private List<PvpBackingStore> backingStores;
+	private boolean errorHappened;
 
 	public PvpPersistenceInterface(final PvpContext contextParam) {
 		context = contextParam;
@@ -89,12 +90,14 @@ public class PvpPersistenceInterface {
 				} catch (UserAskToChangeFileException ucf) {
 					throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
 				} catch (InvalidKeyException e) {
+					System.out.println("at InvalidKeyException");
 					bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
-					break;
+					continue;
 					//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 				} catch (Exception e) {
-					bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs)));
-					break;
+					System.out.println("at Exception: " + e.getMessage());
+					bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
+					continue;
 					//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
 				} 
 					
@@ -115,7 +118,7 @@ public class PvpPersistenceInterface {
 				} catch (UserAskToChangeFileException ucf) {
 					throw ucf;
 				} catch (Exception e) {
-					bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(getFileDesc(bs)));
+					bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				} finally {
 					// note that close is called 2 times when an error happens
 					fileReader.close();
@@ -128,15 +131,12 @@ public class PvpPersistenceInterface {
 		}
 		
 		if (wasChanged) {
+			// set them as dirty, so they will eventually save
+			for (PvpBackingStore bs: backingStores) {
+				bs.setDirty(true);
+			}
+			
 			System.out.println("was changed is TRUE");
-		}
-	}
-	
-	private String getFileDesc(PvpBackingStore bs) {
-		if (bs instanceof PvpBackingStoreGoogleDocs) {
-			return "Google Doc: " + PvpBackingStoreGoogleDocs.DOC_NAME;
-		} else {
-			return "File: " + context.getDataFile();
 		}
 	}
 	
@@ -145,10 +145,11 @@ public class PvpPersistenceInterface {
 	 */
 	public boolean appQuiting() {
 		save(context.getDataInterface(), SaveTrigger.quit);
-		return true;
+		return !errorHappened;
 	}
 	
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
+		errorHappened = false;
 		for (PvpBackingStore bs : backingStores) {
 			if (bs.isEnabled()) {
 				bs.clearTransientData();
@@ -184,23 +185,26 @@ public class PvpPersistenceInterface {
 	
 	private void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
 		System.out.println("SAVING BACKING STORE:" + bs.getClass().getName());
-		if (bs.supportsFileUpload()) {
-			bs.doFileUpload();
-		} else {
-			PvpOutStreamer fileWriter = null;
-			try {
-				fileWriter = new PvpOutStreamer(bs, context);
-				DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
-			} catch (Exception e) {
-				context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
-			} finally {
-				// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
-				if (fileWriter != null) {
-					fileWriter.close();
+		try {
+			if (bs.supportsFileUpload()) {
+				bs.doFileUpload();
+			} else {
+				PvpOutStreamer fileWriter = null;
+				try {
+					fileWriter = new PvpOutStreamer(bs, context);
+					DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
+				} finally {
+					// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
+					if (fileWriter != null) {
+						fileWriter.close();
+					}
 				}
 			}
+			bs.setDirty(false);
+		} catch (Exception e) {
+			errorHappened = true;
+			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
 		}
-		bs.setDirty(false);
 	}
 
 }

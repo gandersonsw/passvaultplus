@@ -180,7 +180,7 @@ public class PvpContext {
 	 * Will only ask once when the application is started.  Will be saved until quit.
 	 * @return
 	 */
-	public String getPasswordOrAskUser(boolean passwordWasBad) throws UserAskToChangeFileException {
+	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
 
 		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
 			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
@@ -238,7 +238,7 @@ public class PvpContext {
 		}
 		
 		final PwDialog pd = new PwDialog();
-		final PwDialog.PwAction action = pd.askForPw(passwordWasBad, dataFilePath);
+		final PwDialog.PwAction action = pd.askForPw(passwordWasBad, resourseLocation);
 		
 		if (action == PwDialog.PwAction.Configure) {
 			throw new UserAskToChangeFileException();

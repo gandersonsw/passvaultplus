@@ -42,7 +42,7 @@ public class PwDialog {
 		showConfigButton = scb;
 	}
 	
-	public PwAction askForPw(final boolean passwordWasBad, final String path) {
+	public PwAction askForPw(final boolean passwordWasBad, final String resourseLocation) {
 		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 		
@@ -91,7 +91,7 @@ public class PwDialog {
 	
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JLabel file = new JLabel("File: " + path);
+			JLabel file = new JLabel(resourseLocation);
 			final Font fnt = file.getFont().deriveFont(file.getFont().getSize() - 1.0f);
 			file.setFont(fnt);
 			p.add(file);

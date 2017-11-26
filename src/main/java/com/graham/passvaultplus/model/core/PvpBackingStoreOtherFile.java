@@ -50,5 +50,10 @@ public class PvpBackingStoreOtherFile extends PvpBackingStoreAbstract {
 	public long getLastUpdatedDate() {
 		return f.lastModified();
 	}
+	
+	@Override
+	public String getDisplayableResourceLocation() {
+		return "File: " + f;
+	}
 
 }

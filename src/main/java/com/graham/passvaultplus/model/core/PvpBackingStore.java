@@ -76,7 +76,7 @@ public interface PvpBackingStore {
 	
 	boolean supportsFileUpload();
 	
-	void doFileUpload();
+	void doFileUpload() throws IOException;
 	
 	boolean isDirty();
 	
@@ -103,5 +103,7 @@ public interface PvpBackingStore {
 	void setException(PvpException e);
 	
 	PvpException getException();
+	
+	String getDisplayableResourceLocation();
 
 }

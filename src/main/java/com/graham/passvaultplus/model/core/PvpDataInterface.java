@@ -54,6 +54,9 @@ public class PvpDataInterface {
   		
   		int typesMatched = 0;
   		boolean wasChanged = false;
+  		if (maxID != dataTocMergeFrom.maxID) {
+  			wasChanged = true;
+  		}
   		
   		for (PvpType newType : dataTocMergeFrom.types) {
   			PvpType existingType = getType(newType.getName());
