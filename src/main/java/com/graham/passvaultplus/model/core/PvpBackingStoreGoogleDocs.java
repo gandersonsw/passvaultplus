@@ -25,6 +25,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 import com.graham.passvaultplus.PvpContext;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
@@ -79,11 +80,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	@Override
 	public InputStream openInputStream() throws IOException {
 		System.out.println("google getting in stream");
-		final String id = context.getGoogleDriveDocId();
-		if (id == null || id.length() == 0) {
-			System.out.println("no google yet");
-			return null;
-		}
+		String id = context.getGoogleDriveDocId();
 		
 		final Drive driveService;
 		try {
@@ -91,7 +88,41 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		} catch (GeneralSecurityException e) {
 			throw new IOException(e);
 		}
-		return driveService.files().get(id).executeMediaAsInputStream();
+		
+		if (id != null && id.length() > 0) {
+			try {
+				return driveService.files().get(id).executeMediaAsInputStream();
+			} catch (HttpResponseException e) {
+				System.out.println("at 88 HttpResponseException : " + e.getStatusCode() );
+				if (e.getStatusCode() == 404) {
+					// process below
+				} else {
+					throw e;
+				}
+			}
+		}
+		
+		System.out.println("looking for google doc");
+		
+		FileList result = driveService.files().list().execute();
+		List<File> files = result.getFiles();
+        if (files == null || files.size() == 0) {
+            System.out.println("No files found.");
+            return null;
+        } else {
+        	final String localFileName = getFileName(false);
+            System.out.println("Files:");
+            for (File file : files) {
+                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+                if (localFileName.equals(file.getName())) {
+                	id = file.getId();
+                	context.setGoogleDriveDocId(id);
+                	return driveService.files().get(id).executeMediaAsInputStream();
+                }
+            }
+        }
+		
+		return null;
 	}
 
 	@Override
@@ -147,6 +178,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				System.out.println("at HttpResponseException : " + e.getStatusCode() );
 				if (e.getStatusCode() == 404) {
 					returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
+				} else {
+					throw e;
 				}
 			}
 		}
@@ -250,6 +283,19 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	@Override
 	public String getShortName() {
 		return "Google™";
+	}
+	
+	@Override
+	String getErrorMessageForDisplay() {
+		Throwable t = exception.getCause();
+		if (t instanceof HttpResponseException) {
+			int httpCode = ((HttpResponseException)t).getStatusCode();
+			if (httpCode == 404) {
+				return "File not found on Google Doc Server. A new file will be created when saving.";
+			}
+		}
+		
+		return exception.getMessage();
 	}
 
 }

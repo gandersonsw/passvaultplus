@@ -7,8 +7,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,7 +14,6 @@ import javax.swing.border.EmptyBorder;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.*;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
-import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
 import com.graham.passvaultplus.view.recordlist.ViewListBuilder;
 
 public class MainFrame extends JFrame {
@@ -65,26 +62,16 @@ public class MainFrame extends JFrame {
 		info.setBorder(new EmptyBorder(3,3,7,10));
 		p.add(info);
 		
-		for (PvpBackingStore bs : context.getFileInterface().getBackingStores()) {
-			if (bs.isEnabled()) {
-				final JLabel bsSN = new JLabel(bs.getShortName());
-				bsSN.setFont(info.getFont());
-				bsSN.setBorder(new EmptyBorder(3,8,7,3));
-				p.add(bsSN);
-				final StatusBox sb = new StatusBox(Color.GREEN);
-				//sb.setBorder(new EmptyBorder(1,1,18,1));
+		for (PvpBackingStore bs : context.getFileInterface().getEnabledBackingStores()) {
+			final JLabel bsSN = new JLabel(bs.getShortName());
+			bsSN.setFont(info.getFont());
+			bsSN.setBorder(new EmptyBorder(3,8,7,3));
+			p.add(bsSN);
 				
-				sb.addMouseListener(new MouseAdapter() {
-			            @Override
-			            public void mouseClicked(MouseEvent e) {
-			              //  super.mouseClicked(e);
-			                System.out.println("clicked");
-			            }
-			        });
-				
-				p.add(sb);
-				bs.setStatusBox(sb);
-			}
+			final StatusBox sb = new StatusBox(Color.GREEN);
+			sb.addMouseListener(new BackingStoreClickHandler(context, bs));
+			p.add(sb);
+			bs.setStatusBox(sb);
 		}
 		p.add(Box.createRigidArea(new Dimension(18, 0)));
 		

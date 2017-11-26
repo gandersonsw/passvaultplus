@@ -63,77 +63,86 @@ public class PvpPersistenceInterface {
 		return fname;
 	}
 	
-	public List<PvpBackingStore> getBackingStores() {
-		return backingStores;
+	public List<PvpBackingStore> getEnabledBackingStores() {
+		List<PvpBackingStore> bsList = new ArrayList<PvpBackingStore>();
+		for (PvpBackingStore bs : backingStores) {
+			if (bs.isEnabled()) {
+				bsList.add(bs);
+			}
+		}
+		return bsList;
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
 		
-		for (PvpBackingStore bs: backingStores) {
+		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
+		
+		for (PvpBackingStore bs: enabledBs) {
 			bs.clearTransientData();
 		}
 		
 		// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
-		PvpBackingStore[] sortedBSArr = new PvpBackingStore[backingStores.size()];
-		sortedBSArr = backingStores.toArray(sortedBSArr);
+		PvpBackingStore[] sortedBSArr = new PvpBackingStore[enabledBs.size()];
+		sortedBSArr = enabledBs.toArray(sortedBSArr);
 		Arrays.sort(sortedBSArr, (bs1, bs2) -> { return Long.compare(bs2.getLastUpdatedDate(), bs1.getLastUpdatedDate()); } );
 		
 		boolean doMerge = false;
 		boolean wasChanged = false; // TODO way to write out if it was changed?
 		for (PvpBackingStore bs: sortedBSArr) {
-			if (bs.isEnabled()) {
-				System.out.println("loading bs : " + bs.getClass().getName());
-				System.out.println("update date: " + new Date(bs.getLastUpdatedDate()));
-				final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
+			System.out.println("loading bs : " + bs.getClass().getName());
+			System.out.println("update date: " + new Date(bs.getLastUpdatedDate()));
+			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
+			
+			BufferedInputStream inStream = null;
+			try {
+				inStream = fileReader.getStream();
+			} catch (UserAskToChangeFileException ucf) {
+				throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
+			} catch (InvalidKeyException e) {
+				System.out.println("at InvalidKeyException");
+				bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
+				continue;
+				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
+			} catch (Exception e) {
+				System.out.println("at 11 Exception: " + e.getMessage());
+				bs.setDirty(true); // in the case where the file does not exist for the BackingStore, this will create it
+				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
+				continue;
+				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
+			} 
 				
-				BufferedInputStream inStream = null;
-				try {
-					inStream = fileReader.getStream();
-				} catch (UserAskToChangeFileException ucf) {
-					throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
-				} catch (InvalidKeyException e) {
-					System.out.println("at InvalidKeyException");
-					bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
-					continue;
-					//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
-				} catch (Exception e) {
-					System.out.println("at Exception: " + e.getMessage());
-					bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
-					continue;
-					//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
-				} 
-					
-				// TODO does fileReader.close(); need to be called if we dont get here?
-				
-				try {
-					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-					if (doMerge) {
-						if (dataInterface.mergeData(newDataInterface)) {
-							wasChanged = true;
-						}
-					} else {
-						dataInterface.setData(newDataInterface);
-						doMerge = true;
+			// TODO does fileReader.close(); need to be called if we dont get here?
+			
+			try {
+				PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+				if (doMerge) {
+					if (dataInterface.mergeData(newDataInterface)) {
+						wasChanged = true;
 					}
-					context.setEncryptionStrengthBits(fileReader.getAesBits());
-				} catch (UserAskToChangeFileException ucf) {
-					throw ucf;
-				} catch (Exception e) {
-					bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
-				} finally {
-					// note that close is called 2 times when an error happens
-					fileReader.close();
+				} else {
+					dataInterface.setData(newDataInterface);
+					doMerge = true;
 				}
+				context.setEncryptionStrengthBits(fileReader.getAesBits());
+			} catch (UserAskToChangeFileException ucf) {
+				throw ucf;
+			} catch (Exception e) {
+				System.out.println("at 37 Exception: " + e.getMessage());
+				e.printStackTrace();
+				bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
+			} finally {
+				// note that close is called 2 times when an error happens
+				fileReader.close();
 			}
 		}
 		
 		if (!doMerge) { // if this is false, nothing was loaded -> we have a problem
-			throw backingStores.get(0).getException();
+			throw enabledBs.get(0).getException();
 		}
 		
 		if (wasChanged) {
 			// set them as dirty, so they will eventually save
-			for (PvpBackingStore bs: backingStores) {
+			for (PvpBackingStore bs: enabledBs) {
 				bs.setDirty(true);
 			}
 			
@@ -150,41 +159,40 @@ public class PvpPersistenceInterface {
 	}
 	
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
+		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
 		errorHappened = false;
-		for (PvpBackingStore bs : backingStores) {
-			if (bs.isEnabled()) {
-				bs.clearTransientData();
-				switch (bs.getChattyLevel()) {
-					case unlimited:
-					case localLevel:
-					case remoteHeavy:
-						if (saveTrig == SaveTrigger.quit) {
-							if (bs.isDirty()) {
-								saveOneBackingStore(dataInterface, bs);
-							}
-						} else {
+		for (PvpBackingStore bs : enabledBs) {
+			bs.clearTransientData();
+			switch (bs.getChattyLevel()) {
+				case unlimited:
+				case localLevel:
+				case remoteHeavy:
+					if (saveTrig == SaveTrigger.quit) {
+						if (bs.isDirty()) {
 							saveOneBackingStore(dataInterface, bs);
 						}
-						break;
-					case remoteMedium:
-					case remoteLight:
-					case mostRestricted:
-						if (saveTrig == SaveTrigger.quit) {
-							if (bs.isDirty()) {
-								saveOneBackingStore(dataInterface, bs);
-							}
-						} else if (saveTrig == SaveTrigger.major) {
+					} else {
+						saveOneBackingStore(dataInterface, bs);
+					}
+					break;
+				case remoteMedium:
+				case remoteLight:
+				case mostRestricted:
+					if (saveTrig == SaveTrigger.quit) {
+						if (bs.isDirty()) {
 							saveOneBackingStore(dataInterface, bs);
-						} else {
-							bs.setDirty(true);
 						}
-						break;
-				}
+					} else if (saveTrig == SaveTrigger.major) {
+						saveOneBackingStore(dataInterface, bs);
+					} else {
+						bs.setDirty(true);
+					}
+					break;
 			}
 		}
 	}
 	
-	private void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
+	public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
 		System.out.println("SAVING BACKING STORE:" + bs.getClass().getName());
 		try {
 			if (bs.supportsFileUpload()) {

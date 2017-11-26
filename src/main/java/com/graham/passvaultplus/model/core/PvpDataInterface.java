@@ -73,10 +73,13 @@ public class PvpDataInterface {
   		int recordsMatched = 0;
   		for (int i = 0; i < dataTocMergeFrom.records.size(); i++) {
   			PvpRecord newRec = dataTocMergeFrom.getRecordAtIndex(i);
-  			PvpRecord existingRec = getRecordAtIndex(i);
-  			if (newRec.getId() != existingRec.getId()) {
-  				System.out.println("id did not match by index");
-  				existingRec = getRecord(newRec.getId());
+  			PvpRecord existingRec = null;
+  			if (i < getRecordCount()) {
+  				existingRec = getRecordAtIndex(i);
+  				if (newRec.getId() != existingRec.getId()) {
+  					System.out.println("id did not match by index");
+  					existingRec = getRecord(newRec.getId());
+  				}
   			}
   			if (existingRec == null) {
   				System.out.println("adding a record");

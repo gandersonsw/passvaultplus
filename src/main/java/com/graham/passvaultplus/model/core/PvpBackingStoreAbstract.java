@@ -10,7 +10,7 @@ import com.graham.passvaultplus.view.StatusBox;
 public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	
 	private boolean dirty;
-	private PvpException exception;
+	PvpException exception;
 	private StatusBox statusBox;
 	
 	@Override
@@ -64,15 +64,19 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		if (statusBox != null) {
 			if (exception != null) {
 				statusBox.setColor(Color.ORANGE);
-				statusBox.setToolTipText("Error:" + exception.getMessage());
+				statusBox.setToolTipText("Error:" + getErrorMessageForDisplay());
 			} else if (dirty) {
 				statusBox.setColor(Color.BLUE);
-				statusBox.setToolTipText("Not stored yet");
+				statusBox.setToolTipText("Not stored yet. Click to store now.");
 			} else {
 				statusBox.setColor(Color.GREEN);
-				statusBox.setToolTipText("All data saved");
+				statusBox.setToolTipText("All data stored");
 			}
 		}
+	}
+	
+	String getErrorMessageForDisplay() {
+		return exception.getMessage();
 	}
 	
 }

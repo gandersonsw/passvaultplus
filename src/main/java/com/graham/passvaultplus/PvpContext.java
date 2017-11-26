@@ -37,7 +37,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  */
 public class PvpContext {
 	static final public boolean JAR_BUILD = false;
-	static final public String VERSION = "1.1.4";
+	static final public String VERSION = "1.2";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
@@ -515,9 +515,9 @@ public class PvpContext {
 		try {
 			BufferedImage img;
 			if (JAR_BUILD) {
-				//System.out.println("getIcon1:" + "resources/images/" + imageName + ".png");
+				//System.out.println("getIcon1:" + "images/" + imageName + ".png");
 				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
-				InputStream imageStream = PvpContext.class.getResourceAsStream("/resources/images/" + imageName + ".png");
+				InputStream imageStream = PvpContext.class.getResourceAsStream("/images/" + imageName + ".png");
 				img = ImageIO.read(imageStream);
 			} else {
 				//System.out.println("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
@@ -542,7 +542,7 @@ public class PvpContext {
 			if (PvpContext.JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
-				sourceStream = PvpContext.class.getResourceAsStream("/resources/" + rname + ".txt");
+				sourceStream = PvpContext.class.getResourceAsStream("/" + rname + ".txt");
 				isr = new InputStreamReader(sourceStream);
 			} else {
 				File sourceFile = new File("src/main/resources/" + rname + ".txt");
