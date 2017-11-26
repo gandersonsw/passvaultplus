@@ -244,7 +244,12 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	
 	@Override
 	public String getDisplayableResourceLocation() {
-		return "Google Doc: " + getFileName(true);
+		return "Google™ Doc: " + getFileName(true);
+	}
+	
+	@Override
+	public String getShortName() {
+		return "Google™";
 	}
 
 }

@@ -2,11 +2,9 @@
 package com.graham.passvaultplus.model.core;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +62,10 @@ public class PvpPersistenceInterface {
 		}
 		return fname;
 	}
+	
+	public List<PvpBackingStore> getBackingStores() {
+		return backingStores;
+	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
 		
@@ -102,7 +104,6 @@ public class PvpPersistenceInterface {
 				} 
 					
 				// TODO does fileReader.close(); need to be called if we dont get here?
-				
 				
 				try {
 					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);

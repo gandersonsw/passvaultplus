@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.graham.passvaultplus.PvpException;
+import com.graham.passvaultplus.view.StatusBox;
 
 /**
  * Interface for anything we use to interface to a backing storage. Could be file system, 
@@ -105,5 +106,9 @@ public interface PvpBackingStore {
 	PvpException getException();
 	
 	String getDisplayableResourceLocation();
+	
+	String getShortName();
+	
+	void setStatusBox(StatusBox sb);
 
 }

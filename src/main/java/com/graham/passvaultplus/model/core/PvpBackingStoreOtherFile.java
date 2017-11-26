@@ -55,5 +55,10 @@ public class PvpBackingStoreOtherFile extends PvpBackingStoreAbstract {
 	public String getDisplayableResourceLocation() {
 		return "File: " + f;
 	}
+	
+	@Override
+	public String getShortName() {
+		return "Other File";
+	}
 
 }
