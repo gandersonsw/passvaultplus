@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.model.core.StringEncrypt;
+import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.MainFrame;
@@ -42,6 +43,8 @@ public class PvpContext {
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
 	static private final int PWS_NOT_SAVED = 2; // the user asked the password to not be saved in prefs
+	
+	static private PvpContext activeContext;
 	
 	private final MyUndoManager undoManager = new MyUndoManager(this);
 	private final TabManager tabManager = new TabManager(this);
@@ -70,10 +73,12 @@ public class PvpContext {
 	private ErrorFrame eframe;
 	private StringBuilder warnings = new StringBuilder();
 	private byte[] encryptedPassword;
+	private DiagnosticsManager diagnosticsManager = new DiagnosticsManager();
 	
 	private boolean userPrefsLoaded = false;
-	private boolean showDashboard = true; // TODO !!!!!!!!!!!!!!!!!!!  for now, always show the dashboard.  This should be saved in the data file
+	private boolean showDashboard = true;
 	private boolean useGoogleDrive = false;
+	private boolean showDiagnostics = false;
 	private String googleDriveDocId;
 	
 	/**
@@ -89,6 +94,7 @@ public class PvpContext {
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
 		PvpContext context = new PvpContext();
+		activeContext = context;
 
 		context.rtFileInterface = new PvpPersistenceInterface(context);
 		context.rtDataInterface = new PvpDataInterface(context);
@@ -112,6 +118,10 @@ public class PvpContext {
 		} else {
 			new StartupOptionsFrame(context);
 		}
+	}
+	
+	static public PvpContext getActiveContext() {
+		return activeContext;
 	}
 
 	private boolean isDataFilePresent() {
@@ -369,6 +379,7 @@ public class PvpContext {
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		showDashboard = userPrefs.getBoolean("showDashboard", false);
 		useGoogleDrive = userPrefs.getBoolean("useGoogleDrive", false);
+		showDiagnostics = userPrefs.getBoolean("showDiagnostics", false);
 		googleDriveDocId = userPrefs.get("googleDriveDocId", "");
 		userPrefsLoaded = true;
 	}
@@ -385,7 +396,12 @@ public class PvpContext {
 		checkDashboard();
 	}
 	
-	public void checkDashboard() {
+	public void checkOtherTabs() {
+		checkDashboard();
+		diagnosticsManager.checkDiagnostics();
+	}
+	
+	private void checkDashboard() {
 		if (getShowDashboard() && dashboardComponent == null) {
 			try {
 				dashboardComponent = DashBoardBuilder.buildDashBoard(this);
@@ -422,6 +438,18 @@ public class PvpContext {
 		userPrefs.put("googleDriveDocId", googleDriveDocId);
 	}
 	
+	public boolean getShowDiagnostics() {
+		loadUserPrefs();
+		return showDiagnostics;
+	}
+	
+	public void setShowDiagnostics(final boolean s) {
+		showDiagnostics = s;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putBoolean("showDiagnostics", showDiagnostics);
+		diagnosticsManager.checkDiagnostics();
+	}
+	
 	/**
 	 * To be used when a bad exception happens somewhere in the application.
 	 * @canContinue If false, force the application to quit
@@ -445,20 +473,21 @@ public class PvpContext {
 	}
 
 	public void notifyWarning(String s) {
+		diagnosticsManager.warning(s, null);
 		warnings.append(s);
 		warnings.append("\n");
-		// TODO
-		System.out.println(s);
 	}
 	
 	public void notifyWarning(String s, Exception e) {
+		diagnosticsManager.warning(s, e);
 		warnings.append(s);
 		warnings.append("::");
 		warnings.append(e.getMessage());
 		warnings.append("\n");
-		// TODO
-		System.out.println(s);
-		e.printStackTrace();
+	}
+	
+	public void notifyInfo(String s) {
+		diagnosticsManager.info(s);
 	}
 
 	public PvpViewListContext getViewListContext() {
@@ -515,12 +544,12 @@ public class PvpContext {
 		try {
 			BufferedImage img;
 			if (JAR_BUILD) {
-				//System.out.println("getIcon1:" + "images/" + imageName + ".png");
+				//PvpContext.getActiveContext().notifyInfo("getIcon1:" + "images/" + imageName + ".png");
 				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
 				InputStream imageStream = PvpContext.class.getResourceAsStream("/images/" + imageName + ".png");
 				img = ImageIO.read(imageStream);
 			} else {
-				//System.out.println("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
+				//PvpContext.getActiveContext().notifyInfo("getIcon:" + new File("src/main/resources/images/" + imageName + ".png").getAbsolutePath());
 				img = ImageIO.read(new File("src/main/resources/images/" + imageName + ".png"));
 			}
 
@@ -528,8 +557,7 @@ public class PvpContext {
 			cachedIcons.put(imageName, i);
 			return i;
 		} catch (Exception e) {
-			System.out.println(imageName);
-			e.printStackTrace(); // TODO
+			PvpContext.getActiveContext().notifyWarning("PvpContext.getIcon :: " + imageName, e);
 			return null;
 		}
 	}

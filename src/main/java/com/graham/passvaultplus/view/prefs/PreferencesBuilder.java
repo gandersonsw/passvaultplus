@@ -55,6 +55,7 @@ public class PreferencesBuilder {
 		p.add(buildAESBits());
 		p.add(buildDashboard());
 		p.add(buildGoogleDrive());
+		p.add(buildDiagnostics());
 		prefsContext.updateBecauseCompressedOrEncryptedChanged();
 		
 		// set the intial password strength
@@ -195,9 +196,17 @@ public class PreferencesBuilder {
 	
 	private JPanel buildGoogleDrive() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		prefsContext.useGoogleDrive = new JCheckBox("Use Google Drive");
+		prefsContext.useGoogleDrive = new JCheckBox("Use Google™ Drive");
 		prefsContext.useGoogleDrive.setSelected(conn.getUseGoogleDrive());
 		p.add(prefsContext.useGoogleDrive);
+		return p;
+	}
+	
+	private JPanel buildDiagnostics() {
+		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		prefsContext.showDiagnostics = new JCheckBox("Show Diagnostics");
+		prefsContext.showDiagnostics.setSelected(conn.getShowDiagnostics());
+		p.add(prefsContext.showDiagnostics);
 		return p;
 	}
 	

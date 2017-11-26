@@ -19,6 +19,7 @@ public class PreferencesContext {
 	final boolean compressedFlag; // this is not updated, original value only
 	final boolean encryptedFlag;  // this is not updated, original value only
 	final boolean useGoogleDriveFlag; // this is not updated, original value only
+	final boolean showDiagnosticsFlag; // this is not updated, original value only
 	final PreferencesConnection conn;
 	
 	JCheckBox compressed;
@@ -42,6 +43,7 @@ public class PreferencesContext {
 	
 	JCheckBox showDashboard;
 	JCheckBox useGoogleDrive;
+	JCheckBox showDiagnostics;
 	
 	private JLabel dataFileLabel;
 	private String dataFileString;
@@ -53,6 +55,7 @@ public class PreferencesContext {
 		compressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
 		encryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
 		useGoogleDriveFlag = connParam.getUseGoogleDrive();
+		showDiagnosticsFlag = connParam.getShowDiagnostics();
 	}
 	
 	String getPasswordText() {

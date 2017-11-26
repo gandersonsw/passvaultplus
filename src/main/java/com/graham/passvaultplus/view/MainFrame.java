@@ -40,8 +40,8 @@ public class MainFrame extends JFrame {
 		setSize(904, 520);
 		setMinimumSize(new Dimension(400, 240));
 
-		context.checkDashboard();
 		context.getTabManager().addOtherTab("Records", ViewListBuilder.buildViewList(context));
+		context.checkOtherTabs();
 
 		JPanel toolBar = initToolBar(context);
 		JPanel mainPanel = new JPanel(new BorderLayout());

@@ -75,6 +75,8 @@ public class PvpPersistenceInterface {
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
 		
+		context.notifyInfo("PvpPersistenceInterface.load :: START");
+		
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
 		
 		for (PvpBackingStore bs: enabledBs) {
@@ -89,8 +91,8 @@ public class PvpPersistenceInterface {
 		boolean doMerge = false;
 		boolean wasChanged = false; // TODO way to write out if it was changed?
 		for (PvpBackingStore bs: sortedBSArr) {
-			System.out.println("loading bs : " + bs.getClass().getName());
-			System.out.println("update date: " + new Date(bs.getLastUpdatedDate()));
+			context.notifyInfo("loading bs : " + bs.getClass().getName());
+			context.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
 			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
 			
 			BufferedInputStream inStream = null;
@@ -99,12 +101,12 @@ public class PvpPersistenceInterface {
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
 			} catch (InvalidKeyException e) {
-				System.out.println("at InvalidKeyException");
+				context.notifyInfo("at InvalidKeyException");
 				bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 			} catch (Exception e) {
-				System.out.println("at 11 Exception: " + e.getMessage());
+				context.notifyInfo("at 11 Exception: " + e.getMessage());
 				bs.setDirty(true); // in the case where the file does not exist for the BackingStore, this will create it
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
@@ -127,7 +129,7 @@ public class PvpPersistenceInterface {
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf;
 			} catch (Exception e) {
-				System.out.println("at 37 Exception: " + e.getMessage());
+				context.notifyInfo("at 37 Exception: " + e.getMessage());
 				e.printStackTrace();
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 			} finally {
@@ -146,7 +148,7 @@ public class PvpPersistenceInterface {
 				bs.setDirty(true);
 			}
 			
-			System.out.println("was changed is TRUE");
+			context.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
 		}
 	}
 	
@@ -193,7 +195,7 @@ public class PvpPersistenceInterface {
 	}
 	
 	public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
-		System.out.println("SAVING BACKING STORE:" + bs.getClass().getName());
+		context.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
 		try {
 			if (bs.supportsFileUpload()) {
 				bs.doFileUpload();

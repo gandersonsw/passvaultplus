@@ -60,7 +60,6 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 	
 	private void updateStatusBox() {
-		System.out.println("at updateStatusBox");
 		if (statusBox != null) {
 			if (exception != null) {
 				statusBox.setColor(Color.ORANGE);

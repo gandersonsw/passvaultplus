@@ -79,7 +79,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		System.out.println("google getting in stream");
+		context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream");
 		String id = context.getGoogleDriveDocId();
 		
 		final Drive driveService;
@@ -93,7 +93,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			try {
 				return driveService.files().get(id).executeMediaAsInputStream();
 			} catch (HttpResponseException e) {
-				System.out.println("at 88 HttpResponseException : " + e.getStatusCode() );
+				context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: HttpResponseException : " + e.getStatusCode() );
 				if (e.getStatusCode() == 404) {
 					// process below
 				} else {
@@ -102,18 +102,18 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			}
 		}
 		
-		System.out.println("looking for google doc");
+		context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: looking for google doc");
 		
 		FileList result = driveService.files().list().execute();
 		List<File> files = result.getFiles();
         if (files == null || files.size() == 0) {
-            System.out.println("No files found.");
+        	context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: No files found.");
             return null;
         } else {
         	final String localFileName = getFileName(false);
-            System.out.println("Files:");
+        	context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: Files:");
             for (File file : files) {
-                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+            	context.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: " + file.getName() + " :: " + file.getId());
                 if (localFileName.equals(file.getName())) {
                 	id = file.getId();
                 	context.setGoogleDriveDocId(id);
@@ -152,7 +152,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	
 	@Override
 	public void doFileUpload() throws IOException {
-    	System.out.println("at doFileUpload" );
+		context.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: START" );
 
         Drive driveService;
 		try {
@@ -168,14 +168,14 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		newFileMetadata.setName(getFileName(false));
 		
 		if (id == null || id.length() == 0) {
-			System.out.println("creating new file ");
+			context.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: creating new file ");
 			returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
 		} else {
-			System.out.println("updating file file " + id);
+			context.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: updating file file " + id);
 			try {
 				final File ignored = driveService.files().update(id, newFileMetadata, mediaContent).execute();
 			} catch (HttpResponseException e) {
-				System.out.println("at HttpResponseException : " + e.getStatusCode() );
+				context.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: HttpResponseException : " + e.getStatusCode() );
 				if (e.getStatusCode() == 404) {
 					returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
 				} else {
@@ -186,7 +186,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		
 		if  (returnedFileMetaData != null) {
 			context.setGoogleDriveDocId(returnedFileMetaData.getId());
-			System.out.println("File ID: " + returnedFileMetaData.getId());
+			context.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: File ID: " + returnedFileMetaData.getId());
 		}
 	}
 
@@ -215,7 +215,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
 				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
 		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+		context.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
 		return credential;
 	}
 

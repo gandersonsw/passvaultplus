@@ -258,7 +258,6 @@ public class DatePicker extends AbstractPopupWidget<JTextField> {
 					return;
 				}
 			} else {
-				//System.out.println("D year=" + getSelectedYear() + "  month=" + getSelectedMonth() + "  day=" + getSelectedDay());
 				d = tm.getDate(dayTable.getSelectedRow(), dayTable.getSelectedColumn());
 			}
 			Calendar c3 = Calendar.getInstance();
@@ -295,7 +294,7 @@ public class DatePicker extends AbstractPopupWidget<JTextField> {
 			}
 			ignoreListSel = true;
 			int day = getSelectedDay();
-			System.out.println("YM year=" + getSelectedYear() + "  month=" + getSelectedMonth() + "  day=" + getSelectedDay());
+			//System.out.println("YM year=" + getSelectedYear() + "  month=" + getSelectedMonth() + "  day=" + getSelectedDay());
 			cal.set(getSelectedYear(), getSelectedMonth(), 1);
 			if (day > cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
 				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));

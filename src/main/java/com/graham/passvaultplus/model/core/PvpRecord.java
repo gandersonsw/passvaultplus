@@ -88,7 +88,8 @@ public class PvpRecord {
 		}
 
 		if (!fields.containsKey(fieldName)) {
-			// TODO System.out.println("id:" + id + " field not found:" + fieldName);
+			PvpContext.getActiveContext().notifyInfo("PvpRecord.getCustomField :: id:" + id + " field not found:" + fieldName);
+			// TODO
 			StringBuffer sb = new StringBuffer();
 			for (String fn : fields.keySet()) {
 				if (sb.length() > 0) {
@@ -96,7 +97,7 @@ public class PvpRecord {
 				}
 				sb.append(fn);
 			}
-			// TODO System.out.println("fields:" + sb);
+			PvpContext.getActiveContext().notifyInfo("PvpRecord.getCustomField :: fields:" + sb);
 		}
 
 		return fields.get(fieldName);
@@ -138,13 +139,13 @@ public class PvpRecord {
 			try {
 				creationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				System.out.println("creation date parse error:" + fieldValue);
+				PvpContext.getActiveContext().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_MODIFICATION_DATE)) {
 			try {
 				modificationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				System.out.println("modification date parse error:" + fieldValue);
+				PvpContext.getActiveContext().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_TYPE)) {
 			typeForValidate = fieldValue;

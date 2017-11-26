@@ -48,10 +48,9 @@ public class DatabaseReader {
 		byte[] goodData = new byte[1000000];
 		int b;
 		int goodDataCount = 0;
-		//int[] counts = new int[256];
+	
 		List<BadChar> badChars = new ArrayList<>();
 		while ((b = inStream.read()) != -1) {
-			//counts[b]++;
 			if (b < 128) {
 				goodData[goodDataCount] = (byte) b;
 				goodDataCount++;
@@ -59,12 +58,6 @@ public class DatabaseReader {
 				badChars.add(new BadChar(b, goodDataCount));
 			}
 		}
-		
-		//for (int i = 0; i < 256; i++) {
-		//	if (counts[i] > 0) {
-		//		System.out.println(i + " : " + counts[i]);
-		//	}
-		//}
 		
 		StringBuilder sb = new StringBuilder("There were bad characters in the file. Consider opening from a backup.\n");
 		for (BadChar bc : badChars) {

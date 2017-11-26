@@ -50,7 +50,7 @@ public class PvpDataInterface {
   	 */
   	boolean mergeData(PvpDataInterface dataTocMergeFrom) {
   		
-  		System.out.println(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataTocMergeFrom.maxID);
+  		context.notifyInfo(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataTocMergeFrom.maxID);
   		
   		int typesMatched = 0;
   		boolean wasChanged = false;
@@ -61,7 +61,7 @@ public class PvpDataInterface {
   		for (PvpType newType : dataTocMergeFrom.types) {
   			PvpType existingType = getType(newType.getName());
   			if (existingType == null) {
-  				System.out.println("adding type:" + newType.getName());
+  				context.notifyInfo("adding type:" + newType.getName());
   				types.add(newType);
   				wasChanged = true;
   			} else {
@@ -77,12 +77,12 @@ public class PvpDataInterface {
   			if (i < getRecordCount()) {
   				existingRec = getRecordAtIndex(i);
   				if (newRec.getId() != existingRec.getId()) {
-  					System.out.println("id did not match by index");
+  					context.notifyInfo("id did not match by index");
   					existingRec = getRecord(newRec.getId());
   				}
   			}
   			if (existingRec == null) {
-  				System.out.println("adding a record");
+  				context.notifyInfo("adding a record");
   				int nextID = getNextMaxID();
   				newRec.setId(nextID);
   				records.add(newRec);
@@ -93,7 +93,7 @@ public class PvpDataInterface {
   			}
   		}
   		
-  		System.out.println(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
+  		context.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
   		return wasChanged;
   	}
 
@@ -239,13 +239,7 @@ public class PvpDataInterface {
 
 	public FilterResults getFilteredRecords(final String filterByType, final String filterByText, final PvpRecord filterByCategory, final boolean checkCategory) {
 		final long startTime = System.nanoTime();
-		/*
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		*/
+	
 		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
 		boolean checkText = filterByText.length() > 0;
 		List<PvpRecord> allRecords = context.getDataInterface().getRecords(); // TODO delete context.getDataInterface().
@@ -287,8 +281,10 @@ public class PvpDataInterface {
     		results.allTheSameTypeFlag = results.records.stream().map(r -> r.getType().getName()).distinct().count() == 1;
     	}
     	
-		final long endTime = System.nanoTime();
-		//System.out.println("getFilteredRecords time:" + (endTime - startTime) / 1000 + " : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
+    	if (context.getShowDiagnostics()) {
+    		final long endTime = System.nanoTime();
+    		context.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + (endTime - startTime) / 1000000 + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
+    	}
 		return results;
 	}
 

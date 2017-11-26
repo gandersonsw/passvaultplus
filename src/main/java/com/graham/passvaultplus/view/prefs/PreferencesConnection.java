@@ -57,6 +57,7 @@ public abstract class PreferencesConnection {
 		context.setPinTimeout(psp.pinTimeout);
 		context.setShowDashboard(psp.showDashBoard);
 		context.setUseGoogleDrive(psp.useGoogleDrive);
+		context.setShowDiagnostics(psp.showDiagnostics);
 	}
 	
 	public boolean getShowDashboard() {
@@ -65,5 +66,9 @@ public abstract class PreferencesConnection {
 	
 	public boolean getUseGoogleDrive() {
 		return context.getUseGoogleDrive();
+	}
+	
+	public boolean getShowDiagnostics() {
+		return context.getShowDiagnostics();
 	}
 }

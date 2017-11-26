@@ -32,7 +32,7 @@ public class ExportXmlFile extends AbstractAction {
 		String rawXML = "";
 		try {
 			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
-			System.out.println("xml size" + rawXML.length());
+			System.out.println("xml size" + rawXML.length()); // don't use Diagnostics because this is error handle code
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, "Could not get XML: " + ex.getMessage());
 			return;
