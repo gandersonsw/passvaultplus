@@ -10,6 +10,7 @@ import com.graham.passvaultplus.view.StatusBox;
 public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	
 	private boolean dirty;
+	private boolean wasLoadedFrom; // true if data was loaded from this data store. This will be false if an error prevent data from loading
 	PvpException exception;
 	private StatusBox statusBox;
 	
@@ -32,6 +33,21 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	public void setDirty(final boolean dirtyParam) {
 		dirty = dirtyParam;
 		updateStatusBox();
+	}
+	
+	@Override
+	public boolean wasLoadedFrom() {
+		return wasLoadedFrom;
+	}
+	
+	@Override
+	public void setWasLoadedFrom(final boolean wasLoadedFromParam) {
+		wasLoadedFrom = wasLoadedFromParam;
+	}
+	
+	@Override
+	public boolean shouldBeSaved() {
+		return wasLoadedFrom;
 	}
 	
 	@Override
@@ -75,7 +91,9 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 	
 	String getErrorMessageForDisplay() {
+		exception.printStackTrace();
 		return exception.getMessage();
+		
 	}
 	
 }

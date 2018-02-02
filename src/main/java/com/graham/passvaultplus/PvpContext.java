@@ -17,6 +17,7 @@ import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
@@ -37,7 +38,7 @@ import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
  * be one instance of this active at any time.
  */
 public class PvpContext {
-	static final public boolean JAR_BUILD = false;
+	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	
 	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
@@ -59,6 +60,7 @@ public class PvpContext {
 	private String pin = ""; // used for encryption of PIN, and UI timeout
 	private boolean usePin;
 	private int pinTimeout = -1;
+	private int pinMaxTry = -1;
 	private Timer pinTimer;
 	
 	private int isPasswordSavedState = PWS_NOT_KNOWN;
@@ -71,6 +73,7 @@ public class PvpContext {
 	private MainFrame mainFrame;
 	private JLabel infoLabel;
 	private ErrorFrame eframe;
+	private boolean canQuitOrGotoSetup = true;
 	private StringBuilder warnings = new StringBuilder();
 	private byte[] encryptedPassword;
 	private DiagnosticsManager diagnosticsManager = new DiagnosticsManager();
@@ -80,6 +83,7 @@ public class PvpContext {
 	private boolean useGoogleDrive = false;
 	private boolean showDiagnostics = false;
 	private String googleDriveDocId;
+	private boolean pinWasReset = false;
 	
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -99,6 +103,7 @@ public class PvpContext {
 		context.rtFileInterface = new PvpPersistenceInterface(context);
 		context.rtDataInterface = new PvpDataInterface(context);
 		if (pw != null) {
+			System.out.println("at 35353");
 			context.setPassword(pw, false);
 		}
 		
@@ -152,6 +157,9 @@ public class PvpContext {
 		getFileInterface().load(getDataInterface());
 		mainFrame = new MainFrame(this);
 		schedulePinTimerTask();
+		if (pinWasReset) {
+			JOptionPane.showMessageDialog(mainFrame, "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
+		}
 	}
 
 	public PvpPersistenceInterface getFileInterface() {
@@ -193,19 +201,17 @@ public class PvpContext {
 	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
 
 		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
-			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			usePin = userPrefs.getBoolean("usepin", false);
+			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			usePin = getUsePin();
 			encryptedPassword = userPrefs.getByteArray("ecp", null); // ecp = encrypted cipher password
-			if (!isBlankEncryptedPassword()) {
-				isPasswordSavedState = PWS_SAVED;
-				
+			if (!isBlankEncryptedPassword() && isPasswordSaved()) {
 				boolean tryingToGetValidPin = true;
-				int pinWasBadCount = 0;
+				int pinTryCount = 0;
 				while (tryingToGetValidPin) {
 					boolean tryToGetPassword = true;
 					if (usePin && pin.length() == 0) {
 						final PinDialog pd = new PinDialog();
-						final PinDialog.PinAction action = pd.askForPin(pinWasBadCount);
+						final PinDialog.PinAction action = pd.askForPin(pinTryCount);
 						if (action == PinDialog.PinAction.Configure) {
 							throw new UserAskToChangeFileException();
 						}
@@ -218,28 +224,31 @@ public class PvpContext {
 						tryingToGetValidPin = false;
 					}
 					
+					pinTryCount++;
+					
 					if (tryToGetPassword) {
 						try {
 							password = StringEncrypt.decryptString(encryptedPassword, pin, usePin);
 							if (password != null) {
 								tryingToGetValidPin = false;
 							} else {
-								pin = "";
-								try {
-									Thread.sleep(pinWasBadCount * 1000); // sleep for number of seconds for how may tries this is
-								} catch (InterruptedException e) {
-									this.notifyWarning("getPasswordOrAskUser:sleep" +  e.getMessage());
+								if (pinTryCount >= getPinMaxTry()) {
+									this.notifyInfo("PIN disabled after " + pinTryCount + " trys");
+									// too many tries - delete the password
+									tryingToGetValidPin = false;
+									clearPassword();
+									pinWasReset = true;
 								}
+								pin = "";
 							}
 						} catch (PvpException e) {
 							pin = "";
 							this.notifyBadException(e, true, null);
 						}
 					}
-					pinWasBadCount++;
 				}
-			}  else {
-				isPasswordSavedState = PWS_NOT_SAVED;
+			} else if (usePin) {
+				pinWasReset = true;
 			}
 		}
 		
@@ -259,7 +268,7 @@ public class PvpContext {
 		return password;
 	}
 	
-	private boolean isBlankEncryptedPassword() {
+	public boolean isBlankEncryptedPassword() {
 		if (encryptedPassword == null) {
 			return true;
 		}
@@ -275,8 +284,15 @@ public class PvpContext {
 	}
 
 	public boolean isPasswordSaved() {
+//		if (isPasswordSavedState == PWS_NOT_KNOWN) {
+//			getPassword();
+//		}
+		
 		if (isPasswordSavedState == PWS_NOT_KNOWN) {
-			getPassword();
+			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			boolean pws = userPrefs.getBoolean("pwsaved", false);
+			isPasswordSavedState = pws ? PWS_SAVED : PWS_NOT_SAVED;
+			usePin = userPrefs.getBoolean("usepin", false);
 		}
 		return isPasswordSavedState == PWS_SAVED;
 	}
@@ -290,26 +306,36 @@ public class PvpContext {
 	}
 	
 	public boolean getUsePin() {
-		if (isPasswordSavedState == PWS_NOT_KNOWN) {
-			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			usePin = userPrefs.getBoolean("usepin", false);
-		}
-		
+		isPasswordSaved(); // call this to make sure usePin is set correctly
 		return usePin;
 	}
 	
 	public int getPinTimeout() {
 		if (pinTimeout == -1) {
 			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-			pinTimeout = userPrefs.getInt("pintineout", 30);
+			pinTimeout = userPrefs.getInt("pintimeout", 30);
 		}
 		return pinTimeout;
 	}
 	
 	public void setPinTimeout(final int t) {
 		pinTimeout = t;
-		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
-		userPrefs.putInt("pintineout", pinTimeout);
+		final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putInt("pintimeout", pinTimeout);
+	}
+	
+	public int getPinMaxTry() {
+		if (pinMaxTry == -1) {
+			final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+			pinMaxTry = userPrefs.getInt("pinmaxtry", 5);
+		}
+		return pinMaxTry;
+	}
+	
+	public void setPinMaxTry(final int mt) {
+		pinMaxTry = mt;
+		final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putInt("pinmaxtry", pinMaxTry);
 	}
 	
 	public void schedulePinTimerTask() {
@@ -328,6 +354,9 @@ public class PvpContext {
 
 	public void setPasswordAndPin(String passwordParam, boolean makePersistant, String pinParam, boolean usePinParam) {
 		pin = pinParam;
+		if (pinParam.length() == 0) {
+			usePinParam = false;
+		}
 		if (usePin != usePinParam) {
 			usePin = usePinParam;
 			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
@@ -339,6 +368,7 @@ public class PvpContext {
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
 		try {
+			System.out.println("setPassword PIN:" + pin + ":");
 			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
 		} catch (PvpException e) {
 			this.notifyBadException(e, true, null);
@@ -347,18 +377,31 @@ public class PvpContext {
 		if (makePersistant) {
 			passwordToPersist = encryptedPassword;
 		} else if (isPasswordSavedState == PWS_SAVED) {
+			// password is saved now, do this to clear it out
 			passwordToPersist = new byte[4];
 		} else {
 			passwordToPersist = null;
 		}
+		final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putBoolean("pwsaved", makePersistant);
 		if (passwordToPersist != null) {
-			Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 			userPrefs.putByteArray("ecp", passwordToPersist); // ecp = encrypted cipher password
 		}
 		if (makePersistant) {
 			isPasswordSavedState = PWS_SAVED;
 		} else {
 			isPasswordSavedState = PWS_NOT_SAVED;
+		}
+	}
+	
+	public void clearPassword() {
+		final Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putByteArray("ecp", new byte[4]); // ecp = encrypted cipher password
+	}
+	
+	public void unclearPassword() {
+		if (isPasswordSavedState == PWS_SAVED) {
+			setPassword(password, true);
 		}
 	}
 	
@@ -454,22 +497,39 @@ public class PvpContext {
 	 * To be used when a bad exception happens somewhere in the application.
 	 * @canContinue If false, force the application to quit
 	 */
-	public void notifyBadException(final Exception e, final boolean canContinue, final PvpException.GeneralErrCode gErrCode) {
+	public void notifyBadException(final Exception e, boolean canContinue, final PvpException.GeneralErrCode gErrCode) {
 		if (eframe == null) {
 			eframe = new ErrorFrame();
 		}
-		eframe.notify(e, canContinue, true, gErrCode, warnings);
+		boolean canQuit = true;
+		boolean canGoToSetup = true;
+		if (!canQuitOrGotoSetup) {
+			canContinue = true;
+			canGoToSetup = false;
+			canQuit = false;
+		}
+		eframe.notify(e, canContinue, canGoToSetup, canQuit, gErrCode, warnings);
 	}
 	
 	/**
 	 * To be used when a bad exception happens somewhere in the application.
 	 * @canContinue If false, force the application to quit
 	 */
-	public void notifyBadException(final Exception e, final boolean canContinue, final boolean canGoToSetup, final PvpException.GeneralErrCode gErrCode) {
+	public void notifyBadException(final Exception e, boolean canContinue, boolean canGoToSetup, final PvpException.GeneralErrCode gErrCode) {
 		if (eframe == null) {
 			eframe = new ErrorFrame();
 		}
-		eframe.notify(e, canContinue, canGoToSetup, gErrCode, warnings);
+		boolean canQuit = true;
+		if (!canQuitOrGotoSetup) {
+			canContinue = true;
+			canGoToSetup = false;
+			canQuit = false;
+		}
+		eframe.notify(e, canContinue, canGoToSetup, canQuit, gErrCode, warnings);
+	}
+	
+	public void enableQuitFromError(final boolean enabled) {
+		canQuitOrGotoSetup = enabled;
 	}
 
 	public void notifyWarning(String s) {

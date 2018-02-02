@@ -20,6 +20,7 @@ public class BackingStoreClickHandler extends MouseAdapter {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (backingStore.getException() != null) {
+			backingStore.userAskedToHandleError();
 			context.notifyInfo("BackingStoreClickHandler clicked : error");
 		} else if (backingStore.isDirty()) {
 			context.getFileInterface().saveOneBackingStore(context.getDataInterface(), backingStore);

@@ -118,6 +118,11 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		return context.getPinTimeout();
 	}
 	
+	@Override
+	public int getPinMaxTry() {
+		return context.getPinMaxTry();
+	}
+	
 	class CancelPrefsAction extends AbstractAction {
 		public CancelPrefsAction() {
 			super("Cancel");

@@ -158,7 +158,7 @@ public class PvpRecord {
 		if (rtType.getToStringCode() == null) {
 			return super.toString();
 		}
-		return (String)getCustomField(rtType.getToStringCode());
+		return getCustomField(rtType.getToStringCode());
 	}
 	
 	public String getFormated() {
@@ -191,8 +191,12 @@ public class PvpRecord {
 		}
 
 	}
+	
+	public boolean isSimilar(final PvpRecord otherRec) {
+		return isSimilar(otherRec, null);
+	}
 
-	public boolean isSimilar(PvpRecord otherRec) {
+	public boolean isSimilar(final PvpRecord otherRec, final String customFieldToIgnore) {
 		if (otherRec == null) {
 			return false;
 		}
@@ -211,6 +215,9 @@ public class PvpRecord {
 		final Set<String> allKeys = new HashSet<>();
 		allKeys.addAll(keySet1);
 		allKeys.addAll(keySet2);
+		if (customFieldToIgnore != null) {
+			allKeys.remove(customFieldToIgnore);
+		}
 
 		for (String k : allKeys) {
 			String v1 = fields1.get(k);
@@ -227,6 +234,50 @@ public class PvpRecord {
 		}
 
 		return true;
+	}
+	
+	/**
+	 * @return true if otherRec was modified at all
+	 */
+	public boolean copyTo(PvpRecord otherRec) {
+		if (otherRec == null) {
+			System.out.println("cant copy to null");
+			return false;
+		}
+		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
+			System.out.println("cant copy to other type");
+			return false;
+		}
+		
+		otherRec.setCategory(this.getCategory());
+		otherRec.setCreationDate(this.getCreationDate());
+		otherRec.setModificationDate(this.getModificationDate());
+
+		final Map<String, String> fields1 = this.getCustomFields();
+		final Map<String, String> fields2 = otherRec.getCustomFields();
+
+		final Set<String> keySet1 = fields1.keySet();
+		final Set<String> keySet2 = fields2.keySet();
+		final Set<String> allKeys = new HashSet<>();
+		allKeys.addAll(keySet1);
+		allKeys.addAll(keySet2);
+
+		boolean changed = false;
+		for (String k : allKeys) {
+			if (keySet1.contains(k)) {
+				if (!AppUtil.equalsWithNull(fields1.get(k), fields2.get(k))) {
+					changed = true;
+					otherRec.setCustomField(k, fields1.get(k));
+				}
+			} else {
+				final String v = fields2.get(k);
+				if (v != null) {
+					changed = true;
+					otherRec.setCustomField(k, null);
+				}
+			}
+		}
+		return changed;
 	}
 
 	public boolean isPersisted() {

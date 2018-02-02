@@ -34,6 +34,7 @@ public class PreferencesContext {
 	JCheckBox showPin;
 	JCheckBox usePin;
 	JComboBox<String> timeoutCombo;
+	JComboBox<String> pinMaxTryCombo;
 	
 	ConfigAction configAction;
 	JComboBox<ConfigAction> actionCombo;
@@ -124,6 +125,14 @@ public class PreferencesContext {
 		}
 	}
 	
+	void setPinMaxTry(final int mt) {
+		if (mt > 50) {
+			pinMaxTryCombo.setSelectedItem("Unlimited");
+		} else {
+			pinMaxTryCombo.setSelectedItem(Integer.toString(mt));
+		}
+	}
+	
 	void setDataFileLabel(final JLabel l) {
 		dataFileLabel = l;
 	}
@@ -167,15 +176,23 @@ public class PreferencesContext {
 	void setPinEnabled() {
 		if (this.savePassword.isSelected()) {
 			this.usePin.setEnabled(true);
+		} else {
+			this.usePin.setEnabled(false);
+			this.usePin.setSelected(false);
+		}
+	}
+	
+	void setPinItemsEnabled() {
+		if (this.usePin.isSelected()) {
 			this.pin.setEnabled(true);
 			this.pinClearText.setEnabled(true);
 			this.timeoutCombo.setEnabled(true);
+			this.pinMaxTryCombo.setEnabled(true);
 		} else {
-			this.usePin.setSelected(false);
-			this.usePin.setEnabled(false);
 			this.pin.setEnabled(false);
 			this.pinClearText.setEnabled(false);
 			this.timeoutCombo.setEnabled(false);
+			this.pinMaxTryCombo.setEnabled(false);
 		}
 	}
 	

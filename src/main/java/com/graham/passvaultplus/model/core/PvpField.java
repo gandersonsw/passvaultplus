@@ -1,9 +1,6 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PvpField {
 
 	// common for all types, these are the fields as they would appear as XML element names

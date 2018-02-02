@@ -12,6 +12,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.jdom2.Attribute;
+import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -216,6 +218,17 @@ public class DatabaseReader {
 
 	private List<PvpRecord> loadRecords(final Element recordsElement) {
 		maxID = 0;
+		Attribute maxIdAttr = recordsElement.getAttribute("maxId");
+		if (maxIdAttr != null) {
+			try {
+				maxID = maxIdAttr.getIntValue();
+			} catch (DataConversionException dce) {
+				context.notifyWarning("WARN117", dce);
+			}
+		}
+		if (maxID == 0) {
+			context.notifyWarning("maxID attribute not found");
+		}
 		List children = recordsElement.getChildren();
 		List<PvpRecord> records = new ArrayList<PvpRecord>();
 		for (int i = 0; i < children.size(); i++) {

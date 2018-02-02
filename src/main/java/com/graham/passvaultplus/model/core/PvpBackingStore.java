@@ -80,8 +80,11 @@ public interface PvpBackingStore {
 	void doFileUpload() throws IOException;
 	
 	boolean isDirty();
-	
 	void setDirty(boolean dirty);
+	
+	boolean wasLoadedFrom();
+	void setWasLoadedFrom(boolean wasLoadedFrom);
+	boolean shouldBeSaved();
 	
 	boolean isCompressed(boolean inFlag);
 	
@@ -110,5 +113,7 @@ public interface PvpBackingStore {
 	String getShortName();
 	
 	void setStatusBox(StatusBox sb);
+	
+	void userAskedToHandleError();
 
 }

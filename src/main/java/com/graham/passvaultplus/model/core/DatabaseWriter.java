@@ -28,7 +28,7 @@ public class DatabaseWriter {
 	private void writeInternal(final PvpDataInterface dataInterface) throws IOException {
 		writeStart();
 		writeTypes(dataInterface.getTypes());
-		writeRecords(dataInterface.getRecords());
+		writeRecords(dataInterface.getRecords(), dataInterface.getMaxId());
 		writeEnd();
 	}
 	
@@ -40,39 +40,39 @@ public class DatabaseWriter {
 	}
 
 	private void writeTypes(final List<PvpType> types) throws IOException {
-		bw.write("   <types>");
+		bw.write("	<types>");
 		bw.newLine();
 
 		for (final PvpType t : types) {
-			bw.write("      <type>");
+			bw.write("		<type>");
 			bw.newLine();
-			bw.write("         <name>");
+			bw.write("			<name>");
 			bw.write(BCUtil.makeXMLSafe(t.getName()));
 			bw.write("</name>");
 			bw.newLine();
-			bw.write("         <to-string>");
+			bw.write("			<to-string>");
 			bw.write(BCUtil.makeXMLSafe(t.getToStringCode()));
 			bw.write("</to-string>");
 			bw.newLine();
 			if (t.getFullFormat() != null && t.getFullFormat().length() > 0) {
-				bw.write("         <full-format>");
+				bw.write("			<full-format>");
 				bw.write(BCUtil.makeXMLSafe(t.getFullFormat()));
 				bw.write("</full-format>");
 				bw.newLine();
 			}
 			writeTypeFields(t);
 
-			bw.write("      </type>");
+			bw.write("		</type>");
 			bw.newLine();
 		}
 
-		bw.write("   </types>");
+		bw.write("	</types>");
 		bw.newLine();
 	}
 
 	private void writeTypeFields(final PvpType t) throws IOException {
 		for (final PvpField f : t.getFields()) {
-			bw.write("         <field");
+			bw.write("			<field");
 			if (f.getClassification() != null) {
 				bw.write(" classification=\"");
 				bw.write(BCUtil.makeXMLSafe(f.getClassification()));
@@ -80,43 +80,45 @@ public class DatabaseWriter {
 			}
 			bw.write(">");
 			bw.newLine();
-			bw.write("            <name>");
+			bw.write("				<name>");
 			bw.write(BCUtil.makeXMLSafe(f.getName()));
 			bw.write("</name>");
 			bw.newLine();
-			bw.write("            <type>");
+			bw.write("				<type>");
 			bw.write(BCUtil.makeXMLSafe(f.getType()));
 			bw.write("</type>");
 			bw.newLine();
-			bw.write("         </field>");
+			bw.write("			</field>");
 			bw.newLine();
 		}
 	}
 
-	private void writeRecords(final List<PvpRecord> records) throws IOException {
-		bw.write("   <records>");
+	private void writeRecords(final List<PvpRecord> records, final int maxId) throws IOException {
+		bw.write("	<records maxId=\"");
+		bw.write(String.valueOf(maxId));
+		bw.write("\">");
 		bw.newLine();
 
 		for (final PvpRecord r : records) {
-			bw.write("      <record id=\"");
+			bw.write("		<record id=\"");
 			bw.write(String.valueOf(r.getId()));
 			bw.write("\">");
 			bw.newLine();
 
 			writeRecordFields(r);
 
-			bw.write("      </record>");
+			bw.write("		</record>");
 			bw.newLine();
 		}
 
-		bw.write("   </records>");
+		bw.write("	</records>");
 		bw.newLine();
 	}
 
 	private void writeRecordFields(final PvpRecord r) throws IOException {
 
 		for (Entry<String, String> entry : r.getAllFields().entrySet()) {
-			bw.write("         <");
+			bw.write("			<");
 			final String name = BCUtil.makeXMLName((String) entry.getKey());
 			bw.write(name);
 			bw.write(">");

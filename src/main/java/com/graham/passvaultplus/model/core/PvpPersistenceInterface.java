@@ -107,7 +107,6 @@ public class PvpPersistenceInterface {
 				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 			} catch (Exception e) {
 				context.notifyInfo("at 11 Exception: " + e.getMessage());
-				bs.setDirty(true); // in the case where the file does not exist for the BackingStore, this will create it
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
@@ -126,6 +125,7 @@ public class PvpPersistenceInterface {
 					doMerge = true;
 				}
 				context.setEncryptionStrengthBits(fileReader.getAesBits());
+				bs.setWasLoadedFrom(true);
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf;
 			} catch (Exception e) {
@@ -196,6 +196,10 @@ public class PvpPersistenceInterface {
 	
 	public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
 		context.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
+		if (!bs.shouldBeSaved()) {
+			context.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
+			return;
+		}
 		try {
 			if (bs.supportsFileUpload()) {
 				bs.doFileUpload();
@@ -212,6 +216,8 @@ public class PvpPersistenceInterface {
 				}
 			}
 			bs.setDirty(false);
+			bs.setWasLoadedFrom(true); // set this because we want this BS to be treated as if it loaded successfully now
+			bs.setException(null);
 		} catch (Exception e) {
 			errorHappened = true;
 			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);

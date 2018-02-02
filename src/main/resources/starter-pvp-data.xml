@@ -130,7 +130,7 @@
          </field>
       </type>
    </types>
-   <records>
+   <records maxId="6">
       <record id="1">
          <title>Everything</title>
          <creation-date></creation-date>

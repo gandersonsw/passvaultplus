@@ -46,19 +46,74 @@ public class PvpDataInterface {
 	}
   	
   	/**
-  	 * return true if the original data has been appended or updated, so it should be written out ot the file
+  	 * @return true if these two records refer to the same record. Although the detailed data may be different.
   	 */
-  	boolean mergeData(PvpDataInterface dataTocMergeFrom) {
+  	private boolean isMatchingRecord(final PvpRecord existingRec, final PvpRecord newRec) {
+  		if (!PvpType.sameType(existingRec.getType(), newRec.getType())) {
+  			context.notifyInfo("types are different");
+  			return false;
+		}
   		
-  		context.notifyInfo(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataTocMergeFrom.maxID);
-  		
-  		int typesMatched = 0;
-  		boolean wasChanged = false;
-  		if (maxID != dataTocMergeFrom.maxID) {
-  			wasChanged = true;
+  		if (existingRec.getCreationDate() != null && !existingRec.getCreationDate().equals(newRec.getCreationDate())) {
+  			context.notifyInfo("creation dates are different");
+  			if (!existingRec.isSimilar(newRec)) {
+  				return false;
+  			}
+  			context.notifyInfo("creation dates are different, but same enough");
   		}
   		
-  		for (PvpType newType : dataTocMergeFrom.types) {
+  		String existingTitle = null;
+  		String newTitle = null;
+  		if (existingRec.getType().getToStringCode() != null) {
+  			existingTitle = existingRec.getCustomField(existingRec.getType().getToStringCode());
+		}
+  		if (newRec.getType().getToStringCode() != null) {
+  			newTitle = newRec.getCustomField(newRec.getType().getToStringCode());
+		}
+		if (existingTitle == null || newTitle == null || !existingTitle.equalsIgnoreCase(newTitle)) {
+			context.notifyInfo("titles are different");
+			if (!existingRec.isSimilar(newRec, existingRec.getType().getToStringCode())) {
+				return false;
+			}
+			context.notifyInfo("... but other data is the same");
+		}
+		return true;
+  	}
+  	
+  	/**
+  	 * @return True if the existing record was changed
+  	 * Meaning: true -> dont add new record, false -> add new record
+  	 */
+  	private boolean makeIdentical(final PvpRecord existingRec, final PvpRecord newRec) {
+		if (existingRec.getModificationDate() != null && newRec.getModificationDate() != null) {
+			if (newRec.getModificationDate().after(existingRec.getModificationDate())) {
+				// the newRec was modified later - assume we want that data
+				return newRec.copyTo(existingRec);
+			}
+		}
+		
+  		return false;
+  	}
+  	
+  	/**
+  	 * return true if the original data has been appended or updated, so it should be written out to the file
+  	 */
+  	boolean mergeData(PvpDataInterface dataToMergeFrom) {
+  		
+  		context.notifyInfo(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataToMergeFrom.maxID);
+  		
+  		int maxIdMatching = 0; // the largest ID that existed in both databases that match
+  		boolean[] matchedRecords = new boolean[maxID+1]; // IDs of records in the main database that have a corresponding record in the mergeFrom database
+  		int typesMatched = 0;
+  		boolean wasChanged = false;
+  		if (maxID != dataToMergeFrom.maxID) {
+  			//wasChanged = true;
+  			//if (dataTocMergeFrom.maxID > maxID) {
+  			//	maxID = dataTocMergeFrom.maxID;
+  			//}
+  		}
+  		
+  		for (PvpType newType : dataToMergeFrom.types) {
   			PvpType existingType = getType(newType.getName());
   			if (existingType == null) {
   				context.notifyInfo("adding type:" + newType.getName());
@@ -71,25 +126,64 @@ public class PvpDataInterface {
   		}
   		
   		int recordsMatched = 0;
-  		for (int i = 0; i < dataTocMergeFrom.records.size(); i++) {
-  			PvpRecord newRec = dataTocMergeFrom.getRecordAtIndex(i);
+  		for (int i = dataToMergeFrom.records.size() - 1; i >= 0; i--) {
+  			PvpRecord newRec = dataToMergeFrom.getRecordAtIndex(i);
+  			context.notifyInfo("--------- Trying to match Record:" + newRec + " ----------");
   			PvpRecord existingRec = null;
   			if (i < getRecordCount()) {
-  				existingRec = getRecordAtIndex(i);
-  				if (newRec.getId() != existingRec.getId()) {
-  					context.notifyInfo("id did not match by index");
-  					existingRec = getRecord(newRec.getId());
+  				final PvpRecord recAtIndex = getRecordAtIndex(i);
+  				if (newRec.getId() == recAtIndex.getId()) { // && isMatchingRecord(recWithId, newRec)  ???
+  					existingRec = recAtIndex;
+  				} else {
+  					context.notifyInfo("id did not match by index:" + newRec + ": " + existingRec);
   				}
   			}
   			if (existingRec == null) {
-  				context.notifyInfo("adding a record");
-  				int nextID = getNextMaxID();
-  				newRec.setId(nextID);
-  				records.add(newRec);
-  				wasChanged = true;
-  			} else {
-  				// TODO compare and modify
+  				final PvpRecord recWithId = getRecord(newRec.getId());
+  				if (recWithId != null && isMatchingRecord(recWithId, newRec)) {
+  					existingRec = recWithId;
+  				}
+  			}
+  			if (existingRec == null) {
+  				List<PvpRecord> recordsTS = getRecordsByToString(newRec.getType(), newRec.toString());
+  				for (final PvpRecord rTS : recordsTS) {
+  					if (isMatchingRecord(rTS, newRec)) {
+  						context.notifyInfo("found matching ToString");
+  						existingRec = rTS;
+  						break;
+  					}
+  				}
+  			}
+  			if (existingRec != null) {
   				recordsMatched++;
+  				matchedRecords[existingRec.getId()] = true;
+  				if (existingRec.getId() == newRec.getId() && existingRec.getId() > maxIdMatching) {
+  					maxIdMatching = existingRec.getId();
+  					context.notifyInfo("maxIdMatching:" + maxIdMatching);
+  				}
+  				if (makeIdentical(existingRec, newRec)) {
+  					context.notifyInfo("wasChanged");
+  					wasChanged = true;
+  				}
+  			} else {
+  				if (newRec.getId() > maxIdMatching) {
+  					int nextID = getNextMaxId();
+  					context.notifyInfo("adding a record:" + nextID + ":" + newRec);
+  					newRec.setId(nextID);
+  					records.add(newRec);
+  					wasChanged = true;
+  				} else {
+  					context.notifyInfo("NOT adding a record:" + newRec.getId() + ":" + newRec);
+  				}
+  			}
+  		}
+  		
+  		for (int i = records.size() - 1; i >= 0; i--) {
+  			PvpRecord r = records.get(i);
+  			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
+  				context.notifyInfo("deleting a record:" + r.getId() + ":" + r);
+  				records.remove(i);
+				r.setId(0);
   			}
   		}
   		
@@ -133,7 +227,7 @@ public class PvpDataInterface {
 
 	public void saveRecord(final PvpRecord r) {
 		if (r.getId() == 0) {
-			int nextID = getNextMaxID();
+			int nextID = getNextMaxId();
 			r.setId(nextID);
 			records.add(r);
 		}
@@ -158,7 +252,7 @@ public class PvpDataInterface {
 		}
 		for (PvpRecord r : rCol) {
 			if (r.getId() == 0) {
-				int nextID = getNextMaxID();
+				int nextID = getNextMaxId();
 				r.setId(nextID);
 				records.add(r);
 			}
@@ -204,6 +298,20 @@ public class PvpDataInterface {
 			}
 		}
 		return null;
+	}
+	
+	public List<PvpRecord> getRecordsByToString(final PvpType t, final String s) {
+		// TODO optimize this
+		List<PvpRecord> results = new ArrayList<>();
+		if (s == null || s.length() == 0) {
+			return results;
+		}
+		for (PvpRecord r : records) {
+			if (PvpType.sameType(r.getType(), t) && s.equals(r.toString())) {
+				results.add(r);
+			}
+		}
+		return results;
 	}
 
 	public List<String> getCommonFiledValues(String recordType, String recordFieldName) {
@@ -299,8 +407,12 @@ public class PvpDataInterface {
 		return false;
 	}
 	
-	public int getNextMaxID() {
+	public int getNextMaxId() {
 		maxID++;
+		return maxID;
+	}
+	
+	public int getMaxId() {
 		return maxID;
 	}
 

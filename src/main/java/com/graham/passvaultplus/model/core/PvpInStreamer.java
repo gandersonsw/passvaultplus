@@ -97,7 +97,7 @@ public class PvpInStreamer {
 				if (inStream.read(check, 0, 8) == 8) {
 					final String s = new String(check);
 					if (s.equals("remthis7")) {
-						// this is how we know the password worked. this is not an exception
+						// this is how we know the password worked.
 						passwordIsGood = true;
 					}
 				}

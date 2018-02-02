@@ -31,6 +31,10 @@ public abstract class PreferencesConnection {
 		return 30; // 30 minutes is the default
 	}
 	
+	public int getPinMaxTry() {
+		return 5; // 5 trys is the default
+	}
+	
 	public abstract String getDataFilePath();
 	
 	public abstract int getAesBits();
@@ -55,6 +59,7 @@ public abstract class PreferencesConnection {
 		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
 		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
 		context.setPinTimeout(psp.pinTimeout);
+		context.setPinMaxTry(psp.pinMaxTry);
 		context.setShowDashboard(psp.showDashBoard);
 		context.setUseGoogleDrive(psp.useGoogleDrive);
 		context.setShowDiagnostics(psp.showDiagnostics);

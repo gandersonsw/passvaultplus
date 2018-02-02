@@ -78,5 +78,10 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	public String getShortName() {
 		return "File";
 	}
+	
+	@Override
+	public void userAskedToHandleError() {
+		// TODO
+	}
 
 }

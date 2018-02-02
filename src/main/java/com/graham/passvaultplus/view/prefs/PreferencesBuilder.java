@@ -219,6 +219,7 @@ public class PreferencesBuilder {
 		if (conn.getUsePin()) {
 			prefsContext.usePin.setSelected(true);
 		}
+		prefsContext.usePin.addActionListener(e -> prefsContext.setPinItemsEnabled());
 		p.add(prefsContext.usePin);
 		prefsContext.pinClearText = new JTextField(10);
 		prefsContext.pinClearText.setVisible(false);
@@ -236,6 +237,17 @@ public class PreferencesBuilder {
 		prefsContext.setPinTimeout(conn.getPinTimeout());
 		p.add(new JLabel("Timeout:"));
 		p.add(prefsContext.timeoutCombo);
+		
+		final String[] maxTrys = {"1", "2", "3", "4", "5", "10", "15", "20", "50", "Unlimited"};
+		prefsContext.pinMaxTryCombo = new JComboBox<>(maxTrys);
+		prefsContext.pinMaxTryCombo.setMaximumRowCount(20);
+		prefsContext.pinMaxTryCombo.setToolTipText("Maximum trys for PIN until you are forced to enter the password.");
+		prefsContext.setPinMaxTry(conn.getPinMaxTry());
+		p.add(new JLabel("Max Trys:"));
+		p.add(prefsContext.pinMaxTryCombo);
+		
+		prefsContext.setPinItemsEnabled();
+		
 		return p;
 	}
 	

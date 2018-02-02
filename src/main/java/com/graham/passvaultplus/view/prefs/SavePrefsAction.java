@@ -178,8 +178,10 @@ public class SavePrefsAction extends AbstractAction {
 		psp.usePin = prefsContext.usePin.isSelected();
 		if (this.prefsContext.encrypted.isSelected()) {
 			try { psp.pinTimeout = Integer.parseInt(prefsContext.timeoutCombo.getSelectedItem().toString()); } catch (Exception e) { psp.pinTimeout = 0; }
+			try { psp.pinMaxTry = Integer.parseInt(prefsContext.pinMaxTryCombo.getSelectedItem().toString()); } catch (Exception e) { psp.pinMaxTry = 100; }
 		} else {
 			psp.pinTimeout = 0;
+			psp.pinMaxTry = 100;
 		}	
 		psp.showDashBoard = prefsContext.showDashboard.isSelected();
 		psp.useGoogleDrive = prefsContext.useGoogleDrive.isSelected();
