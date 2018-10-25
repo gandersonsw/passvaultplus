@@ -46,41 +46,6 @@ public class PvpDataInterface {
 	}
   	
   	/**
-  	 * @return true if these two records refer to the same record. Although the detailed data may be different.
-  	 */
-  	private boolean isMatchingRecord(final PvpRecord existingRec, final PvpRecord newRec) {
-  		if (!PvpType.sameType(existingRec.getType(), newRec.getType())) {
-  			context.notifyInfo("types are different");
-  			return false;
-		}
-  		
-  		if (existingRec.getCreationDate() != null && !existingRec.getCreationDate().equals(newRec.getCreationDate())) {
-  			context.notifyInfo("creation dates are different");
-  			if (!existingRec.isSimilar(newRec)) {
-  				return false;
-  			}
-  			context.notifyInfo("creation dates are different, but same enough");
-  		}
-  		
-  		String existingTitle = null;
-  		String newTitle = null;
-  		if (existingRec.getType().getToStringCode() != null) {
-  			existingTitle = existingRec.getCustomField(existingRec.getType().getToStringCode());
-		}
-  		if (newRec.getType().getToStringCode() != null) {
-  			newTitle = newRec.getCustomField(newRec.getType().getToStringCode());
-		}
-		if (existingTitle == null || newTitle == null || !existingTitle.equalsIgnoreCase(newTitle)) {
-			context.notifyInfo("titles are different");
-			if (!existingRec.isSimilar(newRec, existingRec.getType().getToStringCode())) {
-				return false;
-			}
-			context.notifyInfo("... but other data is the same");
-		}
-		return true;
-  	}
-  	
-  	/**
   	 * @return True if the existing record was changed
   	 * Meaning: true -> dont add new record, false -> add new record
   	 */
@@ -90,6 +55,8 @@ public class PvpDataInterface {
 				// the newRec was modified later - assume we want that data
 				return newRec.copyTo(existingRec);
 			}
+		} else {
+			context.notifyInfo("makeIdentical skipped because modification date missing:" + existingRec);
 		}
 		
   		return false;
@@ -102,6 +69,7 @@ public class PvpDataInterface {
   		
   		context.notifyInfo(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataToMergeFrom.maxID);
   		
+  		int thisStartingRecordCount = getRecordCount();
   		int maxIdMatching = 0; // the largest ID that existed in both databases that match
   		boolean[] matchedRecords = new boolean[maxID+1]; // IDs of records in the main database that have a corresponding record in the mergeFrom database
   		int typesMatched = 0;
@@ -129,6 +97,9 @@ public class PvpDataInterface {
   		for (int i = dataToMergeFrom.records.size() - 1; i >= 0; i--) {
   			PvpRecord newRec = dataToMergeFrom.getRecordAtIndex(i);
   			context.notifyInfo("--------- Trying to match Record:" + newRec + " ----------");
+  			if ("Fidelity Payroll and 401(k)".equals(newRec.toString()) || "Vangaurd".equals(newRec.toString())) {
+  				context.notifyInfo("???");
+  			}
   			PvpRecord existingRec = null;
   			if (i < getRecordCount()) {
   				final PvpRecord recAtIndex = getRecordAtIndex(i);
@@ -140,14 +111,17 @@ public class PvpDataInterface {
   			}
   			if (existingRec == null) {
   				final PvpRecord recWithId = getRecord(newRec.getId());
-  				if (recWithId != null && isMatchingRecord(recWithId, newRec)) {
+  				//if (recWithId != null && isMatchingRecord(recWithId, newRec)) {
+  				if (newRec.matchRating(recWithId) > 30) {
   					existingRec = recWithId;
   				}
   			}
   			if (existingRec == null) {
+  				wasChanged = true;
   				List<PvpRecord> recordsTS = getRecordsByToString(newRec.getType(), newRec.toString());
   				for (final PvpRecord rTS : recordsTS) {
-  					if (isMatchingRecord(rTS, newRec)) {
+  					//if (isMatchingRecord(rTS, newRec)) {
+  					if (newRec.matchRating(rTS) > 50) {
   						context.notifyInfo("found matching ToString");
   						existingRec = rTS;
   						break;
@@ -167,13 +141,15 @@ public class PvpDataInterface {
   				}
   			} else {
   				if (newRec.getId() > maxIdMatching) {
+  					// this is a new record, because its ID is bigger than we know about
   					int nextID = getNextMaxId();
   					context.notifyInfo("adding a record:" + nextID + ":" + newRec);
   					newRec.setId(nextID);
   					records.add(newRec);
   					wasChanged = true;
   				} else {
-  					context.notifyInfo("NOT adding a record:" + newRec.getId() + ":" + newRec);
+  					// this record was deleted, because we didn't match on one we know about
+  					context.notifyInfo("NOT adding a record:" + newRec.getId() + ":" + maxIdMatching + ":" + newRec);
   				}
   			}
   		}
@@ -185,6 +161,11 @@ public class PvpDataInterface {
   				records.remove(i);
 				r.setId(0);
   			}
+  		}
+  		
+  		if (thisStartingRecordCount != dataToMergeFrom.records.size()) {
+  			context.notifyInfo("different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.records.size());
+  			wasChanged = true;
   		}
   		
   		context.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);

@@ -192,19 +192,23 @@ public class PvpRecord {
 
 	}
 	
-	public boolean isSimilar(final PvpRecord otherRec) {
-		return isSimilar(otherRec, null);
-	}
-
-	public boolean isSimilar(final PvpRecord otherRec, final String customFieldToIgnore) {
+	/**
+	 * Return a match rating, 0 to 100
+	 */
+	public int matchRating(final PvpRecord otherRec) {
 		if (otherRec == null) {
-			return false;
+			return 0;
 		}
 		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
-			return false;
+			return 0;
 		}
-		if (!AppUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
-			return false;
+		int fieldCount = 2;
+		int matchCount = 0;
+		if (AppUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
+			matchCount++;
+		}
+		if (AppUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
+			matchCount++;
 		}
 
 		final Map<String, String> fields1 = this.getCustomFields();
@@ -215,9 +219,6 @@ public class PvpRecord {
 		final Set<String> allKeys = new HashSet<>();
 		allKeys.addAll(keySet1);
 		allKeys.addAll(keySet2);
-		if (customFieldToIgnore != null) {
-			allKeys.remove(customFieldToIgnore);
-		}
 
 		for (String k : allKeys) {
 			String v1 = fields1.get(k);
@@ -228,12 +229,13 @@ public class PvpRecord {
 			if (v2 == null) {
 				v2 = "";
 			}
-			if (!v1.equals(v2)) {
-				return false;
+			fieldCount++;
+			if (v1.equals(v2)) {
+				matchCount++;
 			}
 		}
 
-		return true;
+		return 100 * matchCount / fieldCount;
 	}
 	
 	/**

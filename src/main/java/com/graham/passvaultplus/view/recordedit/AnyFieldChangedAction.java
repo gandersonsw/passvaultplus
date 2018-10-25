@@ -27,7 +27,7 @@ public class AnyFieldChangedAction extends AbstractAction {
 		if (hasOriginalValue) {
 			PvpRecord tempRec = new PvpRecord(editContext.editRecord.getType());
 			editContext.populateRecordFromUI(tempRec);
-			if (tempRec.isSimilar(editContext.editRecord)) {
+			if (tempRec.matchRating(editContext.editRecord) == 100) { // TODO test this since changed from isSimilar
 				recordHasBeenModified = false;
 			}
 		}
