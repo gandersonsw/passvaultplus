@@ -23,11 +23,11 @@ public class PvpPersistenceInterface {
 		cud,  // there was a Create, Update or Delete
 		major // some major change
 	}
-	
+
 	public static final String EXT_COMPRESS = "zip";
 	public static final String EXT_ENCRYPT = "bmn";
 	public static final String EXT_XML = "xml";
-	
+
 	final private PvpContext context;
 	final private List<PvpBackingStore> backingStores;
 	private boolean errorHappened;
@@ -48,7 +48,7 @@ public class PvpPersistenceInterface {
 		// path is .bmn or .zip.bmn
 		return path.endsWith("." + EXT_ENCRYPT);
 	}
-	
+
 	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
 		String fname = BCUtil.getFileNameNoExt(fnameWithExt, true);
 		if (compressed) {
@@ -62,7 +62,7 @@ public class PvpPersistenceInterface {
 		}
 		return fname;
 	}
-	
+
 	public List<PvpBackingStore> getEnabledBackingStores() {
 		List<PvpBackingStore> bsList = new ArrayList<PvpBackingStore>();
 		for (PvpBackingStore bs : backingStores) {
@@ -74,27 +74,27 @@ public class PvpPersistenceInterface {
 	}
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
-		
+
 		context.notifyInfo("PvpPersistenceInterface.load :: START");
-		
+
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
-		
+
 		for (PvpBackingStore bs: enabledBs) {
 			bs.clearTransientData();
 		}
-		
+
 		// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
 		PvpBackingStore[] sortedBSArr = new PvpBackingStore[enabledBs.size()];
 		sortedBSArr = enabledBs.toArray(sortedBSArr);
 		Arrays.sort(sortedBSArr, (bs1, bs2) -> { return Long.compare(bs2.getLastUpdatedDate(), bs1.getLastUpdatedDate()); } );
-		
+
 		boolean doMerge = false;
 		boolean wasChanged = false; // TODO way to write out if it was changed?
 		for (PvpBackingStore bs: sortedBSArr) {
 			context.notifyInfo("loading bs : " + bs.getClass().getName());
 			context.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
 			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
-			
+
 			BufferedInputStream inStream = null;
 			try {
 				inStream = fileReader.getStream();
@@ -110,14 +110,14 @@ public class PvpPersistenceInterface {
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
-			} 
-				
+			}
+
 			// TODO does fileReader.close(); need to be called if we dont get here?
-			
+
 			try {
 				PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
 				if (doMerge) {
-					if (dataInterface.mergeData(newDataInterface)) {
+					if (dataInterface.mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
 						wasChanged = true;
 					}
 				} else {
@@ -137,21 +137,21 @@ public class PvpPersistenceInterface {
 				fileReader.close();
 			}
 		}
-		
+
 		if (!doMerge) { // if this is false, nothing was loaded -> we have a problem
 			throw enabledBs.get(0).getException();
 		}
-		
+
 		if (wasChanged) {
 			// set them as dirty, so they will eventually save
 			for (PvpBackingStore bs: enabledBs) {
 				bs.setDirty(true);
 			}
-			
+
 			context.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
 		}
 	}
-	
+
 	/**
 	 * return true to Quit. Return false to cancel Quit, and keep app running
 	 */
@@ -159,7 +159,7 @@ public class PvpPersistenceInterface {
 		save(context.getDataInterface(), SaveTrigger.quit);
 		return !errorHappened;
 	}
-	
+
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
 		errorHappened = false;
@@ -193,7 +193,7 @@ public class PvpPersistenceInterface {
 			}
 		}
 	}
-	
+
 	public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
 		context.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
 		if (!bs.shouldBeSaved()) {

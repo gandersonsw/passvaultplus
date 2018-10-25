@@ -8,60 +8,61 @@ import org.junit.Test;
 
 import com.graham.passvaultplus.PvpContext;
 
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class PvpDataInterfaceTest {
-	
+public class PvpDataMergerTest {
+
 	interface RecGetter {
 		List<PvpRecord> get();
 	}
-	
+
 	PvpContext context;
-	
+
 	PvpType type1;
 	PvpRecord rec1;
 	PvpRecord rec2;
 	PvpRecord rec1modified;
-	
+
 	private List<PvpType> createTestTypes() {
 		List<PvpType> types = new ArrayList<>();
 		types.add(type1);
 		return types;
 	}
-	
+
 	private List<PvpRecord> createTestRecords() {
 		List<PvpRecord> records = new ArrayList<>();
 		records.add(rec1);
 		return records;
 	}
-	
+
 	private List<PvpRecord> createTestRecords2() {
 		List<PvpRecord> records = new ArrayList<>();
 		records.add(rec2);
 		return records;
 	}
-	
+
 	private List<PvpRecord> createTestRecordsModified() {
 		List<PvpRecord> records = new ArrayList<>();
 		records.add(rec1modified);
 		return records;
 	}
-	
+
 	@Before
 	public void setUpStuff() {
 		context = mock(PvpContext.class);
-		
+
 		type1 = new PvpType();
 		type1.setName("Account");
 		type1.addField(new PvpField("Account Name", PvpField.TYPE_STRING));
 		type1.addField(new PvpField("Username", PvpField.TYPE_STRING));
 		type1.addField(new PvpField("Password", PvpField.TYPE_STRING));
 		type1.setToStringCode("Account Name");
-		
+
 		rec1 = new PvpRecord(type1);
 		rec1.setId(8);
 		rec1.setCreationDate(new Date());
@@ -69,7 +70,7 @@ public class PvpDataInterfaceTest {
 		rec1.setCustomField("Account Name", "Email");
 		rec1.setCustomField("Username", "joe123");
 		rec1.setCustomField("Password", "secret99");
-		
+
 		rec2 = new PvpRecord(type1);
 		rec2.setId(6);
 		rec2.setCreationDate(new Date());
@@ -77,7 +78,7 @@ public class PvpDataInterfaceTest {
 		rec2.setCustomField("Account Name", "Work Email");
 		rec2.setCustomField("Username", "joe-work");
 		rec2.setCustomField("Password", "password123");
-		
+
 		rec1modified = new PvpRecord(type1);
 		rec1modified.setId(8);
 		rec1modified.setCreationDate(rec1.getCreationDate());
@@ -86,20 +87,28 @@ public class PvpDataInterfaceTest {
 		rec1modified.setCustomField("Username", "joe123");
 		rec1modified.setCustomField("Password", "newsecret99"); // updated password
 	}
-	
+
+	private void printContextInfo() {
+		ArgumentCaptor<String> contextInfoCaptor = ArgumentCaptor.forClass(String.class);
+		verify(context, atLeastOnce()).notifyInfo(contextInfoCaptor.capture());
+		for (String s : contextInfoCaptor.getAllValues()) {
+			System.out.println(s);
+		}
+	}
+
 	private void testMergeBasic1Help(RecGetter rg2) {
 		List<PvpType> types1 = createTestTypes();
 		List<PvpRecord> records1 = createTestRecords();
 		int maxID1 = 9;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = rg2.get();
 		int maxID2 = 9;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.NO_CHANGE, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(9, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
@@ -110,7 +119,7 @@ public class PvpDataInterfaceTest {
 			assertEquals("secret99", r.getCustomField("Password"));
 		}
 	}
-	
+
 	/**
 	 * Test where the two databases are identical
 	 */
@@ -121,7 +130,7 @@ public class PvpDataInterfaceTest {
 		};
 		testMergeBasic1Help(rg);
 	}
-	
+
 	/**
 	 * Test where the two databases are identical - using copy
 	 */
@@ -137,7 +146,7 @@ public class PvpDataInterfaceTest {
 		};
 		testMergeBasic1Help(rg);
 	}
-	
+
 	/**
 	 * same except using copy, and changing creation date
 	 */
@@ -154,13 +163,66 @@ public class PvpDataInterfaceTest {
 		};
 		testMergeBasic1Help(rg);
 	}
-	
+
 	/**
 	 * same except using copy, and changing title - use new title
+	 * di1 has the newest data
 	 */
 	@Test
-	public void testMerge_newTitle() {
-		RecGetter rg2 = () -> {
+	public void testMerge_newTitle_1() {
+		PvpDataInterface di1;
+		{
+			List<PvpType> types1 = createTestTypes();
+			List<PvpRecord> records1 = createTestRecords();
+			int maxID1 = 9;
+			rec1.setModificationDate(new Date(new Date().getTime() + 60000));
+			di1 = new PvpDataInterface(context, types1, records1, maxID1);
+		}
+
+		PvpDataInterface di2;
+		{
+			List<PvpType> types2 = createTestTypes();
+			List<PvpRecord> records2 = new ArrayList<>();
+			PvpRecord rec1Copy = new PvpRecord(type1);
+			rec1.copyTo(rec1Copy);
+			rec1Copy.setId(8);
+			rec1Copy.setCustomField("Account Name", "Email 2");
+			//rec1Copy.setModificationDate(new Date(new Date().getTime() + 60000));
+			records2.add(rec1Copy);
+			int maxID2 = 9;
+			di2 = new PvpDataInterface(context, types2, records2, maxID2);
+		}
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
+		assertEquals(1, di1.getTypes().size());
+		assertEquals(9, di1.getMaxId());
+		assertEquals(1, di1.getRecordCount());
+		{
+			PvpRecord r = di1.getRecord(8);
+			assertEquals("Email", r.getCustomField("Account Name"));
+			assertEquals("joe123", r.getCustomField("Username"));
+			assertEquals("secret99", r.getCustomField("Password"));
+		}
+	}
+
+	/**
+	 * same except using copy, and changing title - use new title
+	 * di2 has the newest data
+	 */
+	@Test
+	public void testMerge_newTitle_2() {
+		PvpDataInterface di1;
+		{
+			List<PvpType> types1 = createTestTypes();
+			List<PvpRecord> records1 = createTestRecords();
+			int maxID1 = 9;
+			di1 = new PvpDataInterface(context, types1, records1, maxID1);
+		}
+
+		PvpDataInterface di2;
+		{
+			List<PvpType> types2 = createTestTypes();
 			List<PvpRecord> records2 = new ArrayList<>();
 			PvpRecord rec1Copy = new PvpRecord(type1);
 			rec1.copyTo(rec1Copy);
@@ -168,22 +230,12 @@ public class PvpDataInterfaceTest {
 			rec1Copy.setCustomField("Account Name", "Email 2");
 			rec1Copy.setModificationDate(new Date(new Date().getTime() + 60000));
 			records2.add(rec1Copy);
-			return records2;
-		};
-		
-		
-		List<PvpType> types1 = createTestTypes();
-		List<PvpRecord> records1 = createTestRecords();
-		int maxID1 = 9;
-		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
-		List<PvpType> types2 = createTestTypes();
-		List<PvpRecord> records2 = rg2.get();
-		int maxID2 = 9;
-		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertTrue(result);
+			int maxID2 = 9;
+			di2 = new PvpDataInterface(context, types2, records2, maxID2);
+		}
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.TO_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(9, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
@@ -194,25 +246,41 @@ public class PvpDataInterfaceTest {
 			assertEquals("secret99", r.getCustomField("Password"));
 		}
 	}
-	
+
 	/**
 	 * same except using copy, and changing title - keep main title
 	 */
 	@Test
 	public void testMergeBasic_keepMainTitle() {
-		RecGetter rg = () -> {
-			List<PvpRecord> records2 = new ArrayList<>();
-			PvpRecord rec1Copy = new PvpRecord(type1);
-			rec1.copyTo(rec1Copy);
-			rec1Copy.setId(8);
-			rec1Copy.setCustomField("Account Name", "Email 2");
-			rec1Copy.setModificationDate(new Date(new Date().getTime() - 60000));
-			records2.add(rec1Copy);
-			return records2;
-		};
-		testMergeBasic1Help(rg);
+		List<PvpType> types1 = createTestTypes();
+		List<PvpRecord> records1 = createTestRecords();
+		int maxID1 = 9;
+		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
+
+		List<PvpType> types2 = createTestTypes();
+		List<PvpRecord> records2 = new ArrayList<>();
+		PvpRecord rec1Copy = new PvpRecord(type1);
+		rec1.copyTo(rec1Copy);
+		rec1Copy.setId(8);
+		rec1Copy.setCustomField("Account Name", "Email 2");
+		rec1Copy.setModificationDate(new Date(new Date().getTime() - 60000));
+		records2.add(rec1Copy);
+		int maxID2 = 9;
+		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
+		assertEquals(1, di1.getTypes().size());
+		assertEquals(9, di1.getMaxId());
+		assertEquals(1, di1.getRecordCount());
+		{
+			PvpRecord r = di1.getRecord(8);
+			assertEquals("Email", r.getCustomField("Account Name"));
+			assertEquals("joe123", r.getCustomField("Username"));
+			assertEquals("secret99", r.getCustomField("Password"));
+		}
 	}
-	
+
 	/**
 	 * same except using copy, changing id, same title
 	 */
@@ -226,9 +294,10 @@ public class PvpDataInterfaceTest {
 			records2.add(rec1Copy);
 			return records2;
 		};
+		System.out.println("at testMerge_diffId");
 		testMergeBasic1Help(rg);
 	}
-	
+
 	/**
 	 * Test where the main has a higher maxID
 	 */
@@ -238,19 +307,19 @@ public class PvpDataInterfaceTest {
 		List<PvpRecord> records1 = createTestRecords();
 		int maxID1 = 9;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecords();
 		int maxID2 = 15;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.NO_CHANGE, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(9, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
 	}
-	
+
 	/**
 	 * Test where the import has a higher maxID
 	 */
@@ -260,19 +329,19 @@ public class PvpDataInterfaceTest {
 		List<PvpRecord> records1 = createTestRecords();
 		int maxID1 = 15;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecords();
 		int maxID2 = 9;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.NO_CHANGE, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(15, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
 	}
-	
+
 	/**
 	 * Test where the import has a different record
 	 */
@@ -282,14 +351,14 @@ public class PvpDataInterfaceTest {
 		List<PvpRecord> records1 = createTestRecords();
 		int maxID1 = 9;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecords2();
 		int maxID2 = 15;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertTrue(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(10, di1.getMaxId());
 		assertEquals(2, di1.getRecordCount());
@@ -306,7 +375,7 @@ public class PvpDataInterfaceTest {
 			assertEquals("password123", r2.getCustomField("Password"));
 		}
 	}
-	
+
 	/**
 	 * Test where the import record was modified
 	 */
@@ -316,14 +385,14 @@ public class PvpDataInterfaceTest {
 		List<PvpRecord> records1 = createTestRecords();
 		int maxID1 = 15;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecordsModified();
 		int maxID2 = 9;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertTrue(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.TO_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(15, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
@@ -334,7 +403,7 @@ public class PvpDataInterfaceTest {
 			assertEquals("newsecret99", r.getCustomField("Password"));
 		}
 	}
-	
+
 	/**
 	 * Test where the main record was modified
 	 */
@@ -344,14 +413,14 @@ public class PvpDataInterfaceTest {
 		List<PvpRecord> records1 = createTestRecordsModified();
 		int maxID1 = 15;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecords();
 		int maxID2 = 9;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(15, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());
@@ -362,11 +431,10 @@ public class PvpDataInterfaceTest {
 			assertEquals("newsecret99", r.getCustomField("Password"));
 		}
 	}
-	
+
 	/**
 	 * Test where the main record was modified, and title was changed
 	 */
-	/*
 	@Test
 	public void testMergeBasic7() {
 		List<PvpType> types1 = createTestTypes();
@@ -374,32 +442,25 @@ public class PvpDataInterfaceTest {
 		records1.get(0).setCustomField("Account Name", "Email 2");
 		int maxID1 = 15;
 		PvpDataInterface di1 = new PvpDataInterface(context, types1, records1, maxID1);
-		
+
 		List<PvpType> types2 = createTestTypes();
 		List<PvpRecord> records2 = createTestRecords();
 		int maxID2 = 9;
 		PvpDataInterface di2 = new PvpDataInterface(context, types2, records2, maxID2);
-		
-		boolean result = di1.mergeData(di2);
-		assertTrue(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
-		assertEquals(16, di1.getMaxId());
-		assertEquals(2, di1.getRecordCount());
+		assertEquals(15, di1.getMaxId());
+		assertEquals(1, di1.getRecordCount());
 		{
 			PvpRecord r = di1.getRecord(8);
 			assertEquals("Email 2", r.getCustomField("Account Name"));
 			assertEquals("joe123", r.getCustomField("Username"));
 			assertEquals("newsecret99", r.getCustomField("Password"));
 		}
-		{
-			PvpRecord r2 = di1.getRecord(16);
-			assertEquals("Email", r2.getCustomField("Account Name"));
-			assertEquals("joe123", r2.getCustomField("Username"));
-			assertEquals("secret99", r2.getCustomField("Password"));
-		}
 	}
-	*/
-	
+
 	/**
 	 * test where merged has different records - but dont delete because maxId is 1
 	 */
@@ -416,7 +477,7 @@ public class PvpDataInterfaceTest {
 			int maxID1 = 2;
 			di1 = new PvpDataInterface(context, types1, records1, maxID1);
 		}
-		
+
 		PvpDataInterface di2;
 		{
 			List<PvpType> types2 = createTestTypes();
@@ -425,17 +486,17 @@ public class PvpDataInterfaceTest {
 			int maxID2 = 1;
 			di2 = new PvpDataInterface(context, types2, records2, maxID2);
 		}
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+
+		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result); // this is true, because the di2 needs to updated with rec2
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(2, di1.getMaxId());
 		assertEquals(2, di1.getRecordCount());
 	}
-	
 
 	/**
-	 * test where merged has different records - but dont delete because maxId is 1
+	 * test where merged has different records - delete because maxId is 2
 	 */
 	@Test
 	public void testMergeBasic_delete2() {
@@ -450,24 +511,22 @@ public class PvpDataInterfaceTest {
 			int maxID1 = 2;
 			di1 = new PvpDataInterface(context, types1, records1, maxID1);
 		}
-		
+
 		PvpDataInterface di2;
 		{
 			List<PvpType> types2 = createTestTypes();
 			List<PvpRecord> records2 = new ArrayList<>();
 			records2.add(rec1);
-			int maxID2 = 2; // the maxId is 2
+			int maxID2 = 2; // the maxId is 2 -> record with ID 2 was deleted
 			di2 = new PvpDataInterface(context, types2, records2, maxID2);
 		}
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(2, di1.getMaxId());
 		assertEquals(2, di1.getRecordCount());
 	}
-
-	
 
 	/**
 	 * test delete
@@ -485,7 +544,7 @@ public class PvpDataInterfaceTest {
 			int maxID1 = 2;
 			di1 = new PvpDataInterface(context, types1, records1, maxID1);
 		}
-		
+
 		PvpDataInterface di2;
 		{
 			List<PvpType> types2 = createTestTypes();
@@ -494,9 +553,9 @@ public class PvpDataInterfaceTest {
 			int maxID2 = 2; // the maxId is 2
 			di2 = new PvpDataInterface(context, types2, records2, maxID2);
 		}
-		
-		boolean result = di1.mergeData(di2);
-		assertFalse(result);
+
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
 		assertEquals(2, di1.getMaxId());
 		assertEquals(1, di1.getRecordCount());

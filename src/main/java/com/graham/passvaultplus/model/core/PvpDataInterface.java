@@ -12,12 +12,13 @@ import java.util.stream.Stream;
 import com.graham.passvaultplus.PvpContext;
 
 /**
+ * This is basically a database. It represents a set of types and data records that bundle together.
  * All methods to work with RtRecords and RtTypes.
  */
 public class PvpDataInterface {
-	
+
 	static final public String TYPE_CATEGORY = "Category";
-	
+
 	static public class FilterResults {
 		public List<PvpRecord> records = new ArrayList<PvpRecord>();
 		public boolean allTheSameTypeFlag = true;
@@ -27,7 +28,7 @@ public class PvpDataInterface {
 	private List<PvpType> types;
 	private List<PvpRecord> records;
 	private int maxID;
-	
+
 	public PvpDataInterface(final PvpContext contextParam) {
 		context = contextParam;
 	}
@@ -39,138 +40,19 @@ public class PvpDataInterface {
 		maxID = maxIDParam;
 	}
 
-  	void setData(PvpDataInterface dataTocCopyFrom) {
+	void setData(PvpDataInterface dataTocCopyFrom) {
 		types = dataTocCopyFrom.types;
 		records = dataTocCopyFrom.records;
 		maxID = dataTocCopyFrom.maxID;
 	}
-  	
-  	/**
-  	 * @return True if the existing record was changed
-  	 * Meaning: true -> dont add new record, false -> add new record
-  	 */
-  	private boolean makeIdentical(final PvpRecord existingRec, final PvpRecord newRec) {
-		if (existingRec.getModificationDate() != null && newRec.getModificationDate() != null) {
-			if (newRec.getModificationDate().after(existingRec.getModificationDate())) {
-				// the newRec was modified later - assume we want that data
-				return newRec.copyTo(existingRec);
-			}
-		} else {
-			context.notifyInfo("makeIdentical skipped because modification date missing:" + existingRec);
-		}
-		
-  		return false;
-  	}
-  	
-  	/**
-  	 * return true if the original data has been appended or updated, so it should be written out to the file
-  	 */
-  	boolean mergeData(PvpDataInterface dataToMergeFrom) {
-  		
-  		context.notifyInfo(">>>>>> start merge. curMax:" + maxID + " mergeMaxId:" + dataToMergeFrom.maxID);
-  		
-  		int thisStartingRecordCount = getRecordCount();
-  		int maxIdMatching = 0; // the largest ID that existed in both databases that match
-  		boolean[] matchedRecords = new boolean[maxID+1]; // IDs of records in the main database that have a corresponding record in the mergeFrom database
-  		int typesMatched = 0;
-  		boolean wasChanged = false;
-  		if (maxID != dataToMergeFrom.maxID) {
-  			//wasChanged = true;
-  			//if (dataTocMergeFrom.maxID > maxID) {
-  			//	maxID = dataTocMergeFrom.maxID;
-  			//}
-  		}
-  		
-  		for (PvpType newType : dataToMergeFrom.types) {
-  			PvpType existingType = getType(newType.getName());
-  			if (existingType == null) {
-  				context.notifyInfo("adding type:" + newType.getName());
-  				types.add(newType);
-  				wasChanged = true;
-  			} else {
-  				// TODO compare and modify
-  				typesMatched++;
-  			}
-  		}
-  		
-  		int recordsMatched = 0;
-  		for (int i = dataToMergeFrom.records.size() - 1; i >= 0; i--) {
-  			PvpRecord newRec = dataToMergeFrom.getRecordAtIndex(i);
-  			context.notifyInfo("--------- Trying to match Record:" + newRec + " ----------");
-  			if ("Fidelity Payroll and 401(k)".equals(newRec.toString()) || "Vangaurd".equals(newRec.toString())) {
-  				context.notifyInfo("???");
-  			}
-  			PvpRecord existingRec = null;
-  			if (i < getRecordCount()) {
-  				final PvpRecord recAtIndex = getRecordAtIndex(i);
-  				if (newRec.getId() == recAtIndex.getId()) { // && isMatchingRecord(recWithId, newRec)  ???
-  					existingRec = recAtIndex;
-  				} else {
-  					context.notifyInfo("id did not match by index:" + newRec + ": " + existingRec);
-  				}
-  			}
-  			if (existingRec == null) {
-  				final PvpRecord recWithId = getRecord(newRec.getId());
-  				//if (recWithId != null && isMatchingRecord(recWithId, newRec)) {
-  				if (newRec.matchRating(recWithId) > 30) {
-  					existingRec = recWithId;
-  				}
-  			}
-  			if (existingRec == null) {
-  				wasChanged = true;
-  				List<PvpRecord> recordsTS = getRecordsByToString(newRec.getType(), newRec.toString());
-  				for (final PvpRecord rTS : recordsTS) {
-  					//if (isMatchingRecord(rTS, newRec)) {
-  					if (newRec.matchRating(rTS) > 50) {
-  						context.notifyInfo("found matching ToString");
-  						existingRec = rTS;
-  						break;
-  					}
-  				}
-  			}
-  			if (existingRec != null) {
-  				recordsMatched++;
-  				matchedRecords[existingRec.getId()] = true;
-  				if (existingRec.getId() == newRec.getId() && existingRec.getId() > maxIdMatching) {
-  					maxIdMatching = existingRec.getId();
-  					context.notifyInfo("maxIdMatching:" + maxIdMatching);
-  				}
-  				if (makeIdentical(existingRec, newRec)) {
-  					context.notifyInfo("wasChanged");
-  					wasChanged = true;
-  				}
-  			} else {
-  				if (newRec.getId() > maxIdMatching) {
-  					// this is a new record, because its ID is bigger than we know about
-  					int nextID = getNextMaxId();
-  					context.notifyInfo("adding a record:" + nextID + ":" + newRec);
-  					newRec.setId(nextID);
-  					records.add(newRec);
-  					wasChanged = true;
-  				} else {
-  					// this record was deleted, because we didn't match on one we know about
-  					context.notifyInfo("NOT adding a record:" + newRec.getId() + ":" + maxIdMatching + ":" + newRec);
-  				}
-  			}
-  		}
-  		
-  		for (int i = records.size() - 1; i >= 0; i--) {
-  			PvpRecord r = records.get(i);
-  			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-  				context.notifyInfo("deleting a record:" + r.getId() + ":" + r);
-  				records.remove(i);
-				r.setId(0);
-  			}
-  		}
-  		
-  		if (thisStartingRecordCount != dataToMergeFrom.records.size()) {
-  			context.notifyInfo("different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.records.size());
-  			wasChanged = true;
-  		}
-  		
-  		context.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
-  		return wasChanged;
-  	}
+
+	/**
+	 * return true if the original data has been appended or updated, so it should be written out to the file
+	 */
+	PvpDataMerger.MergeResultState mergeData(PvpDataInterface dataToMergeFrom) {
+		PvpDataMerger m = new PvpDataMerger(context);
+		return m.mergeData(this, dataToMergeFrom);
+	}
 
 	/**
 	 * @return List of PvpType
@@ -226,7 +108,7 @@ public class PvpDataInterface {
 			context.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
 		}
 	}
-	
+
 	public void saveRecords(final Collection<PvpRecord> rCol) {
 		if (rCol == null || rCol.size() == 0) {
 			return;
@@ -256,7 +138,7 @@ public class PvpDataInterface {
 				context.notifyWarning("WARN112 could not delete record because it is not in the list:" + r);
 			}
 		}
-		
+
 		if (changed) {
 			context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
 			context.getViewListContext().filterUIChanged();
@@ -280,7 +162,7 @@ public class PvpDataInterface {
 		}
 		return null;
 	}
-	
+
 	public List<PvpRecord> getRecordsByToString(final PvpType t, final String s) {
 		// TODO optimize this
 		List<PvpRecord> results = new ArrayList<>();
@@ -328,7 +210,7 @@ public class PvpDataInterface {
 
 	public FilterResults getFilteredRecords(final String filterByType, final String filterByText, final PvpRecord filterByCategory, final boolean checkCategory) {
 		final long startTime = System.nanoTime();
-	
+
 		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
 		boolean checkText = filterByText.length() > 0;
 		List<PvpRecord> allRecords = context.getDataInterface().getRecords(); // TODO delete context.getDataInterface().
@@ -361,15 +243,15 @@ public class PvpDataInterface {
 			}
 			return true;
    	 	});
-    	
+
     	results.records = filteredStream.collect(Collectors.toList());
-    	
+
     	if (checkType) {
     		results.allTheSameTypeFlag = true;
     	} else {
     		results.allTheSameTypeFlag = results.records.stream().map(r -> r.getType().getName()).distinct().count() == 1;
     	}
-    	
+
     	if (context.getShowDiagnostics()) {
     		final long endTime = System.nanoTime();
     		context.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + (endTime - startTime) / 1000000 + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
@@ -387,12 +269,12 @@ public class PvpDataInterface {
 		}
 		return false;
 	}
-	
+
 	public int getNextMaxId() {
 		maxID++;
 		return maxID;
 	}
-	
+
 	public int getMaxId() {
 		return maxID;
 	}
