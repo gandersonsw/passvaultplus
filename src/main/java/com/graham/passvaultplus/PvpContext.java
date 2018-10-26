@@ -76,7 +76,7 @@ public class PvpContext {
 	private boolean canQuitOrGotoSetup = true;
 	private StringBuilder warnings = new StringBuilder();
 	private byte[] encryptedPassword;
-	private DiagnosticsManager diagnosticsManager = new DiagnosticsManager();
+	private DiagnosticsManager diagnosticsManager = new DiagnosticsManager(new CommandExecuter(this));
 	
 	private boolean userPrefsLoaded = false;
 	private boolean showDashboard = true;

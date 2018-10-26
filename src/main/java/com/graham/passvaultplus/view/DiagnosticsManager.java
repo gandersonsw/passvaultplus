@@ -1,18 +1,35 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
+import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 
 public class DiagnosticsManager {
 	
+	private final CommandExecuter executer;
+	
 	private Component diagnosticsComponent;
 	private JTextArea ta;
 	private StringBuilder log = new StringBuilder();
+	
+	private JTextField paramsTF;
+	private JComboBox<String> commandCB;
+	
+	public DiagnosticsManager(CommandExecuter e) {
+		executer = e;
+	}
 	
 	public void checkDiagnostics() {
 		PvpContext context = PvpContext.getActiveContext();
@@ -32,9 +49,26 @@ public class DiagnosticsManager {
 	}
 	
 	private Component buildDiagnosticsTab() {
+		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
 		JScrollPane sp = new JScrollPane(ta);
-		return sp;
+		mainP.add(sp, BorderLayout.CENTER);
+		
+		JPanel commandP = new JPanel(new BorderLayout());
+		//String[] commands = { "SetAllModDateToNow", "SetAllCreateDateToNow", "Exit" };
+		commandCB = new JComboBox<>(executer.getCommands());
+		commandP.add(commandCB, BorderLayout.WEST);
+		paramsTF = new JTextField();
+		commandP.add(paramsTF, BorderLayout.CENTER);
+		JButton doIt = new JButton(new DoCommandAction());
+		commandP.add(doIt, BorderLayout.EAST);
+		mainP.add(commandP, BorderLayout.SOUTH);
+		
+		CommandSelectedAction csel = new CommandSelectedAction();
+		commandCB.addActionListener(csel);
+		csel.actionPerformed(null);
+		
+		return mainP;
 	}
 	
 	public void warning(final String s, final Exception e) {
@@ -59,6 +93,30 @@ public class DiagnosticsManager {
 		}
 		if (ta != null) {
 			ta.setText(log.toString());
+		}
+	}
+	
+	class DoCommandAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+		public DoCommandAction() {
+			super("Execute");
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("command=" + commandCB.getSelectedItem());
+			executer.execute((String)commandCB.getSelectedItem(), paramsTF.getText());
+		}
+	}
+	
+	class CommandSelectedAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+		//public DoCommandAction() {
+		//	super("Execute");
+		//}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("command sel=" + commandCB.getSelectedItem());
+			paramsTF.setText(executer.getDefaultArguments((String)commandCB.getSelectedItem()));
 		}
 	}
 
