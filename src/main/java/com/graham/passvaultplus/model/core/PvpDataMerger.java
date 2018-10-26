@@ -56,7 +56,7 @@ public class PvpDataMerger {
 	 * if param is true, add the "From" PvpDataInterface to the ones that are
 	 * dirty (that have been modified)
 	 */
-	private void dirtyTo(boolean b) {
+	private void dirtyFrom(boolean b) {
 		if (b) {
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.FROM_CHANGED.bits);
 		}
@@ -66,12 +66,12 @@ public class PvpDataMerger {
 	 * if param is true, add the "To PvpDataInterface to the ones that are dirty
 	 * (that have been modified)
 	 */
-	private void dirtyFrom(boolean b) {
+	private void dirtyTo(boolean b) {
 		if (b) {
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.TO_CHANGED.bits);
 		}
 	}
-	
+
 	private void logRecInfo(String s) {
 		if (newRec.getId() != curLogInofId) {
 			curLogInofId = newRec.getId();
@@ -85,14 +85,14 @@ public class PvpDataMerger {
 			if (newRec.getModificationDate().after(existingRec.getModificationDate())) {
 				// the newRec was modified later - assume we want that data
 				boolean b = newRec.copyTo(existingRec);
-				dirtyFrom(b);
+				dirtyTo(b);
 				if (b) {
 					logRecInfo("makeIdentical - dirtyTo");
 				}
 			} else {
 				// we don't care about the copiedData, only what is returned
 				boolean b = existingRec.copyTo(newRec);
-				dirtyTo(b);
+				dirtyFrom(b);
 				if (b) {
 					logRecInfo("makeIdentical - dirtyFrom");
 				}
@@ -102,15 +102,18 @@ public class PvpDataMerger {
 		}
 	}
 
+	/**
+	 * dataToMergeTo is considered the newer dataset. dataToMergeFrom is considered the older dataset.
+	 */
 	public MergeResultState mergeData(PvpDataInterface dataToMergeTo, PvpDataInterface dataToMergeFrom) {
 
 		context.notifyInfo(">>>>>> start merge. curMax:" + dataToMergeTo.getMaxId() + " mergeMaxId:" + dataToMergeFrom.getMaxId());
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
-		
+
 		// IDs of records in the main database that have a corresponding record in the mergeFrom database
-		boolean[] matchedRecords = new boolean[dataToMergeTo.getMaxId() + 1]; 
+		boolean[] matchedRecords = new boolean[dataToMergeTo.getMaxId() + 1];
 		int typesMatched = 0;
 		// if (dataToMergeTo.getMaxId() != dataToMergeFrom.getMaxId()) {
 		// wasChanged = true;
@@ -121,6 +124,7 @@ public class PvpDataMerger {
 
 		for (PvpType newType : dataToMergeFrom.getTypes()) {
 			PvpType existingType = dataToMergeTo.getType(newType.getName());
+			// TODO handle case where TO has type but FROM doesnt
 			if (existingType == null) {
 				context.notifyInfo("adding type:" + newType.getName());
 				dataToMergeTo.getTypes().add(newType);
@@ -130,7 +134,7 @@ public class PvpDataMerger {
 				typesMatched++;
 			}
 		}
-		
+
 		int indexNotMatching = 0;
 
 		int recordsMatched = 0;
@@ -193,12 +197,15 @@ public class PvpDataMerger {
 				dataToMergeTo.getRecords().remove(i2);
 				r.setId(0);
 				dirtyTo(true);
+			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
+				context.notifyInfo("adding record to FROM:" + r.getId() + ":" + r);
+				dirtyFrom(true);
 			}
 		}
 
 		if (thisStartingRecordCount != dataToMergeFrom.getRecordCount()) {
 			context.notifyInfo("different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
-			resultState = MergeResultState.BOTH_CHANGED; // TODO not sure about this
+			dirtyFrom(true); // TODO not sure about this
 		}
 
 		context.notifyInfo("records not matched by index:" + indexNotMatching);
