@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -31,7 +32,6 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.PvpException;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	
@@ -363,6 +363,24 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			new ErrUIGoogleDocFileNotFound(context, getFileName(false), this).buildDialog();
 		}
 		System.out.println("at 46464");
+	}
+	
+	@Override
+	public void allStoresAreUpToDate() {
+		if (lastUpdatedDate == null) {
+			loadFileProps(true);
+		}
+		context.notifyInfo("BS_Google: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
+		context.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());
+	}
+	
+	@Override
+	public boolean isUnmodifiedRemote() {
+		if (lastUpdatedDate == null) {
+			loadFileProps(true);
+		}
+		context.notifyInfo("BS_Google: isUnmodifiedRemote:" + (lastUpdatedDate.getValue() == context.getGoogleDriveDocUpdateDate()) + ":" + lastUpdatedDate + ":" + new Date(context.getGoogleDriveDocUpdateDate()));
+		return lastUpdatedDate.getValue() == context.getGoogleDriveDocUpdateDate();
 	}
 
 }

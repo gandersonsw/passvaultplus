@@ -55,7 +55,6 @@ public class DiagnosticsManager {
 		mainP.add(sp, BorderLayout.CENTER);
 		
 		JPanel commandP = new JPanel(new BorderLayout());
-		//String[] commands = { "SetAllModDateToNow", "SetAllCreateDateToNow", "Exit" };
 		commandCB = new JComboBox<>(executer.getCommands());
 		commandP.add(commandCB, BorderLayout.WEST);
 		paramsTF = new JTextField();
@@ -103,19 +102,14 @@ public class DiagnosticsManager {
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("command=" + commandCB.getSelectedItem());
 			executer.execute((String)commandCB.getSelectedItem(), paramsTF.getText());
 		}
 	}
 	
 	class CommandSelectedAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
-		//public DoCommandAction() {
-		//	super("Execute");
-		//}
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("command sel=" + commandCB.getSelectedItem());
 			paramsTF.setText(executer.getDefaultArguments((String)commandCB.getSelectedItem()));
 		}
 	}

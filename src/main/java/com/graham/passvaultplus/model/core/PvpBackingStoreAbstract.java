@@ -96,4 +96,12 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		
 	}
 	
+	public void allStoresAreUpToDate() {
+		// by default, don't do anything
+	}
+	
+	public boolean isUnmodifiedRemote() {
+		return false;
+	}
+	
 }

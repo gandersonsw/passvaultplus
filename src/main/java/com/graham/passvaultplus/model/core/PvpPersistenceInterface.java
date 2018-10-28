@@ -63,10 +63,10 @@ public class PvpPersistenceInterface {
 		return fname;
 	}
 
-	public List<PvpBackingStore> getEnabledBackingStores() {
+	public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
 		List<PvpBackingStore> bsList = new ArrayList<PvpBackingStore>();
 		for (PvpBackingStore bs : backingStores) {
-			if (bs.isEnabled()) {
+			if (bs.isEnabled() && (includeUnmodifiedRemotes || !bs.isUnmodifiedRemote())) {
 				bsList.add(bs);
 			}
 		}
@@ -77,7 +77,7 @@ public class PvpPersistenceInterface {
 
 		context.notifyInfo("PvpPersistenceInterface.load :: START");
 
-		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
+		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
 
 		for (PvpBackingStore bs: enabledBs) {
 			bs.clearTransientData();
@@ -149,6 +149,19 @@ public class PvpPersistenceInterface {
 			}
 
 			context.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
+		} else {
+			boolean wasErrA = false;
+			for (PvpBackingStore bs: sortedBSArr) {
+				if (bs.getException() != null) {
+					wasErrA = true;
+				}
+			}
+			context.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate : " + wasErrA);
+			if (!wasErrA) {
+				for (PvpBackingStore bs : enabledBs) {
+					bs.allStoresAreUpToDate();
+				}
+			}
 		}
 	}
 
@@ -161,7 +174,7 @@ public class PvpPersistenceInterface {
 	}
 
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
-		final List<PvpBackingStore> enabledBs = getEnabledBackingStores();
+		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
 		errorHappened = false;
 		for (PvpBackingStore bs : enabledBs) {
 			bs.clearTransientData();
@@ -190,6 +203,12 @@ public class PvpPersistenceInterface {
 						bs.setDirty(true);
 					}
 					break;
+			}
+		}
+		context.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. err:" + errorHappened);
+		if (!errorHappened) {
+			for (PvpBackingStore bs : enabledBs) {
+				bs.allStoresAreUpToDate();
 			}
 		}
 	}

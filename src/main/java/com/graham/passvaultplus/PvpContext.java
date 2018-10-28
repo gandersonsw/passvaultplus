@@ -83,6 +83,7 @@ public class PvpContext {
 	private boolean useGoogleDrive = false;
 	private boolean showDiagnostics = false;
 	private String googleDriveDocId;
+	private long googleDriveDocUpdateDate;
 	private boolean pinWasReset = false;
 	
 	/**
@@ -424,6 +425,7 @@ public class PvpContext {
 		useGoogleDrive = userPrefs.getBoolean("useGoogleDrive", false);
 		showDiagnostics = userPrefs.getBoolean("showDiagnostics", false);
 		googleDriveDocId = userPrefs.get("googleDriveDocId", "");
+		googleDriveDocUpdateDate = userPrefs.getLong("googleDriveDocUpdateDate", 0);
 		userPrefsLoaded = true;
 	}
 	
@@ -479,6 +481,17 @@ public class PvpContext {
 		googleDriveDocId = id;
 		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
 		userPrefs.put("googleDriveDocId", googleDriveDocId);
+	}
+	
+	public long getGoogleDriveDocUpdateDate() {
+		loadUserPrefs();
+		return googleDriveDocUpdateDate;
+	}
+	
+	public void setGoogleDriveDocUpdateDate(final long d) {
+		googleDriveDocUpdateDate = d;
+		Preferences userPrefs = Preferences.userNodeForPackage(this.getClass());
+		userPrefs.putLong("googleDriveDocUpdateDate", googleDriveDocUpdateDate);
 	}
 	
 	public boolean getShowDiagnostics() {

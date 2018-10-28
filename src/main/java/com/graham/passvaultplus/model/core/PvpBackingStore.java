@@ -115,5 +115,15 @@ public interface PvpBackingStore {
 	void setStatusBox(StatusBox sb);
 	
 	void userAskedToHandleError();
+	
+	/**
+	 * todo
+	 */
+	void allStoresAreUpToDate();
+	
+	/**
+	 * todo
+	 */
+	boolean isUnmodifiedRemote();
 
 }

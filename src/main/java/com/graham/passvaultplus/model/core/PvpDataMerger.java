@@ -75,7 +75,7 @@ public class PvpDataMerger {
 	private void logRecInfo(String s) {
 		if (newRec.getId() != curLogInofId) {
 			curLogInofId = newRec.getId();
-			context.notifyInfo("--------- Record:" + i + ":" + newRec.getId() + ":" + newRec + " ----------");
+			context.notifyInfo("--------- Record Index:" + i + " Id:" + newRec.getId() + ":" + newRec + " ----------");
 		}
 		context.notifyInfo(s);
 	}
@@ -152,6 +152,7 @@ public class PvpDataMerger {
 			}
 			if (existingRec == null) {
 				final PvpRecord recWithId = dataToMergeTo.getRecord(newRec.getId());
+				logRecInfo("Matching By Id. matchRating:" + newRec.matchRating(recWithId));
 				if (newRec.matchRating(recWithId) > 30) {
 					existingRec = recWithId;
 				}
@@ -179,13 +180,13 @@ public class PvpDataMerger {
 				if (newRec.getId() > maxIdMatching) {
 					// this is a new record, because its ID is bigger than we know about
 					int nextID = dataToMergeTo.getNextMaxId();
-					logRecInfo("adding a record:" + nextID);
+					logRecInfo("adding a record Id:" + nextID);
 					newRec.setId(nextID);
 					dataToMergeTo.getRecords().add(newRec);
 					dirtyTo(true);
 				} else {
 					// this record was deleted, because we didn't match on one we know about
-					logRecInfo("NOT adding a record:" + newRec.getId() + ":" + maxIdMatching);
+					logRecInfo("NOT adding a record Id:" + newRec.getId() + ":" + maxIdMatching);
 				}
 			}
 		}
@@ -193,12 +194,12 @@ public class PvpDataMerger {
 		for (int i2 = dataToMergeTo.getRecordCount() - 1; i2 >= 0; i2--) {
 			PvpRecord r = dataToMergeTo.getRecordAtIndex(i2);
 			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-				context.notifyInfo("deleting a record:" + r.getId() + ":" + r);
+				context.notifyInfo("deleting a record Id:" + r.getId() + ":" + r);
 				dataToMergeTo.getRecords().remove(i2);
 				r.setId(0);
 				dirtyTo(true);
 			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
-				context.notifyInfo("adding record to FROM:" + r.getId() + ":" + r);
+				context.notifyInfo("adding record to FROM Id:" + r.getId() + ":" + r);
 				dirtyFrom(true);
 			}
 		}

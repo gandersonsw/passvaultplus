@@ -110,6 +110,7 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_TYPE)) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
+		
 		if (fieldValue == null) {
 			fields.remove(fieldName);
 		} else {
@@ -202,13 +203,13 @@ public class PvpRecord {
 		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
 			return 0;
 		}
-		int fieldCount = 2;
+		int fieldCount = 5;
 		int matchCount = 0;
 		if (AppUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
 			matchCount++;
 		}
 		if (AppUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
-			matchCount++;
+			matchCount += 4;
 		}
 
 		final Map<String, String> fields1 = this.getCustomFields();
