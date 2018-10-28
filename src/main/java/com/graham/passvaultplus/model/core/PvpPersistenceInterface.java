@@ -106,7 +106,7 @@ public class PvpPersistenceInterface {
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 			} catch (Exception e) {
-				context.notifyInfo("at 11 Exception: " + e.getMessage());
+				context.notifyWarning("PI load Exception: ", e); // TODO might delete this since the exceptin is hadnled by bs
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));

@@ -135,7 +135,7 @@ public class BCUtil {
 		//d.show();
 	}
 	
-	public String getExceptionTrace(Exception e) {
+	public static String getExceptionTrace(Exception e) {
 		if (e == null)
 			return "";
 		StringWriter sw = new StringWriter();

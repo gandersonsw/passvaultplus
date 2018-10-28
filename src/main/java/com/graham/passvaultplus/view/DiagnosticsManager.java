@@ -13,6 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 
@@ -74,7 +75,11 @@ public class DiagnosticsManager {
 		log.append(s);
 		if (e != null) {
 			log.append("::");
+			log.append(e);
+			log.append("::");
 			log.append(e.getMessage());
+			log.append("\n");
+			log.append(BCUtil.getExceptionTrace(e));
 		}
 		log.append("\n");
 		logUpdated();
