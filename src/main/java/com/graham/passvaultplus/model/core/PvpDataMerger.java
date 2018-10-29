@@ -1,6 +1,7 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import java.util.Date;
 import java.util.List;
 import com.graham.passvaultplus.PvpContext;
 
@@ -42,11 +43,14 @@ public class PvpDataMerger {
 		}
 	}
 
+	private static final Date ZERO_DATE = new Date(0);
+
 	private final PvpContext context;
 	private MergeResultState resultState = MergeResultState.NO_CHANGE;
-	private PvpRecord newRec;
+	private PvpRecord fromRec;
 	private int curLogInofId;
 	private int i;
+	private int sameModDateCount;
 
 	public PvpDataMerger(final PvpContext contextParam) {
 		context = contextParam;
@@ -73,32 +77,32 @@ public class PvpDataMerger {
 	}
 
 	private void logRecInfo(String s) {
-		if (newRec.getId() != curLogInofId) {
-			curLogInofId = newRec.getId();
-			context.notifyInfo("--------- Record Index:" + i + " Id:" + newRec.getId() + ":" + newRec + " ----------");
+		if (fromRec.getId() != curLogInofId) {
+			curLogInofId = fromRec.getId();
+			context.notifyInfo("--------- Record Index:" + i + " Id:" + fromRec.getId() + ":" + fromRec + " ----------");
 		}
 		context.notifyInfo(s);
 	}
 
-	private void makeIdentical(final PvpRecord existingRec, final PvpRecord newRec) {
-		if (existingRec.getModificationDate() != null && newRec.getModificationDate() != null) {
-			if (newRec.getModificationDate().after(existingRec.getModificationDate())) {
-				// the newRec was modified later - assume we want that data
-				boolean b = newRec.copyTo(existingRec);
-				dirtyTo(b);
-				if (b) {
-					logRecInfo("makeIdentical - dirtyTo");
-				}
-			} else {
-				// we don't care about the copiedData, only what is returned
-				boolean b = existingRec.copyTo(newRec);
-				dirtyFrom(b);
-				if (b) {
-					logRecInfo("makeIdentical - dirtyFrom");
-				}
+	private void makeIdentical(final PvpRecord toRec) {
+		Date toRMD = toRec.getModificationDate() == null ? ZERO_DATE : toRec.getModificationDate();
+		Date fromRMD = fromRec.getModificationDate() == null ? ZERO_DATE : fromRec.getModificationDate();
+		if (fromRMD.equals(toRMD)) {
+			sameModDateCount++;
+		} else if (fromRMD.after(toRMD)) {
+			// the fromRec was modified later - assume we want that data
+			boolean b = fromRec.copyTo(toRec);
+			dirtyTo(b);
+			if (b) {
+				logRecInfo("makeIdentical - dirtyTo");
 			}
 		} else {
-			logRecInfo("makeIdentical skipped because modification date missing:" + existingRec.getModificationDate() + ":" + newRec.getModificationDate());
+			// we don't care about the copiedData, only what is returned
+			boolean b = toRec.copyTo(fromRec);
+			dirtyFrom(b);
+			if (b) {
+				logRecInfo("makeIdentical - dirtyFrom");
+			}
 		}
 	}
 
@@ -107,7 +111,7 @@ public class PvpDataMerger {
 	 */
 	public MergeResultState mergeData(PvpDataInterface dataToMergeTo, PvpDataInterface dataToMergeFrom) {
 
-		context.notifyInfo(">>>>>> start merge. curMax:" + dataToMergeTo.getMaxId() + " mergeMaxId:" + dataToMergeFrom.getMaxId());
+		context.notifyInfo(">>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
@@ -122,12 +126,12 @@ public class PvpDataMerger {
 		// }
 		// }
 
-		for (PvpType newType : dataToMergeFrom.getTypes()) {
-			PvpType existingType = dataToMergeTo.getType(newType.getName());
+		for (PvpType fromType : dataToMergeFrom.getTypes()) {
+			PvpType toType = dataToMergeTo.getType(fromType.getName());
 			// TODO handle case where TO has type but FROM doesnt
-			if (existingType == null) {
-				context.notifyInfo("adding type:" + newType.getName());
-				dataToMergeTo.getTypes().add(newType);
+			if (toType == null) {
+				context.notifyInfo("adding type:" + fromType.getName());
+				dataToMergeTo.getTypes().add(fromType);
 				dirtyTo(true); // TODO verify this
 			} else {
 				// TODO compare and modify
@@ -139,54 +143,54 @@ public class PvpDataMerger {
 
 		int recordsMatched = 0;
 		for (i = dataToMergeFrom.getRecordCount() - 1; i >= 0; i--) {
-			newRec = dataToMergeFrom.getRecordAtIndex(i);
-			//context.notifyInfo("--------- Trying to match Record:" + newRec + " ----------");
-			PvpRecord existingRec = null;
+			fromRec = dataToMergeFrom.getRecordAtIndex(i);
+			//context.notifyInfo("--------- Trying to match Record:" + fromRec + " ----------");
+			PvpRecord toRec = null;
 			if (i < dataToMergeTo.getRecordCount()) {
 				final PvpRecord recAtIndex = dataToMergeTo.getRecordAtIndex(i);
-				if (newRec.getId() == recAtIndex.getId()) { // && isMatchingRecord(recWithId, newRec) ???
-					existingRec = recAtIndex;
+				if (fromRec.getId() == recAtIndex.getId()) { // && isMatchingRecord(recWithId, fromRec) ???
+					toRec = recAtIndex;
 				} else {
 					indexNotMatching++;
 				}
 			}
-			if (existingRec == null) {
-				final PvpRecord recWithId = dataToMergeTo.getRecord(newRec.getId());
-				logRecInfo("Matching By Id. matchRating:" + newRec.matchRating(recWithId));
-				if (newRec.matchRating(recWithId) > 30) {
-					existingRec = recWithId;
+			if (toRec == null) {
+				final PvpRecord recWithId = dataToMergeTo.getRecord(fromRec.getId());
+				logRecInfo("Matching By Id. matchRating:" + fromRec.matchRating(recWithId));
+				if (fromRec.matchRating(recWithId) > 30) {
+					toRec = recWithId;
 				}
 			}
-			if (existingRec == null) {
+			if (toRec == null) {
 				logRecInfo("looking for matching by toString");
-				List<PvpRecord> recordsTS = dataToMergeTo.getRecordsByToString(newRec.getType(), newRec.toString());
+				List<PvpRecord> recordsTS = dataToMergeTo.getRecordsByToString(fromRec.getType(), fromRec.toString());
 				for (final PvpRecord rTS : recordsTS) {
-					if (newRec.matchRating(rTS) > 50) {
+					if (fromRec.matchRating(rTS) > 50) {
 						logRecInfo("found matching ToString");
-						existingRec = rTS;
+						toRec = rTS;
 						break;
 					}
 				}
 			}
-			if (existingRec != null) {
+			if (toRec != null) {
 				recordsMatched++;
-				matchedRecords[existingRec.getId()] = true;
-				if (existingRec.getId() == newRec.getId() && existingRec.getId() > maxIdMatching) {
-					maxIdMatching = existingRec.getId();
+				matchedRecords[toRec.getId()] = true;
+				if (toRec.getId() == fromRec.getId() && toRec.getId() > maxIdMatching) {
+					maxIdMatching = toRec.getId();
 					logRecInfo("maxIdMatching:" + maxIdMatching);
 				}
-				makeIdentical(existingRec, newRec);
+				makeIdentical(toRec);
 			} else {
-				if (newRec.getId() > maxIdMatching) {
+				if (fromRec.getId() > maxIdMatching) {
 					// this is a new record, because its ID is bigger than we know about
 					int nextID = dataToMergeTo.getNextMaxId();
 					logRecInfo("adding a record Id:" + nextID);
-					newRec.setId(nextID);
-					dataToMergeTo.getRecords().add(newRec);
+					fromRec.setId(nextID);
+					dataToMergeTo.getRecords().add(fromRec);
 					dirtyTo(true);
 				} else {
 					// this record was deleted, because we didn't match on one we know about
-					logRecInfo("NOT adding a record Id:" + newRec.getId() + ":" + maxIdMatching);
+					logRecInfo("NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching);
 				}
 			}
 		}
@@ -205,11 +209,13 @@ public class PvpDataMerger {
 		}
 
 		if (thisStartingRecordCount != dataToMergeFrom.getRecordCount()) {
-			context.notifyInfo("different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
+			context.notifyInfo("> different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
 			dirtyFrom(true); // TODO not sure about this
 		}
 
-		context.notifyInfo("records not matched by index:" + indexNotMatching);
+		context.notifyInfo("> records not matched by index:" + indexNotMatching);
+		context.notifyInfo("> sameModDateCount:" + sameModDateCount);
+		context.notifyInfo("> resultState:" + resultState);
 		context.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
 		return resultState;
 	}
