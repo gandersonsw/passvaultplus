@@ -18,6 +18,7 @@ import com.graham.passvaultplus.PvpContext;
 public class PvpDataInterface {
 
 	static final public String TYPE_CATEGORY = "Category";
+	static final public String TYPE_PASSWORD_GEN = "Password Generator";
 
 	static public class FilterResults {
 		public List<PvpRecord> records = new ArrayList<PvpRecord>();
@@ -62,10 +63,14 @@ public class PvpDataInterface {
 	}
 
 	public List<PvpRecord> getCategories() {
+		return getRecordsOfType(TYPE_CATEGORY);
+	}
+
+	public List<PvpRecord> getRecordsOfType(String typeName) {
 		// TODO optimize this
 		List<PvpRecord> ret = new ArrayList<PvpRecord>();
 		for (PvpRecord r : records) {
-			if (PvpType.sameType(r.getType(), TYPE_CATEGORY)) {
+			if (PvpType.sameType(r.getType(), typeName)) {
 				ret.add(r);
 			}
 		}
@@ -254,8 +259,11 @@ public class PvpDataInterface {
 
     	if (context.getShowDiagnostics()) {
     		final long endTime = System.nanoTime();
-    		context.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + (endTime - startTime) / 1000000 + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
-    	}
+				final long msDelta = (endTime - startTime) / 1000000;
+				if (msDelta > 1) {
+    			context.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + msDelta + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
+				}
+			}
 		return results;
 	}
 

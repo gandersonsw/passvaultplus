@@ -24,7 +24,7 @@ import com.graham.passvaultplus.model.core.PvpField;
  * Builds the UI and the RecordEditField controller
  */
 class RecordEditFieldBuilder {
-	
+
 	final private String name;
 	final private RecordEditBuilder reb;
 	private JPanel leftPanel;
@@ -34,24 +34,24 @@ class RecordEditFieldBuilder {
 		name = n;
 		reb = rebParam;
 	}
-	
+
 	JComponent getLeftComponent() {
 		if (leftPanel == null) {
 			build();
 		}
 		return leftPanel;
 	}
-	
+
 	JComponent getRightComponent() {
 		if (rightComponent == null) {
 			build();
 		}
 		return rightComponent;
 	}
-	
+
 	private void build() {
 		final PvpField field = reb.record.getType().getField(name);
-		
+
 		JTextComponent tf;
 		JComponent textComponent;
 		JComponent rightWidget = null;
@@ -68,8 +68,9 @@ class RecordEditFieldBuilder {
 			new TextFieldPopUpHandler(reb.context.getMainFrame(), textField, field, reb.record.getType(), reb.context.getDataInterface(), reb.context.getUndoManager());
 			tf = textField;
 			textComponent = textField;
+			reb.rcPopup.addListener(tf);
 		}
-		
+
 		RecordEditField ref;
 		if (field.isClassificationSecret() && !reb.isNewRecord) {
 			final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name);
@@ -81,16 +82,16 @@ class RecordEditFieldBuilder {
 		} else {
 			ref = new RecordEditFieldJTextComponent(tf, name);
 		}
-		
+
 		tf.getDocument().addUndoableEditListener(reb.context.getUndoManager());
 		tf.addCaretListener(reb.context.getUndoManager());
 		tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(reb.editContext, ref)));
-		
+
 		reb.editContext.editFields.put(name, ref);
 		EmptyBorder eBorder = new EmptyBorder(3,3,3,3);
 		CompoundBorder cBorder = new CompoundBorder(eBorder, tf.getBorder());
 		tf.setBorder(cBorder);
-		
+
 		if (rightWidget != null) {
 			JPanel p55 = new JPanel(new BorderLayout());
 			p55.add(textComponent, BorderLayout.CENTER);
@@ -99,7 +100,7 @@ class RecordEditFieldBuilder {
 		} else {
 			rightComponent = textComponent;
 		}
-		
+
 		// Build the Left Component ******************************
 		leftPanel = new JPanel(new FlowLayout());
 		leftPanel.add(new JLabel(name + ":", JLabel.RIGHT));
@@ -118,5 +119,5 @@ class RecordEditFieldBuilder {
 			leftPanel.add(copyButton);
 		}
 	}
-	
+
 }

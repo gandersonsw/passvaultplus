@@ -26,6 +26,7 @@ public class RecordEditBuilder {
 	final PvpRecord record;
 	final RecordEditContext editContext = new RecordEditContext();
 	final boolean isNewRecord;
+	final RightClickPopup rcPopup;
 
 	public static RecordEditContext buildEditor(final PvpContext contextParam, final PvpRecord rParam, final boolean isNewRecordParam) {
 		return new RecordEditBuilder(contextParam, rParam, isNewRecordParam).build();
@@ -37,6 +38,7 @@ public class RecordEditBuilder {
 		editContext.editRecord = rParam;
 		editContext.undoManager = context.getUndoManager();
 		isNewRecord = isNewRecordParam;
+		rcPopup = new RightClickPopup(context);
 	}
 
 	private RecordEditContext build() {
@@ -57,8 +59,8 @@ public class RecordEditBuilder {
 		for (int i = 0; i < typeFields.size(); i++) {
 			PvpField f = typeFields.get(i);
 
-			if (!f.getName().equals(PvpField.USR_NOTES) && 
-					!f.getName().equals(PvpField.USR_CREATION_DATE) && 
+			if (!f.getName().equals(PvpField.USR_NOTES) &&
+					!f.getName().equals(PvpField.USR_CREATION_DATE) &&
 					!f.getName().equals(PvpField.USR_MODIFICATION_DATE)) {
 				fieldNamesToDisplay.add(f.getName());
 			}
@@ -77,7 +79,7 @@ public class RecordEditBuilder {
         editorConstraints.gridwidth = GridBagConstraints.REMAINDER;     //end row
         editorConstraints.fill = GridBagConstraints.HORIZONTAL;
         editorConstraints.weightx = 1.0;
-      
+
 		JPanel p = new JPanel(new GridBagLayout());
 
 		for (int i = 0; i < fieldNamesToDisplay.size(); i++) {

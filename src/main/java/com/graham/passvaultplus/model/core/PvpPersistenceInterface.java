@@ -106,7 +106,7 @@ public class PvpPersistenceInterface {
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 			} catch (Exception e) {
-				context.notifyWarning("PI load Exception: ", e); // TODO might delete this since the exceptin is hadnled by bs
+				context.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
@@ -176,8 +176,12 @@ public class PvpPersistenceInterface {
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
 		errorHappened = false;
+		boolean allSaved = true;
 		for (PvpBackingStore bs : enabledBs) {
 			bs.clearTransientData();
+			if (!bs.shouldBeSaved()) {
+				allSaved = false;
+			}
 			switch (bs.getChattyLevel()) {
 				case unlimited:
 				case localLevel:
@@ -206,7 +210,7 @@ public class PvpPersistenceInterface {
 			}
 		}
 		context.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. err:" + errorHappened);
-		if (!errorHappened) {
+		if (!errorHappened && allSaved) {
 			for (PvpBackingStore bs : enabledBs) {
 				bs.allStoresAreUpToDate();
 			}
