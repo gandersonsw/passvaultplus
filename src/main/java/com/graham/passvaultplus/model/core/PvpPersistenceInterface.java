@@ -19,7 +19,7 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
  */
 public class PvpPersistenceInterface {
 	public enum SaveTrigger {
-		quit, // the application it quiting
+		quit, // the application is quiting
 		cud,  // there was a Create, Update or Delete
 		major // some major change
 	}
@@ -125,7 +125,7 @@ public class PvpPersistenceInterface {
 					doMerge = true;
 				}
 				context.setEncryptionStrengthBits(fileReader.getAesBits());
-				bs.setWasLoadedFrom(true);
+				bs.setLoadState(PvpBackingStore.LoadState.loaded);
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf;
 			} catch (Exception e) {
@@ -144,7 +144,7 @@ public class PvpPersistenceInterface {
 
 		if (wasChanged) {
 			// set them as dirty, so they will eventually save
-			for (PvpBackingStore bs: enabledBs) {
+			for (PvpBackingStore bs: getEnabledBackingStores(true)) {
 				bs.setDirty(true);
 			}
 
@@ -156,9 +156,9 @@ public class PvpPersistenceInterface {
 					wasErrA = true;
 				}
 			}
-			context.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate : " + wasErrA);
+			context.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate. wasErrA: " + wasErrA);
 			if (!wasErrA) {
-				for (PvpBackingStore bs : enabledBs) {
+				for (PvpBackingStore bs : getEnabledBackingStores(true)) {
 					bs.allStoresAreUpToDate();
 				}
 			}
@@ -176,12 +176,9 @@ public class PvpPersistenceInterface {
 	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
 		errorHappened = false;
-		boolean allSaved = true;
+
 		for (PvpBackingStore bs : enabledBs) {
 			bs.clearTransientData();
-			if (!bs.shouldBeSaved()) {
-				allSaved = false;
-			}
 			switch (bs.getChattyLevel()) {
 				case unlimited:
 				case localLevel:
@@ -209,8 +206,15 @@ public class PvpPersistenceInterface {
 					break;
 			}
 		}
-		context.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. err:" + errorHappened);
-		if (!errorHappened && allSaved) {
+
+		boolean allSaved = true;
+		for (PvpBackingStore bs : enabledBs) {
+			if (bs.isDirty()) {
+				allSaved = false;
+			}
+		}
+		context.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. allSaved:" + allSaved);
+		if (allSaved) {
 			for (PvpBackingStore bs : enabledBs) {
 				bs.allStoresAreUpToDate();
 			}
@@ -239,7 +243,7 @@ public class PvpPersistenceInterface {
 				}
 			}
 			bs.setDirty(false);
-			bs.setWasLoadedFrom(true); // set this because we want this BS to be treated as if it loaded successfully now
+			bs.setLoadState(PvpBackingStore.LoadState.loaded); // set this because we want this BS to be treated as if it loaded successfully now
 			bs.setException(null);
 		} catch (Exception e) {
 			errorHappened = true;

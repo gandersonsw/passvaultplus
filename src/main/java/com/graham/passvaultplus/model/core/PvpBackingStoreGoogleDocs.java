@@ -86,7 +86,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	@Override
 	public boolean shouldBeSaved() {
-		return wasLoadedFrom() || (exception != null && exception.getCause() instanceof FileNotFoundException);
+		return super.shouldBeSaved() || (exception != null && exception.getCause() instanceof FileNotFoundException);
 	}
 
 	@Override
@@ -307,7 +307,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				if (t instanceof FileNotFoundException) {
 					// In this case, we want to treat it as if it was loaded, because there is no file we need to be careful of overwriting
 					setDirty(true);
-					setWasLoadedFrom(true);
+					setLoadState(PvpBackingStore.LoadState.loaded);
 				}
 			}
 			driveService = null;
@@ -371,7 +371,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		if (lastUpdatedDate == null) {
 			loadFileProps(true);
 		}
-		setWasLoadedFrom(true); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
+		if (getLoadState() == LoadState.startState) {
+			setLoadState(LoadState.skipped); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
+		}
 		context.notifyInfo("BS_Google: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
 		context.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());
 	}
