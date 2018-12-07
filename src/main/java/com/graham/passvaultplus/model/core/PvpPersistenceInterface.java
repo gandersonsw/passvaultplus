@@ -27,6 +27,7 @@ public class PvpPersistenceInterface {
 	public static final String EXT_COMPRESS = "zip";
 	public static final String EXT_ENCRYPT = "bmn";
 	public static final String EXT_XML = "xml";
+	public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
 
 	final private PvpContext context;
 	final private List<PvpBackingStore> backingStores;
@@ -41,12 +42,16 @@ public class PvpPersistenceInterface {
 
 	public static boolean isCompressed(final String path) {
 		// path is .zip or .zip.bmn
-		return path.endsWith("." + EXT_COMPRESS) || path.endsWith("." + EXT_COMPRESS + "." + EXT_ENCRYPT);
+		return path.endsWith("." + EXT_COMPRESS) || path.endsWith("." + EXT_BOTH);
 	}
 
 	public static boolean isEncrypted(final String path) {
 		// path is .bmn or .zip.bmn
 		return path.endsWith("." + EXT_ENCRYPT);
+	}
+
+	public static boolean isPvpFileExt(final String fileExtension) {
+		return fileExtension.equals(EXT_COMPRESS) || fileExtension.equals(EXT_ENCRYPT) || fileExtension.equals(EXT_XML) || fileExtension.equals(EXT_BOTH);
 	}
 
 	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {

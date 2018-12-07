@@ -18,20 +18,20 @@ import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 
 public class DiagnosticsManager {
-	
+
 	private final CommandExecuter executer;
-	
+
 	private Component diagnosticsComponent;
 	private JTextArea ta;
 	private StringBuilder log = new StringBuilder();
-	
+
 	private JTextField paramsTF;
 	private JComboBox<String> commandCB;
-	
+
 	public DiagnosticsManager(CommandExecuter e) {
 		executer = e;
 	}
-	
+
 	public void checkDiagnostics() {
 		PvpContext context = PvpContext.getActiveContext();
 		if (context.getShowDiagnostics() && diagnosticsComponent == null) {
@@ -42,19 +42,19 @@ public class DiagnosticsManager {
 				// if the Diagnostics fails to load, dont crash the app
 				e.printStackTrace();
 			}
-		} else if (!context.getShowDashboard() && diagnosticsComponent != null) {
+		} else if (!context.getShowDiagnostics() && diagnosticsComponent != null) {
 			context.getTabManager().removeOtherTab(diagnosticsComponent);
 			diagnosticsComponent = null;
 			ta = null;
 		}
 	}
-	
+
 	private Component buildDiagnosticsTab() {
 		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
 		JScrollPane sp = new JScrollPane(ta);
 		mainP.add(sp, BorderLayout.CENTER);
-		
+
 		JPanel commandP = new JPanel(new BorderLayout());
 		commandCB = new JComboBox<>(executer.getCommands());
 		commandP.add(commandCB, BorderLayout.WEST);
@@ -63,14 +63,14 @@ public class DiagnosticsManager {
 		JButton doIt = new JButton(new DoCommandAction());
 		commandP.add(doIt, BorderLayout.EAST);
 		mainP.add(commandP, BorderLayout.SOUTH);
-		
+
 		CommandSelectedAction csel = new CommandSelectedAction();
 		commandCB.addActionListener(csel);
 		csel.actionPerformed(null);
-		
+
 		return mainP;
 	}
-	
+
 	public void warning(final String s, final Exception e) {
 		log.append(s);
 		if (e != null) {
@@ -84,13 +84,13 @@ public class DiagnosticsManager {
 		log.append("\n");
 		logUpdated();
 	}
-	
+
 	public void info(String s) {
 		log.append(s);
 		log.append("\n");
 		logUpdated();
 	}
-	
+
 	private void logUpdated() {
 		if (log.length() > 100000) {
 			log = new StringBuilder("<<< log trimmed >>>" + log.substring(50000));
@@ -99,7 +99,7 @@ public class DiagnosticsManager {
 			ta.setText(log.toString());
 		}
 	}
-	
+
 	class DoCommandAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		public DoCommandAction() {
@@ -110,7 +110,7 @@ public class DiagnosticsManager {
 			executer.execute((String)commandCB.getSelectedItem(), paramsTF.getText());
 		}
 	}
-	
+
 	class CommandSelectedAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		@Override

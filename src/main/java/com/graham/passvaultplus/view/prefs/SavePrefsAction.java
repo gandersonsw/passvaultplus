@@ -15,12 +15,13 @@ import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
+import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.model.core.PvpBackingStoreOtherFile;
 import com.graham.passvaultplus.model.core.PvpOutStreamer;
 import com.graham.passvaultplus.view.JceDialog;
 
 public class SavePrefsAction extends AbstractAction {
-	
+
 	final private PreferencesConnection conn;
 	final private PreferencesContext prefsContext;
 
@@ -29,91 +30,100 @@ public class SavePrefsAction extends AbstractAction {
 		conn = prefsContextParam.conn;
 		prefsContext = prefsContextParam;
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
+		boolean completed = false;
 		if (prefsContext.configAction == ConfigAction.Create) {
-			doCreate();
+			completed = doCreate();
 		} else if (prefsContext.configAction == ConfigAction.Open) {
-			doOpen();
+			completed = doOpen();
 		} else if (prefsContext.configAction == ConfigAction.Change) {
-			doChange();
+			completed = doChange();
 		} else {
 			throw new RuntimeException("unexpected action: " + prefsContext.configAction);
 		}
+		if (completed) {
+			if (!prefsContext.useGoogleDrive.isSelected()) {
+				conn.getPvpContext().notifyInfo("deleteing Google Credientials if present");
+				PvpBackingStoreGoogleDocs.deleteLocalCredentials();
+			}
+		}
 	}
 
-	private void doCreate() {
+	private boolean doCreate() {
 		final String newPassword = prefsContext.getPasswordText();
 
 		final File dataFile = prefsContext.getDataFile();
 		if (dataFile.isFile()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "When creating a new database, a file must not exist in the choosen location. \nPlease choose a directory where there is no file, or use the \"Open Existing Database\" option.");
-			return;
+			return false;
 		}
-		
+
 		final PrefsSettingsParam psp = createPspFromContext();
 		if (!validatePin()) {
-			return;
+			return false;
 		}
-	
+
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				return;
+				return false;
 			}
 			if (checkEncryptionStrength(psp.aesBits)) {
-				return;
+				return false;
 			}
 		}
-		
+
 		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
 			boolean mkret = new File(dataFile.getParent()).mkdirs();
 			if (!mkret) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "There was a problem creating the directory:" + dataFile.getParent());
 			}
 		}
-		
+
 		try {
 			createDefaultStarterFile(psp);
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
-			return;
+			return false;
 		}
-		
+
 		conn.doOpen(psp);
+		return true;
 	}
-	
-	private void doOpen() {
+
+	private boolean doOpen() {
 		final String newPassword = prefsContext.getPasswordText();
 
 		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-			return;
+			return false;
 		}
-		
+
 		if (!validatePin()) {
-			return;
+			return false;
 		}
 
 		final File dataFile = prefsContext.getDataFile();
 		if (!dataFile.isFile()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "That file does not exist on the file system. Please create it or use a different path.");
-			return;
+			return false;
 		}
-	
+
 		final PrefsSettingsParam psp = createPspFromContext();
 		conn.doOpen(psp);
+		return true;
 	}
-	
-	private void doChange() {
+
+	private boolean doChange() {
 		final String newPassword = prefsContext.getPasswordText();
 		boolean saveFlag = false;
 		final PrefsSettingsParam psp = createPspFromContext();
-		
+
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				return;
+				return false;
 			}
 			String oldPassword = conn.getPassword();
 			if (oldPassword == null) {
@@ -126,14 +136,14 @@ public class SavePrefsAction extends AbstractAction {
 				saveFlag = true;
 			}
 			if (checkEncryptionStrength(psp.aesBits)) {
-				return;
+				return false;
 			}
 		}
-		
+
 		if (!validatePin()) {
-			return;
+			return false;
 		}
-		
+
 		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
 			saveFlag = true;
 		}
@@ -141,14 +151,15 @@ public class SavePrefsAction extends AbstractAction {
 		if (prefsContext.compressed.isSelected() != prefsContext.compressedFlag || prefsContext.encrypted.isSelected() != prefsContext.encryptedFlag) {
 			saveFlag = true;
 		}
-		
+
 		if (prefsContext.useGoogleDrive.isSelected() && !prefsContext.useGoogleDriveFlag) {
 			saveFlag = true;
 		}
-		
+
 		conn.doSave(psp, saveFlag);
+		return true;
 	}
-	
+
 	private boolean validatePin() {
 		if (prefsContext.usePin.isSelected()) {
 			final String pin = prefsContext.getPinText();
@@ -163,7 +174,7 @@ public class SavePrefsAction extends AbstractAction {
 		}
 		return true;
 	}
-	
+
 	private PrefsSettingsParam createPspFromContext() {
 		final PrefsSettingsParam psp = new PrefsSettingsParam();
 		psp.pw = prefsContext.getPasswordText();
@@ -182,13 +193,13 @@ public class SavePrefsAction extends AbstractAction {
 		} else {
 			psp.pinTimeout = 0;
 			psp.pinMaxTry = 100;
-		}	
+		}
 		psp.showDashBoard = prefsContext.showDashboard.isSelected();
 		psp.useGoogleDrive = prefsContext.useGoogleDrive.isSelected();
 		psp.showDiagnostics = prefsContext.showDiagnostics.isSelected();
 		return psp;
 	}
-	
+
 	private boolean checkEncryptionStrength(final int aesBits) {
 		try {
 			final int maxKL = MyCipherFactory.getMaxAllowedAESKeyLength();
@@ -203,7 +214,7 @@ public class SavePrefsAction extends AbstractAction {
 		}
 		return false;
 	}
-	
+
 	private void createDefaultStarterFile(final PrefsSettingsParam psp) throws Exception {
 		InputStream sourceStream = null;
 		InputStreamReader isr = null;
@@ -219,7 +230,7 @@ public class SavePrefsAction extends AbstractAction {
 				File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
 				isr = new FileReader(sourceFile);
 			}
-			
+
 			bufR = new BufferedReader(isr);
 			fileWriter = new PvpOutStreamer(new PvpBackingStoreOtherFile(psp.f), psp.pw, psp.aesBits);
 			final BufferedWriter bw = fileWriter.getWriter();

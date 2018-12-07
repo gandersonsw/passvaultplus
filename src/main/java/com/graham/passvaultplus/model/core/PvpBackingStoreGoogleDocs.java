@@ -387,4 +387,15 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		return lastUpdatedDate.getValue() == context.getGoogleDriveDocUpdateDate();
 	}
 
+	public static void deleteLocalCredentials() {
+		if (DATA_STORE_DIR.isDirectory()) {
+			String[] entries = DATA_STORE_DIR.list();
+			for(String s: entries){
+				java.io.File currentFile = new java.io.File(DATA_STORE_DIR.getPath(),s);
+				currentFile.delete();
+			}
+			DATA_STORE_DIR.delete();
+		}
+	}
+
 }

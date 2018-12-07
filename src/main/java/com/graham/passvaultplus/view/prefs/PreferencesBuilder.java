@@ -11,36 +11,39 @@ import javax.swing.*;
 import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
 
 public class PreferencesBuilder {
-	
-	private final Dimension indentDim = new Dimension(30, 2); 
-	
+
+	private final Dimension indentDim = new Dimension(30, 2);
+
 	public static Component buildPrefs(final PreferencesConnection connParam) {
 		return new PreferencesBuilder(connParam).build();
 	}
-	
+
 	final private PreferencesConnection conn;
 	final private PreferencesContext prefsContext;
-	
+
 	private PreferencesBuilder(final PreferencesConnection connParam) {
 		conn = connParam;
 		prefsContext = new PreferencesContext(conn);
 	}
-	
+
 	private Component build() {
 		final JPanel p = new JPanel(new BorderLayout());
 		p.add(buildTop(), BorderLayout.CENTER);
 		p.add(buildBottom(p), BorderLayout.SOUTH);
 		return p;
 	}
-	
+
 	private Component buildBottom(final JPanel panelToBeReturned) {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		if (conn instanceof PreferencesConnectionTab) {
+			p.add(new JButton(new ResetPrefsAction(conn.getPvpContext())));
+		}
 		p.add(new JButton(conn.getCancelAction()));
 		prefsContext.saveButton = new JButton(new SavePrefsAction(prefsContext));
 		p.add(prefsContext.saveButton);
 		return p;
 	}
-	
+
 	private Component buildTop() {
 		final JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -57,19 +60,19 @@ public class PreferencesBuilder {
 		p.add(buildGoogleDrive());
 		p.add(buildDiagnostics());
 		prefsContext.updateBecauseCompressedOrEncryptedChanged();
-		
+
 		// set the intial password strength
 		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
 		pca.actionPerformed(null);
-		
+
 		JPanel bp = new JPanel(new BorderLayout());
 		bp.add(p, BorderLayout.NORTH);
-		
+
 		return new JScrollPane(bp);
-		
+
 		//return bp;
 	}
-	
+
 	private JPanel buildActionCombo() {
 		final ConfigAction[] actions = new ConfigAction[conn.supportsChangeDataFileOptions() ? 3 : 2];
 		actions[0] = ConfigAction.Create;
@@ -87,12 +90,12 @@ public class PreferencesBuilder {
 		cb.setFocusable(false);
 		cb.addActionListener(new ConfigActionChanged(prefsContext));
 		prefsContext.actionCombo = cb;
-	
+
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(cb);
 		return p;
 	}
-	
+
 	private JPanel buildFileText() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(new JLabel("  Data File: "));
@@ -101,7 +104,7 @@ public class PreferencesBuilder {
 		p.add(jl);
 		return p;
 	}
-	
+
 	private JPanel buildFileButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
@@ -113,7 +116,7 @@ public class PreferencesBuilder {
 		p.add(chooseBut);
 		return p;
 	}
-	
+
 	private JPanel buildCompressButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.compressedFlag);
@@ -121,7 +124,7 @@ public class PreferencesBuilder {
 		p.add(prefsContext.compressed);
 		return p;
 	}
-	
+
 	private JPanel buildEncryptedButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.encryptedFlag);
@@ -129,12 +132,12 @@ public class PreferencesBuilder {
 		p.add(prefsContext.encrypted);
 		return p;
 	}
-	
+
 	private JPanel buildPassword() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
 		p.add(new JLabel("  Password:", JLabel.LEFT));
-		
+
 		final JTextField pwct = new JTextField(27);
 		pwct.setVisible(false);
 		JPasswordField pw;
@@ -157,7 +160,7 @@ public class PreferencesBuilder {
 		p.add(prefsContext.showPassword);
 		return p;
 	}
-	
+
 	private JPanel buildPasswordOptions() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
@@ -172,20 +175,20 @@ public class PreferencesBuilder {
 		p.add(prefsContext.passwordStrength);
 		return p;
 	}
-	
+
 	private JPanel buildAESBits() {
 		final String[] bits = {"128", "192", "256"};
 		final JComboBox<String> cb = new JComboBox<>(bits);
 		prefsContext.aesBits = cb;
 		prefsContext.setSelectedBits(conn.getAesBits());
-		
+
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
 		p.add(new JLabel("  Key Size in bits:"));
 		p.add(cb);
 		return p;
 	}
-	
+
 	private JPanel buildDashboard() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.showDashboard = new JCheckBox("Show Dashboard");
@@ -193,7 +196,7 @@ public class PreferencesBuilder {
 		p.add(prefsContext.showDashboard);
 		return p;
 	}
-	
+
 	private JPanel buildGoogleDrive() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.useGoogleDrive = new JCheckBox("Use Google™ Drive");
@@ -201,7 +204,7 @@ public class PreferencesBuilder {
 		p.add(prefsContext.useGoogleDrive);
 		return p;
 	}
-	
+
 	private JPanel buildDiagnostics() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.showDiagnostics = new JCheckBox("Show Diagnostics");
@@ -209,7 +212,7 @@ public class PreferencesBuilder {
 		p.add(prefsContext.showDiagnostics);
 		return p;
 	}
-	
+
 	private JPanel buildPin() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
@@ -229,7 +232,7 @@ public class PreferencesBuilder {
 		prefsContext.showPin = new JCheckBox("Show");
 		prefsContext.showPin.addActionListener(new ShowPinAction(prefsContext));
 		p.add(prefsContext.showPin);
-		
+
 		final String[] timeouts = {"2", "5", "10", "15", "20", "30", "45", "60", "120", "300", "Never"};
 		prefsContext.timeoutCombo = new JComboBox<>(timeouts);
 		prefsContext.timeoutCombo.setMaximumRowCount(20);
@@ -237,7 +240,7 @@ public class PreferencesBuilder {
 		prefsContext.setPinTimeout(conn.getPinTimeout());
 		p.add(new JLabel("Timeout:"));
 		p.add(prefsContext.timeoutCombo);
-		
+
 		final String[] maxTrys = {"1", "2", "3", "4", "5", "10", "15", "20", "50", "Unlimited"};
 		prefsContext.pinMaxTryCombo = new JComboBox<>(maxTrys);
 		prefsContext.pinMaxTryCombo.setMaximumRowCount(20);
@@ -245,10 +248,10 @@ public class PreferencesBuilder {
 		prefsContext.setPinMaxTry(conn.getPinMaxTry());
 		p.add(new JLabel("Max Trys:"));
 		p.add(prefsContext.pinMaxTryCombo);
-		
+
 		prefsContext.setPinItemsEnabled();
-		
+
 		return p;
 	}
-	
+
 }
