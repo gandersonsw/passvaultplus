@@ -32,13 +32,13 @@ public class UpcomingDatesTableMouseAdpater extends MouseAdapter {
     		PvpRecord r = tm.getRecordAtRow(row);
     		
     		if (r != null) {
-    			RecordEditContext editor = context.getTabManager().getRecordEditor(r);
+    			RecordEditContext editor = context.ui.getTabManager().getRecordEditor(r);
     			if (editor == null) {
     				editor = RecordEditBuilder.buildEditor(context, r, false);
-    				context.getTabManager().addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
+    				context.ui.getTabManager().addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
     				
     			}
-    			context.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
+    			context.ui.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
     		}
         }
     }

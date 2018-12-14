@@ -28,15 +28,15 @@ public class NewRecordAction extends AbstractAction {
 		}
 		PvpRecord r = new PvpRecord(type);
 		final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
-		context.getTabManager().addRecordEditor("new", editor);
-		context.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
+		context.ui.getTabManager().addRecordEditor("new", editor);
+		context.ui.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
 	}
 
 	private PvpType getTypeToCreateNew() {
-		Object selItem = context.getViewListContext().getTypeComboBox().getSelectedItem();
+		Object selItem = context.ui.getViewListContext().getTypeComboBox().getSelectedItem();
 		if (PvpType.FILTER_ALL_TYPES.equals(selItem)) {
-			for (int i = 0 ; i < context.getViewListContext().getTypeComboBox().getItemCount(); i++) {
-				Object item = context.getViewListContext().getTypeComboBox().getItemAt(i);
+			for (int i = 0 ; i < context.ui.getViewListContext().getTypeComboBox().getItemCount(); i++) {
+				Object item = context.ui.getViewListContext().getTypeComboBox().getItemAt(i);
 				if (item instanceof PvpType) {
 					return (PvpType)item;
 				}

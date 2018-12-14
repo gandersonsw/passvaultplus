@@ -10,20 +10,20 @@ import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 
 public class ConfigActionChanged extends AbstractAction {
 	final private PreferencesContext context;
-	
+
 	public ConfigActionChanged(final PreferencesContext contextParam) {
 		context = contextParam;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		ConfigAction ca = (ConfigAction)context.actionCombo.getSelectedItem();
-		
+
 		if (ca == context.configAction) {
 			// it didn't change, nothing to do
 			return;
 		}
-		
+
 		context.saveButton.setText(ca.getButtonLabel());
 		if (ca == ConfigAction.Create) {
 			context.setDataFile(new File(context.conn.getDataFilePath()), 0);
@@ -41,7 +41,7 @@ public class ConfigActionChanged extends AbstractAction {
 			context.encrypted.setSelected(false);
 			//context.password.setText("");
 			//context.aesBits.setEnabled(false);
-			
+
 			File f = context.getDataFile();
 			if (f != null && f.isFile()) {
 				// a file exists here,
@@ -70,7 +70,7 @@ public class ConfigActionChanged extends AbstractAction {
 		} else {
 			throw new RuntimeException("unexpected action: " + ca);
 		}
-		
+
 		context.configAction = ca;
 	}
 

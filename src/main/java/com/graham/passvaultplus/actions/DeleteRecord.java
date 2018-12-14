@@ -28,11 +28,11 @@ public class DeleteRecord extends AbstractAction {
 		Collection<PvpRecord> records = null;
 		ArrayList<RecordEditContext> editContexts = new ArrayList<>();
 		String message = null;
-		if (context.getTabManager().isCurrentTabList()) {
-			records = context.getViewListContext().getAllSelectedRecords();
+		if (context.ui.getTabManager().isCurrentTabList()) {
+			records = context.ui.getViewListContext().getAllSelectedRecords();
 
 			for (PvpRecord r : records) {
-				final RecordEditContext re2 = context.getTabManager().getRecordEditor(r);
+				final RecordEditContext re2 = context.ui.getTabManager().getRecordEditor(r);
 				if (re2 != null) {
 					editContexts.add(re2);
 				}
@@ -45,7 +45,7 @@ public class DeleteRecord extends AbstractAction {
 			}
 
 		} else {
-			RecordEditContext ec2 = context.getTabManager().getCurrentTabRecordEditContext();
+			RecordEditContext ec2 = context.ui.getTabManager().getCurrentTabRecordEditContext();
 
 			if (ec2 != null) {
 				editContexts.add(ec2);
@@ -60,34 +60,34 @@ public class DeleteRecord extends AbstractAction {
 		}
 
 		if (message != null) {
-			int v = JOptionPane.showConfirmDialog(context.getMainFrame(), message, "Delete", JOptionPane.OK_CANCEL_OPTION);
+			int v = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Delete", JOptionPane.OK_CANCEL_OPTION);
 			if (v == JOptionPane.CANCEL_OPTION) {
 				return;
 			}
 		}
 
 		for (RecordEditContext ec2 : editContexts) {
-			context.getTabManager().removeRecordEditor(ec2);
+			context.ui.getTabManager().removeRecordEditor(ec2);
 		}
 		if (records != null) {
-			context.getDataInterface().deleteRecords(records);
-			context.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
+			context.data.getDataInterface().deleteRecords(records);
+			context.ui.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
 		}
 
 	}
-	
-	
+
+
 	class DRUndoableEdit implements UndoableEdit {
-		
+
 		final Collection<PvpRecord> records;
-		
+
 		public DRUndoableEdit(final Collection<PvpRecord> recordsParam) {
 			records = recordsParam;
 		}
 
 		@Override
 		public void undo() throws CannotUndoException {
-			context.getDataInterface().saveRecords(records);
+			context.data.getDataInterface().saveRecords(records);
 		}
 
 		@Override
@@ -97,7 +97,7 @@ public class DeleteRecord extends AbstractAction {
 
 		@Override
 		public void redo() throws CannotRedoException {
-			context.getDataInterface().deleteRecords(records);
+			context.data.getDataInterface().deleteRecords(records);
 		}
 
 		@Override
@@ -138,6 +138,6 @@ public class DeleteRecord extends AbstractAction {
 		public String getRedoPresentationName() {
 			return "Redo Delete Records";
 		}
-		
+
 	}
 }

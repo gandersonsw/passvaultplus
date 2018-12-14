@@ -21,15 +21,15 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.schemaedit.PvpTypeModification.PvpFieldModification;
 
 public class SaveChangesAction extends AbstractAction {
-	
+
 	final private SchemaChangesContext scContext;
-	final private PvpContext pvpContext;
+	final private PvpContext context;
 	private List<String> validationErrors = new ArrayList<>();
-	
-	public SaveChangesAction(final SchemaChangesContext scContextParam, final PvpContext pvpContextParam) {
+
+	public SaveChangesAction(final SchemaChangesContext scContextParam, final PvpContext c) {
 		super("Save Changes");
 		scContext = scContextParam;
-		pvpContext = pvpContextParam;
+		context = c;
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -37,16 +37,16 @@ public class SaveChangesAction extends AbstractAction {
 			return;
 		}
 		scContext.tm.readUIValues();
-		
+
 		if (scContext.tm.isNewType()) {
 			createNewType();
 		} else {
 			changeExistingType();
 		}
-		
+
 		if (!hasValidationErrors()) {
 			scContext.panelInTabPane.remove(scContext.currentSchemaEditorPanel);
-			
+
 			final JPanel emptyPanel = new JPanel();
 			scContext.currentSchemaEditorPanel = emptyPanel;
 			scContext.panelInTabPane.add(emptyPanel, BorderLayout.CENTER);
@@ -55,12 +55,12 @@ public class SaveChangesAction extends AbstractAction {
 			scContext.panelInTabPane.revalidate();
 		}
 	}
-	
+
 	private void createNewType() {
 		// ***** do validation ****
 		clearValidationErrors();
 		final Set<String> fieldsIncNew = new HashSet<>();
-		
+
 		final List<PvpFieldModification> fmods = scContext.tm.getFieldMods();
 		for (PvpFieldModification fm : fmods) {
 			if (fm.isDeleted) {
@@ -80,10 +80,10 @@ public class SaveChangesAction extends AbstractAction {
 			return;
 		}
 		// ***** validation done ****
-		
+
 		final PvpType t = new PvpType();
 		t.setName(scContext.tm.newTypeNameString);
-		
+
 		for (PvpFieldModification fm : fmods) {
 			if (fm.isDeleted) {
 				// do nothing because it doesn't exist yet
@@ -92,29 +92,29 @@ public class SaveChangesAction extends AbstractAction {
 				t.getFields().add(f);
 			}
 		}
-		
+
 		t.setFullFormat(scContext.tm.fullFormatString);
 		t.setToStringCode(scContext.tm.toStringCodeString);
-		
-		pvpContext.getDataInterface().getTypes().add(t);
-		
-		pvpContext.getViewListContext().getTypeComboBox().addItem(t);
+
+		context.data.getDataInterface().getTypes().add(t);
+
+		context.ui.getViewListContext().getTypeComboBox().addItem(t);
 		scContext.typeCB.addItem(t);
-		pvpContext.saveAndRefreshDataList();
+		context.data.saveAndRefreshDataList();
 	}
-	
+
 	private void changeExistingType() {
-		final PvpType t = pvpContext.getDataInterface().getType(scContext.tm.getOriginalName());
+		final PvpType t = context.data.getDataInterface().getType(scContext.tm.getOriginalName());
 		final boolean isCatType = PvpType.sameType(t, PvpDataInterface.TYPE_CATEGORY);
-		
+
 		// ***** do validation ****
 		clearValidationErrors();
 		if (t == null) {
-			JOptionPane.showMessageDialog(pvpContext.getMainFrame(), "Error: type not found in database: " + scContext.tm.getOriginalName());
+			JOptionPane.showMessageDialog(context.ui.getMainFrame(), "Error: type not found in database: " + scContext.tm.getOriginalName());
 			return;
 		}
 		final Set<String> fieldsIncNew = new HashSet<>();
-		
+
 		final List<PvpFieldModification> fmods = scContext.tm.getFieldMods();
 		for (PvpFieldModification fm : fmods) {
 			if (fm.isDeleted) {
@@ -133,22 +133,22 @@ public class SaveChangesAction extends AbstractAction {
 			showValidationErrors();
 			return;
 		}
-		
+
 		if (!closeTabsForType(t)) {
 			addValidationError("there was unsaved records"); // just do this so the UI is not closed
 			return;
 		}
 		// ***** validation done ****
-		
-		final PvpDataInterface.FilterResults fr = pvpContext.getDataInterface().getFilteredRecords(t.getName(), "", null, false);
-		
+
+		final PvpDataInterface.FilterResults fr = context.data.getDataInterface().getFilteredRecords(t.getName(), "", null, false);
+
 		for (PvpFieldModification fm : fmods) {
 			if (fm.isDeleted) {
 				final PvpField f = t.getField(fm.originalName);
 				if (f == null) {
 					// this can happen if they add a new field, and then select delete
 				} else if (isCatType && fm.originalName.equals(PvpField.USR_CATEGORY_TITLE)) {
-					pvpContext.notifyWarning("can't delete Title field in Category type");
+					context.ui.notifyWarning("can't delete Title field in Category type");
 				} else {
 					for (PvpRecord r : fr.records) {
 						r.setCustomField(fm.originalName, null);
@@ -160,7 +160,7 @@ public class SaveChangesAction extends AbstractAction {
 				t.getFields().add(f); // TODO handle the order
 			} else if (isCatType && fm.originalName.equals(PvpField.USR_CATEGORY_TITLE)) {
 				if (!fm.newName.equals(fm.originalName)) {
-					pvpContext.notifyWarning("can't change Title field in Category type");
+					context.ui.notifyWarning("can't change Title field in Category type");
 				}
 			} else {
 				final PvpField f = t.getField(fm.originalName);
@@ -178,42 +178,42 @@ public class SaveChangesAction extends AbstractAction {
 				f.setType(fm.newType);
 			}
 		}
-		
+
 		t.setFullFormat(scContext.tm.fullFormatString);
 		t.setToStringCode(scContext.tm.toStringCodeString);
-		
-		pvpContext.saveAndRefreshDataList();
+
+		context.data.saveAndRefreshDataList();
 	}
-	
+
 	private void addValidationError(final String errMsg) {
 		if (!validationErrors.contains(errMsg)) { // dont duplicate the same message
 			validationErrors.add(errMsg);
 		}
 	}
-	
+
 	private void clearValidationErrors() {
 		validationErrors = new ArrayList<>();
 	}
-	
+
 	private boolean hasValidationErrors() {
 		return validationErrors.size() > 0;
 	}
-	
+
 	private void showValidationErrors() {
 		if (validationErrors.size() == 0) {
 			return;
 		} else if (validationErrors.size() == 1) {
-			JOptionPane.showMessageDialog(pvpContext.getMainFrame(), validationErrors.get(0));
+			JOptionPane.showMessageDialog(context.ui.getMainFrame(), validationErrors.get(0));
 		} else {
 			StringBuilder sb = new StringBuilder("There were errors that prevented the type from saving:\n\n");
 			for (String e : validationErrors) {
 				sb.append(e);
 				sb.append("\n");
 			}
-			JOptionPane.showMessageDialog(pvpContext.getMainFrame(), sb.toString());
+			JOptionPane.showMessageDialog(context.ui.getMainFrame(), sb.toString());
 		}
 	}
-	
+
 	private void validateFieldName(final String name) {
 		if (name.length() == 0) {
 			addValidationError("field name is required for all fields");
@@ -229,7 +229,7 @@ public class SaveChangesAction extends AbstractAction {
 			}
 		}
 	}
-	
+
 	private void validateTypeName(final String name) {
 		if (name.length() == 0) {
 			addValidationError("type name is required");
@@ -252,7 +252,7 @@ public class SaveChangesAction extends AbstractAction {
 			addValidationError("the field \"To String\" is required");
 			return;
 		}
-		
+
 		if (!fieldsIncNew.contains(toStringCodeString)) {
 			addValidationError("the field \"To String\" must be one of the fields");
 		}
@@ -261,15 +261,15 @@ public class SaveChangesAction extends AbstractAction {
 	private void validateFullFormat(final Set<String> fieldsIncNew, final String fullFormatString) {
 		// nothing to do here
 	}
-	
+
 	private boolean closeTabsForType(final PvpType t) {
 		List<RecordEditContext> toBeRemoved = new ArrayList<>();
-		List<RecordEditContext> reList = pvpContext.getTabManager().getRecordEditors();
+		List<RecordEditContext> reList = context.ui.getTabManager().getRecordEditors();
 		int userChoice = -1;
 		for (final RecordEditContext re : reList) {
 			if (PvpType.sameType(re.getRecord().getType(), t)) {
 				if (userChoice == -1 && re.hasUnsavedChanged()) {
-					userChoice = JOptionPane.showConfirmDialog(pvpContext.getMainFrame(), "There are unsaved records of this type, do you want to continue?", "Unsaved Data", JOptionPane.OK_CANCEL_OPTION);
+					userChoice = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "There are unsaved records of this type, do you want to continue?", "Unsaved Data", JOptionPane.OK_CANCEL_OPTION);
 					if (userChoice == JOptionPane.CANCEL_OPTION) {
 						return false;
 					}
@@ -277,12 +277,12 @@ public class SaveChangesAction extends AbstractAction {
 				toBeRemoved.add(re);
 			}
 		}
-		
+
 		for (final RecordEditContext re : toBeRemoved) {
-			pvpContext.getTabManager().removeRecordEditor(re);
+			context.ui.getTabManager().removeRecordEditor(re);
 		}
-		
+
 		return true;
 	}
-	
+
 }

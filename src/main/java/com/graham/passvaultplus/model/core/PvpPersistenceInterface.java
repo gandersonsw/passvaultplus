@@ -80,7 +80,7 @@ public class PvpPersistenceInterface {
 
 	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
 
-		context.notifyInfo("PvpPersistenceInterface.load :: START");
+		context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
 
 		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
 
@@ -96,8 +96,8 @@ public class PvpPersistenceInterface {
 		boolean doMerge = false;
 		boolean wasChanged = false; // TODO way to write out if it was changed?
 		for (PvpBackingStore bs: sortedBSArr) {
-			context.notifyInfo("loading bs : " + bs.getClass().getName());
-			context.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
+			context.ui.notifyInfo("loading bs : " + bs.getClass().getName());
+			context.ui.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
 			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
 
 			BufferedInputStream inStream = null;
@@ -106,12 +106,12 @@ public class PvpPersistenceInterface {
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
 			} catch (InvalidKeyException e) {
-				context.notifyInfo("at InvalidKeyException");
+				context.ui.notifyInfo("at InvalidKeyException");
 				bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
 			} catch (Exception e) {
-				context.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
+				context.ui.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 				continue;
 				//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
@@ -129,12 +129,12 @@ public class PvpPersistenceInterface {
 					dataInterface.setData(newDataInterface);
 					doMerge = true;
 				}
-				context.setEncryptionStrengthBits(fileReader.getAesBits());
+				context.prefs.setEncryptionStrengthBits(fileReader.getAesBits());
 				bs.setLoadState(PvpBackingStore.LoadState.loaded);
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf;
 			} catch (Exception e) {
-				context.notifyInfo("at 37 Exception: " + e.getMessage());
+				context.ui.notifyInfo("at 37 Exception: " + e.getMessage());
 				e.printStackTrace();
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
 			} finally {
@@ -153,7 +153,7 @@ public class PvpPersistenceInterface {
 				bs.setDirty(true);
 			}
 
-			context.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
+			context.ui.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
 		} else {
 			boolean wasErrA = false;
 			for (PvpBackingStore bs: sortedBSArr) {
@@ -161,7 +161,7 @@ public class PvpPersistenceInterface {
 					wasErrA = true;
 				}
 			}
-			context.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate. wasErrA: " + wasErrA);
+			context.ui.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate. wasErrA: " + wasErrA);
 			if (!wasErrA) {
 				for (PvpBackingStore bs : getEnabledBackingStores(true)) {
 					bs.allStoresAreUpToDate();
@@ -174,7 +174,7 @@ public class PvpPersistenceInterface {
 	 * return true to Quit. Return false to cancel Quit, and keep app running
 	 */
 	public boolean appQuiting() {
-		save(context.getDataInterface(), SaveTrigger.quit);
+		save(context.data.getDataInterface(), SaveTrigger.quit);
 		return !errorHappened;
 	}
 
@@ -218,7 +218,7 @@ public class PvpPersistenceInterface {
 				allSaved = false;
 			}
 		}
-		context.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. allSaved:" + allSaved);
+		context.ui.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. allSaved:" + allSaved);
 		if (allSaved) {
 			for (PvpBackingStore bs : enabledBs) {
 				bs.allStoresAreUpToDate();
@@ -227,9 +227,9 @@ public class PvpPersistenceInterface {
 	}
 
 	public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
-		context.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
+		context.ui.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
 		if (!bs.shouldBeSaved()) {
-			context.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
+			context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
 			return;
 		}
 		try {
@@ -252,7 +252,7 @@ public class PvpPersistenceInterface {
 			bs.setException(null);
 		} catch (Exception e) {
 			errorHappened = true;
-			context.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
+			context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
 		}
 	}
 

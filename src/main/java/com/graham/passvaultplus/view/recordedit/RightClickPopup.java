@@ -63,7 +63,7 @@ public class RightClickPopup extends MouseAdapter {
 	}
 
   void addPasswordGen(JMenu passwordMenu, JTextComponent tc) {
-    //List<PvpRecord> pwGenList = context.getDataInterface().getRecordsOfType(PvpDataInterface.TYPE_PASSWORD_GEN);
+    //List<PvpRecord> pwGenList = context.data.getDataInterface().getRecordsOfType(PvpDataInterface.TYPE_PASSWORD_GEN);
     //if (pwGenList.size() == 0) {
     PasswordGenerator.PwGenParams params = new PasswordGenerator.PwGenParams();
     passwordMenu.add(new GenPasswordAction("Default Password Generator", 1, tc));
@@ -147,7 +147,7 @@ public class RightClickPopup extends MouseAdapter {
       }
       tc.setText(PasswordGenerator.makePassword(pwParams));
     } catch (Exception eee) {
-      context.notifyWarning("GenPasswordAction", eee);
+      context.ui.notifyWarning("GenPasswordAction", eee);
     }
     }
   }

@@ -36,7 +36,7 @@ public class RecordEditBuilder {
 		context = contextParam;
 		record = rParam;
 		editContext.editRecord = rParam;
-		editContext.undoManager = context.getUndoManager();
+		editContext.undoManager = context.ui.getUndoManager();
 		isNewRecord = isNewRecordParam;
 		rcPopup = new RightClickPopup(context);
 	}
@@ -121,7 +121,7 @@ public class RecordEditBuilder {
 	}
 
 	private Component buildCategoryComponent() {
-		List<PvpRecord> catList = context.getDataInterface().getCategories();
+		List<PvpRecord> catList = context.data.getDataInterface().getCategories();
 		Object[] comboItems = new Object[catList.size() + 1];
 		comboItems[0] = PvpRecord.NO_CATEGORY;
 		int selectedIndex = 0;
@@ -154,7 +154,7 @@ public class RecordEditBuilder {
 	}
 
 	private JComboBox<PvpType> buildTypeComboBox() {
-		List<PvpType> types = context.getDataInterface().getTypes();
+		List<PvpType> types = context.data.getDataInterface().getTypes();
 		PvpType[] typeArray = new PvpType[types.size()];
 		for (int i = 0; i < types.size(); i++) {
 			typeArray[i] = types.get(i);

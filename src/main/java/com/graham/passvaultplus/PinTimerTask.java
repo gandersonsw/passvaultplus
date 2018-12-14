@@ -9,57 +9,57 @@ import com.graham.passvaultplus.view.PwDialog;
 import com.graham.passvaultplus.view.PwDialog.PwAction;
 
 public class PinTimerTask extends TimerTask {
-	
+
 	final private PvpContext context;
 	final private String pinAtCreate;
-	
+
 	public PinTimerTask(final PvpContext contextParam) {
 		context = contextParam;
-		pinAtCreate = context.getPin();
+		pinAtCreate = context.prefs.getPin();
 	}
 
 	@Override
 	public void run() {
-		context.getMainFrame().setVisible(false);
-		
-		if (!context.isBlankEncryptedPassword() && context.isPasswordSaved()) {
+		context.ui.getMainFrame().setVisible(false);
+
+		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.isPasswordSaved()) {
 			int tryCount = 0;
 			while (true) {
 				final PinDialog pd = new PinDialog();
 				pd.setShowConfigButton(false);
 				PinAction action = pd.askForPin(tryCount);
 				tryCount++;
-				
+
 				if (action == PinAction.UsePassword) {
 					askUserForPassword(false);
 					return;
 				} else if (action == PinAction.Configure) {
 					// should never get here since the Configure button is hidden
-					context.notifyWarning("PinTimerTask:PinDialog:Action=Configure");
+					context.ui.notifyWarning("PinTimerTask:PinDialog:Action=Configure");
 				} else { // user pressed Okay
 					final String pin = pd.getPin();
 					if (pin.equals(pinAtCreate)) {
-						context.getMainFrame().setVisible(true);
-						context.schedulePinTimerTask();
+						context.ui.getMainFrame().setVisible(true);
+						context.ui.schedulePinTimerTask();
 						return;
 					} else {
-						if (tryCount >= context.getPinMaxTry()) {
-							context.notifyInfo("PIN disabled after " + tryCount + " trys");
+						if (tryCount >= context.prefs.getPinMaxTry()) {
+							context.ui.notifyInfo("PIN disabled after " + tryCount + " trys");
 							// too many tries - delete the password
-							context.clearPassword();
+							context.prefs.clearPassword();
 							askUserForPassword(true);
 							return;
 						}
 					}
 				}
-				
+
 			}
 		} else {
 			askUserForPassword(false);
 		}
-		
+
 	}
-	
+
 	private void askUserForPassword(final boolean pinTryMaxed) {
 		boolean wasPasswordBad = false;
 		while (true) {
@@ -69,19 +69,19 @@ public class PinTimerTask extends TimerTask {
 			wasPasswordBad = true;
 			if (action == PwAction.Configure) {
 				// should never get here since the Configure button is hidden
-				context.notifyWarning("PinTimerTask:PwDialog:Action=Configure");
+				context.ui.notifyWarning("PinTimerTask:PwDialog:Action=Configure");
 			} else {
 				final String pw = pd.getPw();
-				if (pw.equals(context.getPassword())) {
-					context.getMainFrame().setVisible(true);
-					context.schedulePinTimerTask();
+				if (pw.equals(context.prefs.getPassword())) {
+					context.ui.getMainFrame().setVisible(true);
+					context.ui.schedulePinTimerTask();
 					if (pinTryMaxed) {
-						context.unclearPassword();
+						context.prefs.unclearPassword();
 					}
 					return;
 				}
 			}
-			
+
 		}
 	}
 

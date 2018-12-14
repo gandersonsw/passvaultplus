@@ -25,12 +25,12 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	private int lastDot;
 	private int currentUndoableEdit = -1;
 	private ArrayList<MyUndoableEdit> undoableEdits = new ArrayList<>();
-	private PvpContext pvpContext;
+	private PvpContext context;
 	private boolean ignoreAllChanges;
 	private boolean forceMergeChanges;
 
 	public MyUndoManager(PvpContext contextParam) {
-		pvpContext = contextParam;
+		context = contextParam;
 	}
 
 	@Override
@@ -39,34 +39,34 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			return;
 		}
 		if (e.getSource() == lastEditSource) {
-			undoableEdits.get(currentUndoableEdit).addEditEvent(e, pvpContext.getTabManager().getSelectedComponent());
+			undoableEdits.get(currentUndoableEdit).addEditEvent(e, context.ui.getTabManager().getSelectedComponent());
 		} else {
-			MyUndoableEdit ue = new MyUndoableEdit(e.getEdit(), pvpContext.getTabManager().getSelectedComponent());
+			MyUndoableEdit ue = new MyUndoableEdit(e.getEdit(), context.ui.getTabManager().getSelectedComponent());
 			if (currentUndoableEdit < undoableEdits.size() - 1) {
 				// if an undo has been done by the user, there are events after it that can be redone, we need to remove those now
 				for (int i = undoableEdits.size() - 1; i > currentUndoableEdit; i--) {
 					undoableEdits.remove(i);
 				}
 			}
-			
+
 			undoableEdits.add(ue);
 			if (currentUndoableEdit > MAX_UNDOS) {
 				undoableEdits.remove(0);
 			} else {
 				currentUndoableEdit++;
 			}
-			
+
 			undoAction.setEnabled(canUndo());
 			redoAction.setEnabled(canRedo());
 
 			lastEditSource = e.getSource();
 		}
 	}
-	
+
 	public boolean canUndo() {
 		return currentUndoableEdit >= 0;
 	}
-	
+
 	public boolean canRedo() {
 		return currentUndoableEdit < undoableEdits.size() - 1;
 	}
@@ -81,7 +81,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 		}
 		lastDot = e.getDot();
 	}
-	
+
 	public void notifyCloseTab(Component c) {
 		for (int i = undoableEdits.size() - 1; i >= 0; i--) {
 			if (undoableEdits.get(i).tabPane == c) {
@@ -94,11 +94,11 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 		undoAction.setEnabled(canUndo());
 		redoAction.setEnabled(canRedo());
 	}
-	
+
 	public void setIgnoreAllChanges(boolean b) {
 		ignoreAllChanges = b;
 	}
-	
+
 	public void setForceMergeIfSameEditSource(boolean b) {
 		forceMergeChanges = b;
 	}
@@ -113,7 +113,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit);
 			currentUndoableEdit--;
-			pvpContext.getTabManager().setSelectedComponent(ue.tabPane);
+			context.ui.getTabManager().setSelectedComponent(ue.tabPane);
 			ue.undo();
 			undoAction.setEnabled(canUndo());
 			redoAction.setEnabled(canRedo());
@@ -130,35 +130,35 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit + 1);
 			currentUndoableEdit++;
-			pvpContext.getTabManager().setSelectedComponent(ue.tabPane);
+			context.ui.getTabManager().setSelectedComponent(ue.tabPane);
 			ue.redo();
 			undoAction.setEnabled(canUndo());
 			redoAction.setEnabled(canRedo());
 		}
 	}
-	
+
 	static class MyUndoableEdit {
 		private final ArrayList<UndoableEdit> edits = new ArrayList<>();
 		private final Component tabPane;
-		
+
 		MyUndoableEdit(final UndoableEdit ueParam, final Component tabPaneParam) {
 			edits.add(ueParam);
 			tabPane = tabPaneParam;
 		}
-		
+
 		void addEditEvent(final UndoableEditEvent evt, final Component tabPaneParam) {
 			if (tabPane != tabPaneParam) {
 				throw new RuntimeException("different tab");
 			}
 			edits.add(evt.getEdit());
 		}
-		
+
 		void undo() {
 			for (int i = edits.size() - 1; i >= 0; i--) {
 				edits.get(i).undo();
 			}
 		}
-		
+
 		void redo() {
 			for (int i = 0; i < edits.size(); i++) {
 				edits.get(i).redo();

@@ -86,7 +86,7 @@ public class PvpInStreamer {
 			try {
 				bsInputStream = backingStore.openInputStream();
 				
-				final String password = context.getPasswordOrAskUser(passwordTried, backingStore.getDisplayableResourceLocation());
+				final String password = context.prefs.getPasswordOrAskUser(passwordTried, backingStore.getDisplayableResourceLocation());
 				eHeader = getEncryptHeader(bsInputStream);
 				final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
 	

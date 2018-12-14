@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
-import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.model.core.PvpBackingStoreOtherFile;
 import com.graham.passvaultplus.model.core.PvpOutStreamer;
 import com.graham.passvaultplus.view.JceDialog;
@@ -43,10 +42,7 @@ public class SavePrefsAction extends AbstractAction {
 			throw new RuntimeException("unexpected action: " + prefsContext.configAction);
 		}
 		if (completed) {
-			if (!prefsContext.useGoogleDrive.isSelected()) {
-				conn.getPvpContext().notifyInfo("deleteing Google Credientials if present");
-				PvpBackingStoreGoogleDocs.deleteLocalCredentials();
-			}
+			prefsContext.remoteBS.cleanup();
 		}
 	}
 
@@ -88,8 +84,7 @@ public class SavePrefsAction extends AbstractAction {
 			return false;
 		}
 
-		conn.doOpen(psp);
-		return true;
+		return conn.doOpen(psp);
 	}
 
 	private boolean doOpen() {
@@ -111,8 +106,7 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		final PrefsSettingsParam psp = createPspFromContext();
-		conn.doOpen(psp);
-		return true;
+		return conn.doOpen(psp);
 	}
 
 	private boolean doChange() {
@@ -152,12 +146,14 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 
-		if (prefsContext.useGoogleDrive.isSelected() && !prefsContext.useGoogleDriveFlag) {
+		if (prefsContext.remoteBS.shouldSaveOnChange()) {
 			saveFlag = true;
 		}
 
-		conn.doSave(psp, saveFlag);
-		return true;
+		if (!prefsContext.remoteBS.presave()) {
+			return false;
+		}
+		return conn.doSave(psp, saveFlag);
 	}
 
 	private boolean validatePin() {
@@ -195,7 +191,7 @@ public class SavePrefsAction extends AbstractAction {
 			psp.pinMaxTry = 100;
 		}
 		psp.showDashBoard = prefsContext.showDashboard.isSelected();
-		psp.useGoogleDrive = prefsContext.useGoogleDrive.isSelected();
+		psp.useGoogleDrive = prefsContext.remoteBS.useGoogleDrive.isSelected();
 		psp.showDiagnostics = prefsContext.showDiagnostics.isSelected();
 		return psp;
 	}

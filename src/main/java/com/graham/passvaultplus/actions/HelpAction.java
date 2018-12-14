@@ -31,9 +31,9 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 
 public class HelpAction extends AbstractAction {
-	
+
 	final public static String EMAIL = "gandersonsw@gmail.com";
-	
+
 	private final PvpContext context;
 	private JPanel helpPanel;
 
@@ -45,11 +45,11 @@ public class HelpAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		if (helpPanel == null) {
 			helpPanel = buildHelp();
-			context.getTabManager().addOtherTab("Help", helpPanel);
+			context.ui.getTabManager().addOtherTab("Help", helpPanel);
 		}
-		context.getTabManager().setSelectedComponent(helpPanel);
+		context.ui.getTabManager().setSelectedComponent(helpPanel);
 	}
-	
+
 	private JPanel buildHelp() {
 		final JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -97,7 +97,7 @@ public class HelpAction extends AbstractAction {
 			cp.add(emailPanel, BorderLayout.CENTER);
 			p55.add(cp);
 		}
-		
+
 		{
 			final JTextArea helpLink = new JTextArea();
 			final Font f1 = spacerLabel1.getFont().deriveFont(11.0f);
@@ -109,7 +109,7 @@ public class HelpAction extends AbstractAction {
 			helpLink.setBorder(new EmptyBorder(1, 24, 8, 8));
 			final JPanel leftAlignPanel2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 			leftAlignPanel2.add(helpLink);
-			
+
 			final JButton copyButton = new JButton(new CopyUrlAction(helpLink.getText()));
 			BCUtil.makeButtonSmall(copyButton);
 			copyButton.setFocusable(false);
@@ -120,15 +120,15 @@ public class HelpAction extends AbstractAction {
 				gotoButton.setFocusable(false);
 				leftAlignPanel2.add(gotoButton);
 			}
-			
+
 			p55.add(leftAlignPanel2);
 		}
-		
+
 		{
 			final JTextArea helpText = new JTextArea();
 			helpText.setBackground(spacerLabel1.getBackground());
 			helpText.setEditable(false);
-			helpText.setText(context.getResourceText("help"));
+			helpText.setText(PvpContext.getResourceText("help"));
 			helpText.setLineWrap(true);
 			helpText.setWrapStyleWord(true);
 			helpText.setPreferredSize(new Dimension(800, 2000));
@@ -146,7 +146,7 @@ public class HelpAction extends AbstractAction {
 
 		final JScrollPane sp55 = new JScrollPane(p55);
 		mainPanel.add(sp55, BorderLayout.CENTER);
-		
+
 		return mainPanel;
 	}
 
@@ -159,13 +159,13 @@ public class HelpAction extends AbstractAction {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 		}
 	}
-	
+
 	class CloseHelp extends AbstractAction {
 		public CloseHelp() {
 			super("Close");
 		}
 		public void actionPerformed(ActionEvent e) {
-			context.getTabManager().removeOtherTab(helpPanel);
+			context.ui.getTabManager().removeOtherTab(helpPanel);
 			helpPanel = null;
 		}
 	}
@@ -181,7 +181,7 @@ public class HelpAction extends AbstractAction {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 		}
 	}
-	
+
 	static class GoToUrlAction extends AbstractAction {
 		final String url;
 		public GoToUrlAction(final String urlParam) {

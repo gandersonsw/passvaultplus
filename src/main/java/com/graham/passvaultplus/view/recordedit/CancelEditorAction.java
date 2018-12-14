@@ -17,7 +17,7 @@ public class CancelEditorAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		context.getTabManager().removeRecordEditor(editContext);
+		context.ui.getTabManager().removeRecordEditor(editContext);
 	}
 
 }

@@ -18,12 +18,12 @@ public class SchemaEditorAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		Component c = context.getSchemaEditComponent();
+		Component c = context.ui.getSchemaEditComponent();
 		if (c == null) {
 			c = SchemaEditBuilder.buildEditor(context);
-			context.setSchemaEditComponent(c);
-			context.getTabManager().addOtherTab("Schema", c);
+			context.ui.setSchemaEditComponent(c);
+			context.ui.getTabManager().addOtherTab("Schema", c);
 		}
-		context.getTabManager().setSelectedComponent(c);
+		context.ui.getTabManager().setSelectedComponent(c);
 	}
 }

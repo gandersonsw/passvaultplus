@@ -22,25 +22,25 @@ public class ChooseDirAction extends AbstractAction {
 		context = contextParam;
 		parent = parentParam;
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
-		
+
 		final JFileChooser chooser = new JFileChooser();
-		
+
 		if (context.configAction == ConfigAction.Create || context.configAction == ConfigAction.Change) {
 			final File f = context.getDataFile();
 			if (f != null) {
 				chooser.setSelectedFile(f);
 			}
 			final int returnVal = chooser.showSaveDialog(parent);
-			if (returnVal == JFileChooser.APPROVE_OPTION) { 
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				context.setDataFile(chooser.getSelectedFile(), 0);
 			}
 		} else if (context.configAction == ConfigAction.Open) {
 			final int returnVal = chooser.showOpenDialog(parent);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				final File f = chooser.getSelectedFile();
-				
+
 				try {
 					int encryptBits = 0;
 					if (PvpPersistenceInterface.isEncrypted(f.getName())) {
@@ -51,7 +51,7 @@ public class ChooseDirAction extends AbstractAction {
 					context.setItemsDependentOnEncryptedEnabled();
 					context.aesBits.setEnabled(false); // user cant change this when opening
 				} catch (Exception e1) {
-					context.conn.getPvpContext().notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncryptionHeader);
+					context.conn.getPvpContext().ui.notifyBadException(e1, true, false, PvpException.GeneralErrCode.CantReadEncryptionHeader);
 				}
 			}
 		} else {

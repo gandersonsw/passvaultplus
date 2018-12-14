@@ -8,9 +8,9 @@ import javax.swing.AbstractAction;
 import com.graham.framework.BCUtil;
 
 public class PasswordChangedAction extends AbstractAction {
-	
+
 	final private PreferencesContext context;
-	
+
 	public PasswordChangedAction(final PreferencesContext contextParam) {
 		context = contextParam;
 	}
@@ -28,7 +28,7 @@ public class PasswordChangedAction extends AbstractAction {
 		} else {
 			rating = "Weak";
 		}
-		
+
 		context.passwordStrength.setText(bits + " bits (" + rating + ")");
 	}
 

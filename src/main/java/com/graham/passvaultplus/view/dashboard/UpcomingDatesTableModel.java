@@ -71,7 +71,7 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 		cal.add(Calendar.DAY_OF_YEAR, days);
 		Date cutoffDate = cal.getTime();
 		
-		List<PvpRecord> allRecords = context.getDataInterface().getRecords();
+		List<PvpRecord> allRecords = context.data.getDataInterface().getRecords();
 		
 		for (PvpRecord r : allRecords) {
 			String t = r.getType().getName();

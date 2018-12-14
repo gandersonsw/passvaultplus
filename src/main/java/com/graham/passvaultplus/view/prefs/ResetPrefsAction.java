@@ -41,13 +41,13 @@ public class ResetPrefsAction extends AbstractAction {
       return;
     }
 
-    context.getMainFrame().setVisible(false);
+    context.ui.getMainFrame().setVisible(false);
     if (deleteDb.isSelected()) {
       System.out.println("deleteing stuff");
       PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context);
       bsFile.deleteAll();
-      PvpBackingStoreGoogleDocs.deleteLocalCredentials();
     }
+    PvpBackingStoreGoogleDocs.deleteLocalCredentials();
     final Preferences userPrefs = Preferences.userNodeForPackage(context.getClass());
     try {
       userPrefs.clear();

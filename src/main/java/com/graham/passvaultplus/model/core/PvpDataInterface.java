@@ -99,18 +99,18 @@ public class PvpDataInterface {
 			r.setId(nextID);
 			records.add(r);
 		}
-		context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance
-		context.getViewListContext().filterUIChanged();
+		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance
+		context.ui.getViewListContext().filterUIChanged();
 	}
 
 	public void deleteRecord(final PvpRecord r) {
 		if (records.contains(r)) {
 			records.remove(r);
 			r.setId(0);
-			context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.getViewListContext().filterUIChanged();
+			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
+			context.ui.getViewListContext().filterUIChanged();
 		} else {
-			context.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
+			context.ui.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
 		}
 	}
 
@@ -125,8 +125,8 @@ public class PvpDataInterface {
 				records.add(r);
 			}
 		}
-		context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance on getFileInterface
-		context.getViewListContext().filterUIChanged();
+		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance on getFileInterface
+		context.ui.getViewListContext().filterUIChanged();
 	}
 
 	public void deleteRecords(final Collection<PvpRecord> rCol) {
@@ -140,13 +140,13 @@ public class PvpDataInterface {
 				r.setId(0);
 				changed = true;
 			} else {
-				context.notifyWarning("WARN112 could not delete record because it is not in the list:" + r);
+				context.ui.notifyWarning("WARN112 could not delete record because it is not in the list:" + r);
 			}
 		}
 
 		if (changed) {
-			context.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.getViewListContext().filterUIChanged();
+			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
+			context.ui.getViewListContext().filterUIChanged();
 		}
 	}
 
@@ -218,7 +218,7 @@ public class PvpDataInterface {
 
 		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
 		boolean checkText = filterByText.length() > 0;
-		List<PvpRecord> allRecords = context.getDataInterface().getRecords(); // TODO delete context.getDataInterface().
+		List<PvpRecord> allRecords = context.data.getDataInterface().getRecords(); // TODO delete context.data.getDataInterface().
 
     	final String filterByTextLC = filterByText.toLowerCase();
 
@@ -257,11 +257,11 @@ public class PvpDataInterface {
     		results.allTheSameTypeFlag = results.records.stream().map(r -> r.getType().getName()).distinct().count() == 1;
     	}
 
-    	if (context.getShowDiagnostics()) {
+    	if (context.prefs.getShowDiagnostics()) {
     		final long endTime = System.nanoTime();
 				final long msDelta = (endTime - startTime) / 1000000;
-				if (msDelta > 1) {
-    			context.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + msDelta + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
+				if (msDelta > 6) {
+    			context.ui.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + msDelta + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
 				}
 			}
 		return results;

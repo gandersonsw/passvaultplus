@@ -19,14 +19,14 @@ public class ShowPrefsAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		Component c = context.getPrefsComponent();
+		Component c = context.ui.getPrefsComponent();
 		if (c == null) {
 			c = PreferencesBuilder.buildPrefs(new PreferencesConnectionTab(context));
 			//c = new JScrollPane(npc);
-			context.setPrefsComponent(c);
-			context.getTabManager().addOtherTab("Settings", c);
+			context.ui.setPrefsComponent(c);
+			context.ui.getTabManager().addOtherTab("Settings", c);
 		}
-		context.getTabManager().setSelectedComponent(c);
+		context.ui.getTabManager().setSelectedComponent(c);
 	}
 
 }

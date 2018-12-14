@@ -17,7 +17,7 @@ import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.view.recordlist.ViewListBuilder;
 
 public class MainFrame extends JFrame {
-	
+
 	class ThisWindAdapter extends java.awt.event.WindowAdapter {
 		final QuitAction qa;
 		public ThisWindAdapter(QuitAction qaParam) {
@@ -27,9 +27,9 @@ public class MainFrame extends JFrame {
 			qa.actionPerformed(null);
 		}
 	}
-	
+
 	private static final long serialVersionUID = 6161486225628873141L;
-	
+
 	public MainFrame(final PvpContext context) {
 		super("");
 		setTitle("Pass Vault Plus");
@@ -40,53 +40,53 @@ public class MainFrame extends JFrame {
 		setSize(904, 520);
 		setMinimumSize(new Dimension(400, 240));
 
-		context.getTabManager().addOtherTab("Records", ViewListBuilder.buildViewList(context));
-		context.checkOtherTabs();
+		context.ui.getTabManager().addOtherTab("Records", ViewListBuilder.buildViewList(context));
+		context.ui.checkOtherTabs();
 
 		JPanel toolBar = initToolBar(context);
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.add(toolBar, BorderLayout.NORTH);
-		mainPanel.add(context.getTabManager().getMainTabPane(), BorderLayout.CENTER);
+		mainPanel.add(context.ui.getTabManager().getMainTabPane(), BorderLayout.CENTER);
 		mainPanel.add(initFooter(context), BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
 		setVisible(true);
 	}
-	
+
 	private JPanel initStatusPanel(final PvpContext context) {
 		JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
-		
-		final JLabel info = context.getInfoLabel();
+
+		final JLabel info = context.ui.getInfoLabel();
 		info.setBorder(new EmptyBorder(3,3,7,10));
 		p.add(info);
-		
-		for (PvpBackingStore bs : context.getFileInterface().getEnabledBackingStores(true)) {
+
+		for (PvpBackingStore bs : context.data.getFileInterface().getEnabledBackingStores(true)) {
 			final JLabel bsSN = new JLabel(bs.getShortName());
 			bsSN.setFont(info.getFont());
 			bsSN.setBorder(new EmptyBorder(3,8,7,3));
 			p.add(bsSN);
-				
+
 			final StatusBox sb = new StatusBox(Color.GREEN);
 			sb.addMouseListener(new BackingStoreClickHandler(context, bs));
 			p.add(sb);
 			bs.setStatusBox(sb);
 		}
 		p.add(Box.createRigidArea(new Dimension(18, 0)));
-		
+
 		return p;
 	}
-	
+
 	private JPanel initFooter(final PvpContext context) {
 		final JPanel p = new JPanel(new BorderLayout());
 		final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt"));
 		logo.setBorder(new EmptyBorder(0,8,4,3));
 		p.add(logo, BorderLayout.WEST);
-		
+
 		final JPanel ipanel = new JPanel(new BorderLayout());
 		ipanel.add(initStatusPanel(context), BorderLayout.SOUTH);
-		
+
 		p.add(ipanel, BorderLayout.EAST);
 		return p;
 	}
@@ -122,11 +122,11 @@ public class MainFrame extends JFrame {
 
 		toolBar.add(Box.createHorizontalStrut(30));
 
-		JButton jbUndo = createImageButton(context.getUndoManager().undoAction, KeyEvent.VK_Z);
+		JButton jbUndo = createImageButton(context.ui.getUndoManager().undoAction, KeyEvent.VK_Z);
 		jbUndo.setToolTipText("[Z] Undo");
 		toolBar.add(jbUndo);
 
-		JButton jbRedo = createImageButton(context.getUndoManager().redoAction, KeyEvent.VK_R);
+		JButton jbRedo = createImageButton(context.ui.getUndoManager().redoAction, KeyEvent.VK_R);
 		jbRedo.setToolTipText("[R]edo");
 		toolBar.add(jbRedo);
 

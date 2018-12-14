@@ -28,7 +28,7 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 public class SchemaEditBuilder {
 	final private PvpContext context;
 	final private SchemaChangesContext scContext;
-	
+
 	public static JPanel buildEditor(final PvpContext contextParam) {
 		return new SchemaEditBuilder(contextParam).build();
 	}
@@ -43,16 +43,16 @@ public class SchemaEditBuilder {
 		scContext.panelInTabPane.add(buildSchemaTop(), BorderLayout.NORTH);
 		return scContext.panelInTabPane;
 	}
-	
+
 	private JPanel buildSchemaTop() {
-		List<PvpType> types = context.getDataInterface().getTypes();
-		
+		List<PvpType> types = context.data.getDataInterface().getTypes();
+
 		scContext.typeCB = new JComboBox<>();
 		scContext.typeCB.setMaximumRowCount(20);
 		for (PvpType t : types) {
 			scContext.typeCB.addItem(t);
 		}
-		
+
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(new JLabel("Type:"));
 		p.add(scContext.typeCB);
@@ -61,15 +61,15 @@ public class SchemaEditBuilder {
 		p.add(new JButton(new DeleteTypeAction()));
 		p.add(new JButton(new SaveChangesAction(scContext, context)));
 		p.add(new JButton(new CloseSchemaEditAction()));
-		
+
 		return p;
 	}
-	
+
 	private Component buildSchemaEditor() {
 		List<PvpTypeModification.PvpFieldModification> fieldMods = scContext.tm.getFieldMods();
 		final JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		
+
 		{
 			final JPanel typeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			if (scContext.tm.isNewType()) {
@@ -81,26 +81,26 @@ public class SchemaEditBuilder {
 			}
 			p.add(typeP);
 		}
-		
+
 		{
 			final JPanel firstAddP = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			firstAddP.add(new JButton(new AddFieldAction(0)));
 			p.add(firstAddP);
 		}
-		
+
 		for (PvpTypeModification.PvpFieldModification fm : fieldMods) {
 			final JPanel fieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			
+
 			fm.typeCB = new JComboBox<String>(PvpField.TYPES);
 			fm.typeCB.setMaximumRowCount(20);
 			addIfNotIncluded(fm.typeCB, fm.newType);
 			fm.typeCB.setSelectedItem(fm.newType);
 			fieldPanel.add(fm.typeCB);
-			
+
 			fm.tf = new JTextField(16);
 			fm.tf.setText(fm.newName);
 			fieldPanel.add(fm.tf);
-			
+
 			fm.secretCB = new JCheckBox("Secret");
 			if (fm.isSecret) {
 				fm.secretCB.setSelected(true);
@@ -111,14 +111,14 @@ public class SchemaEditBuilder {
 				fm.deletedCB.setSelected(true);
 			}
 			fieldPanel.add(fm.deletedCB);
-			
+
 			p.add(fieldPanel);
-			
+
 			final JPanel addPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			addPanel.add(new JButton(new AddFieldAction(fm.id)));
 			p.add(addPanel);
 		}
-		
+
 		{
 			final JPanel toStringP = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			toStringP.add(new JLabel("To String (short): "));
@@ -126,7 +126,7 @@ public class SchemaEditBuilder {
 			toStringP.add(scContext.tm.toStringCodeTF);
 			p.add(toStringP);
 		}
-		
+
 		{
 			final JPanel fullFormatP = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			fullFormatP.add(new JLabel("Full Format: "));
@@ -134,7 +134,7 @@ public class SchemaEditBuilder {
 			fullFormatP.add(scContext.tm.fullFormatTF);
 			p.add(fullFormatP);
 		}
-		
+
 		JPanel pushToTopPanel = new JPanel(new BorderLayout());
 		pushToTopPanel.add(p, BorderLayout.NORTH);
 		JScrollPane sp = new JScrollPane(pushToTopPanel);
@@ -155,7 +155,7 @@ public class SchemaEditBuilder {
 			scContext.panelInTabPane.revalidate();
 		}
 	}
-	
+
 	class EditTypeAction extends AbstractAction {
 		public EditTypeAction() {
 			super("Edit");
@@ -170,7 +170,7 @@ public class SchemaEditBuilder {
 			scContext.panelInTabPane.revalidate();
 		}
 	}
-	
+
 	class DeleteTypeAction extends AbstractAction {
 		public DeleteTypeAction() {
 			super("Delete");
@@ -181,44 +181,44 @@ public class SchemaEditBuilder {
 				return;
 			}
 			if (PvpDataInterface.TYPE_CATEGORY.equals(type.getName())) {
-				JOptionPane.showMessageDialog(context.getMainFrame(), "Can't delete the Category type because it is used to structure all data.");
+				JOptionPane.showMessageDialog(context.ui.getMainFrame(), "Can't delete the Category type because it is used to structure all data.");
 				return;
 			}
-			
-			final PvpDataInterface.FilterResults fr = context.getDataInterface().getFilteredRecords(type.getName(), "", null, false);
+
+			final PvpDataInterface.FilterResults fr = context.data.getDataInterface().getFilteredRecords(type.getName(), "", null, false);
 			final int recordCount = fr.records.size();
 			final String message = "Are you sure you want to delete the type \"" + type.getName() + "\"?\n" + recordCount + " records will be deleted";
-			
-			final int option = JOptionPane.showConfirmDialog(context.getMainFrame(), message, "Confirm Delete Type", JOptionPane.OK_CANCEL_OPTION);
+
+			final int option = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Confirm Delete Type", JOptionPane.OK_CANCEL_OPTION);
 			if (option == JOptionPane.CANCEL_OPTION) {
 				return;
 			}
-			
+
 			closeTabsForType(type);
-			
-			context.getDataInterface().deleteRecords(fr.records);
-			
-			List<PvpType> types = context.getDataInterface().getTypes();
+
+			context.data.getDataInterface().deleteRecords(fr.records);
+
+			List<PvpType> types = context.data.getDataInterface().getTypes();
 			types.remove(type);
-			context.saveAndRefreshDataList();
-			context.getViewListContext().getTypeComboBox().removeItem(type);
+			context.data.saveAndRefreshDataList();
+			context.ui.getViewListContext().getTypeComboBox().removeItem(type);
 			scContext.typeCB.removeItem(type);
 		}
-		
+
 		private void closeTabsForType(final PvpType t) {
 			List<RecordEditContext> toBeRemoved = new ArrayList<>();
-			List<RecordEditContext> reList = context.getTabManager().getRecordEditors();
+			List<RecordEditContext> reList = context.ui.getTabManager().getRecordEditors();
 			for (final RecordEditContext re : reList) {
 				if (PvpType.sameType(re.getRecord().getType(), t)) {
 					toBeRemoved.add(re);
 				}
 			}
 			for (final RecordEditContext re : toBeRemoved) {
-				context.getTabManager().removeRecordEditor(re);
+				context.ui.getTabManager().removeRecordEditor(re);
 			}
 		}
 	}
-	
+
 	class AddFieldAction extends AbstractAction {
 		final int addAfterThisId;
 		public AddFieldAction(final int addAfterThisIdParam) {
@@ -236,17 +236,17 @@ public class SchemaEditBuilder {
 			scContext.panelInTabPane.revalidate();
 		}
 	}
-	
+
 	class CloseSchemaEditAction extends AbstractAction {
 		public CloseSchemaEditAction() {
 			super("Close");
 		}
 		public void actionPerformed(ActionEvent e) {
-			context.getTabManager().removeOtherTab(context.getSchemaEditComponent());
-			context.setSchemaEditComponent(null);
+			context.ui.getTabManager().removeOtherTab(context.ui.getSchemaEditComponent());
+			context.ui.setSchemaEditComponent(null);
 		}
 	}
-	
+
 	private void addIfNotIncluded(JComboBox<String> cb, String s) {
 		for (int i = 0; i < cb.getItemCount(); i++) {
 			if (cb.getItemAt(i).equals(s)) {

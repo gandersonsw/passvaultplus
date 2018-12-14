@@ -19,6 +19,7 @@ import com.graham.passvaultplus.PvpContext;
 
 public class DiagnosticsManager {
 
+	private final PvpContext context;
 	private final CommandExecuter executer;
 
 	private Component diagnosticsComponent;
@@ -28,22 +29,22 @@ public class DiagnosticsManager {
 	private JTextField paramsTF;
 	private JComboBox<String> commandCB;
 
-	public DiagnosticsManager(CommandExecuter e) {
-		executer = e;
+	public DiagnosticsManager(PvpContext c) {
+		context = c;
+		executer = new CommandExecuter(context);
 	}
 
 	public void checkDiagnostics() {
-		PvpContext context = PvpContext.getActiveContext();
-		if (context.getShowDiagnostics() && diagnosticsComponent == null) {
+		if (context.prefs.getShowDiagnostics() && diagnosticsComponent == null) {
 			try {
 				diagnosticsComponent = buildDiagnosticsTab();
-				context.getTabManager().addOtherTab("Diagnostics", diagnosticsComponent);
+				context.ui.getTabManager().addOtherTab("Diagnostics", diagnosticsComponent);
 			} catch (Exception e) {
 				// if the Diagnostics fails to load, dont crash the app
 				e.printStackTrace();
 			}
-		} else if (!context.getShowDiagnostics() && diagnosticsComponent != null) {
-			context.getTabManager().removeOtherTab(diagnosticsComponent);
+		} else if (!context.prefs.getShowDiagnostics() && diagnosticsComponent != null) {
+			context.ui.getTabManager().removeOtherTab(diagnosticsComponent);
 			diagnosticsComponent = null;
 			ta = null;
 		}

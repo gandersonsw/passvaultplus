@@ -92,7 +92,7 @@ public class DatabaseReader {
 			}
 			jdomDoc = builder.build(inStream);
 		} catch (CharConversionException originalException) {
-			context.notifyWarning("WARN119 builder.build CharConversionException", originalException);
+			context.ui.notifyWarning("WARN119 builder.build CharConversionException", originalException);
 			try {
 				if  (inStream.markSupported()) {
 					inStream.reset();
@@ -101,7 +101,7 @@ public class DatabaseReader {
 				}
 			} catch (Exception e2) {
 				// if an exception happens, don't use it as the main exception, just log it
-				context.notifyWarning("cleanStreamUTF8 error", e2);
+				context.ui.notifyWarning("cleanStreamUTF8 error", e2);
 				throw originalException;
 			}
 		}
@@ -115,7 +115,7 @@ public class DatabaseReader {
 		final Document jdomDoc = getJDom(inStream);
 		final Element root = jdomDoc.getRootElement();
 		if (!root.getName().equals("mydb")) {
-			context.notifyWarning("WARN101 unexpected element:" + root.getName());
+			context.ui.notifyWarning("WARN101 unexpected element:" + root.getName());
 		}
 		final List children = root.getChildren();
 		for (int i = 0; i < children.size(); i++) {
@@ -125,7 +125,7 @@ public class DatabaseReader {
 			} else if (e.getName().equals("records")) {
 				records = loadRecords(e);
 			} else {
-				context.notifyWarning("WARN102 unexpected element:" + e.getName());
+				context.ui.notifyWarning("WARN102 unexpected element:" + e.getName());
 			}
 		}
 
@@ -154,11 +154,11 @@ public class DatabaseReader {
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (!e.getName().equals("type")) {
-				context.notifyWarning("WARN103 unexpected element:" + e.getName());
+				context.ui.notifyWarning("WARN103 unexpected element:" + e.getName());
 			}
 			PvpType type = loadOneType(e);
 			if (typeNames.contains(type.getName())) {
-				context.notifyWarning("WARN104 duplicate type found, second definition ignored:" + type.getName());
+				context.ui.notifyWarning("WARN104 duplicate type found, second definition ignored:" + type.getName());
 			} else {
 				types.add(type);
 			}
@@ -181,7 +181,7 @@ public class DatabaseReader {
 			} else if (e.getName().equals("field")) {
 				rttype.addField(loadTypeField(e));
 			} else {
-				context.notifyWarning("WARN105 unexpected element:" + e.getName());
+				context.ui.notifyWarning("WARN105 unexpected element:" + e.getName());
 			}
 		}
 
@@ -205,12 +205,12 @@ public class DatabaseReader {
 			} else if (e.getName().equals("type")) {
 				type = BCUtil.unmakeXMLSafe(e.getTextTrim());
 			} else {
-				context.notifyWarning("WARN106 unexpected element:" + e.getName());
+				context.ui.notifyWarning("WARN106 unexpected element:" + e.getName());
 			}
 		}
 		
 		if (name == null || type == null) {
-			context.notifyWarning("WARN107 name and type are required:" + fieldElement.getQualifiedName()); 
+			context.ui.notifyWarning("WARN107 name and type are required:" + fieldElement.getQualifiedName()); 
 		}
 
 		return new PvpField(name, type, classification);
@@ -223,23 +223,23 @@ public class DatabaseReader {
 			try {
 				maxID = maxIdAttr.getIntValue();
 			} catch (DataConversionException dce) {
-				context.notifyWarning("WARN117", dce);
+				context.ui.notifyWarning("WARN117", dce);
 			}
 		}
 		if (maxID == 0) {
-			context.notifyWarning("maxID attribute not found");
+			context.ui.notifyWarning("maxID attribute not found");
 		}
 		List children = recordsElement.getChildren();
 		List<PvpRecord> records = new ArrayList<PvpRecord>();
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (!e.getName().equals("record")) {
-				context.notifyWarning("WARN108 unexpected element:" + e.getName());
+				context.ui.notifyWarning("WARN108 unexpected element:" + e.getName());
 			}
 			try {
 				records.add(loadOneRecord(e));
 			} catch (Exception ex) {
-				context.notifyWarning("WARN116", ex);
+				context.ui.notifyWarning("WARN116", ex);
 			}
 		}
 
@@ -253,7 +253,7 @@ public class DatabaseReader {
 		try {
 			id = recordElement.getAttribute("id").getIntValue();
 		} catch (Exception e) {
-			context.notifyWarning("WARN109 no id attribute for " + recordElement.getName(), e);
+			context.ui.notifyWarning("WARN109 no id attribute for " + recordElement.getName(), e);
 		}
 		PvpRecord record = new PvpRecord();
 		record.setId(id);
@@ -262,7 +262,7 @@ public class DatabaseReader {
 			try {
 				record.setAnyField(BCUtil.unmakeXMLName(e.getName()), BCUtil.unmakeXMLSafe(e.getText()));
 			} catch (final Exception ex) {
-				context.notifyWarning("WARN110 loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
+				context.ui.notifyWarning("WARN110 loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
 			}
 		}
 

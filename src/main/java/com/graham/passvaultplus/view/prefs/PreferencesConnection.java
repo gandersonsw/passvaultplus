@@ -12,68 +12,68 @@ import com.graham.passvaultplus.PvpContext;
 public abstract class PreferencesConnection {
 
 	protected final PvpContext context;
-	
+
 	public PreferencesConnection(final PvpContext contextParam) {
 		context = contextParam;
 	}
-	
+
 	public abstract Action getCancelAction();
-	
+
 	public abstract String getPassword();
-	
+
 	public abstract boolean isPasswordSaved();
-	
+
 	public abstract String getPin();
-	
+
 	public abstract boolean getUsePin();
-	
+
 	public int getPinTimeout() {
 		return 30; // 30 minutes is the default
 	}
-	
+
 	public int getPinMaxTry() {
 		return 5; // 5 trys is the default
 	}
-	
+
 	public abstract String getDataFilePath();
-	
+
 	public abstract int getAesBits();
-	
-	public abstract void doSave(final PrefsSettingsParam psp, final boolean wasChanges);
-	
-	public abstract void doOpen(final PrefsSettingsParam psp);
-	
+
+	public abstract boolean doSave(final PrefsSettingsParam psp, final boolean wasChanges);
+
+	public abstract boolean doOpen(final PrefsSettingsParam psp);
+
 	public abstract JFrame getSuperFrame();
-	
+
 	public abstract boolean isDefaultPath(final String path);
-	
+
 	public boolean supportsChangeDataFileOptions() {
 		return false;
 	}
-	
+
 	public PvpContext getPvpContext() {
 		return context;
 	}
-	
+
 	protected void setContextFromPsp(final PrefsSettingsParam psp) {
-		context.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
-		context.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
-		context.setPinTimeout(psp.pinTimeout);
-		context.setPinMaxTry(psp.pinMaxTry);
-		context.setShowDashboard(psp.showDashBoard);
-		context.setUseGoogleDrive(psp.useGoogleDrive);
-		context.setShowDiagnostics(psp.showDiagnostics);
+		context.prefs.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
+		context.prefs.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
+		context.prefs.setPinTimeout(psp.pinTimeout);
+		context.prefs.setPinMaxTry(psp.pinMaxTry);
+		context.prefs.setShowDashboard(psp.showDashBoard);
+		context.prefs.setUseGoogleDrive(psp.useGoogleDrive);
+		context.prefs.setShowDiagnostics(psp.showDiagnostics);
 	}
-	
+
 	public boolean getShowDashboard() {
-		return context.getShowDashboard();
+		return context.prefs.getShowDashboard();
 	}
-	
+
 	public boolean getUseGoogleDrive() {
-		return context.getUseGoogleDrive();
+		return context.prefs.getUseGoogleDrive();
 	}
-	
+
 	public boolean getShowDiagnostics() {
-		return context.getShowDiagnostics();
+		return context.prefs.getShowDiagnostics();
 	}
 }

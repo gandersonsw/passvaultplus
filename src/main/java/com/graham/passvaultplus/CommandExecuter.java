@@ -40,25 +40,25 @@ public class CommandExecuter {
 			} else if (command.equals("Exit")) {
 				doExit();
 			} else {
-				context.notifyInfo("Unkown Command:" + command);
+				context.ui.notifyInfo("Unkown Command:" + command);
 			}
 		} catch (ParseException e) {
-			context.notifyInfo("Error:" + e);
+			context.ui.notifyInfo("Error:" + e);
 		}
 	}
 	
 	private void setModDates(Date d) {
-		for (PvpRecord r : context.getDataInterface().getRecords()) {
+		for (PvpRecord r : context.data.getDataInterface().getRecords()) {
 			r.setModificationDate(d);
 		}
-		context.getDataInterface().saveRecords(context.getDataInterface().getRecords());
+		context.data.getDataInterface().saveRecords(context.data.getDataInterface().getRecords());
 	}
 	
 	private void setCreationDates(Date d) {
-		for (PvpRecord r : context.getDataInterface().getRecords()) {
+		for (PvpRecord r : context.data.getDataInterface().getRecords()) {
 			r.setCreationDate(d);
 		}
-		context.getDataInterface().saveRecords(context.getDataInterface().getRecords());
+		context.data.getDataInterface().saveRecords(context.data.getDataInterface().getRecords());
 	}
 	
 	private void doExit() {

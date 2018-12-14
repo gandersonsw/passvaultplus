@@ -57,7 +57,7 @@ public class PreferencesBuilder {
 		p.add(buildPin());
 		p.add(buildAESBits());
 		p.add(buildDashboard());
-		p.add(buildGoogleDrive());
+		p.add(prefsContext.remoteBS.buildPrefsUI());
 		p.add(buildDiagnostics());
 		prefsContext.updateBecauseCompressedOrEncryptedChanged();
 
@@ -194,14 +194,6 @@ public class PreferencesBuilder {
 		prefsContext.showDashboard = new JCheckBox("Show Dashboard");
 		prefsContext.showDashboard.setSelected(conn.getShowDashboard());
 		p.add(prefsContext.showDashboard);
-		return p;
-	}
-
-	private JPanel buildGoogleDrive() {
-		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		prefsContext.useGoogleDrive = new JCheckBox("Use Google™ Drive");
-		prefsContext.useGoogleDrive.setSelected(conn.getUseGoogleDrive());
-		p.add(prefsContext.useGoogleDrive);
 		return p;
 	}
 

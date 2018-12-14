@@ -32,23 +32,23 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(context.getDataFile());
+		return new FileInputStream(context.prefs.getDataFile());
 	}
 
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		checkBackupFileHourly(context.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
-		return new FileOutputStream(context.getDataFile());
+		checkBackupFileHourly(context.prefs.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
+		return new FileOutputStream(context.prefs.getDataFile());
 	}
 
 	@Override
 	public boolean isCompressed(boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(context.getDataFile().getName());
+		return PvpPersistenceInterface.isCompressed(context.prefs.getDataFile().getName());
 	}
 
 	@Override
 	public boolean isEncrypted(boolean inFlag) {
-		return PvpPersistenceInterface.isEncrypted(context.getDataFile().getName());
+		return PvpPersistenceInterface.isEncrypted(context.prefs.getDataFile().getName());
 	}
 
 
@@ -66,7 +66,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	public void deleteAll() {
-		File[] fArr = context.getDataFile().getParentFile().listFiles(new MyFF(context.getDataFile()));
+		File[] fArr = context.prefs.getDataFile().getParentFile().listFiles(new MyFF(context.prefs.getDataFile()));
 		for (File f : fArr) {
 			System.out.println("deleteAll: deleteing:" + f);
 			f.delete();
@@ -86,12 +86,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public long getLastUpdatedDate() {
-		return context.getDataFile().lastModified();
+		return context.prefs.getDataFile().lastModified();
 	}
 
 	@Override
 	public String getDisplayableResourceLocation() {
-		return "File: " + context.getDataFile();
+		return "File: " + context.prefs.getDataFile();
 	}
 
 	@Override

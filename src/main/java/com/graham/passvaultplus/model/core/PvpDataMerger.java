@@ -79,9 +79,9 @@ public class PvpDataMerger {
 	private void logRecInfo(String s) {
 		if (fromRec.getId() != curLogInofId) {
 			curLogInofId = fromRec.getId();
-			context.notifyInfo("--------- Record Index:" + i + " Id:" + fromRec.getId() + ":" + fromRec + " ----------");
+			context.ui.notifyInfo("--------- Record Index:" + i + " Id:" + fromRec.getId() + ":" + fromRec + " ----------");
 		}
-		context.notifyInfo(s);
+		context.ui.notifyInfo(s);
 	}
 
 	private void makeIdentical(final PvpRecord toRec) {
@@ -111,7 +111,7 @@ public class PvpDataMerger {
 	 */
 	public MergeResultState mergeData(PvpDataInterface dataToMergeTo, PvpDataInterface dataToMergeFrom) {
 
-		context.notifyInfo(">>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
+		context.ui.notifyInfo(">>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
@@ -130,7 +130,7 @@ public class PvpDataMerger {
 			PvpType toType = dataToMergeTo.getType(fromType.getName());
 			// TODO handle case where TO has type but FROM doesnt
 			if (toType == null) {
-				context.notifyInfo("adding type:" + fromType.getName());
+				context.ui.notifyInfo("adding type:" + fromType.getName());
 				dataToMergeTo.getTypes().add(fromType);
 				dirtyTo(true); // TODO verify this
 			} else {
@@ -144,7 +144,7 @@ public class PvpDataMerger {
 		int recordsMatched = 0;
 		for (i = dataToMergeFrom.getRecordCount() - 1; i >= 0; i--) {
 			fromRec = dataToMergeFrom.getRecordAtIndex(i);
-			//context.notifyInfo("--------- Trying to match Record:" + fromRec + " ----------");
+			//context.ui.notifyInfo("--------- Trying to match Record:" + fromRec + " ----------");
 			PvpRecord toRec = null;
 			if (i < dataToMergeTo.getRecordCount()) {
 				final PvpRecord recAtIndex = dataToMergeTo.getRecordAtIndex(i);
@@ -198,25 +198,25 @@ public class PvpDataMerger {
 		for (int i2 = dataToMergeTo.getRecordCount() - 1; i2 >= 0; i2--) {
 			PvpRecord r = dataToMergeTo.getRecordAtIndex(i2);
 			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-				context.notifyInfo("deleting a record Id:" + r.getId() + ":" + r);
+				context.ui.notifyInfo("deleting a record Id:" + r.getId() + ":" + r);
 				dataToMergeTo.getRecords().remove(i2);
 				r.setId(0);
 				dirtyTo(true);
 			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
-				context.notifyInfo("adding record to FROM Id:" + r.getId() + ":" + r);
+				context.ui.notifyInfo("adding record to FROM Id:" + r.getId() + ":" + r);
 				dirtyFrom(true);
 			}
 		}
 
 		if (thisStartingRecordCount != dataToMergeFrom.getRecordCount()) {
-			context.notifyInfo("> different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
+			context.ui.notifyInfo("> different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
 			dirtyFrom(true); // TODO not sure about this
 		}
 
-		context.notifyInfo("> records not matched by index:" + indexNotMatching);
-		context.notifyInfo("> sameModDateCount:" + sameModDateCount);
-		context.notifyInfo("> resultState:" + resultState);
-		context.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
+		context.ui.notifyInfo("> records not matched by index:" + indexNotMatching);
+		context.ui.notifyInfo("> sameModDateCount:" + sameModDateCount);
+		context.ui.notifyInfo("> resultState:" + resultState);
+		context.ui.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
 		return resultState;
 	}
 

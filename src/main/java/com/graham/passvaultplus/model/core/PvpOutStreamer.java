@@ -19,7 +19,7 @@ import com.graham.passvaultplus.UserAskToChangeFileException;
  * Get a Writer for the database file. Take care of encryption and compression.
  */
 public class PvpOutStreamer {
-	
+
 	private final PvpBackingStore backingStore;
 	private String password;
 	private int encryptionStrength;
@@ -33,11 +33,11 @@ public class PvpOutStreamer {
 	public PvpOutStreamer(final PvpBackingStore bs, final PvpContext contextParam) throws UserAskToChangeFileException {
 		backingStore = bs;
 		if (backingStore.isEncrypted(false)) {
-			password = contextParam.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
-			encryptionStrength = contextParam.getEncryptionStrengthBits();
+			password = contextParam.prefs.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
+			encryptionStrength = contextParam.prefs.getEncryptionStrengthBits();
 		}
 	}
-	
+
 	public PvpOutStreamer(final PvpBackingStore bs, final String passwordParam, final int encryptionStrengthParam) {
 		backingStore = bs;
 		password = passwordParam;
@@ -58,14 +58,14 @@ public class PvpOutStreamer {
 				bsos.write(header.createEncryptionHeaderBytes());
 				cipherStream = new CipherOutputStream(bsos, cer);
 				outStream = cipherStream;
-	
+
 				// write the code so we know it decrypted successfully
 				outStream.write("remthis7".getBytes());
 			} else {
 				bsOutStream = backingStore.openOutputStream();
 				outStream = bsOutStream;
 			}
-	
+
 			if (backingStore.isCompressed(false)) {
 				zipStream = new ZipOutputStream(outStream);
 				String zippedFileName = BCUtil.setFileExt("PvpData",
@@ -73,7 +73,7 @@ public class PvpOutStreamer {
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;
 			}
-	
+
 			writer = new OutputStreamWriter(outStream, "UTF-8");
 			bufWriter = new BufferedWriter(writer);
 		} catch (Exception e) {

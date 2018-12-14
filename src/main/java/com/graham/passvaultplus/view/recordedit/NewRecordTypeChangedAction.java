@@ -24,14 +24,14 @@ public class NewRecordTypeChangedAction  extends AbstractAction {
 		try {
 			JComboBox typeSelector = (JComboBox)arg0.getSource();
 			PvpType type = (PvpType)typeSelector.getSelectedItem();
-			context.getTabManager().removeRecordEditor(editContext);
-	
+			context.ui.getTabManager().removeRecordEditor(editContext);
+
 			PvpRecord newRecord = new PvpRecord(type);
 			final RecordEditContext newContext = RecordEditBuilder.buildEditor(context, newRecord, true);
-			context.getTabManager().addRecordEditor("New", newContext);
-			context.getTabManager().setSelectedComponent(newContext.getPanelInTabPane());
+			context.ui.getTabManager().addRecordEditor("New", newContext);
+			context.ui.getTabManager().setSelectedComponent(newContext.getPanelInTabPane());
 		} catch (Exception e) {
-			context.notifyBadException(e, true, PvpException.GeneralErrCode.OtherErr);
+			context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.OtherErr);
 		}
 	}
 

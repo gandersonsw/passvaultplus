@@ -14,11 +14,11 @@ public class TabManager {
 	private JTabbedPane mainTabPane = new JTabbedPane();
 	private List<RecordEditContext> recordEditors = new ArrayList<>();
 	private PvpContext context;
-	
+
 	public TabManager(final PvpContext contextParam) {
 		context = contextParam;
 	}
-	
+
 	public List<RecordEditContext> getRecordEditors() {
 		return recordEditors;
 	}
@@ -40,24 +40,24 @@ public class TabManager {
 	public void removeRecordEditor(final RecordEditContext r) {
 		mainTabPane.remove(r.getPanelInTabPane());
 		recordEditors.remove(r);
-		context.getUndoManager().notifyCloseTab(r.getPanelInTabPane());
+		context.ui.getUndoManager().notifyCloseTab(r.getPanelInTabPane());
 	}
-	
+
 	/**
 	 * Add a tab that is not a record editor.
 	 */
 	public void addOtherTab(final String tabLabel, final Component c) {
 		mainTabPane.add(tabLabel, c);
 	}
-	
+
 	/**
 	 * remove a tab that is not a record editor.
 	 */
 	public void removeOtherTab(final Component c) {
 		mainTabPane.remove(c);
-		context.getUndoManager().notifyCloseTab(c);
+		context.ui.getUndoManager().notifyCloseTab(c);
 	}
-	
+
 	public boolean isCurrentTabList() {
 		return mainTabPane.getSelectedIndex() == 0;
 	}
@@ -77,15 +77,15 @@ public class TabManager {
 		// the preferences or help tab is selected
 		return null;
 	}
-	
+
 	public Component getSelectedComponent() {
 		return mainTabPane.getSelectedComponent();
 	}
-	
+
 	public void setSelectedComponent(final Component c) {
 		mainTabPane.setSelectedComponent(c);
 	}
-	
+
 	/**
 	 * This should only be called by MainFrame
 	 */

@@ -18,47 +18,47 @@ import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 public class PreferencesContext {
 	final boolean compressedFlag; // this is not updated, original value only
 	final boolean encryptedFlag;  // this is not updated, original value only
-	final boolean useGoogleDriveFlag; // this is not updated, original value only
 	final boolean showDiagnosticsFlag; // this is not updated, original value only
 	final PreferencesConnection conn;
-	
+	final RemoteBSPrefHandler remoteBS;
+
 	JCheckBox compressed;
 	JCheckBox encrypted;
 	JCheckBox savePassword;
 	JCheckBox showPassword;
 	JPasswordField password;
 	JTextField passwordClearText;
-	
+
 	JPasswordField pin;
 	JTextField pinClearText;
 	JCheckBox showPin;
 	JCheckBox usePin;
 	JComboBox<String> timeoutCombo;
 	JComboBox<String> pinMaxTryCombo;
-	
+
 	ConfigAction configAction;
 	JComboBox<ConfigAction> actionCombo;
 	JComboBox<String> aesBits;
 	JButton saveButton;
 	JLabel passwordStrength;
-	
+
 	JCheckBox showDashboard;
-	JCheckBox useGoogleDrive;
 	JCheckBox showDiagnostics;
-	
+
 	private JLabel dataFileLabel;
 	private String dataFileString;
 	private File dataFile;
-	
+
 	PreferencesContext(final PreferencesConnection connParam) {
 		conn = connParam;
 		dataFileString = connParam.getDataFilePath();
 		compressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
 		encryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
-		useGoogleDriveFlag = connParam.getUseGoogleDrive();
+
 		showDiagnosticsFlag = connParam.getShowDiagnostics();
+		remoteBS = new RemoteBSPrefHandler(this);
 	}
-	
+
 	String getPasswordText() {
 		if (showPassword.isSelected()) {
 			return passwordClearText.getText();
@@ -66,7 +66,7 @@ public class PreferencesContext {
 			return new String(password.getPassword());
 		}
 	}
-	
+
 	String getPinText() {
 		if (showPin.isSelected()) {
 			return pinClearText.getText();
@@ -81,11 +81,11 @@ public class PreferencesContext {
 		}
 		return dataFile;
 	}
-	
+
 	String getDataFileString() {
 		return dataFileString;
 	}
-	
+
 	void setDataFile(final File f, final int aesBits) {
 		if (f == null) {
 			dataFile = null;
@@ -101,10 +101,10 @@ public class PreferencesContext {
 			encrypted.setSelected(isEncrypted);
 			setSelectedBits(aesBits);
 		}
-		
+
 		dataFileLabel.setText(dataFileString);
 	}
-	
+
 	void setSelectedBits(final int bits) {
 		if (bits == 0) {
 			// if its 0, dont change it
@@ -116,7 +116,7 @@ public class PreferencesContext {
 			aesBits.setSelectedIndex(0);
 		}
 	}
-	
+
 	void setPinTimeout(final int to) {
 		if (to < 2 || to > 300) {
 			timeoutCombo.setSelectedItem("Never");
@@ -124,7 +124,7 @@ public class PreferencesContext {
 			timeoutCombo.setSelectedItem(Integer.toString(to));
 		}
 	}
-	
+
 	void setPinMaxTry(final int mt) {
 		if (mt > 50) {
 			pinMaxTryCombo.setSelectedItem("Unlimited");
@@ -132,15 +132,15 @@ public class PreferencesContext {
 			pinMaxTryCombo.setSelectedItem(Integer.toString(mt));
 		}
 	}
-	
+
 	void setDataFileLabel(final JLabel l) {
 		dataFileLabel = l;
 	}
-	
+
 	Action getDefaultFileAction() {
 		return new SetDefaultDataFile(getDataFile());
 	}
-	
+
 	/**
 	 * Call when the compressed checkbox or encrypted checkbox changed
 	 */
@@ -151,10 +151,10 @@ public class PreferencesContext {
 			dataFileString = dataFile.getAbsolutePath();
 			dataFileLabel.setText(dataFileString);
 		}
-		
+
 		setItemsDependentOnEncryptedEnabled();
 	}
-	
+
 	void setItemsDependentOnEncryptedEnabled() {
 		if (encrypted.isSelected()) {
 			this.password.setEnabled(true);
@@ -169,10 +169,10 @@ public class PreferencesContext {
 			this.usePin.setSelected(false);
 			this.aesBits.setEnabled(false);
 		}
-		
+
 		setPinEnabled();
 	}
-	
+
 	void setPinEnabled() {
 		if (this.savePassword.isSelected()) {
 			this.usePin.setEnabled(true);
@@ -181,7 +181,7 @@ public class PreferencesContext {
 			this.usePin.setSelected(false);
 		}
 	}
-	
+
 	void setPinItemsEnabled() {
 		if (this.usePin.isSelected()) {
 			this.pin.setEnabled(true);
@@ -195,7 +195,7 @@ public class PreferencesContext {
 			this.pinMaxTryCombo.setEnabled(false);
 		}
 	}
-	
+
 	class SetDefaultDataFile extends AbstractAction {
 		final private File defaultFile;
 		public SetDefaultDataFile(final File f) {

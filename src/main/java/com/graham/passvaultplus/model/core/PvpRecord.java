@@ -88,7 +88,7 @@ public class PvpRecord {
 		}
 
 		if (!fields.containsKey(fieldName)) {
-			PvpContext.getActiveContext().notifyInfo("PvpRecord.getCustomField :: id:" + id + " field not found:" + fieldName);
+			PvpContext.getActiveUI().notifyInfo("PvpRecord.getCustomField :: id:" + id + " field not found:" + fieldName);
 			// TODO
 			StringBuffer sb = new StringBuffer();
 			for (String fn : fields.keySet()) {
@@ -97,7 +97,7 @@ public class PvpRecord {
 				}
 				sb.append(fn);
 			}
-			PvpContext.getActiveContext().notifyInfo("PvpRecord.getCustomField :: fields:" + sb);
+			PvpContext.getActiveUI().notifyInfo("PvpRecord.getCustomField :: fields:" + sb);
 		}
 
 		return fields.get(fieldName);
@@ -110,7 +110,7 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_TYPE)) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
-		
+
 		if (fieldValue == null) {
 			fields.remove(fieldName);
 		} else {
@@ -140,13 +140,13 @@ public class PvpRecord {
 			try {
 				creationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				PvpContext.getActiveContext().notifyWarning("creation date parse error:" + fieldValue, e);
+				PvpContext.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_MODIFICATION_DATE)) {
 			try {
 				modificationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				PvpContext.getActiveContext().notifyWarning("modification date parse error:" + fieldValue, e);
+				PvpContext.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_TYPE)) {
 			typeForValidate = fieldValue;
@@ -161,7 +161,7 @@ public class PvpRecord {
 		}
 		return getCustomField(rtType.getToStringCode());
 	}
-	
+
 	public String getFormated() {
 		return rtType.getFullFormatter().format(this);
 	}
@@ -173,7 +173,7 @@ public class PvpRecord {
 
 		rtType = dataInterface.getType(typeForValidate);
 		if (rtType == null) {
-			context.notifyWarning("WARN113 type not found:" + typeForValidate);
+			context.ui.notifyWarning("WARN113 type not found:" + typeForValidate);
 		}
 
 		if (categoryIdForValidate == null || categoryIdForValidate.length() == 0) {
@@ -183,16 +183,16 @@ public class PvpRecord {
 				int catId = Integer.parseInt(categoryIdForValidate);
 				category = dataInterface.getRecord(catId);
 				if (category == null) {
-					context.notifyWarning("WARN114 for object id:" + id + " category not found:" + categoryIdForValidate);
+					context.ui.notifyWarning("WARN114 for object id:" + id + " category not found:" + categoryIdForValidate);
 				}
 			} catch (final Exception e) {
-				context.notifyWarning("WARN115 for object id:" + id + " category not valid:" + categoryIdForValidate, e);
+				context.ui.notifyWarning("WARN115 for object id:" + id + " category not valid:" + categoryIdForValidate, e);
 				category = null;
 			}
 		}
 
 	}
-	
+
 	/**
 	 * Return a match rating, 0 to 100
 	 */
@@ -238,7 +238,7 @@ public class PvpRecord {
 
 		return 100 * matchCount / fieldCount;
 	}
-	
+
 	/**
 	 * @return true if otherRec was modified at all
 	 */
@@ -251,7 +251,7 @@ public class PvpRecord {
 			System.out.println("cant copy to other type");
 			return false;
 		}
-		
+
 		otherRec.setCategory(this.getCategory());
 		otherRec.setCreationDate(this.getCreationDate());
 		otherRec.setModificationDate(this.getModificationDate());

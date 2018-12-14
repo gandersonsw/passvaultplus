@@ -10,13 +10,13 @@ import com.graham.passvaultplus.PvpContext;
  * Format the record in its default human readable plain-text format.
  */
 public class PvpRecordFormatter {
-	
+
 	ArrayList<FormatPart> formatParts;
-	
+
 	static interface FormatPart {
 		String format(final PvpRecord r);
 	}
-	
+
 	static class ConstantPart implements FormatPart {
 		private String text;
 		public ConstantPart(final String textParam) {
@@ -26,7 +26,7 @@ public class PvpRecordFormatter {
 			return text;
 		}
 	}
-	
+
 	static class FieldPart implements FormatPart {
 		private String fieldName;
 		public FieldPart(final String fieldNameParam) {
@@ -36,32 +36,32 @@ public class PvpRecordFormatter {
 			return r.getCustomField(fieldName);
 		}
 	}
-	
+
 	public PvpRecordFormatter(final String format) {
 		if (format != null) {
 			try {
 				parseFormat(format);
 			} catch (Exception e) {
-				PvpContext.getActiveContext().notifyWarning("PvpRecordFormatter: format=" + format, e);
+				PvpContext.getActiveUI().notifyWarning("PvpRecordFormatter: format=" + format, e);
 				formatParts = new ArrayList<>();
 				formatParts.add(new ConstantPart("format was bad: " + format));
 			}
 		}
 	}
-	
+
 	private void parseFormat(final String format) {
 		formatParts = new ArrayList<>();
-		
+
 		int currentIndex = 0;
 		boolean doneProcessing = false;
-		
+
 		while (!doneProcessing) {
 			int nextBracketStart = format.indexOf('[', currentIndex);
 			int nextBracketEnd = -1;
 			if (nextBracketStart > -1) {
 				nextBracketEnd = format.indexOf(']', nextBracketStart);
 			}
-			
+
 			if (nextBracketStart > -1 && nextBracketEnd > -1) {
 				if (currentIndex < nextBracketStart) {
 					formatParts.add(new ConstantPart(format.substring(currentIndex, nextBracketStart)));
@@ -76,17 +76,17 @@ public class PvpRecordFormatter {
 			}
 		}
 	}
-	
+
 	public String format(final PvpRecord r) {
 		if (formatParts == null) {
 			return null;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		for (FormatPart part : formatParts) {
 			sb.append(part.format(r));
 		}
-		
+
 		return sb.toString();
 	}
 

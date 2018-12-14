@@ -49,14 +49,14 @@ public class ViewListBuilder {
 		panel.add(buildCategoryComboBox(context, filterChangeAction));
 		
 		JLabel rc = new JLabel("");
-		context.getViewListContext().setRecordCountLabel(rc);
+		context.ui.getViewListContext().setRecordCountLabel(rc);
 		panel.add(rc);
 
 		return panel;
 	}
 
 	static private JComboBox buildTypeComboBox(final PvpContext context, final ListFilterChangedAction filterChangeAction) {
-		List<PvpType> types = context.getDataInterface().getTypes();
+		List<PvpType> types = context.data.getDataInterface().getTypes();
 		Object[] typeArray = new Object[types.size() + 1];
 		typeArray[0] = PvpType.FILTER_ALL_TYPES;
 		for (int i = 0; i < types.size(); i++) {
@@ -66,7 +66,7 @@ public class ViewListBuilder {
 		JComboBox typeCombo = new JComboBox(typeArray);
 		typeCombo.setMaximumRowCount(20);
 		typeCombo.addActionListener(filterChangeAction);
-		context.getViewListContext().setTypeComboBox(typeCombo);
+		context.ui.getViewListContext().setTypeComboBox(typeCombo);
 		return typeCombo;
 	}
 
@@ -83,7 +83,7 @@ public class ViewListBuilder {
 	}
 
 	static private JComboBox buildCategoryComboBox(final PvpContext context, final ListFilterChangedAction filterChangeAction) {
-		List<PvpRecord> categories = context.getDataInterface().getCategories();
+		List<PvpRecord> categories = context.data.getDataInterface().getCategories();
 		List categoryTree = CreateSortedTree.createSortedTree(categories, new CategoryTreeItemComparator());
 		List<CategoryMenuItem> menuItems = new ArrayList<CategoryMenuItem>();
 		menuItems.add(new CategoryMenuItem(PvpRecord.FILTER_ALL_CATEGORIES, 0, null));
@@ -94,7 +94,7 @@ public class ViewListBuilder {
 		JComboBox categoryCombo = new JComboBox(menuItems.toArray());
 		categoryCombo.setMaximumRowCount(20);
 		categoryCombo.addActionListener(filterChangeAction);
-		context.getViewListContext().setCategoryComboBox(categoryCombo);
+		context.ui.getViewListContext().setCategoryComboBox(categoryCombo);
 		return categoryCombo;
 	}
 
@@ -102,7 +102,7 @@ public class ViewListBuilder {
 		JTextField tf = new JTextField(12);
 		TextFieldChangeForwarder f = new TextFieldChangeForwarder(filterChangeAction);
 		tf.getDocument().addDocumentListener(f);
-		context.getViewListContext().setFilterTextField(tf);
+		context.ui.getViewListContext().setFilterTextField(tf);
 		return tf;
 	}
 
@@ -112,7 +112,7 @@ public class ViewListBuilder {
 		ListTableModel model = new ListTableModel(filter);
 		JTable table = new JTable(model);
 		table.addMouseListener(new RecordListTableMouseAdpater(erAction));
-		context.getViewListContext().setListTable(table, model);
+		context.ui.getViewListContext().setListTable(table, model);
 		JScrollPane scroll = new JScrollPane(table);
 		return scroll;
 	}

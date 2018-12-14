@@ -20,21 +20,21 @@ public class QuitAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		boolean shouldQuit = true;
 		if (hasUnsavedChanges()) {
-			int v = JOptionPane.showConfirmDialog(context.getMainFrame(), "There are some records that have been edited but not saved. Are you sure you want to quit?", "Unsaved changes", JOptionPane.OK_CANCEL_OPTION);
+			int v = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "There are some records that have been edited but not saved. Are you sure you want to quit?", "Unsaved changes", JOptionPane.OK_CANCEL_OPTION);
 			if (v == JOptionPane.CANCEL_OPTION) {
 				shouldQuit = false;
 			}
 		}
 
 		if (shouldQuit) {
-			if (context.getFileInterface().appQuiting()) {
+			if (context.data.getFileInterface().appQuiting()) {
 				System.exit(0);
 			}
 		}
 	}
 
 	private boolean hasUnsavedChanges() {
-		for (RecordEditContext editor : context.getTabManager().getRecordEditors()) {
+		for (RecordEditContext editor : context.ui.getTabManager().getRecordEditors()) {
 			if (editor.hasUnsavedChanged()) {
 				return true;
 			}
