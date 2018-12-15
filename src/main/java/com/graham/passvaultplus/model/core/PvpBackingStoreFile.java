@@ -10,14 +10,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.graham.passvaultplus.AppUtil;
-import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextPrefs;
 
 public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
-	private final PvpContext context;
+	private final PvpContextPrefs contextPrefs;
 
-	public PvpBackingStoreFile(PvpContext contextParam) {
-		context = contextParam;
+	public PvpBackingStoreFile(PvpContextPrefs contextParam) {
+		contextPrefs = contextParam;
 	}
 
 	@Override
@@ -32,23 +32,23 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(context.prefs.getDataFile());
+		return new FileInputStream(contextPrefs.getDataFile());
 	}
 
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		checkBackupFileHourly(context.prefs.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
-		return new FileOutputStream(context.prefs.getDataFile());
+		checkBackupFileHourly(contextPrefs.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
+		return new FileOutputStream(contextPrefs.getDataFile());
 	}
 
 	@Override
 	public boolean isCompressed(boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(context.prefs.getDataFile().getName());
+		return PvpPersistenceInterface.isCompressed(contextPrefs.getDataFile().getName());
 	}
 
 	@Override
 	public boolean isEncrypted(boolean inFlag) {
-		return PvpPersistenceInterface.isEncrypted(context.prefs.getDataFile().getName());
+		return PvpPersistenceInterface.isEncrypted(contextPrefs.getDataFile().getName());
 	}
 
 
@@ -66,7 +66,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	public void deleteAll() {
-		File[] fArr = context.prefs.getDataFile().getParentFile().listFiles(new MyFF(context.prefs.getDataFile()));
+		File[] fArr = contextPrefs.getDataFile().getParentFile().listFiles(new MyFF(contextPrefs.getDataFile()));
 		for (File f : fArr) {
 			System.out.println("deleteAll: deleteing:" + f);
 			f.delete();
@@ -86,12 +86,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public long getLastUpdatedDate() {
-		return context.prefs.getDataFile().lastModified();
+		return contextPrefs.getDataFile().lastModified();
 	}
 
 	@Override
 	public String getDisplayableResourceLocation() {
-		return "File: " + context.prefs.getDataFile();
+		return "File: " + contextPrefs.getDataFile();
 	}
 
 	@Override

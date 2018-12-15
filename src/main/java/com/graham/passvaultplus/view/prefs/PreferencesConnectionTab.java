@@ -10,6 +10,8 @@ import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextPrefsNoop;
+import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
@@ -19,12 +21,12 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 public class PreferencesConnectionTab extends PreferencesConnection {
 
 	public PreferencesConnectionTab(final PvpContext contextParam) {
-		super(contextParam);
+		super(contextParam, PvpContextPrefs.copyPrefs(contextParam.prefs, new PvpContextPrefsNoop(contextParam)));
 	}
 
 	@Override
-	public boolean doSave(final PrefsSettingsParam psp, final boolean wasChanges) {
-		setContextFromPsp(psp);
+	public boolean doSave(final boolean wasChanges) {
+		copyPrefsToReal();
 		// if changes made don't require file rewrite, don't do it
 		if (wasChanges) {
 			//context.setDataFilePath(dataFile.getAbsolutePath());
@@ -37,7 +39,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	}
 
 	@Override
-	public boolean doOpen(final PrefsSettingsParam psp) {
+	public boolean doOpen() {
 		if (hasUnsavedChanges()) {
 			int v = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "There are some records that have been edited but not saved. Are you sure you want to discard them?", "Unsaved changes", JOptionPane.OK_CANCEL_OPTION);
 			if (v == JOptionPane.CANCEL_OPTION) {
@@ -47,9 +49,9 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 
 		// for now, dont support multiple databases open at once
 		context.ui.getMainFrame().setVisible(false);
-		setContextFromPsp(psp);
+		copyPrefsToReal();
 
-		PvpContext.startApp(false, psp.pw);
+		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword()); // psp.pw TODO
 		return true;
 	}
 
@@ -62,25 +64,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		return false;
 	}
 
-	@Override
-	public String getPassword() {
-		return context.prefs.getPassword();
-	}
-
-	@Override
-	public boolean isPasswordSaved() {
-		return context.prefs.isPasswordSaved();
-	}
-
-	@Override
-	public String getDataFilePath() {
-		return context.prefs.getDataFilePath();
-	}
-
-	@Override
-	public int getAesBits() {
-		return context.prefs.getEncryptionStrengthBits();
-	}
+	//return context.prefs.getEncryptionStrengthBits();
 
 	@Override
 	public JFrame getSuperFrame() {
@@ -103,26 +87,6 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	@Override
 	public boolean supportsChangeDataFileOptions() {
 		return true;
-	}
-
-	@Override
-	public String getPin() {
-		return context.prefs.getPin();
-	}
-
-	@Override
-	public boolean getUsePin() {
-		return context.prefs.getUsePin();
-	}
-
-	@Override
-	public int getPinTimeout() {
-		return context.prefs.getPinTimeout();
-	}
-
-	@Override
-	public int getPinMaxTry() {
-		return context.prefs.getPinMaxTry();
 	}
 
 	class CancelPrefsAction extends AbstractAction {

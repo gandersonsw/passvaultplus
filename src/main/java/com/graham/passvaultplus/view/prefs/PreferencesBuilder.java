@@ -36,7 +36,7 @@ public class PreferencesBuilder {
 	private Component buildBottom(final JPanel panelToBeReturned) {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		if (conn instanceof PreferencesConnectionTab) {
-			p.add(new JButton(new ResetPrefsAction(conn.getPvpContext())));
+			p.add(new JButton(new ResetPrefsAction(conn.getPvpContextOriginal())));
 		}
 		p.add(new JButton(conn.getCancelAction()));
 		prefsContext.saveButton = new JButton(new SavePrefsAction(prefsContext));
@@ -119,7 +119,7 @@ public class PreferencesBuilder {
 
 	private JPanel buildCompressButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.compressedFlag);
+		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.oCompressedFlag);
 		prefsContext.compressed.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
 		p.add(prefsContext.compressed);
 		return p;
@@ -127,7 +127,7 @@ public class PreferencesBuilder {
 
 	private JPanel buildEncryptedButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.encryptedFlag);
+		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.oEncryptedFlag);
 		prefsContext.encrypted.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
 		p.add(prefsContext.encrypted);
 		return p;
@@ -141,8 +141,8 @@ public class PreferencesBuilder {
 		final JTextField pwct = new JTextField(27);
 		pwct.setVisible(false);
 		JPasswordField pw;
-		if (conn.isPasswordSaved()) {
-			pw = new JPasswordField(conn.getPassword(), 27);
+		if (conn.getContextPrefs().isPasswordSaved()) {
+			pw = new JPasswordField(conn.getContextPrefs().getPassword(), 27);
 		} else {
 			pw = new JPasswordField(27);
 		}
@@ -165,7 +165,7 @@ public class PreferencesBuilder {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
 		p.add(Box.createRigidArea(indentDim));
-		prefsContext.savePassword = new JCheckBox("Save Password", conn.isPasswordSaved());
+		prefsContext.savePassword = new JCheckBox("Save Password", conn.getContextPrefs().isPasswordSaved());
 		prefsContext.savePassword.setToolTipText("If checked, the password will be saved. If not checked, you must enter the password when starting app.");
 		prefsContext.savePassword.addActionListener(e -> prefsContext.setPinEnabled());
 		p.add(prefsContext.savePassword);
@@ -180,7 +180,7 @@ public class PreferencesBuilder {
 		final String[] bits = {"128", "192", "256"};
 		final JComboBox<String> cb = new JComboBox<>(bits);
 		prefsContext.aesBits = cb;
-		prefsContext.setSelectedBits(conn.getAesBits());
+		prefsContext.setSelectedBits(conn.getContextPrefs().getEncryptionStrengthBits());
 
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		p.add(Box.createRigidArea(indentDim));
@@ -192,7 +192,7 @@ public class PreferencesBuilder {
 	private JPanel buildDashboard() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.showDashboard = new JCheckBox("Show Dashboard");
-		prefsContext.showDashboard.setSelected(conn.getShowDashboard());
+		prefsContext.showDashboard.setSelected(conn.getContextPrefs().getShowDashboard());
 		p.add(prefsContext.showDashboard);
 		return p;
 	}
@@ -200,7 +200,7 @@ public class PreferencesBuilder {
 	private JPanel buildDiagnostics() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.showDiagnostics = new JCheckBox("Show Diagnostics");
-		prefsContext.showDiagnostics.setSelected(conn.getShowDiagnostics());
+		prefsContext.showDiagnostics.setSelected(conn.getContextPrefs().getShowDiagnostics());
 		p.add(prefsContext.showDiagnostics);
 		return p;
 	}
@@ -211,14 +211,14 @@ public class PreferencesBuilder {
 		p.add(Box.createRigidArea(indentDim));
 		p.add(Box.createRigidArea(indentDim));
 		prefsContext.usePin = new JCheckBox("Use PIN:");
-		if (conn.getUsePin()) {
+		if (conn.getContextPrefs().getUsePin()) {
 			prefsContext.usePin.setSelected(true);
 		}
 		prefsContext.usePin.addActionListener(e -> prefsContext.setPinItemsEnabled());
 		p.add(prefsContext.usePin);
 		prefsContext.pinClearText = new JTextField(10);
 		prefsContext.pinClearText.setVisible(false);
-		prefsContext.pin = new JPasswordField(conn.getPin(), 10);
+		prefsContext.pin = new JPasswordField(conn.getContextPrefs().getPin(), 10);
 		p.add(prefsContext.pin);
 		p.add(prefsContext.pinClearText);
 		prefsContext.showPin = new JCheckBox("Show");
@@ -229,7 +229,7 @@ public class PreferencesBuilder {
 		prefsContext.timeoutCombo = new JComboBox<>(timeouts);
 		prefsContext.timeoutCombo.setMaximumRowCount(20);
 		prefsContext.timeoutCombo.setToolTipText("Timeout in minutes. You will be asked to enter PIN after this many minutes");
-		prefsContext.setPinTimeout(conn.getPinTimeout());
+		prefsContext.setPinTimeout(conn.getContextPrefs().getPinTimeout());
 		p.add(new JLabel("Timeout:"));
 		p.add(prefsContext.timeoutCombo);
 
@@ -237,7 +237,7 @@ public class PreferencesBuilder {
 		prefsContext.pinMaxTryCombo = new JComboBox<>(maxTrys);
 		prefsContext.pinMaxTryCombo.setMaximumRowCount(20);
 		prefsContext.pinMaxTryCombo.setToolTipText("Maximum trys for PIN until you are forced to enter the password.");
-		prefsContext.setPinMaxTry(conn.getPinMaxTry());
+		prefsContext.setPinMaxTry(conn.getContextPrefs().getPinMaxTry());
 		p.add(new JLabel("Max Trys:"));
 		p.add(prefsContext.pinMaxTryCombo);
 

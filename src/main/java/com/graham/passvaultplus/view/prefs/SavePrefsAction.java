@@ -55,7 +55,7 @@ public class SavePrefsAction extends AbstractAction {
 			return false;
 		}
 
-		final PrefsSettingsParam psp = createPspFromContext();
+		setContextPrefsValues();
 		if (!validatePin()) {
 			return false;
 		}
@@ -65,7 +65,7 @@ public class SavePrefsAction extends AbstractAction {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
 				return false;
 			}
-			if (checkEncryptionStrength(psp.aesBits)) {
+			if (checkEncryptionStrength()) {
 				return false;
 			}
 		}
@@ -78,13 +78,13 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		try {
-			createDefaultStarterFile(psp);
+			createDefaultStarterFile();
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
 			return false;
 		}
 
-		return conn.doOpen(psp);
+		return conn.doOpen();
 	}
 
 	private boolean doOpen() {
@@ -105,31 +105,31 @@ public class SavePrefsAction extends AbstractAction {
 			return false;
 		}
 
-		final PrefsSettingsParam psp = createPspFromContext();
-		return conn.doOpen(psp);
+		setContextPrefsValues();
+		return conn.doOpen();
 	}
 
 	private boolean doChange() {
 		final String newPassword = prefsContext.getPasswordText();
 		boolean saveFlag = false;
-		final PrefsSettingsParam psp = createPspFromContext();
+		setContextPrefsValues();
 
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
 				return false;
 			}
-			String oldPassword = conn.getPassword();
+			String oldPassword = conn.getContextPrefs().getPassword();
 			if (oldPassword == null) {
 				oldPassword = "";
 			}
 			if (!oldPassword.equals(newPassword)) {
 				saveFlag = true;
 			}
-			if (psp.aesBits != conn.getAesBits()) {
+			if (conn.getContextPrefsOriginal().getEncryptionStrengthBits() != conn.getContextPrefs().getEncryptionStrengthBits()) {
 				saveFlag = true;
 			}
-			if (checkEncryptionStrength(psp.aesBits)) {
+			if (checkEncryptionStrength()) {
 				return false;
 			}
 		}
@@ -142,7 +142,7 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 
-		if (prefsContext.compressed.isSelected() != prefsContext.compressedFlag || prefsContext.encrypted.isSelected() != prefsContext.encryptedFlag) {
+		if (prefsContext.compressed.isSelected() != prefsContext.oCompressedFlag || prefsContext.encrypted.isSelected() != prefsContext.oEncryptedFlag) {
 			saveFlag = true;
 		}
 
@@ -153,7 +153,7 @@ public class SavePrefsAction extends AbstractAction {
 		if (!prefsContext.remoteBS.presave()) {
 			return false;
 		}
-		return conn.doSave(psp, saveFlag);
+		return conn.doSave(saveFlag);
 	}
 
 	private boolean validatePin() {
@@ -171,33 +171,29 @@ public class SavePrefsAction extends AbstractAction {
 		return true;
 	}
 
-	private PrefsSettingsParam createPspFromContext() {
-		final PrefsSettingsParam psp = new PrefsSettingsParam();
-		psp.pw = prefsContext.getPasswordText();
-		psp.f = prefsContext.getDataFile();
-		psp.spw = prefsContext.savePassword.isSelected();
+	private void setContextPrefsValues() {
+		conn.getContextPrefs().setPasswordAndPin(prefsContext.getPasswordText(), prefsContext.savePassword.isSelected(), prefsContext.getPinText(), prefsContext.usePin.isSelected());
+		int encryptBits = 0;
 		if (this.prefsContext.encrypted.isSelected()) {
-			try { psp.aesBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { psp.aesBits = 128; }
-		} else {
-			psp.aesBits = 0;
+			try { encryptBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { encryptBits = 128; }
 		}
-		psp.pin = prefsContext.getPinText();
-		psp.usePin = prefsContext.usePin.isSelected();
+		conn.getContextPrefs().setDataFilePath(prefsContext.getDataFile().getAbsolutePath(), encryptBits);
+		int pinTimeout = 0;
+		int pinMaxTry = 100;
 		if (this.prefsContext.encrypted.isSelected()) {
-			try { psp.pinTimeout = Integer.parseInt(prefsContext.timeoutCombo.getSelectedItem().toString()); } catch (Exception e) { psp.pinTimeout = 0; }
-			try { psp.pinMaxTry = Integer.parseInt(prefsContext.pinMaxTryCombo.getSelectedItem().toString()); } catch (Exception e) { psp.pinMaxTry = 100; }
-		} else {
-			psp.pinTimeout = 0;
-			psp.pinMaxTry = 100;
+			try { pinTimeout = Integer.parseInt(prefsContext.timeoutCombo.getSelectedItem().toString()); } catch (Exception e) { }
+			try { pinMaxTry = Integer.parseInt(prefsContext.pinMaxTryCombo.getSelectedItem().toString()); } catch (Exception e) { }
 		}
-		psp.showDashBoard = prefsContext.showDashboard.isSelected();
-		psp.useGoogleDrive = prefsContext.remoteBS.useGoogleDrive.isSelected();
-		psp.showDiagnostics = prefsContext.showDiagnostics.isSelected();
-		return psp;
+		conn.getContextPrefs().setPinTimeout(pinTimeout);
+		conn.getContextPrefs().setPinMaxTry(pinMaxTry);
+		conn.getContextPrefs().setShowDashboard(prefsContext.showDashboard.isSelected());
+		conn.getContextPrefs().setUseGoogleDrive(prefsContext.remoteBS.useGoogleDrive.isSelected());
+		conn.getContextPrefs().setShowDiagnostics(prefsContext.showDiagnostics.isSelected());
 	}
 
-	private boolean checkEncryptionStrength(final int aesBits) {
+	private boolean checkEncryptionStrength() {
 		try {
+			final int aesBits = conn.getContextPrefs().getEncryptionStrengthBits();
 			final int maxKL = MyCipherFactory.getMaxAllowedAESKeyLength();
 			if (maxKL < aesBits) {
 				final JceDialog jced = new JceDialog();
@@ -211,7 +207,7 @@ public class SavePrefsAction extends AbstractAction {
 		return false;
 	}
 
-	private void createDefaultStarterFile(final PrefsSettingsParam psp) throws Exception {
+	private void createDefaultStarterFile() throws Exception {
 		InputStream sourceStream = null;
 		InputStreamReader isr = null;
 		BufferedReader bufR = null;
@@ -228,7 +224,7 @@ public class SavePrefsAction extends AbstractAction {
 			}
 
 			bufR = new BufferedReader(isr);
-			fileWriter = new PvpOutStreamer(new PvpBackingStoreOtherFile(psp.f), psp.pw, psp.aesBits);
+			fileWriter = new PvpOutStreamer(new PvpBackingStoreOtherFile(conn.getContextPrefs().getDataFile()), conn.getContextPrefs());
 			final BufferedWriter bw = fileWriter.getWriter();
 			String line;
 			while ((line = bufR.readLine()) != null) {

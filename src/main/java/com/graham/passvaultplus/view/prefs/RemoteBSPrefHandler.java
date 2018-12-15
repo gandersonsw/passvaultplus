@@ -18,7 +18,7 @@ public class RemoteBSPrefHandler {
 
   public RemoteBSPrefHandler(PreferencesContext pcontext) {
     prefsContext = pcontext;
-    useGoogleDriveFlag = prefsContext.conn.getUseGoogleDrive();
+    useGoogleDriveFlag = prefsContext.conn.getContextPrefs().getUseGoogleDrive();
   }
 
   public JPanel buildPrefsUI() {
@@ -32,7 +32,7 @@ public class RemoteBSPrefHandler {
   /** after prefs are changed and work is done, handle any cleanup */
   public void cleanup() {
     if (!useGoogleDrive.isSelected() && useGoogleDriveFlag) {
-      prefsContext.conn.getPvpContext().ui.notifyInfo("deleteing Google Credientials if present");
+      prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("deleteing Google Credientials if present");
       PvpBackingStoreGoogleDocs.deleteLocalCredentials();
     }
   }
@@ -46,6 +46,7 @@ public class RemoteBSPrefHandler {
     if (useGoogleDrive.isSelected() && !useGoogleDriveFlag) {
     //  PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs();
       //bs.doChecksForNewFile();
+
     }
     return true;
   }

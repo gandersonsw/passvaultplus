@@ -2,7 +2,6 @@
 package com.graham.passvaultplus;
 
 import java.io.File;
-import java.util.prefs.Preferences;
 
 import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.PinDialog;
@@ -13,7 +12,7 @@ public class PvpContextPrefs {
 	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
 	static private final int PWS_NOT_SAVED = 2; // the user asked the password to not be saved in prefs
 
-	private final Preferences userPrefs = Preferences.userNodeForPackage(PvpContext.class);
+	final PvpPrefFacade userPrefs;
 	private final PvpContext context;
 
 	private String dataFilePath;
@@ -37,12 +36,21 @@ public class PvpContextPrefs {
   boolean pinWasReset = false;
 
 	public PvpContextPrefs(PvpContext c) {
+		this(c, new PvpPrefFacade());
+	}
+
+	PvpContextPrefs(PvpContext c, PvpPrefFacade u) {
 		context = c;
+		userPrefs = u;
+	}
+
+	public static PvpContextPrefs copyPrefs(PvpContextPrefs source, PvpContextPrefs target) {
+		throw new RuntimeException("impl this");
+		//return target;
 	}
 
 	public String getDataFilePath() {
 		if (dataFilePath == null) {
-
 			dataFilePath = userPrefs.get("data_file", null);
 		}
 		return dataFilePath;

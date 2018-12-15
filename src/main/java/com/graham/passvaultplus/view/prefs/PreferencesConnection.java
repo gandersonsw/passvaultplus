@@ -5,43 +5,26 @@ import javax.swing.Action;
 import javax.swing.JFrame;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextPrefs;
 
 /**
  * Way to give the preferences stuff a connection to the outside world.
  */
 public abstract class PreferencesConnection {
 
-	protected final PvpContext context;
+	protected final PvpContext context; // The real context
+	protected final PvpContextPrefs contextPrefsForSettingsUI; // a temporary context prefs that has been edited
 
-	public PreferencesConnection(final PvpContext contextParam) {
+	public PreferencesConnection(final PvpContext contextParam, final PvpContextPrefs cp) {
 		context = contextParam;
+		contextPrefsForSettingsUI = cp;
 	}
 
 	public abstract Action getCancelAction();
 
-	public abstract String getPassword();
+	public abstract boolean doSave(final boolean wasChanges);
 
-	public abstract boolean isPasswordSaved();
-
-	public abstract String getPin();
-
-	public abstract boolean getUsePin();
-
-	public int getPinTimeout() {
-		return 30; // 30 minutes is the default
-	}
-
-	public int getPinMaxTry() {
-		return 5; // 5 trys is the default
-	}
-
-	public abstract String getDataFilePath();
-
-	public abstract int getAesBits();
-
-	public abstract boolean doSave(final PrefsSettingsParam psp, final boolean wasChanges);
-
-	public abstract boolean doOpen(final PrefsSettingsParam psp);
+	public abstract boolean doOpen();
 
 	public abstract JFrame getSuperFrame();
 
@@ -51,29 +34,20 @@ public abstract class PreferencesConnection {
 		return false;
 	}
 
-	public PvpContext getPvpContext() {
+	protected void copyPrefsToReal() {
+		PvpContextPrefs.copyPrefs(contextPrefsForSettingsUI, context.prefs);
+	}
+
+	public PvpContextPrefs getContextPrefs() {
+		return contextPrefsForSettingsUI;
+	}
+
+	public PvpContext getPvpContextOriginal() {
 		return context;
 	}
 
-	protected void setContextFromPsp(final PrefsSettingsParam psp) {
-		context.prefs.setDataFilePath(psp.f.getAbsolutePath(), psp.aesBits);
-		context.prefs.setPasswordAndPin(psp.pw, psp.spw, psp.pin, psp.usePin);
-		context.prefs.setPinTimeout(psp.pinTimeout);
-		context.prefs.setPinMaxTry(psp.pinMaxTry);
-		context.prefs.setShowDashboard(psp.showDashBoard);
-		context.prefs.setUseGoogleDrive(psp.useGoogleDrive);
-		context.prefs.setShowDiagnostics(psp.showDiagnostics);
+	public PvpContextPrefs getContextPrefsOriginal() {
+		return context.prefs;
 	}
 
-	public boolean getShowDashboard() {
-		return context.prefs.getShowDashboard();
-	}
-
-	public boolean getUseGoogleDrive() {
-		return context.prefs.getUseGoogleDrive();
-	}
-
-	public boolean getShowDiagnostics() {
-		return context.prefs.getShowDiagnostics();
-	}
 }

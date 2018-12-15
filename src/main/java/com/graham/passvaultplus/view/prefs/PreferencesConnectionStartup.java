@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpException;
 
 /**
@@ -20,12 +21,13 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	final private String defaultDataFilePath;
 
 	public PreferencesConnectionStartup(final PvpContext contextParam, final JFrame startupOptionsFrameParam) {
-		super(contextParam);
+		super(contextParam, new PvpContextPrefsNoop(contextParam));
 		startupOptionsFrame = startupOptionsFrameParam;
 
 		final String userHome = System.getProperty("user.home");
 		final String fileSep = System.getProperty("file.separator");
 		defaultDataFilePath = userHome + fileSep + "PassVaultPlusData" + fileSep + "pvp-data.xml";
+		contextPrefsForSettingsUI.setDataFilePath(defaultDataFilePath, contextPrefsForSettingsUI.getEncryptionStrengthBits());
 	}
 
 	@Override
@@ -34,13 +36,13 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	}
 
 	@Override
-	public boolean doSave(final PrefsSettingsParam psp, final boolean wasChanges) {
+	public boolean doSave(final boolean wasChanges) {
 		throw new RuntimeException("unsupported operation");
 	}
 
 	@Override
-	public boolean doOpen(final PrefsSettingsParam psp) {
-		setContextFromPsp(psp);
+	public boolean doOpen() {
+		copyPrefsToReal();
 		startupOptionsFrame.setVisible(false);
 		try {
 			context.dataFileSelectedForStartup();
@@ -54,36 +56,6 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	@Override
 	public JFrame getSuperFrame() {
 		return startupOptionsFrame;
-	}
-
-	@Override
-	public String getDataFilePath() {
-		// when starting up, just use the default when asking, we don't want to save anything the user has entered that is not valid
-		return defaultDataFilePath;
-	}
-
-	@Override
-	public String getPassword() {
-		return "";
-	}
-
-	@Override
-	public boolean isPasswordSaved() {
-		return false;
-	}
-	@Override
-	public int getAesBits() {
-		return 128;
-	}
-
-	@Override
-	public String getPin() {
-		return "";
-	}
-
-	@Override
-	public boolean getUsePin() {
-		return false;
 	}
 
 	@Override

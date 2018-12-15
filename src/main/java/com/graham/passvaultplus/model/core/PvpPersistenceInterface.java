@@ -36,7 +36,7 @@ public class PvpPersistenceInterface {
 	public PvpPersistenceInterface(final PvpContext contextParam) {
 		context = contextParam;
 		backingStores = new ArrayList<PvpBackingStore>();
-		backingStores.add(new PvpBackingStoreFile(context)); // File needs to be the first Backing Store in the list
+		backingStores.add(new PvpBackingStoreFile(context.prefs)); // File needs to be the first Backing Store in the list
 		backingStores.add(new PvpBackingStoreGoogleDocs(context));
 	}
 
@@ -238,7 +238,7 @@ public class PvpPersistenceInterface {
 			} else {
 				PvpOutStreamer fileWriter = null;
 				try {
-					fileWriter = new PvpOutStreamer(bs, context);
+					fileWriter = new PvpOutStreamer(bs, context.prefs);
 					DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
 				} finally {
 					// note that close is called 2 times if Exception thrown from fileWriter.getWriter()

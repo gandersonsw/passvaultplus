@@ -12,7 +12,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
 import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 
 /**
@@ -30,19 +30,19 @@ public class PvpOutStreamer {
 	private BufferedWriter bufWriter;
 	private OutputStream outStream; // do not close this, this is used as the last output
 
-	public PvpOutStreamer(final PvpBackingStore bs, final PvpContext contextParam) throws UserAskToChangeFileException {
+	public PvpOutStreamer(final PvpBackingStore bs, final PvpContextPrefs cp) throws UserAskToChangeFileException {
 		backingStore = bs;
 		if (backingStore.isEncrypted(false)) {
-			password = contextParam.prefs.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
-			encryptionStrength = contextParam.prefs.getEncryptionStrengthBits();
+			password = cp.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
+			encryptionStrength = cp.getEncryptionStrengthBits();
 		}
 	}
 
-	public PvpOutStreamer(final PvpBackingStore bs, final String passwordParam, final int encryptionStrengthParam) {
-		backingStore = bs;
-		password = passwordParam;
-		encryptionStrength = encryptionStrengthParam;
-	}
+//	public PvpOutStreamer(final PvpBackingStore bs, final String passwordParam, final int encryptionStrengthParam) {
+//		backingStore = bs;
+//		password = passwordParam;
+//		encryptionStrength = encryptionStrengthParam;
+//	}
 
 	/**
 	 * When writing, encryption happens first, then compression.

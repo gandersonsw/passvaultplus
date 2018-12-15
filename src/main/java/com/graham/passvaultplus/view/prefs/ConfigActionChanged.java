@@ -7,6 +7,7 @@ import java.io.File;
 import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
+import com.graham.passvaultplus.PvpContextPrefs;
 
 public class ConfigActionChanged extends AbstractAction {
 	final private PreferencesContext context;
@@ -24,9 +25,10 @@ public class ConfigActionChanged extends AbstractAction {
 			return;
 		}
 
+		PvpContextPrefs contextPrefs = context.conn.getContextPrefs();
 		context.saveButton.setText(ca.getButtonLabel());
 		if (ca == ConfigAction.Create) {
-			context.setDataFile(new File(context.conn.getDataFilePath()), 0);
+			context.setDataFile(contextPrefs.getDataFile(), 0);
 			context.compressed.setEnabled(true);
 			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(true);
@@ -54,18 +56,17 @@ public class ConfigActionChanged extends AbstractAction {
 			}
 			context.setItemsDependentOnEncryptedEnabled();
 		} else if (ca == ConfigAction.Change) {
-			context.setDataFile(new File(context.conn.getDataFilePath()), context.conn.getAesBits());
+			context.setDataFile(new File(contextPrefs.getDataFilePath()), contextPrefs.getEncryptionStrengthBits());
 			context.compressed.setEnabled(true);
-			context.compressed.setSelected(context.compressedFlag);
+			context.compressed.setSelected(context.oCompressedFlag);
 			context.encrypted.setEnabled(true);
-			context.encrypted.setSelected(context.encryptedFlag);
-			context.password.setText(context.conn.getPassword());
-			context.passwordClearText.setText(context.conn.getPassword());
-			context.savePassword.setSelected(context.conn.isPasswordSaved());
-			context.pin.setText(context.conn.getPin());
-			context.pinClearText.setText(context.conn.getPin());
-			context.usePin.setSelected(context.conn.getUsePin());
-			//context.setSelectedBits(context.conn.getAesBits());
+			context.encrypted.setSelected(context.oEncryptedFlag);
+			context.password.setText(contextPrefs.getPassword());
+			context.passwordClearText.setText(contextPrefs.getPassword());
+			context.savePassword.setSelected(contextPrefs.isPasswordSaved());
+			context.pin.setText(contextPrefs.getPin());
+			context.pinClearText.setText(contextPrefs.getPin());
+			context.usePin.setSelected(contextPrefs.getUsePin());
 			context.setItemsDependentOnEncryptedEnabled();
 		} else {
 			throw new RuntimeException("unexpected action: " + ca);

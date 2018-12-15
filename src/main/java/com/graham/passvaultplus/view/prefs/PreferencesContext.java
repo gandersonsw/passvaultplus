@@ -16,9 +16,8 @@ import javax.swing.JTextField;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 
 public class PreferencesContext {
-	final boolean compressedFlag; // this is not updated, original value only
-	final boolean encryptedFlag;  // this is not updated, original value only
-	final boolean showDiagnosticsFlag; // this is not updated, original value only
+	final boolean oCompressedFlag; // this is not updated, original value only
+	final boolean oEncryptedFlag;  // this is not updated, original value only
 	final PreferencesConnection conn;
 	final RemoteBSPrefHandler remoteBS;
 
@@ -51,11 +50,9 @@ public class PreferencesContext {
 
 	PreferencesContext(final PreferencesConnection connParam) {
 		conn = connParam;
-		dataFileString = connParam.getDataFilePath();
-		compressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
-		encryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
-
-		showDiagnosticsFlag = connParam.getShowDiagnostics();
+		dataFileString = connParam.getContextPrefs().getDataFilePath();
+		oCompressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
+		oEncryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
 		remoteBS = new RemoteBSPrefHandler(this);
 	}
 

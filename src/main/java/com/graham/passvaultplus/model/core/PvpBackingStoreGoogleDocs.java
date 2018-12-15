@@ -399,9 +399,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	 */
 	public static NewChecks doChecksForNewFile(PvpContext context, boolean localFileName) {
 	//	PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
-	//	bs.overrideContext = new OContext();
-	//	bs.overrideContext.
-//		bs.loadFileProps(true);
+//	 	bs.loadFileProps(true);
 		return new NewChecks();
 	}
 

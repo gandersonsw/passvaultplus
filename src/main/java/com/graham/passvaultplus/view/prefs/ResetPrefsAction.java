@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -21,6 +20,7 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
 import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpPrefFacade;
 
 public class ResetPrefsAction extends AbstractAction {
 
@@ -44,16 +44,11 @@ public class ResetPrefsAction extends AbstractAction {
     context.ui.getMainFrame().setVisible(false);
     if (deleteDb.isSelected()) {
       System.out.println("deleteing stuff");
-      PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context);
+      PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context.prefs);
       bsFile.deleteAll();
     }
     PvpBackingStoreGoogleDocs.deleteLocalCredentials();
-    final Preferences userPrefs = Preferences.userNodeForPackage(context.getClass());
-    try {
-      userPrefs.clear();
-    } catch (BackingStoreException bse) {
-      bse.printStackTrace();
-    }
+    PvpPrefFacade.resetGlobalPrefs();
     PvpContext.startApp(false, null);
   }
 
@@ -73,7 +68,7 @@ public class ResetPrefsAction extends AbstractAction {
 
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			deleteDb = new JCheckBox("Delete Local Database Files Also");
+			deleteDb = new JCheckBox("Delete Local Database Files Also. WARNING!!! THIS WILL DELETE THE ENTIRE LOCAL DATABASE");
 			p.add(deleteDb);
 			centerPanel.add(p);
 		}
