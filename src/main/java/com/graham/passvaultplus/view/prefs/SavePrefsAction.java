@@ -2,21 +2,15 @@
 package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
+import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
-import com.graham.passvaultplus.model.core.PvpBackingStoreOtherFile;
-import com.graham.passvaultplus.model.core.PvpOutStreamer;
 import com.graham.passvaultplus.view.JceDialog;
 
 public class SavePrefsAction extends AbstractAction {
@@ -31,7 +25,7 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		boolean completed = false;
+		boolean completed;
 		if (prefsContext.configAction == ConfigAction.Create) {
 			completed = doCreate();
 		} else if (prefsContext.configAction == ConfigAction.Open) {
@@ -74,11 +68,16 @@ public class SavePrefsAction extends AbstractAction {
 			boolean mkret = new File(dataFile.getParent()).mkdirs();
 			if (!mkret) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "There was a problem creating the directory:" + dataFile.getParent());
+				return false;
 			}
 		}
 
+		if (!prefsContext.remoteBS.presave(true)) {
+			return false;
+		}
+
 		try {
-			createDefaultStarterFile();
+			createFiles();
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
 			return false;
@@ -105,6 +104,9 @@ public class SavePrefsAction extends AbstractAction {
 			return false;
 		}
 
+		if (!prefsContext.remoteBS.presave(false)) {
+			return false;
+		}
 		setContextPrefsValues();
 		return conn.doOpen();
 	}
@@ -119,7 +121,7 @@ public class SavePrefsAction extends AbstractAction {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
 				return false;
 			}
-			String oldPassword = conn.getContextPrefs().getPassword();
+			String oldPassword = conn.getContextPrefsOriginal().getPassword();
 			if (oldPassword == null) {
 				oldPassword = "";
 			}
@@ -150,7 +152,7 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 
-		if (!prefsContext.remoteBS.presave()) {
+		if (!prefsContext.remoteBS.presave(false)) {
 			return false;
 		}
 		return conn.doSave(saveFlag);
@@ -187,7 +189,7 @@ public class SavePrefsAction extends AbstractAction {
 		conn.getContextPrefs().setPinTimeout(pinTimeout);
 		conn.getContextPrefs().setPinMaxTry(pinMaxTry);
 		conn.getContextPrefs().setShowDashboard(prefsContext.showDashboard.isSelected());
-		conn.getContextPrefs().setUseGoogleDrive(prefsContext.remoteBS.useGoogleDrive.isSelected());
+		prefsContext.remoteBS.save();
 		conn.getContextPrefs().setShowDiagnostics(prefsContext.showDiagnostics.isSelected());
 	}
 
@@ -207,40 +209,23 @@ public class SavePrefsAction extends AbstractAction {
 		return false;
 	}
 
-	private void createDefaultStarterFile() throws Exception {
+	private void createFiles() throws Exception {
+		if (prefsContext.remoteBS.createFiles()) {
+			// the file was copied from a remote - no need to create a default
+			return;
+		}
 		InputStream sourceStream = null;
-		InputStreamReader isr = null;
-		BufferedReader bufR = null;
-		PvpOutStreamer fileWriter = null;
 		try {
 			if (PvpContext.JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
 				sourceStream = PvpContext.class.getResourceAsStream("/starter-pvp-data.xml");
-				isr = new InputStreamReader(sourceStream);
 			} else {
 				File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
-				isr = new FileReader(sourceFile);
+				sourceStream = new FileInputStream(sourceFile);
 			}
-
-			bufR = new BufferedReader(isr);
-			fileWriter = new PvpOutStreamer(new PvpBackingStoreOtherFile(conn.getContextPrefs().getDataFile()), conn.getContextPrefs());
-			final BufferedWriter bw = fileWriter.getWriter();
-			String line;
-			while ((line = bufR.readLine()) != null) {
-				bw.write(line);
-				bw.newLine();
-			}
+			BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
 		} finally {
-			if (fileWriter != null) {
-				fileWriter.close();
-			}
-			if (bufR != null) {
-				try { bufR.close(); } catch (Exception e) { }
-			}
-			if (isr != null) {
-				try { isr.close(); } catch (Exception e) { }
-			}
 			if (sourceStream != null) {
 				try { sourceStream.close(); } catch (Exception e) { }
 			}

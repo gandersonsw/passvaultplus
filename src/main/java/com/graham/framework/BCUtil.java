@@ -401,9 +401,7 @@ public class BCUtil {
 		ret = ret.toLowerCase();
 		return ret;
 	}
-	
 
-	
 	public static String getFileExtension(String fileName, boolean includeAllExtentions) {
 		if (fileName.indexOf(".") == -1) {
 			return "";
@@ -468,7 +466,6 @@ public class BCUtil {
 			}
 		}
 	}
-	
 
 	public static void copyFile(final InputStream sourceStream, final OutputStream destStream) throws IOException {
 		byte[] buffer = new byte[1024];

@@ -1,13 +1,10 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -31,44 +28,62 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.UserAskToChangeFileException;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	private static String ERRORED_FILE_NAME = "error642";
+	private static String CANT_CONNECT_MSG = "Could not connect to Google. Make sure you have an internet connection.";
+
+	public static class NewChecks {
+		public boolean fileExists;
+		public boolean sameFormatExists;
+		public boolean passwordWorks;
+		public String existingFileFormats;
+		public String error;
+		void addFileFormat(String fname) {
+			//String newFormat = BCUtil.getFileExtension(fname, true);
+			//newFormat = newFormat + ":" + PvpPersistenceInterface.convertFileExtensionToEnglish("." + newFormat);
+			String newFormat = PvpPersistenceInterface.convertFileExtensionToEnglish(fname);
+			if  (existingFileFormats == null) {
+				existingFileFormats = newFormat;
+			} else {
+				existingFileFormats += ", " + newFormat;
+			}
+		}
+	}
 
 	public static final String DOC_NAME = "PassVaultPlusDataGDAPI";
 
-	 /** Application name. */
-    private static final String APPLICATION_NAME =
-        "PassVaultPlus";
+	/** Application name. */
+	private static final String APPLICATION_NAME = "PassVaultPlus";
 
-    /** Directory to store user credentials for this application. */
-    private static final java.io.File DATA_STORE_DIR = new java.io.File(
-        System.getProperty("user.home"), ".credentials/drive-java-pvp");
+	/** Directory to store user credentials for this application. */
+	private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".credentials/drive-java-pvp");
 
-    /** Global instance of the {@link FileDataStoreFactory}. */
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
+	/** Global instance of the {@link FileDataStoreFactory}. */
+	private static FileDataStoreFactory DATA_STORE_FACTORY;
 
-    /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY =
-        JacksonFactory.getDefaultInstance();
+	/** Global instance of the JSON factory. */
+	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-    /** Global instance of the HTTP transport. */
-    private static HttpTransport HTTP_TRANSPORT;
+	/** Global instance of the HTTP transport. */
+	private static HttpTransport HTTP_TRANSPORT;
 
-    /** Global instance of the scopes required by this quickstart.
-     *
-     * If modifying these scopes, delete your previously saved credentials
-     * at ~/.credentials/drive-java-quickstart
-     */
-    private static final List<String> SCOPES =
-           Arrays.asList(DriveScopes.DRIVE_FILE);
+	/** Global instance of the scopes required by this quickstart.
+	 *
+	 * If modifying these scopes, delete your previously saved credentials
+	 * at ~/.credentials/drive-java-quickstart
+	 */
+	private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_FILE);
 
 	final private PvpContext context;
 	private Drive driveService;
 	private DateTime lastUpdatedDate;
 	private String remoteFileName;
+	private NewChecks nchecks = new NewChecks();
 
 	public PvpBackingStoreGoogleDocs(PvpContext contextParam) {
 		context = contextParam;
@@ -127,24 +142,27 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 		final FileList result = driveService.files().list().execute();
 		final List<File> files = result.getFiles();
-        if (files == null || files.size() == 0) {
-        	context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: No files found.");
-            return false; // TODO should never return null
-        } else {
-        	final String localFileName = getFileName(false);
-        	context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Files:");
-            for (File file : files) {
-            	context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: " + file.getName() + " :: " + file.getId());
-                if (localFileName.equals(file.getName())) {
-                	context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: using this file");
-                	final String id = file.getId();
-                	context.prefs.setGoogleDriveDocId(id);
-                	return true;
-                	//return driveService.files().get(id).executeMediaAsInputStream();
-                }
-            }
-        }
-        return false;
+		if (files == null || files.size() == 0) {
+			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: No files found.");
+			return false; // TODO should never return null
+		} else {
+			final String localFileName = getFileName(false);
+			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Files:");
+			for (File file : files) {
+				nchecks.fileExists = true;
+				nchecks.addFileFormat(file.getName());
+				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: " + file.getName() + " :: " + file.getId());
+				if (localFileName.equals(file.getName())) {
+					nchecks.sameFormatExists = true;
+					context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: using this file");
+					final String id = file.getId();
+					context.prefs.setGoogleDriveDocId(id);
+					return true;
+					//return driveService.files().get(id).executeMediaAsInputStream();
+					}
+				}
+			}
+		return false;
 	}
 
 	@Override
@@ -176,7 +194,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	public void doFileUpload() throws IOException {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: START" );
 
-        Drive driveService;
+		Drive driveService;
 		try {
 			driveService = getDriveService();
 		} catch (GeneralSecurityException e) {
@@ -193,7 +211,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: creating new file ");
 			returnedFileMetaData = driveService.files().create(newFileMetadata, mediaContent).setFields("id").execute();
 		} else {
-			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: updating file file " + id);
+			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: updating file " + id);
 			try {
 				final File ignored = driveService.files().update(id, newFileMetadata, mediaContent).execute();
 			} catch (HttpResponseException e) {
@@ -271,11 +289,13 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				final File f = driveService.files().get(id).setFields("modifiedTime,name").execute();
 				lastUpdatedDate = f.getModifiedTime();
 				remoteFileName = f.getName();
+				nchecks.fileExists = true;
+				nchecks.sameFormatExists = true;
 				return;
 			}
 		} catch (Exception e) {
 			context.ui.notifyWarning("Google Doc File Properties Error", e);
-			if (e instanceof java.net.UnknownHostException) {
+			if (e instanceof UnknownHostException) {
 				lookInFileList = false;
 			}
 		}
@@ -284,8 +304,14 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			try {
 				if (lookForFileInList(driveService)) {
 					loadFileProps(false);
+					return;
 				}
 			} catch (Exception e2) {
+				if (e2 instanceof UnknownHostException) {
+					nchecks.error = CANT_CONNECT_MSG;
+				} else {
+					nchecks.error = e2.getMessage();
+				}
 				context.ui.notifyWarning("Google Doc File Properties Error 2", e2);
 			}
 		}
@@ -334,7 +360,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	String getErrorMessageForDisplay() {
 		Throwable t = exception.getCause();
 		if (t instanceof UnknownHostException) {
-			return "Could not connect to Google. Make sure you have an internet connection.";
+			return CANT_CONNECT_MSG;
 		} else if (t instanceof FileNotFoundException) {
 			return "File not found on Google Drive Server. A new file will be created when saving.";
 		}
@@ -390,17 +416,61 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		return lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate();
 	}
 
-	public static class NewChecks {
-
-	}
-
-  /**
+	/**
 	 * note that context may not have all the correct settings at this time.
 	 */
-	public static NewChecks doChecksForNewFile(PvpContext context, boolean localFileName) {
-	//	PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
-//	 	bs.loadFileProps(true);
-		return new NewChecks();
+	public static NewChecks doChecksForNewFile(PvpContext context, boolean saveFile) {
+		PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
+		bs.nchecks.passwordWorks = true;
+		bs.loadFileProps(true);
+
+		if (bs.nchecks.sameFormatExists) {
+			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
+			try {
+				BufferedInputStream inStream = fileReader.getStream();
+				if (saveFile) {
+					BCUtil.copyFile(inStream, context.prefs.getDataFile());
+				}
+			} catch (UserAskToChangeFileException ucf) {
+				bs.nchecks.passwordWorks = false;
+				context.ui.notifyInfo("doChecksForNewFile: at UserAskToChangeFileException");
+			} catch (InvalidKeyException e) {
+				context.ui.notifyInfo("doChecksForNewFile: at InvalidKeyException");
+				bs.nchecks.passwordWorks = false;
+			} catch (Exception e) {
+				bs.nchecks.error = e.getMessage();
+			} finally {
+				fileReader.close();
+			}
+		}
+
+		return bs.nchecks;
+	}
+
+	public static void deleteOfType(PvpContext context) {
+		PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
+		try {
+			bs.deleteOfType2();
+		} catch (IOException e) {
+			context.ui.notifyWarning("Trying to remove existing Google drive file", e);
+		}
+	}
+
+	private void deleteOfType2() throws IOException {
+		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.deleteOfType2 :: START" );
+
+		Drive driveService;
+		try {
+			driveService = getDriveService();
+		} catch (GeneralSecurityException e) {
+			throw new IOException(e);
+		}
+
+		if (lookForFileInList(driveService)) {
+			final String id = context.prefs.getGoogleDriveDocId();
+			driveService.files().delete(id);
+			context.ui.notifyInfo("deleted file id :: " + id);
+		}
 	}
 
 	public static void deleteLocalCredentials() {

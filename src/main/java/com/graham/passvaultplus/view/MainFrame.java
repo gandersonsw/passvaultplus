@@ -30,6 +30,8 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 6161486225628873141L;
 
+	private JPanel footer;
+
 	public MainFrame(final PvpContext context) {
 		super("");
 		setTitle("Pass Vault Plus");
@@ -47,11 +49,19 @@ public class MainFrame extends JFrame {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.add(toolBar, BorderLayout.NORTH);
 		mainPanel.add(context.ui.getTabManager().getMainTabPane(), BorderLayout.CENTER);
-		mainPanel.add(initFooter(context), BorderLayout.SOUTH);
+		footer = initFooter(context);
+		mainPanel.add(footer, BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
 		setVisible(true);
+	}
+
+	public void reinitStatusPanel(final PvpContext context) {
+		final JPanel ipanel = new JPanel(new BorderLayout());
+		ipanel.add(initStatusPanel(context), BorderLayout.SOUTH);
+		footer.remove(1);
+		footer.add(ipanel, BorderLayout.EAST);
 	}
 
 	private JPanel initStatusPanel(final PvpContext context) {

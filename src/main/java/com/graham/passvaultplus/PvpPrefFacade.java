@@ -21,7 +21,11 @@ public class PvpPrefFacade {
   }
 
   public void put(String k, String v) {
-    userPrefs.put(k, v);
+    if (v == null) {
+      userPrefs.remove(k);
+    } else {
+      userPrefs.put(k, v);
+    }
   }
 
   public boolean getBoolean(String k, boolean d) {

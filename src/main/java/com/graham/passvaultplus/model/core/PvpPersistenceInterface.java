@@ -1,7 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
-import java.io.BufferedInputStream;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class PvpPersistenceInterface {
 
 	public PvpPersistenceInterface(final PvpContext contextParam) {
 		context = contextParam;
-		backingStores = new ArrayList<PvpBackingStore>();
+		backingStores = new ArrayList<>();
 		backingStores.add(new PvpBackingStoreFile(context.prefs)); // File needs to be the first Backing Store in the list
 		backingStores.add(new PvpBackingStoreGoogleDocs(context));
 	}
@@ -66,6 +66,22 @@ public class PvpPersistenceInterface {
 			fname = fname + "." + PvpPersistenceInterface.EXT_XML;
 		}
 		return fname;
+	}
+
+	public static String convertFileExtensionToEnglish(final String fileExtension) {
+		if (isCompressed(fileExtension)) {
+			if (isEncrypted(fileExtension)) {
+				return "Compressed and Encrypted";
+			} else {
+				return "Compressed only";
+			}
+		} else {
+			if (isEncrypted(fileExtension)) {
+				return "Encrypted only";
+			} else {
+				return "Not Compressed or Encrypted";
+			}
+		}
 	}
 
 	public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {

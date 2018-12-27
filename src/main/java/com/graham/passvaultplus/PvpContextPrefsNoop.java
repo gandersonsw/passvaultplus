@@ -7,4 +7,17 @@ public class PvpContextPrefsNoop extends PvpContextPrefs {
     super(contextParam, new PvpPrefFacadeNoop());
   }
 
+  /**
+   * Return the password if it was saved, otherwise, ask user for password.
+   * Will only ask once when the application is started.  Will be saved until quit.
+   * @return
+   */
+  public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
+    if (passwordWasBad) {
+      throw new UserAskToChangeFileException();
+    } else {
+      return this.getPassword();
+    }
+  }
+
 }

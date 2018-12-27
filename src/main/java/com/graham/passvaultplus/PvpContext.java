@@ -1,9 +1,8 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import java.awt.Component;
+import java.awt.*;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,10 +13,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.MainFrame;
@@ -30,6 +27,7 @@ import com.graham.passvaultplus.view.MainFrame;
 public class PvpContext {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
+	static final public int OPT_ICN_SCALE = 35;
 
 	static private PvpContextUI activeUI;
 
@@ -52,8 +50,6 @@ public class PvpContext {
 		PvpContext context = new PvpContext();
 		activeUI = context.ui;
 
-	//	context.rtFileInterface = new PvpPersistenceInterface(context);
-	//	context.rtDataInterface = new PvpDataInterface(context);
 		if (pw != null) {
 			System.out.println("at 35353");
 			context.prefs.setPassword(pw, false);
@@ -82,14 +78,19 @@ public class PvpContext {
 	}
 
 	public PvpContext() {
-		data = new PvpContextData(this);
 		prefs = new PvpContextPrefs(this);
+		data = new PvpContextData(this);
 		ui = new PvpContextUI(this);
+	}
+
+	public PvpContext(PvpContext mainContext, PvpContextPrefs tempPrefs) {
+		prefs = tempPrefs;
+		data = null;
+		ui = mainContext.ui;
 	}
 
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
 		data.getFileInterface().load(data.getDataInterface());
-		//ui.initMainFrame();
 		ui.mainFrame = new MainFrame(this);
 		ui.schedulePinTimerTask();
 		if (prefs.pinWasReset) {
@@ -100,11 +101,16 @@ public class PvpContext {
 	private static final Map<String, ImageIcon> cachedIcons = new HashMap<>();
 
 	public static ImageIcon getIcon(final String imageName) {
-		if (cachedIcons.containsKey(imageName)) {
-			return cachedIcons.get(imageName);
+		return getIcon(imageName, 100);
+	}
+
+	public static ImageIcon getIcon(final String imageName, int scalePercent) {
+		String cachedName = imageName + scalePercent;
+		if (cachedIcons.containsKey(cachedName)) {
+			return cachedIcons.get(cachedName);
 		}
 		try {
-			BufferedImage img;
+			Image img;
 			if (JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
 				InputStream imageStream = PvpContext.class.getResourceAsStream("/images/" + imageName + ".png");
@@ -113,8 +119,12 @@ public class PvpContext {
 				img = ImageIO.read(new File("src/main/resources/images/" + imageName + ".png"));
 			}
 
+			if (scalePercent != 100) {
+					double r = scalePercent / 100.0;
+					img = img.getScaledInstance((int)(r * img.getWidth(null)), (int)(r * img.getHeight(null)), Image.SCALE_SMOOTH);
+			}
 			final ImageIcon i = new ImageIcon(img);
-			cachedIcons.put(imageName, i);
+			cachedIcons.put(cachedName, i);
 			return i;
 		} catch (Exception e) {
 			PvpContext.getActiveUI().notifyWarning("PvpContext.getIcon :: " + imageName, e);

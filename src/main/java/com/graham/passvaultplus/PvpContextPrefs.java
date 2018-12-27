@@ -45,8 +45,17 @@ public class PvpContextPrefs {
 	}
 
 	public static PvpContextPrefs copyPrefs(PvpContextPrefs source, PvpContextPrefs target) {
-		throw new RuntimeException("impl this");
-		//return target;
+		target.userPrefsLoaded = true;
+		target.setDataFilePath(source.getDataFilePath(),source.getEncryptionStrengthBits());
+		target.setPinTimeout(source.getPinTimeout());
+		target.setPinMaxTry(source.getPinMaxTry());
+		target.setPasswordAndPin(source.getPassword(), source.isPasswordSaved(), source.getPin(), source.getUsePin());
+		target.setShowDashboard(source.getShowDashboard());
+		target.setUseGoogleDrive(source.getUseGoogleDrive());
+		target.setGoogleDriveDocId(source.getGoogleDriveDocId());
+		target.setGoogleDriveDocUpdateDate(source.getGoogleDriveDocUpdateDate());
+		target.setShowDiagnostics(source.getShowDiagnostics());
+		return target;
 	}
 
 	public String getDataFilePath() {
@@ -65,7 +74,7 @@ public class PvpContextPrefs {
 
 	public File getDataFile() {
 		if (dataFile == null) {
-			dataFile = new File(dataFilePath);
+			dataFile = new File(getDataFilePath());
 		}
 		return dataFile;
 	}
@@ -93,10 +102,6 @@ public class PvpContextPrefs {
 	}
 
 	public boolean isPasswordSaved() {
-//		if (isPasswordSavedState == PWS_NOT_KNOWN) {
-//			getPassword();
-//		}
-
 		if (isPasswordSavedState == PWS_NOT_KNOWN) {
 			boolean pws = userPrefs.getBoolean("pwsaved", false);
 			isPasswordSavedState = pws ? PWS_SAVED : PWS_NOT_SAVED;
@@ -108,7 +113,6 @@ public class PvpContextPrefs {
 	public String getPassword() {
 		return password;
 	}
-
 
 	/**
 	 * Return the password if it was saved, otherwise, ask user for password.
@@ -231,7 +235,6 @@ public class PvpContextPrefs {
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
 		try {
-			System.out.println("setPassword PIN:" + pin + ":");
 			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
 		} catch (PvpException e) {
 			context.ui.notifyBadException(e, true, null);
@@ -274,7 +277,6 @@ public class PvpContextPrefs {
 		// this is not saved because it is saved in the file header
 		encryptionStrengthBits = esb;
 		context.ui.refreshInfoLabelText();
-	//	getInfoLabel().setText(getInfoLabelText());
 	}
 
 	private void loadUserPrefs() {
