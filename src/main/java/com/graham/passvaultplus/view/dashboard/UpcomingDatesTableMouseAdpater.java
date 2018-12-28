@@ -22,25 +22,23 @@ public class UpcomingDatesTableMouseAdpater extends MouseAdapter {
 	}
 
 	public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) { // a double-click
-        	
-        	int row = table.getSelectedRow();
-    		if (row < 0) {
-    			return;
-    		}
-    		UpcomingDatesTableModel tm = (UpcomingDatesTableModel)table.getModel();
-    		PvpRecord r = tm.getRecordAtRow(row);
-    		
-    		if (r != null) {
-    			RecordEditContext editor = context.ui.getTabManager().getRecordEditor(r);
-    			if (editor == null) {
-    				editor = RecordEditBuilder.buildEditor(context, r, false);
-    				context.ui.getTabManager().addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
-    				
-    			}
-    			context.ui.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
-    		}
-        }
-    }
+		if (e.getClickCount() == 2) { // a double-click
+			int row = table.getSelectedRow();
+			if (row < 0) {
+				return;
+			}
+			UpcomingDatesTableModel tm = (UpcomingDatesTableModel)table.getModel();
+			PvpRecord r = tm.getRecordAtRow(row);
+
+			if (r != null) {
+				RecordEditContext editor = context.uiMain.getRecordEditor(r);
+				if (editor == null) {
+					editor = RecordEditBuilder.buildEditor(context, r, false);
+					context.uiMain.addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
+				}
+				context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
+			}
+		}
+	}
 
 }

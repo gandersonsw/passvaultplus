@@ -49,7 +49,11 @@ public class RemoteBSPrefHandler {
 			PvpBackingStoreGoogleDocs.deleteLocalCredentials();
 		}
 		if (useGoogleDrive.isSelected() != useGoogleDriveFlag) {
-			prefsContext.conn.getPvpContextOriginal().ui.getMainFrame().reinitStatusPanel(prefsContext.conn.getPvpContextOriginal());
+			// TODO uiMain this might bomb on first start
+			prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("RemoteBSPrefHandler.cleanup:" + (prefsContext.conn.getPvpContextOriginal().uiMain != null) + ":" + (prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame() != null));
+			if (prefsContext.conn.getPvpContextOriginal().uiMain != null && prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame() != null) {
+				prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame().reinitStatusPanel(prefsContext.conn.getPvpContextOriginal());
+			}
 		}
 	}
 
@@ -61,10 +65,11 @@ public class RemoteBSPrefHandler {
 	public boolean presave(boolean isNewDB) {
 		if (useGoogleDrive.isSelected() && !useGoogleDriveFlag) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
+			// TODO verify mainUI is not used by this context
 			PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext, false);
 			if (nc.error != null) {
 				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-				JOptionPane.showMessageDialog(prefsContext.conn.getPvpContextOriginal().ui.getMainFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
+				JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
 				return false;
 			}
 			if (nc.sameFormatExists) {
@@ -76,7 +81,6 @@ public class RemoteBSPrefHandler {
 					PvpBackingStoreGoogleDocs.deleteOfType(tempContext);
 				}
 				if (actionHit == FileAction.Merge) {
-
 				}
 				return true;
 			} else {
@@ -87,7 +91,7 @@ public class RemoteBSPrefHandler {
 					message = "No existing file was found on Google drive, your local database will be copied there.";
 				}
 				ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
-				int b = JOptionPane.showConfirmDialog(prefsContext.conn.getPvpContextOriginal().ui.getMainFrame(), message, "New Remote File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
+				int b = JOptionPane.showConfirmDialog(prefsContext.conn.getSuperFrame(), message, "New Remote File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 				return b == JOptionPane.OK_OPTION;
 			}
 		}
@@ -174,10 +178,11 @@ public class RemoteBSPrefHandler {
 	public boolean createFiles() {
 		if (useGoogleDrive.isSelected()) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
+				// TODO verify mainUI is not used by this context
 			PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext, true);
 			if (nc.error != null) {
 				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-				JOptionPane.showMessageDialog(prefsContext.conn.getPvpContextOriginal().ui.getMainFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
+				JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
 				return false;
 			}
 		}

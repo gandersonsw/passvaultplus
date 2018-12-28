@@ -35,7 +35,7 @@ public abstract class PreferencesConnection {
 	}
 
 	protected void copyPrefsToReal() {
-		PvpContextPrefs.copyPrefs(contextPrefsForSettingsUI, context.prefs);
+		PvpContextPrefs.copyPrefs(contextPrefsForSettingsUI, context.prefs, context);
 	}
 
 	public PvpContextPrefs getContextPrefs() {

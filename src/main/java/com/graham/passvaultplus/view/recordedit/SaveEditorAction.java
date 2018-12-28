@@ -19,7 +19,7 @@ public class SaveEditorAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		editContext.populateRecordFromUI(editContext.editRecord);
 		context.data.getDataInterface().saveRecord(editContext.editRecord);
-		context.ui.getTabManager().removeRecordEditor(editContext);
+		context.uiMain.removeRecordEditor(editContext);
 	}
 
 }

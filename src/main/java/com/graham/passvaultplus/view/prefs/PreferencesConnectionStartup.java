@@ -21,7 +21,7 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	final private String defaultDataFilePath;
 
 	public PreferencesConnectionStartup(final PvpContext contextParam, final JFrame startupOptionsFrameParam) {
-		super(contextParam, new PvpContextPrefsNoop(contextParam));
+		super(contextParam, new PvpContextPrefsNoop());
 		startupOptionsFrame = startupOptionsFrameParam;
 
 		final String userHome = System.getProperty("user.home");

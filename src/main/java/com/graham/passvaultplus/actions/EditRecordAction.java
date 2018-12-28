@@ -20,15 +20,15 @@ public class EditRecordAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		PvpRecord r = context.ui.getViewListContext().getFirstSelectedRecord();
+		PvpRecord r = context.uiMain.getViewListContext().getFirstSelectedRecord();
 		if (r != null) {
-			RecordEditContext editor = context.ui.getTabManager().getRecordEditor(r);
+			RecordEditContext editor = context.uiMain.getRecordEditor(r);
 			if (editor == null) {
 				editor = RecordEditBuilder.buildEditor(context, r, false);
-				context.ui.getTabManager().addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
+				context.uiMain.addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
 				
 			}
-			context.ui.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
+			context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
 		}
 	}
 

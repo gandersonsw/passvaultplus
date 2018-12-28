@@ -65,7 +65,7 @@ class RecordEditFieldBuilder {
 			textComponent = sp;
 		} else {
 			JTextField textField = new JTextField(reb.record.getCustomField(name));
-			new TextFieldPopUpHandler(reb.context.ui.getMainFrame(), textField, field, reb.record.getType(), reb.context.data.getDataInterface(), reb.context.ui.getUndoManager());
+			new TextFieldPopUpHandler(reb.context.uiMain.getMainFrame(), textField, field, reb.record.getType(), reb.context.data.getDataInterface(), reb.context.uiMain.getUndoManager());
 			tf = textField;
 			textComponent = textField;
 			reb.rcPopup.addListener(tf);
@@ -83,8 +83,8 @@ class RecordEditFieldBuilder {
 			ref = new RecordEditFieldJTextComponent(tf, name);
 		}
 
-		tf.getDocument().addUndoableEditListener(reb.context.ui.getUndoManager());
-		tf.addCaretListener(reb.context.ui.getUndoManager());
+		tf.getDocument().addUndoableEditListener(reb.context.uiMain.getUndoManager());
+		tf.addCaretListener(reb.context.uiMain.getUndoManager());
 		tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(reb.editContext, ref)));
 
 		reb.editContext.editFields.put(name, ref);

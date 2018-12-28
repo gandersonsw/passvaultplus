@@ -1,71 +1,27 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import java.awt.Font;
-import java.awt.Component;
-import java.util.Timer;
-
-import javax.swing.JLabel;
-
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
-import com.graham.passvaultplus.view.MainFrame;
 
-import com.graham.passvaultplus.view.dashboard.DashBoardBuilder;
-import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
+import javax.swing.*;
 
+/**
+ * Interface to general UI. This is available at all times, can get active UI with PvpContext.getActiveUI()
+ */
 public class PvpContextUI {
-  private final MyUndoManager undoManager;
-	private final TabManager tabManager;
-  private final PvpContext context;
-  private Timer pinTimer;
-
-	private PvpViewListContext viewListContext = new PvpViewListContext();
-	private Component prefsComponent;
-	private Component schemaEditComponent;
-	private Component dashboardComponent;
-	MainFrame mainFrame;
-	private JLabel infoLabel;
-	private ErrorFrame eframe;
+	private JFrame uiFrame;
 	private boolean canQuitOrGotoSetup = true;
 	private StringBuilder warnings = new StringBuilder();
-  final DiagnosticsManager diagnosticsManager;
+	final DiagnosticsManager diagnosticsManager;
+	private ErrorFrame eframe;
 
-  PvpContextUI(PvpContext c) {
-    undoManager = new MyUndoManager(c);
-  	tabManager = new TabManager(c);
-    diagnosticsManager = new DiagnosticsManager(c);
-    context = c;
-  }
-
-	public Component getPrefsComponent() {
-		return prefsComponent;
+	public PvpContextUI(DiagnosticsManager dm) {
+		diagnosticsManager = dm;
 	}
 
-	public void setPrefsComponent(final Component c) {
-		prefsComponent = c;
-	}
-
-	public Component getSchemaEditComponent() {
-		return schemaEditComponent;
-	}
-
-	public void setSchemaEditComponent(final Component c) {
-		schemaEditComponent = c;
-	}
-
-	public void schedulePinTimerTask() {
-		cancelPinTimerTask();
-		if (context.prefs.getUsePin() && context.prefs.getPinTimeout() > 0) {
-			pinTimer = new Timer();
-			pinTimer.schedule(new PinTimerTask(context), context.prefs.getPinTimeout() * 60 * 1000);
-		}
-	}
-
-	private void cancelPinTimerTask() {
-		if (pinTimer != null) {
-			pinTimer.cancel();
-		}
+	public void setFrame(final JFrame uiFrameParam) {
+		uiFrame = uiFrameParam;
 	}
 
 	/**
@@ -125,64 +81,18 @@ public class PvpContextUI {
 		diagnosticsManager.info(s);
 	}
 
-	public PvpViewListContext getViewListContext() {
-		return viewListContext;
+	public void showMessageDialog(String title, String message) {
+		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+		JOptionPane.showMessageDialog(uiFrame, message, title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
-	public MainFrame getMainFrame() {
-		return mainFrame;
+	public void showErrorDialog(String title, String message) {
+		ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
+		JOptionPane.showMessageDialog(uiFrame, message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
-	public MyUndoManager getUndoManager() {
-		return undoManager;
+	public boolean showConfirmDialog(String title, String message) {
+		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(uiFrame, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 	}
-
-	public TabManager getTabManager() {
-		return tabManager;
-	}
-
-  public void refreshInfoLabelText() {
-    getInfoLabel().setText(getInfoLabelText());
-  }
-
-  public JLabel getInfoLabel() {
-    if (infoLabel == null) {
-      infoLabel = new JLabel(getInfoLabelText());
-      final Font f = infoLabel.getFont().deriveFont(infoLabel.getFont().getSize() - 2.0f);
-      infoLabel.setFont(f);
-    }
-
-    return infoLabel;
-  }
-
-  private String getInfoLabelText() {
-    int bits = context.prefs.getEncryptionStrengthBits();
-    String encrytpStr;
-    if (bits == 0) {
-      encrytpStr = "None";
-    } else {
-      encrytpStr = bits + "bit AES";
-    }
-    return "v" + PvpContext.VERSION + " © 2017    Encryption:" + encrytpStr;
-  }
-
-  public void checkOtherTabs() {
-    checkDashboard();
-    diagnosticsManager.checkDiagnostics();
-  }
-
-  public void checkDashboard() {
-    if (context.prefs.getShowDashboard() && dashboardComponent == null) {
-      try {
-        dashboardComponent = DashBoardBuilder.buildDashBoard(context);
-        getTabManager().addOtherTab("Dashboard", dashboardComponent);
-      } catch (Exception e) {
-        // if the dashboard fails to load, dont crash the app
-        e.printStackTrace();
-      }
-    } else if (!context.prefs.getShowDashboard() && dashboardComponent != null) {
-      getTabManager().removeOtherTab(dashboardComponent);
-      dashboardComponent = null;
-    }
-  }
 }

@@ -20,7 +20,7 @@ public class PinTimerTask extends TimerTask {
 
 	@Override
 	public void run() {
-		context.ui.getMainFrame().setVisible(false);
+		context.uiMain.getMainFrame().setVisible(false);
 
 		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.isPasswordSaved()) {
 			int tryCount = 0;
@@ -39,8 +39,8 @@ public class PinTimerTask extends TimerTask {
 				} else { // user pressed Okay
 					final String pin = pd.getPin();
 					if (pin.equals(pinAtCreate)) {
-						context.ui.getMainFrame().setVisible(true);
-						context.ui.schedulePinTimerTask();
+						context.uiMain.getMainFrame().setVisible(true);
+						context.uiMain.schedulePinTimerTask();
 						return;
 					} else {
 						if (tryCount >= context.prefs.getPinMaxTry()) {
@@ -73,8 +73,8 @@ public class PinTimerTask extends TimerTask {
 			} else {
 				final String pw = pd.getPw();
 				if (pw.equals(context.prefs.getPassword())) {
-					context.ui.getMainFrame().setVisible(true);
-					context.ui.schedulePinTimerTask();
+					context.uiMain.getMainFrame().setVisible(true);
+					context.uiMain.schedulePinTimerTask();
 					if (pinTryMaxed) {
 						context.prefs.unclearPassword();
 					}

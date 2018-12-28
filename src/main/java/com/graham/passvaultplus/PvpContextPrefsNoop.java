@@ -3,8 +3,8 @@ package com.graham.passvaultplus;
 
 public class PvpContextPrefsNoop extends PvpContextPrefs {
 
-  public PvpContextPrefsNoop(final PvpContext contextParam) {
-    super(contextParam, new PvpPrefFacadeNoop());
+  public PvpContextPrefsNoop() {
+    super(new PvpPrefFacadeNoop());
   }
 
   /**

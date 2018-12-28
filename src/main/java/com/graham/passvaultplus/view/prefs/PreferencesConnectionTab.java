@@ -6,13 +6,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
+import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 /**
@@ -21,7 +21,7 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 public class PreferencesConnectionTab extends PreferencesConnection {
 
 	public PreferencesConnectionTab(final PvpContext contextParam) {
-		super(contextParam, PvpContextPrefs.copyPrefs(contextParam.prefs, new PvpContextPrefsNoop(contextParam)));
+		super(contextParam, PvpContextPrefs.copyPrefs(contextParam.prefs, new PvpContextPrefsNoop(), null));
 	}
 
 	@Override
@@ -32,23 +32,21 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 			//context.setDataFilePath(dataFile.getAbsolutePath());
 			context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major); // TODO if there is an exception here the changes from line 27 should not be applied
 		}
-
-		context.ui.getTabManager().removeOtherTab(context.ui.getPrefsComponent());
-		context.ui.setPrefsComponent(null);
+		context.uiMain.hideTab(OtherTab.Prefs);
 		return true;
 	}
 
 	@Override
 	public boolean doOpen() {
 		if (hasUnsavedChanges()) {
-			int v = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "There are some records that have been edited but not saved. Are you sure you want to discard them?", "Unsaved changes", JOptionPane.OK_CANCEL_OPTION);
-			if (v == JOptionPane.CANCEL_OPTION) {
+			boolean b = context.ui.showConfirmDialog("Unsaved changes", "There are some records that have been edited but not saved. Are you sure you want to discard them?");
+			if (!b) {
 				return false;
 			}
 		}
 
 		// for now, dont support multiple databases open at once
-		context.ui.getMainFrame().setVisible(false);
+		context.uiMain.getMainFrame().setVisible(false);
 		copyPrefsToReal();
 
 		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword()); // psp.pw TODO
@@ -56,7 +54,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	}
 
 	private boolean hasUnsavedChanges() {
-		for (RecordEditContext editor : context.ui.getTabManager().getRecordEditors()) {
+		for (RecordEditContext editor : context.uiMain.getRecordEditors()) {
 			if (editor.hasUnsavedChanged()) {
 				return true;
 			}
@@ -64,11 +62,9 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		return false;
 	}
 
-	//return context.prefs.getEncryptionStrengthBits();
-
 	@Override
 	public JFrame getSuperFrame() {
-		return context.ui.getMainFrame();
+		return context.uiMain.getMainFrame();
 	}
 
 	@Override
@@ -94,8 +90,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 			super("Cancel");
 		}
 		public void actionPerformed(ActionEvent e) {
-			context.ui.getTabManager().removeOtherTab(context.ui.getPrefsComponent());
-			context.ui.setPrefsComponent(null);
+			context.uiMain.hideTab(OtherTab.Prefs);
 		}
 	}
 

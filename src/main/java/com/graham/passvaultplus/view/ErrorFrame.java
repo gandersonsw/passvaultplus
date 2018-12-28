@@ -28,6 +28,7 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
+import com.graham.passvaultplus.actions.GoToUrlAction;
 
 public class ErrorFrame {
 	
@@ -126,12 +127,7 @@ public class ErrorFrame {
 			BCUtil.makeButtonSmall(copyButton);
 			copyButton.setFocusable(false);
 			leftAlignPanel2.add(copyButton);
-			if (Desktop.isDesktopSupported()) {
-				final JButton gotoButton = new JButton(new GoToUrlAction());
-				BCUtil.makeButtonSmall(gotoButton);
-				gotoButton.setFocusable(false);
-				leftAlignPanel2.add(gotoButton);
-			}
+			GoToUrlAction.checkAndAdd(leftAlignPanel2, helpLink.getText());
 			
 			p.add(leftAlignPanel2);
 		}
@@ -213,23 +209,6 @@ public class ErrorFrame {
 		public void actionPerformed(ActionEvent e) {
 			final StringSelection ss = new StringSelection(helpLink.getText());
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
-		}
-	}
-	
-	class GoToUrlAction extends AbstractAction {
-		public GoToUrlAction() {
-			super("Go to Link");
-		}
-		public void actionPerformed(ActionEvent evt) {
-			if (Desktop.isDesktopSupported()) {
-				URI uri;
-				try {
-					uri = new URI(helpLink.getText());
-					Desktop.getDesktop().browse(uri);
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(eFrame, "There was an error opening link: " + ex.getMessage());
-				}
-			}
 		}
 	}
 	

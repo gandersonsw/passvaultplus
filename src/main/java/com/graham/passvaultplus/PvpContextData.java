@@ -27,6 +27,6 @@ public class PvpContextData {
    */
   public void saveAndRefreshDataList() {
     getFileInterface().save(getDataInterface(), PvpPersistenceInterface.SaveTrigger.major);
-    context.ui.getViewListContext().filterUIChanged();
+    context.uiMain.getViewListContext().filterUIChanged();
   }
 }

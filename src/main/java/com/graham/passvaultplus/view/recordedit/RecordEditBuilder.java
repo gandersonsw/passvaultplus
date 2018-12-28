@@ -36,7 +36,7 @@ public class RecordEditBuilder {
 		context = contextParam;
 		record = rParam;
 		editContext.editRecord = rParam;
-		editContext.undoManager = context.ui.getUndoManager();
+		editContext.undoManager = context.uiMain.getUndoManager();
 		isNewRecord = isNewRecordParam;
 		rcPopup = new RightClickPopup(context);
 	}

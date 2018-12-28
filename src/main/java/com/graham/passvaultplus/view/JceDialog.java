@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.view;
 
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -10,19 +9,18 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
+import com.graham.passvaultplus.actions.GoToUrlAction;
 import com.graham.passvaultplus.PvpException;
 
 public class JceDialog {
@@ -115,12 +113,7 @@ public class JceDialog {
 		BCUtil.makeButtonSmall(copyButton);
 		copyButton.setFocusable(false);
 		leftAlignPanel2.add(copyButton);
-		if (Desktop.isDesktopSupported()) {
-			final JButton gotoButton = new JButton(new GoToUrlAction(linkTE));
-			BCUtil.makeButtonSmall(gotoButton);
-			gotoButton.setFocusable(false);
-			leftAlignPanel2.add(gotoButton);
-		}
+		GoToUrlAction.checkAndAdd(leftAlignPanel2, linkStr);
 		
 		return leftAlignPanel2;
 	}
@@ -145,23 +138,5 @@ public class JceDialog {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 		}
 	}
-	
-	class GoToUrlAction extends AbstractAction {
-		final private JTextArea link;
-		public GoToUrlAction(final JTextArea linkParam) {
-			super("Go to Link");
-			link = linkParam;
-		}
-		public void actionPerformed(ActionEvent evt) {
-			if (Desktop.isDesktopSupported()) {
-				URI uri;
-				try {
-					uri = new URI(link.getText());
-					Desktop.getDesktop().browse(uri);
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(d, "There was an error opening link: " + ex.getMessage());
-				}
-			}
-		}
-	}
+
 }

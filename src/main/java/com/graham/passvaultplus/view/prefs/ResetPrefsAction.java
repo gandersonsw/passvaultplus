@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -14,7 +13,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
@@ -41,7 +39,7 @@ public class ResetPrefsAction extends AbstractAction {
       return;
     }
 
-    context.ui.getMainFrame().setVisible(false);
+    context.uiMain.getMainFrame().setVisible(false);
     if (deleteDb.isSelected()) {
       System.out.println("deleteing stuff");
       PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context.prefs);

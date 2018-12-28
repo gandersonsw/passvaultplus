@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -23,19 +22,26 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpType;
+import com.graham.passvaultplus.view.OtherTab;
+import com.graham.passvaultplus.view.OtherTabBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
-public class SchemaEditBuilder {
-	final private PvpContext context;
-	final private SchemaChangesContext scContext;
+public class SchemaEditBuilder implements OtherTabBuilder {
+	private PvpContext context;
+	private SchemaChangesContext scContext;
 
-	public static JPanel buildEditor(final PvpContext contextParam) {
-		return new SchemaEditBuilder(contextParam).build();
+	public String getTitle() {
+		return "Schema";
 	}
 
-	private SchemaEditBuilder(final PvpContext contextParam) {
-		context = contextParam;
-		scContext = new SchemaChangesContext();
+	public Component build(PvpContext c) {
+		SchemaEditBuilder builder = new SchemaEditBuilder();
+		builder.context = c;
+		builder.scContext = new SchemaChangesContext();
+		return builder.build();
+	}
+
+	public void dispose() {
 	}
 
 	private JPanel build() {
@@ -181,7 +187,7 @@ public class SchemaEditBuilder {
 				return;
 			}
 			if (PvpDataInterface.TYPE_CATEGORY.equals(type.getName())) {
-				JOptionPane.showMessageDialog(context.ui.getMainFrame(), "Can't delete the Category type because it is used to structure all data.");
+				context.ui.showMessageDialog("Delete", "Can't delete the Category type because it is used to structure all data.");
 				return;
 			}
 
@@ -189,8 +195,8 @@ public class SchemaEditBuilder {
 			final int recordCount = fr.records.size();
 			final String message = "Are you sure you want to delete the type \"" + type.getName() + "\"?\n" + recordCount + " records will be deleted";
 
-			final int option = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Confirm Delete Type", JOptionPane.OK_CANCEL_OPTION);
-			if (option == JOptionPane.CANCEL_OPTION) {
+			boolean b = context.ui.showConfirmDialog("Confirm Delete Type", message);
+			if (!b) {
 				return;
 			}
 
@@ -201,20 +207,20 @@ public class SchemaEditBuilder {
 			List<PvpType> types = context.data.getDataInterface().getTypes();
 			types.remove(type);
 			context.data.saveAndRefreshDataList();
-			context.ui.getViewListContext().getTypeComboBox().removeItem(type);
+			context.uiMain.getViewListContext().getTypeComboBox().removeItem(type);
 			scContext.typeCB.removeItem(type);
 		}
 
 		private void closeTabsForType(final PvpType t) {
 			List<RecordEditContext> toBeRemoved = new ArrayList<>();
-			List<RecordEditContext> reList = context.ui.getTabManager().getRecordEditors();
+			List<RecordEditContext> reList = context.uiMain.getRecordEditors();
 			for (final RecordEditContext re : reList) {
 				if (PvpType.sameType(re.getRecord().getType(), t)) {
 					toBeRemoved.add(re);
 				}
 			}
 			for (final RecordEditContext re : toBeRemoved) {
-				context.ui.getTabManager().removeRecordEditor(re);
+				context.uiMain.removeRecordEditor(re);
 			}
 		}
 	}
@@ -242,8 +248,7 @@ public class SchemaEditBuilder {
 			super("Close");
 		}
 		public void actionPerformed(ActionEvent e) {
-			context.ui.getTabManager().removeOtherTab(context.ui.getSchemaEditComponent());
-			context.ui.setSchemaEditComponent(null);
+			context.uiMain.hideTab(OtherTab.SchemaEdit);
 		}
 	}
 

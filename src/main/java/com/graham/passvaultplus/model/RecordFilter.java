@@ -41,15 +41,15 @@ public class RecordFilter {
 	}
 
 	private void doWork() {
-		String filterByType = context.ui.getViewListContext().getTypeComboBox().getSelectedItem().toString();
-		String filterByText = context.ui.getViewListContext().getFilterTextField().getText();
-		CategoryMenuItem filterByCategory = (CategoryMenuItem)context.ui.getViewListContext().getCategoryComboBox().getSelectedItem();
+		String filterByType = context.uiMain.getViewListContext().getTypeComboBox().getSelectedItem().toString();
+		String filterByText = context.uiMain.getViewListContext().getFilterTextField().getText();
+		CategoryMenuItem filterByCategory = (CategoryMenuItem)context.uiMain.getViewListContext().getCategoryComboBox().getSelectedItem();
 		boolean checkCategory = !PvpRecord.FILTER_ALL_CATEGORIES.equals(filterByCategory.toString());
 
 		PvpDataInterface.FilterResults results = context.data.getDataInterface().getFilteredRecords(filterByType, filterByText, filterByCategory.getCategory(), checkCategory);
 		data = results.records;
 		allTheSameTypeFlag = results.allTheSameTypeFlag;
-		context.ui.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + BCUtil.getPluralAppendix(data.size()));
+		context.uiMain.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + BCUtil.getPluralAppendix(data.size()));
 	}
 
 	public int getRecordCount() {

@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -371,18 +369,17 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	public void userAskedToHandleError() {
 		Throwable t = exception.getCause();
 		if (t instanceof UnknownHostException) {
-			int r = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "Would you like to try to connect to Google again?", "Cannot Connect", JOptionPane.OK_CANCEL_OPTION);
-
-			if (r == JOptionPane.OK_OPTION) {
+			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
+			if (tryReconnect) {
 				context.ui.notifyInfo("trying to reconnect to google...");
 				exception = null; // TODO not sure this is right. do we want to call super.clearTransientData ?
 				loadFileProps(true);
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
-					JOptionPane.showMessageDialog(context.ui.getMainFrame(), "Connection Failed");
+					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
 				} else {
 					try {
 						context.data.getFileInterface().load(context.data.getDataInterface());
-						context.ui.getViewListContext().filterUIChanged();
+						context.uiMain.getViewListContext().filterUIChanged();
 						setException(exception); // to update the status box
 					} catch (Exception e) {
 						context.ui.notifyBadException(e, true, false, null);

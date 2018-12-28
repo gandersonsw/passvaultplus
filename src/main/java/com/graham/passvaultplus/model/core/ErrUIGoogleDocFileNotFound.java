@@ -34,10 +34,10 @@ public class ErrUIGoogleDocFileNotFound {
 		p1.add(buildCenter(), BorderLayout.CENTER);
 		p1.add(buildBottom(), BorderLayout.SOUTH);
 
-		d = new JDialog(context.ui.getMainFrame(), "File not found", true);
+		d = new JDialog(context.uiMain.getMainFrame(), "File not found", true);
 		d.setContentPane(p1);
 		d.pack();
-		d.setLocationRelativeTo(context.ui.getMainFrame());
+		d.setLocationRelativeTo(context.uiMain.getMainFrame());
 		d.setVisible(true);
 		return d;
 	}

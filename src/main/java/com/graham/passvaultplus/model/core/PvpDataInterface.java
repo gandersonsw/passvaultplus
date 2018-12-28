@@ -100,7 +100,7 @@ public class PvpDataInterface {
 			records.add(r);
 		}
 		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance
-		context.ui.getViewListContext().filterUIChanged();
+		context.uiMain.getViewListContext().filterUIChanged();
 	}
 
 	public void deleteRecord(final PvpRecord r) {
@@ -108,7 +108,7 @@ public class PvpDataInterface {
 			records.remove(r);
 			r.setId(0);
 			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.ui.getViewListContext().filterUIChanged();
+			context.uiMain.getViewListContext().filterUIChanged();
 		} else {
 			context.ui.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
 		}
@@ -126,7 +126,7 @@ public class PvpDataInterface {
 			}
 		}
 		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance on getFileInterface
-		context.ui.getViewListContext().filterUIChanged();
+		context.uiMain.getViewListContext().filterUIChanged();
 	}
 
 	public void deleteRecords(final Collection<PvpRecord> rCol) {
@@ -146,7 +146,7 @@ public class PvpDataInterface {
 
 		if (changed) {
 			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.ui.getViewListContext().filterUIChanged();
+			context.uiMain.getViewListContext().filterUIChanged();
 		}
 	}
 

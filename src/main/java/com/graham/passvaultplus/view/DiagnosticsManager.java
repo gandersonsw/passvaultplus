@@ -17,40 +17,27 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 
-public class DiagnosticsManager {
+public class DiagnosticsManager implements OtherTabBuilder {
+	private static DiagnosticsManager activeManager = new DiagnosticsManager();
 
-	private final PvpContext context;
-	private final CommandExecuter executer;
-
-	private Component diagnosticsComponent;
 	private JTextArea ta;
 	private StringBuilder log = new StringBuilder();
-
 	private JTextField paramsTF;
 	private JComboBox<String> commandCB;
 
-	public DiagnosticsManager(PvpContext c) {
-		context = c;
-		executer = new CommandExecuter(context);
+	public static DiagnosticsManager get() {
+		return activeManager;
 	}
 
-	public void checkDiagnostics() {
-		if (context.prefs.getShowDiagnostics() && diagnosticsComponent == null) {
-			try {
-				diagnosticsComponent = buildDiagnosticsTab();
-				context.ui.getTabManager().addOtherTab("Diagnostics", diagnosticsComponent);
-			} catch (Exception e) {
-				// if the Diagnostics fails to load, dont crash the app
-				e.printStackTrace();
-			}
-		} else if (!context.prefs.getShowDiagnostics() && diagnosticsComponent != null) {
-			context.ui.getTabManager().removeOtherTab(diagnosticsComponent);
-			diagnosticsComponent = null;
-			ta = null;
-		}
+	private DiagnosticsManager() {
 	}
 
-	private Component buildDiagnosticsTab() {
+	public String getTitle() {
+		return "Diagnostics";
+	}
+
+	public Component build(PvpContext context) {
+		final CommandExecuter executer = new CommandExecuter(context);
 		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
 		JScrollPane sp = new JScrollPane(ta);
@@ -61,15 +48,21 @@ public class DiagnosticsManager {
 		commandP.add(commandCB, BorderLayout.WEST);
 		paramsTF = new JTextField();
 		commandP.add(paramsTF, BorderLayout.CENTER);
-		JButton doIt = new JButton(new DoCommandAction());
+		JButton doIt = new JButton(new DoCommandAction(executer));
 		commandP.add(doIt, BorderLayout.EAST);
 		mainP.add(commandP, BorderLayout.SOUTH);
 
-		CommandSelectedAction csel = new CommandSelectedAction();
+		CommandSelectedAction csel = new CommandSelectedAction(executer);
 		commandCB.addActionListener(csel);
 		csel.actionPerformed(null);
 
 		return mainP;
+	}
+
+	public void dispose() {
+		ta = null;
+		paramsTF = null;
+		commandCB = null;
 	}
 
 	public void warning(final String s, final Exception e) {
@@ -103,8 +96,10 @@ public class DiagnosticsManager {
 
 	class DoCommandAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
-		public DoCommandAction() {
+		final CommandExecuter executer;
+		public DoCommandAction(final CommandExecuter e) {
 			super("Execute");
+			executer = e;
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -114,6 +109,10 @@ public class DiagnosticsManager {
 
 	class CommandSelectedAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
+		final CommandExecuter executer;
+		public CommandSelectedAction(final CommandExecuter e) {
+			executer = e;
+		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			paramsTF.setText(executer.getDefaultArguments((String)commandCB.getSelectedItem()));

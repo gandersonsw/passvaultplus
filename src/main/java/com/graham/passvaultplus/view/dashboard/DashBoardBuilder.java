@@ -14,15 +14,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.OtherTabBuilder;
 
-public class DashBoardBuilder {
-	
-	static public Component buildDashBoard(final PvpContext context) {
+public class DashBoardBuilder implements OtherTabBuilder {
+
+	public String getTitle() {
+		return "Dashboard";
+	}
+
+	public Component build(PvpContext context) {
 		final JPanel p = new JPanel(new BorderLayout());
 		final UpcomingDatesTableModel tm = new UpcomingDatesTableModel(context);
 		p.add(buildUpcomingDatesHeader(context, tm), BorderLayout.NORTH);
 		p.add(buildUpcomingDatesPanel(context, tm), BorderLayout.CENTER);
 		return p;
+	}
+
+	public void dispose() {
 	}
 	
 	private static JPanel buildUpcomingDatesHeader(final PvpContext context, final UpcomingDatesTableModel tm) {

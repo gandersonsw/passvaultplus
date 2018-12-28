@@ -25,14 +25,28 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.*;
 
-public class ViewListBuilder {
+public class ViewListBuilder implements OtherTabBuilder {
 
-	static public Component buildViewList(final PvpContext context) {
+	public String getTitle() {
+		return "Records";
+	}
+
+	public Component build(PvpContext context) {
 		JPanel viewList = new JPanel(new BorderLayout());
 		viewList.add(buildTopPanel(context), BorderLayout.NORTH);
 		viewList.add(buildCenterPanel(context), BorderLayout.CENTER);
 		return viewList;
 	}
+
+	public void dispose() {
+	}
+
+	//static public Component buildViewList(final PvpContext context) {
+	//	JPanel viewList = new JPanel(new BorderLayout());
+	//	viewList.add(buildTopPanel(context), BorderLayout.NORTH);
+	//	viewList.add(buildCenterPanel(context), BorderLayout.CENTER);
+	//	return viewList;
+//	}
 
 	static private Component buildTopPanel(final PvpContext context) {
 		final ListFilterChangedAction filterChangeAction = new ListFilterChangedAction(context);
@@ -49,7 +63,7 @@ public class ViewListBuilder {
 		panel.add(buildCategoryComboBox(context, filterChangeAction));
 		
 		JLabel rc = new JLabel("");
-		context.ui.getViewListContext().setRecordCountLabel(rc);
+		context.uiMain.getViewListContext().setRecordCountLabel(rc);
 		panel.add(rc);
 
 		return panel;
@@ -66,7 +80,7 @@ public class ViewListBuilder {
 		JComboBox typeCombo = new JComboBox(typeArray);
 		typeCombo.setMaximumRowCount(20);
 		typeCombo.addActionListener(filterChangeAction);
-		context.ui.getViewListContext().setTypeComboBox(typeCombo);
+		context.uiMain.getViewListContext().setTypeComboBox(typeCombo);
 		return typeCombo;
 	}
 
@@ -94,7 +108,7 @@ public class ViewListBuilder {
 		JComboBox categoryCombo = new JComboBox(menuItems.toArray());
 		categoryCombo.setMaximumRowCount(20);
 		categoryCombo.addActionListener(filterChangeAction);
-		context.ui.getViewListContext().setCategoryComboBox(categoryCombo);
+		context.uiMain.getViewListContext().setCategoryComboBox(categoryCombo);
 		return categoryCombo;
 	}
 
@@ -102,7 +116,7 @@ public class ViewListBuilder {
 		JTextField tf = new JTextField(12);
 		TextFieldChangeForwarder f = new TextFieldChangeForwarder(filterChangeAction);
 		tf.getDocument().addDocumentListener(f);
-		context.ui.getViewListContext().setFilterTextField(tf);
+		context.uiMain.getViewListContext().setFilterTextField(tf);
 		return tf;
 	}
 
@@ -112,7 +126,7 @@ public class ViewListBuilder {
 		ListTableModel model = new ListTableModel(filter);
 		JTable table = new JTable(model);
 		table.addMouseListener(new RecordListTableMouseAdpater(erAction));
-		context.ui.getViewListContext().setListTable(table, model);
+		context.uiMain.getViewListContext().setListTable(table, model);
 		JScrollPane scroll = new JScrollPane(table);
 		return scroll;
 	}

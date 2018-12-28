@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.graham.passvaultplus.PvpContext;
@@ -25,6 +24,7 @@ public class SaveChangesAction extends AbstractAction {
 	final private SchemaChangesContext scContext;
 	final private PvpContext context;
 	private List<String> validationErrors = new ArrayList<>();
+	private List<PvpFieldModification> fmods;
 
 	public SaveChangesAction(final SchemaChangesContext scContextParam, final PvpContext c) {
 		super("Save Changes");
@@ -59,19 +59,8 @@ public class SaveChangesAction extends AbstractAction {
 	private void createNewType() {
 		// ***** do validation ****
 		clearValidationErrors();
-		final Set<String> fieldsIncNew = new HashSet<>();
+		final Set<String> fieldsIncNew = getFieldsIncNew();
 
-		final List<PvpFieldModification> fmods = scContext.tm.getFieldMods();
-		for (PvpFieldModification fm : fmods) {
-			if (fm.isDeleted) {
-			} else {
-				validateFieldName(fm.newName);
-				if (fieldsIncNew.contains(fm.newName)) {
-					addValidationError("field name is present more than once: " + fm.newName);
-				}
-				fieldsIncNew.add(fm.newName);
-			}
-		}
 		validateTypeName(scContext.tm.newTypeNameString);
 		validateFullFormat(fieldsIncNew, scContext.tm.fullFormatString);
 		validateToStringCode(fieldsIncNew, scContext.tm.toStringCodeString);
@@ -98,7 +87,7 @@ public class SaveChangesAction extends AbstractAction {
 
 		context.data.getDataInterface().getTypes().add(t);
 
-		context.ui.getViewListContext().getTypeComboBox().addItem(t);
+		context.uiMain.getViewListContext().getTypeComboBox().addItem(t);
 		scContext.typeCB.addItem(t);
 		context.data.saveAndRefreshDataList();
 	}
@@ -110,23 +99,11 @@ public class SaveChangesAction extends AbstractAction {
 		// ***** do validation ****
 		clearValidationErrors();
 		if (t == null) {
-			JOptionPane.showMessageDialog(context.ui.getMainFrame(), "Error: type not found in database: " + scContext.tm.getOriginalName());
+			context.ui.showMessageDialog("Type Not Found", "Error: type not found in database: " + scContext.tm.getOriginalName());
 			return;
 		}
-		final Set<String> fieldsIncNew = new HashSet<>();
+		final Set<String> fieldsIncNew = getFieldsIncNew();
 
-		final List<PvpFieldModification> fmods = scContext.tm.getFieldMods();
-		for (PvpFieldModification fm : fmods) {
-			if (fm.isDeleted) {
-				// check for how many records have this field
-			} else {
-				validateFieldName(fm.newName);
-				if (fieldsIncNew.contains(fm.newName)) {
-					addValidationError("field name is present more than once: " + fm.newName);
-				}
-				fieldsIncNew.add(fm.newName);
-			}
-		}
 		validateFullFormat(fieldsIncNew, scContext.tm.fullFormatString);
 		validateToStringCode(fieldsIncNew, scContext.tm.toStringCodeString);
 		if (hasValidationErrors()) {
@@ -185,6 +162,25 @@ public class SaveChangesAction extends AbstractAction {
 		context.data.saveAndRefreshDataList();
 	}
 
+	private Set<String> getFieldsIncNew() {
+		final Set<String> fieldsIncNew = new HashSet<>();
+
+		fmods = scContext.tm.getFieldMods();
+		for (PvpFieldModification fm : fmods) {
+			if (fm.isDeleted) {
+				// check for how many records have this field
+			} else {
+				validateFieldName(fm.newName);
+				if (fieldsIncNew.contains(fm.newName)) {
+					addValidationError("field name is present more than once: " + fm.newName);
+				}
+				fieldsIncNew.add(fm.newName);
+			}
+		}
+
+		return fieldsIncNew;
+	}
+
 	private void addValidationError(final String errMsg) {
 		if (!validationErrors.contains(errMsg)) { // dont duplicate the same message
 			validationErrors.add(errMsg);
@@ -203,14 +199,14 @@ public class SaveChangesAction extends AbstractAction {
 		if (validationErrors.size() == 0) {
 			return;
 		} else if (validationErrors.size() == 1) {
-			JOptionPane.showMessageDialog(context.ui.getMainFrame(), validationErrors.get(0));
+			context.ui.showMessageDialog("Error", validationErrors.get(0));
 		} else {
 			StringBuilder sb = new StringBuilder("There were errors that prevented the type from saving:\n\n");
 			for (String e : validationErrors) {
 				sb.append(e);
 				sb.append("\n");
 			}
-			JOptionPane.showMessageDialog(context.ui.getMainFrame(), sb.toString());
+			context.ui.showErrorDialog("Error", sb.toString());
 		}
 	}
 
@@ -264,22 +260,22 @@ public class SaveChangesAction extends AbstractAction {
 
 	private boolean closeTabsForType(final PvpType t) {
 		List<RecordEditContext> toBeRemoved = new ArrayList<>();
-		List<RecordEditContext> reList = context.ui.getTabManager().getRecordEditors();
-		int userChoice = -1;
+		List<RecordEditContext> reList = context.uiMain.getRecordEditors();
 		for (final RecordEditContext re : reList) {
 			if (PvpType.sameType(re.getRecord().getType(), t)) {
-				if (userChoice == -1 && re.hasUnsavedChanged()) {
-					userChoice = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), "There are unsaved records of this type, do you want to continue?", "Unsaved Data", JOptionPane.OK_CANCEL_OPTION);
-					if (userChoice == JOptionPane.CANCEL_OPTION) {
-						return false;
-					}
-				}
 				toBeRemoved.add(re);
 			}
 		}
 
+		if (toBeRemoved.size() > 0) {
+			boolean b = context.ui.showConfirmDialog("Unsaved Data", "There are unsaved records of this type, do you want to continue?");
+			if (!b) {
+				return false;
+			}
+		}
+
 		for (final RecordEditContext re : toBeRemoved) {
-			context.ui.getTabManager().removeRecordEditor(re);
+			context.uiMain.removeRecordEditor(re);
 		}
 
 		return true;

@@ -8,22 +8,39 @@ import java.awt.FlowLayout;
 
 import javax.swing.*;
 
+import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
+import com.graham.passvaultplus.view.OtherTabBuilder;
 
-public class PreferencesBuilder {
+public class PreferencesBuilder implements OtherTabBuilder {
 
 	private final Dimension indentDim = new Dimension(30, 2);
 
 	public static Component buildPrefs(final PreferencesConnection connParam) {
-		return new PreferencesBuilder(connParam).build();
+		PreferencesBuilder pb = new PreferencesBuilder();
+		pb.conn = connParam;
+		pb.prefsContext = new PreferencesContext(connParam);
+		return pb.build();
 	}
 
-	final private PreferencesConnection conn;
-	final private PreferencesContext prefsContext;
+	private PreferencesConnection conn;
+	private PreferencesContext prefsContext;
 
-	private PreferencesBuilder(final PreferencesConnection connParam) {
-		conn = connParam;
+	public String getTitle() {
+			return "Settings";
+	}
+
+	public Component build(PvpContext context) {
+		conn = new PreferencesConnectionTab(context);
 		prefsContext = new PreferencesContext(conn);
+		Component c = build();
+		conn = null;
+		prefsContext = null;
+		return c;
+	}
+
+	public void dispose() {
+			// nothing to do
 	}
 
 	private Component build() {

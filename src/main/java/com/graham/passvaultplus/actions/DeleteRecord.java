@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -28,11 +27,11 @@ public class DeleteRecord extends AbstractAction {
 		Collection<PvpRecord> records = null;
 		ArrayList<RecordEditContext> editContexts = new ArrayList<>();
 		String message = null;
-		if (context.ui.getTabManager().isCurrentTabList()) {
-			records = context.ui.getViewListContext().getAllSelectedRecords();
+		if (context.uiMain.isCurrentTabList()) {
+			records = context.uiMain.getViewListContext().getAllSelectedRecords();
 
 			for (PvpRecord r : records) {
-				final RecordEditContext re2 = context.ui.getTabManager().getRecordEditor(r);
+				final RecordEditContext re2 = context.uiMain.getRecordEditor(r);
 				if (re2 != null) {
 					editContexts.add(re2);
 				}
@@ -45,7 +44,7 @@ public class DeleteRecord extends AbstractAction {
 			}
 
 		} else {
-			RecordEditContext ec2 = context.ui.getTabManager().getCurrentTabRecordEditContext();
+			RecordEditContext ec2 = context.uiMain.getCurrentTabRecordEditContext();
 
 			if (ec2 != null) {
 				editContexts.add(ec2);
@@ -60,18 +59,18 @@ public class DeleteRecord extends AbstractAction {
 		}
 
 		if (message != null) {
-			int v = JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Delete", JOptionPane.OK_CANCEL_OPTION);
-			if (v == JOptionPane.CANCEL_OPTION) {
+			boolean b = context.ui.showConfirmDialog("Delete", message); //  JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Delete", JOptionPane.OK_CANCEL_OPTION);
+			if (!b) {
 				return;
 			}
 		}
 
 		for (RecordEditContext ec2 : editContexts) {
-			context.ui.getTabManager().removeRecordEditor(ec2);
+			context.uiMain.removeRecordEditor(ec2);
 		}
 		if (records != null) {
 			context.data.getDataInterface().deleteRecords(records);
-			context.ui.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
+			context.uiMain.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
 		}
 
 	}

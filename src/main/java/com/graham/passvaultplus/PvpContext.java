@@ -13,8 +13,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
+import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.MainFrame;
@@ -34,6 +34,7 @@ public class PvpContext {
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
 	public final PvpContextUI ui;
+	public PvpContextUIMainFrame uiMain;
 
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -78,23 +79,28 @@ public class PvpContext {
 	}
 
 	public PvpContext() {
-		prefs = new PvpContextPrefs(this);
+		prefs = new PvpContextPrefs();
 		data = new PvpContextData(this);
-		ui = new PvpContextUI(this);
+		ui = new PvpContextUI(DiagnosticsManager.get());
+		//uiMain TODO
 	}
 
 	public PvpContext(PvpContext mainContext, PvpContextPrefs tempPrefs) {
 		prefs = tempPrefs;
 		data = null;
 		ui = mainContext.ui;
+		//uiMain TODO
 	}
 
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
 		data.getFileInterface().load(data.getDataInterface());
-		ui.mainFrame = new MainFrame(this);
-		ui.schedulePinTimerTask();
+		uiMain = new PvpContextUIMainFrame(this);
+		uiMain.mainFrame = new MainFrame(this);
+		ui.setFrame(uiMain.getMainFrame());
+
+	//	ui.schedulePinTimerTask();
 		if (prefs.pinWasReset) {
-			JOptionPane.showMessageDialog(ui.mainFrame, "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
+			ui.showMessageDialog("PIN Reset", "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
 		}
 	}
 

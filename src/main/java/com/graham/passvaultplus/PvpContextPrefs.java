@@ -13,7 +13,6 @@ public class PvpContextPrefs {
 	static private final int PWS_NOT_SAVED = 2; // the user asked the password to not be saved in prefs
 
 	final PvpPrefFacade userPrefs;
-	private final PvpContext context;
 
 	private String dataFilePath;
   private File dataFile;
@@ -35,16 +34,15 @@ public class PvpContextPrefs {
   private long googleDriveDocUpdateDate;
   boolean pinWasReset = false;
 
-	public PvpContextPrefs(PvpContext c) {
-		this(c, new PvpPrefFacade());
+	public PvpContextPrefs() {
+		this(new PvpPrefFacade());
 	}
 
-	PvpContextPrefs(PvpContext c, PvpPrefFacade u) {
-		context = c;
+	PvpContextPrefs(PvpPrefFacade u) {
 		userPrefs = u;
 	}
 
-	public static PvpContextPrefs copyPrefs(PvpContextPrefs source, PvpContextPrefs target) {
+	public static PvpContextPrefs copyPrefs(PvpContextPrefs source, PvpContextPrefs target, PvpContext context) {
 		target.userPrefsLoaded = true;
 		target.setDataFilePath(source.getDataFilePath(),source.getEncryptionStrengthBits());
 		target.setPinTimeout(source.getPinTimeout());
@@ -55,6 +53,14 @@ public class PvpContextPrefs {
 		target.setGoogleDriveDocId(source.getGoogleDriveDocId());
 		target.setGoogleDriveDocUpdateDate(source.getGoogleDriveDocUpdateDate());
 		target.setShowDiagnostics(source.getShowDiagnostics());
+
+		if (context != null) {
+			if (context.uiMain.getMainFrame() != null) { // TODO is there a way to get rid of these checks?
+				context.uiMain.getMainFrame().refreshInfoLabelText(context);
+			}
+			context.uiMain.checkOtherTabs();
+		}
+
 		return target;
 	}
 
@@ -152,7 +158,7 @@ public class PvpContextPrefs {
 								tryingToGetValidPin = false;
 							} else {
 								if (pinTryCount >= getPinMaxTry()) {
-									context.ui.notifyInfo("PIN disabled after " + pinTryCount + " trys");
+									PvpContext.getActiveUI().notifyInfo("PIN disabled after " + pinTryCount + " trys");
 									// too many tries - delete the password
 									tryingToGetValidPin = false;
 									clearPassword();
@@ -162,7 +168,7 @@ public class PvpContextPrefs {
 							}
 						} catch (PvpException e) {
 							pin = "";
-							context.ui.notifyBadException(e, true, null);
+							PvpContext.getActiveUI().notifyBadException(e, true, null);
 						}
 					}
 				}
@@ -237,7 +243,7 @@ public class PvpContextPrefs {
 		try {
 			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
 		} catch (PvpException e) {
-			context.ui.notifyBadException(e, true, null);
+			PvpContext.getActiveUI().notifyBadException(e, true, null);
 		}
 		byte[] passwordToPersist;
 		if (makePersistant) {
@@ -274,9 +280,8 @@ public class PvpContextPrefs {
 	}
 
 	public void setEncryptionStrengthBits(final int esb) {
-		// this is not saved because it is saved in the file header
+		// this is not saved in prefs because it is saved in the file header
 		encryptionStrengthBits = esb;
-		context.ui.refreshInfoLabelText();
 	}
 
 	private void loadUserPrefs() {
@@ -299,7 +304,6 @@ public class PvpContextPrefs {
 	public void setShowDashboard(final boolean s) {
 		showDashboard = s;
 		userPrefs.putBoolean("showDashboard", showDashboard);
-		context.ui.checkDashboard();
 	}
 
 	public boolean getUseGoogleDrive() {
@@ -340,6 +344,5 @@ public class PvpContextPrefs {
 	public void setShowDiagnostics(final boolean s) {
 		showDiagnostics = s;
 		userPrefs.putBoolean("showDiagnostics", showDiagnostics);
-		context.ui.diagnosticsManager.checkDiagnostics();
 	}
 }

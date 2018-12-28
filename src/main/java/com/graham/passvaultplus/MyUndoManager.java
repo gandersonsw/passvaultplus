@@ -39,9 +39,9 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			return;
 		}
 		if (e.getSource() == lastEditSource) {
-			undoableEdits.get(currentUndoableEdit).addEditEvent(e, context.ui.getTabManager().getSelectedComponent());
+			undoableEdits.get(currentUndoableEdit).addEditEvent(e, context.uiMain.getSelectedComponent());
 		} else {
-			MyUndoableEdit ue = new MyUndoableEdit(e.getEdit(), context.ui.getTabManager().getSelectedComponent());
+			MyUndoableEdit ue = new MyUndoableEdit(e.getEdit(), context.uiMain.getSelectedComponent());
 			if (currentUndoableEdit < undoableEdits.size() - 1) {
 				// if an undo has been done by the user, there are events after it that can be redone, we need to remove those now
 				for (int i = undoableEdits.size() - 1; i > currentUndoableEdit; i--) {
@@ -113,7 +113,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit);
 			currentUndoableEdit--;
-			context.ui.getTabManager().setSelectedComponent(ue.tabPane);
+			context.uiMain.setSelectedComponent(ue.tabPane);
 			ue.undo();
 			undoAction.setEnabled(canUndo());
 			redoAction.setEnabled(canRedo());
@@ -130,7 +130,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 			lastEditSource = null;
 			MyUndoableEdit ue = undoableEdits.get(currentUndoableEdit + 1);
 			currentUndoableEdit++;
-			context.ui.getTabManager().setSelectedComponent(ue.tabPane);
+			context.uiMain.setSelectedComponent(ue.tabPane);
 			ue.redo();
 			undoAction.setEnabled(canUndo());
 			redoAction.setEnabled(canRedo());

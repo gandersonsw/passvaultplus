@@ -1,11 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 import javax.swing.*;
@@ -14,7 +10,6 @@ import javax.swing.border.EmptyBorder;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.*;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
-import com.graham.passvaultplus.view.recordlist.ViewListBuilder;
 
 public class MainFrame extends JFrame {
 
@@ -31,6 +26,7 @@ public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 6161486225628873141L;
 
 	private JPanel footer;
+	private JLabel infoLabel;
 
 	public MainFrame(final PvpContext context) {
 		super("");
@@ -42,19 +38,44 @@ public class MainFrame extends JFrame {
 		setSize(904, 520);
 		setMinimumSize(new Dimension(400, 240));
 
-		context.ui.getTabManager().addOtherTab("Records", ViewListBuilder.buildViewList(context));
-		context.ui.checkOtherTabs();
+		context.uiMain.showTab(OtherTab.RecordList);
+		//context.uiMain.addOtherTab("Records", ViewListBuilder.buildViewList(context));
+		context.uiMain.checkOtherTabs();
 
 		JPanel toolBar = initToolBar(context);
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.add(toolBar, BorderLayout.NORTH);
-		mainPanel.add(context.ui.getTabManager().getMainTabPane(), BorderLayout.CENTER);
+		mainPanel.add(context.uiMain.getMainTabPane(), BorderLayout.CENTER);
 		footer = initFooter(context);
 		mainPanel.add(footer, BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
 		setVisible(true);
+	}
+
+	public void refreshInfoLabelText(final PvpContext context) {
+				getInfoLabel(context).setText(getInfoLabelText(context));
+		}
+
+	public JLabel getInfoLabel(final PvpContext context) {
+		if (infoLabel == null) {
+			infoLabel = new JLabel(getInfoLabelText(context));
+			final Font f = infoLabel.getFont().deriveFont(infoLabel.getFont().getSize() - 2.0f);
+			infoLabel.setFont(f);
+		}
+		return infoLabel;
+	}
+
+	private String getInfoLabelText(final PvpContext context) {
+		int bits = context.prefs.getEncryptionStrengthBits();
+		String encrytpStr;
+		if (bits == 0) {
+			encrytpStr = "None";
+		} else {
+			encrytpStr = bits + "bit AES";
+		}
+		return "v" + PvpContext.VERSION + " © 2017    Encryption:" + encrytpStr;
 	}
 
 	public void reinitStatusPanel(final PvpContext context) {
@@ -68,7 +89,7 @@ public class MainFrame extends JFrame {
 		JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
 
-		final JLabel info = context.ui.getInfoLabel();
+		final JLabel info = getInfoLabel(context);
 		info.setBorder(new EmptyBorder(3,3,7,10));
 		p.add(info);
 
@@ -132,11 +153,11 @@ public class MainFrame extends JFrame {
 
 		toolBar.add(Box.createHorizontalStrut(30));
 
-		JButton jbUndo = createImageButton(context.ui.getUndoManager().undoAction, KeyEvent.VK_Z);
+		JButton jbUndo = createImageButton(context.uiMain.getUndoManager().undoAction, KeyEvent.VK_Z);
 		jbUndo.setToolTipText("[Z] Undo");
 		toolBar.add(jbUndo);
 
-		JButton jbRedo = createImageButton(context.ui.getUndoManager().redoAction, KeyEvent.VK_R);
+		JButton jbRedo = createImageButton(context.uiMain.getUndoManager().redoAction, KeyEvent.VK_R);
 		jbRedo.setToolTipText("[R]edo");
 		toolBar.add(jbRedo);
 

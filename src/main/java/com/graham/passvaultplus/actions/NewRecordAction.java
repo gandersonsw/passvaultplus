@@ -4,7 +4,6 @@ package com.graham.passvaultplus.actions;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -23,20 +22,20 @@ public class NewRecordAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		final PvpType type = getTypeToCreateNew();
 		if (type == null) {
-			JOptionPane.showMessageDialog(null, "A Type must be selected first.");
+			context.ui.showMessageDialog("Select Type", "A Type must be selected first.");
 			return; // can't create a new record if there are no types defined
 		}
 		PvpRecord r = new PvpRecord(type);
 		final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
-		context.ui.getTabManager().addRecordEditor("new", editor);
-		context.ui.getTabManager().setSelectedComponent(editor.getPanelInTabPane());
+		context.uiMain.addRecordEditor("new", editor);
+		context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
 	}
 
 	private PvpType getTypeToCreateNew() {
-		Object selItem = context.ui.getViewListContext().getTypeComboBox().getSelectedItem();
+		Object selItem = context.uiMain.getViewListContext().getTypeComboBox().getSelectedItem();
 		if (PvpType.FILTER_ALL_TYPES.equals(selItem)) {
-			for (int i = 0 ; i < context.ui.getViewListContext().getTypeComboBox().getItemCount(); i++) {
-				Object item = context.ui.getViewListContext().getTypeComboBox().getItemAt(i);
+			for (int i = 0 ; i < context.uiMain.getViewListContext().getTypeComboBox().getItemCount(); i++) {
+				Object item = context.uiMain.getViewListContext().getTypeComboBox().getItemAt(i);
 				if (item instanceof PvpType) {
 					return (PvpType)item;
 				}
