@@ -54,7 +54,7 @@ public class PvpContextPrefs {
 		target.setGoogleDriveDocUpdateDate(source.getGoogleDriveDocUpdateDate());
 		target.setShowDiagnostics(source.getShowDiagnostics());
 
-		if (context != null) {
+		if (context != null && context.uiMain != null) {
 			if (context.uiMain.getMainFrame() != null) { // TODO is there a way to get rid of these checks?
 				context.uiMain.getMainFrame().refreshInfoLabelText(context);
 			}

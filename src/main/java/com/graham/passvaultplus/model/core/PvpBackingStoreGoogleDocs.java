@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -29,6 +30,8 @@ import com.google.api.services.drive.model.FileList;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.UserAskToChangeFileException;
+import com.graham.passvaultplus.view.LongTask;
+import com.graham.passvaultplus.view.LongTaskUI;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
@@ -245,16 +248,40 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	 * @throws IOException
 	 */
 	private Credential authorize() throws IOException {
-		// Load client secrets.
-		InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
-		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+			LongTaskAuthorize lt = new LongTaskAuthorize();
+			LongTaskUI ui = new LongTaskUI(lt, "Authorizing with Google...");
+			try {
+					if (ui.runLongTask()) {
+							throw new IOException(PvpContext.USR_CANCELED);
+					} else {
+							return lt.credential;
+					}
+			} catch (IOException ioe) {
+					throw ioe;
+			} catch (Exception e) {
+					e.printStackTrace(); // should never get to this line because LongTaskAuthorize throws IOException
+					throw new RuntimeException(e);
+			}
+	}
 
-		// Build flow and trigger user authorization request.
-		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-				clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-		return credential;
+	class LongTaskAuthorize implements LongTask {
+			Credential credential;
+			public void runLongTask(LongTaskUI ui) throws IOException {
+					// Load client secrets.
+					InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
+					GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+					// Build flow and trigger user authorization request.
+					GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+							clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+					credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+					context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+			}
+
+			public void cancel(LongTaskUI ui) {
+					//VerificationCodeReceiver a = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).getReceiver();
+					//a.waitForCode()
+			}
 	}
 
 	/**
@@ -293,8 +320,13 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			}
 		} catch (Exception e) {
 			context.ui.notifyWarning("Google Doc File Properties Error", e);
+			if (driveService == null) {
+				nchecks.error = e.getMessage();
+				lookInFileList = false;
+			}
 			if (e instanceof UnknownHostException) {
 				lookInFileList = false;
+				nchecks.error = CANT_CONNECT_MSG;
 			}
 		}
 

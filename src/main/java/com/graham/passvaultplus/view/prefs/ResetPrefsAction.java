@@ -51,7 +51,10 @@ public class ResetPrefsAction extends AbstractAction {
   }
 
   void doConfirmDialog() {
-    d = new JDialog(null, "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
+
+			// context.ui.getFrame()
+		d = new JDialog(context.ui.getFrame(), "Confirm Reset");
+   // d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 
 		final JPanel centerPanel = new JPanel();
@@ -89,7 +92,7 @@ public class ResetPrefsAction extends AbstractAction {
 		}
 
 		d.pack();
-		BCUtil.center(d);
+		BCUtil.center(d, context.ui.getFrame());
 		d.setResizable(false);
 		d.setVisible(true); // this is the line that causes the dialog to Block
 		//return actionHit;

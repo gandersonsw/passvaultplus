@@ -86,10 +86,9 @@ public class PvpRecord {
 				fieldName.equals(PvpField.USR_TYPE)) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
-
+/*
 		if (!fields.containsKey(fieldName)) {
 			PvpContext.getActiveUI().notifyInfo("PvpRecord.getCustomField :: id:" + id + " field not found:" + fieldName);
-			// TODO
 			StringBuffer sb = new StringBuffer();
 			for (String fn : fields.keySet()) {
 				if (sb.length() > 0) {
@@ -99,7 +98,7 @@ public class PvpRecord {
 			}
 			PvpContext.getActiveUI().notifyInfo("PvpRecord.getCustomField :: fields:" + sb);
 		}
-
+*/
 		return fields.get(fieldName);
 	}
 

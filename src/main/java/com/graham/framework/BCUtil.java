@@ -1,12 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.framework;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,11 +15,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import org.jdom2.Element;
@@ -69,6 +60,17 @@ public class BCUtil {
 		}
 
 		c.setLocation((int)((screenWidth - d.getWidth()) / 2), (int)((screenHeight - d.getHeight()) / 3));
+	}
+
+	public static void center(java.awt.Component c, JFrame owner) {
+			if (owner == null) {
+					center(c);
+			} else {
+					Point loc = owner.getLocationOnScreen();
+					Dimension osize = owner.getSize();
+					Dimension size = c.getSize();
+					c.setLocation(Math.max(loc.x + (int)((osize.width - size.width) / 2), 1), Math.max(loc.y + (int)((osize.height - size.height) / 3), 1));
+			}
 	}
 	
 	public static Font getTitleFont() {

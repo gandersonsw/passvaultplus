@@ -32,6 +32,7 @@ public class StartupOptionsFrame extends JFrame {
 		pack();
 		BCUtil.center(this);
 		setResizable(false);
+		PvpContext.getActiveUI().setFrame(this);
 		setVisible(true);
 	}
 	

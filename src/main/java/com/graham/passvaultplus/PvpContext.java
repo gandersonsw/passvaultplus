@@ -28,6 +28,7 @@ public class PvpContext {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
+	static final public String USR_CANCELED = "operation cancelled by user";
 
 	static private PvpContextUI activeUI;
 

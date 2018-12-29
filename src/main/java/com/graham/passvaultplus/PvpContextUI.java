@@ -24,6 +24,13 @@ public class PvpContextUI {
 		uiFrame = uiFrameParam;
 	}
 
+	public JFrame getFrame() {
+		if (uiFrame != null && uiFrame.isVisible()) {
+			return uiFrame;
+		}
+		return null;
+	}
+
 	/**
 	 * To be used when a bad exception happens somewhere in the application.
 	 * @canContinue If false, force the application to quit
@@ -83,16 +90,16 @@ public class PvpContextUI {
 
 	public void showMessageDialog(String title, String message) {
 		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
-		JOptionPane.showMessageDialog(uiFrame, message, title, JOptionPane.INFORMATION_MESSAGE, icn);
+		JOptionPane.showMessageDialog(getFrame(), message, title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
 	public void showErrorDialog(String title, String message) {
 		ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-		JOptionPane.showMessageDialog(uiFrame, message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
+		JOptionPane.showMessageDialog(getFrame(), message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
 	public boolean showConfirmDialog(String title, String message) {
 		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
-		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(uiFrame, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
+		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(getFrame(), message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 	}
 }

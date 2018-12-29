@@ -68,8 +68,10 @@ public class RemoteBSPrefHandler {
 			// TODO verify mainUI is not used by this context
 			PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext, false);
 			if (nc.error != null) {
-				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-				JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
+				if (!nc.error.equals(PvpContext.USR_CANCELED)) {
+					ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
+					JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
+				}
 				return false;
 			}
 			if (nc.sameFormatExists) {
@@ -99,7 +101,7 @@ public class RemoteBSPrefHandler {
 	}
 
 	private void askAboutExistingFile(boolean passwordWorks, boolean isNewDB) {
-		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+		d = new JDialog(prefsContext.conn.getSuperFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 
 		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
