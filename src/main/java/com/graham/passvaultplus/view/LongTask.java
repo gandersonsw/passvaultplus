@@ -2,7 +2,7 @@
 package com.graham.passvaultplus.view;
 
 public interface LongTask {
-		void runLongTask(LongTaskUI ui) throws Exception;
+		void runLongTask() throws Exception;
 
-		void cancel(LongTaskUI ui);
+		void cancel();
 }

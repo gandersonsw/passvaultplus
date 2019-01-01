@@ -1,9 +1,7 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.prefs;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -50,10 +48,10 @@ public class ResetPrefsAction extends AbstractAction {
     PvpContext.startApp(false, null);
   }
 
-  void doConfirmDialog() {
+  public void doConfirmDialog() {
 
 			// context.ui.getFrame()
-		d = new JDialog(context.ui.getFrame(), "Confirm Reset");
+		d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
    // d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 

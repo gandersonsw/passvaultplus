@@ -93,7 +93,8 @@ public class JceDialog {
 		}
 		
 		d.pack();
-		BCUtil.center(d);
+		//BCUtil.center(d);
+		d.setLocationRelativeTo(parent);
 		d.setVisible(true); // this is the line that causes the dialog to Block
 	}
 	

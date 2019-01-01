@@ -5,7 +5,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.graham.passvaultplus.model.core.ErrUIGoogleDocFileNotFound;
 import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.passvaultplus.view.EulaDialog;
+import com.graham.passvaultplus.view.JceDialog;
+import com.graham.passvaultplus.view.LongTask;
+import com.graham.passvaultplus.view.LongTaskUI;
+import com.graham.passvaultplus.view.prefs.RemoteBSPrefHandler;
+import com.graham.passvaultplus.view.prefs.ResetPrefsAction;
 
 public class CommandExecuter {
 	
@@ -17,7 +24,7 @@ public class CommandExecuter {
 	}
 	
 	public String[] getCommands() {
-		String[] commands = { "SetAllModDate", "SetAllCreateDate", "Exit" };
+		String[] commands = { "TestLongTask", "TestJce", "TestEula", "TestRemoteAsk", "TestGDNF", "TestResetPrefs", "SetAllModDate", "SetAllCreateDate", "Exit" };
 		return commands;
 	}
 	
@@ -25,7 +32,19 @@ public class CommandExecuter {
 		if (command.equals("SetAllModDate") || command.equals("SetAllCreateDate")) {
 			return df.format(new Date());
 		}
-		if (command.equals("Exit")) {
+		if (command.equals("TestLongTask") ) {
+			return "18";
+		}
+		if (command.equals("TestJce") ) {
+			return "256";
+		}
+		if (command.equals("TestRemoteAsk") ) {
+			return "true,false";
+		}
+		if (command.equals("TestGDNF") ) {
+			return "TestFile.txt";
+		}
+		if (command.equals("Exit") || command.equals("TestResetPrefs") || command.equals("TestEula")) {
 			return "";
 		}
 		return "?";
@@ -33,7 +52,20 @@ public class CommandExecuter {
 	
 	public void execute(String command, String args) {
 		try {
-			if (command.equals("SetAllModDate")) {
+			if (command.equals("TestLongTask")) {
+				testLongTask(Integer.parseInt(args));
+			} else if (command.equals("TestJce")) {
+				testJceDialog(Integer.parseInt(args));
+			} else if (command.equals("TestEula")) {
+				testEula();
+			} else if (command.equals("TestRemoteAsk")) {
+				String[] sa = args.split(",");
+				testRemoteAsk(Boolean.parseBoolean(sa[0]), Boolean.parseBoolean(sa[1]));
+			} else if (command.equals("TestGDNF")) {
+				testGDNF(args);
+			} else if (command.equals("TestResetPrefs")) {
+				testResetPrefs();
+			} else if (command.equals("SetAllModDate")) {
 				setModDates(df.parse(args));
 			} else if (command.equals("SetAllCreateDate")) {
 				setCreationDates(df.parse(args));
@@ -46,7 +78,42 @@ public class CommandExecuter {
 			context.ui.notifyInfo("Error:" + e);
 		}
 	}
-	
+
+	private void testLongTask(int bakeTime) {
+			LongTaskUI ui = new LongTaskUI(new LongTaskTest(bakeTime), "Making a pizza");
+			try {
+					if (ui.runLongTask()) {
+							context.ui.notifyInfo("Cancel was pressed!");
+					}
+			} catch (Exception e) {
+					context.ui.notifyWarning("TestLongTask Exception", e);
+			}
+	}
+
+	private void testJceDialog(int maxKeySize) {
+			final JceDialog jced = new JceDialog();
+			jced.showDialog(context.ui.getFrame(), maxKeySize);
+	}
+
+	private void testEula() {
+		final EulaDialog eula = new EulaDialog();
+		eula.showEula();
+	}
+
+	private void testRemoteAsk(boolean passwordWorks, boolean isNewDB) {
+			RemoteBSPrefHandler handler = new RemoteBSPrefHandler();
+			handler.askAboutExistingFile(context.ui.getFrame(), passwordWorks, isNewDB);
+	}
+
+	private void testGDNF(String fileName) {
+			ErrUIGoogleDocFileNotFound d = new ErrUIGoogleDocFileNotFound(context, fileName, null);
+			d.buildDialog();
+	}
+
+	private void testResetPrefs() {
+			new ResetPrefsAction(context).doConfirmDialog();
+	}
+
 	private void setModDates(Date d) {
 		for (PvpRecord r : context.data.getDataInterface().getRecords()) {
 			r.setModificationDate(d);
@@ -63,6 +130,44 @@ public class CommandExecuter {
 	
 	private void doExit() {
 		System.exit(0);
+	}
+
+	static class LongTaskTest implements LongTask {
+
+			final private int bakeTime;
+			public LongTaskTest(int bt) {
+					bakeTime = bt;
+			}
+
+			@Override
+			public void runLongTask() throws Exception {
+					LongTaskUI.nextStep("Prepping dough");
+					Thread.sleep(3000);
+					LongTaskUI.stepDone("Prepping dough");
+					LongTaskUI.nextStep("Rolling out dough");
+					Thread.sleep(5000);
+					LongTaskUI.stepDone("Rolling out dough");
+					LongTaskUI.nextStep("Adding Sauce");
+					Thread.sleep(500);
+					LongTaskUI.stepDone("Adding Sauce");
+					LongTaskUI.nextStep("Adding Cheese");
+					Thread.sleep(1000);
+					LongTaskUI.stepDone("Adding Cheese");
+					LongTaskUI.nextStep("Adding Olives");
+					Thread.sleep(1000);
+					LongTaskUI.stepDone("Adding Olives");
+					LongTaskUI.nextStep("Baking");
+					Thread.sleep(1000 * bakeTime);
+					LongTaskUI.stepDone("Baking");
+					LongTaskUI.nextStep("Cutting");
+					Thread.sleep(4000);
+					LongTaskUI.stepDone("Cutting");
+			}
+
+			@Override
+			public void cancel() {
+
+			}
 	}
 
 }

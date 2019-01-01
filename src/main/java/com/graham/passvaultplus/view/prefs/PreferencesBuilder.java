@@ -31,12 +31,15 @@ public class PreferencesBuilder implements OtherTabBuilder {
 	}
 
 	public Component build(PvpContext context) {
-		conn = new PreferencesConnectionTab(context);
-		prefsContext = new PreferencesContext(conn);
-		Component c = build();
-		conn = null;
-		prefsContext = null;
-		return c;
+			return buildPrefs(new PreferencesConnectionTab(context));
+	//	conn = new PreferencesConnectionTab(context);
+	//	prefsContext = new PreferencesContext(conn);
+	//	PreferencesBuilder pb = new PreferencesBuilder();
+
+//		Component c = build();
+	//	conn = null;
+	//	prefsContext = null;
+	//	return c;
 	}
 
 	public void dispose() {

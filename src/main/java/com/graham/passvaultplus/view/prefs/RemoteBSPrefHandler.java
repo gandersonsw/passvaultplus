@@ -28,6 +28,12 @@ public class RemoteBSPrefHandler {
 	private JDialog d;
 	private FileAction actionHit;
 
+	public RemoteBSPrefHandler() {
+			// for testing only
+			prefsContext = null;
+			useGoogleDriveFlag = false;
+	}
+
 	public RemoteBSPrefHandler(PreferencesContext pcontext) {
 		prefsContext = pcontext;
 		useGoogleDriveFlag = prefsContext.conn.getContextPrefs().getUseGoogleDrive();
@@ -75,7 +81,7 @@ public class RemoteBSPrefHandler {
 				return false;
 			}
 			if (nc.sameFormatExists) {
-				askAboutExistingFile(nc.passwordWorks, isNewDB);
+				askAboutExistingFile(prefsContext.conn.getSuperFrame(), nc.passwordWorks, isNewDB);
 				if (actionHit == FileAction.Cancel) {
 					return false;
 				}
@@ -100,8 +106,8 @@ public class RemoteBSPrefHandler {
 		return true;
 	}
 
-	private void askAboutExistingFile(boolean passwordWorks, boolean isNewDB) {
-		d = new JDialog(prefsContext.conn.getSuperFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+	public void askAboutExistingFile(JFrame parent, boolean passwordWorks, boolean isNewDB) {
+		d = new JDialog(parent, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 
 		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
@@ -144,7 +150,8 @@ public class RemoteBSPrefHandler {
 
 		actionHit = FileAction.Cancel;
 		d.pack();
-		BCUtil.center(d);
+		//BCUtil.center(d);
+		d.setLocationRelativeTo(parent);
 		d.setResizable(false);
 		d.setVisible(true); // this is the line that causes the dialog to Block
 	}

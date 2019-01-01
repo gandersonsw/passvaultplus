@@ -6,13 +6,42 @@ import com.graham.passvaultplus.PvpContext;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
 public class LongTaskUI implements Runnable {
 
+		private static long SHOW_DELAY = 800;
+		private static long MIN_SHOW_TIME = 500;
+
+		static class TaskStep {
+				String description;
+				long runtime;
+				boolean done;
+				public TaskStep(String d) {
+						description = d;
+						runtime = System.currentTimeMillis();
+				}
+				public void setDone() {
+						done = true;
+						runtime = System.currentTimeMillis() - runtime;
+				}
+				@Override
+				public String toString() {
+						if (done) {
+								return description + " (" + (runtime / 1000) + "s)";
+						} else {
+								return description + "...";
+						}
+				}
+		}
+
+		private static LongTaskUI activeTask; // there can be only one at a time, if there is already one, don't create a new one
+
 		private JDialog cancelDialog;
-		private JLabel progressLabel;
+		private JTextArea progressText;
 		private JLabel timerLabel;
 		private LongTask ltask;
 		private Exception ltaskException;
@@ -23,6 +52,10 @@ public class LongTaskUI implements Runnable {
 		private long startTime;
 		private boolean shouldShowCancelDialog;
 		private String taskDescription;
+		private boolean stillRinning;
+		private JButton cancelButton;
+
+		private ArrayList<TaskStep> steps = new ArrayList<>();
 
 		public LongTaskUI(LongTask t, String desc) {
 				ltask = t;
@@ -33,42 +66,90 @@ public class LongTaskUI implements Runnable {
 		 * returns true if it was canceled by user
 		 */
 		public boolean runLongTask() throws Exception {
-				System.out.println("at 1 runLongTask");
-				shouldShowCancelDialog = true;
-				mainThread = Thread.currentThread();
-				ltaskThread = new Thread(this, "LongTaskUI Thread");
-				startTime = System.currentTimeMillis();
-				ltaskThread.start();
-
-				System.out.println("at 2 runLongTask");
+				if (activeTask != null && activeTask.stillRinning) {
+						nextStep(taskDescription);
+						ltask.runLongTask();
+						stepDone(taskDescription);
+						return activeTask.wasCanceled;
+				}
 				try {
-					Thread.sleep(800);
-				} catch (InterruptedException e1) {
-						System.out.println("at runLongTask InterruptedException 1");
-				}
-				synchronized(this) {
-						mainThread = null;
-				}
-				if (getShouldShowCancelDialog()) {
-						showCancelDialog();
-				}
+						stillRinning = true;
+						activeTask = this;
+						System.out.println("at 1 runLongTask");
+						shouldShowCancelDialog = true;
+						mainThread = Thread.currentThread();
+						ltaskThread = new Thread(this, "LongTaskUI Thread");
+						startTime = System.currentTimeMillis();
+						ltaskThread.start();
 
-				if (ltaskException != null) {
-						throw ltaskException;
-				}
+						System.out.println("at 2 runLongTask");
+						try {
+								Thread.sleep(SHOW_DELAY);
+						}
+						catch (InterruptedException e1) {
+								System.out.println("at runLongTask InterruptedException 1");
+						}
+						synchronized (this) {
+								mainThread = null;
+						}
+						if (getShouldShowCancelDialog()) {
+								showCancelDialog();
+						}
 
-				return wasCanceled;
+						if (ltaskException != null) {
+								throw ltaskException;
+						}
+
+						return wasCanceled;
+				} finally {
+						stillRinning = false;
+				}
 		}
 
-		public void nextStep(String stepName) {
-				progressLabel.setText(stepName);
+		static public void nextStep(String stepDesc) {
+				if (activeTask != null) {
+						synchronized (activeTask) {
+						if (activeTask.stillRinning) {
+								activeTask.steps.add(new TaskStep(stepDesc));
+								activeTask.stepsChanged();
+						}
+					}
+				}
+		}
+
+		static public void stepDone(String stepDesc) {
+				if (activeTask != null) {
+						synchronized (activeTask) {
+								if (activeTask.stillRinning) {
+										for (int i = activeTask.steps.size() - 1; i >= 0; i--) {
+												if (activeTask.steps.get(i).description.equals(stepDesc) && !activeTask.steps.get(i).done) {
+														activeTask.steps.get(i).setDone();
+														activeTask.stepsChanged();
+														return;
+												}
+										}
+								}
+						}
+				}
+		}
+
+		private void stepsChanged() {
+				if (progressText != null) {
+					StringBuffer sb = new StringBuffer();
+					for (int i = Math.max(steps.size() - 5, 0); i < steps.size(); i++) {
+							sb.append(steps.get(i));
+							sb.append("\n");
+					}
+					System.out.println("at 8999:" + sb.toString());
+						progressText.setText(sb.toString());
+				}
 		}
 
 		@Override
 		public void run() {
 				try {
 						System.out.println("at 3 run");
-						ltask.runLongTask(this);
+						ltask.runLongTask();
 						killStuff();
 						System.out.println("at 4 run");
 				} catch (Exception e) {
@@ -90,21 +171,34 @@ public class LongTaskUI implements Runnable {
 				}
 				if (cancelDialog != null) {
 						timerThread.interrupt();
+						long showTime = System.currentTimeMillis() - startTime - SHOW_DELAY;
+						System.out.println("killStuff: showTime:" + showTime);
+						if (showTime < MIN_SHOW_TIME) {
+								try {
+										cancelButton.setEnabled(false);
+										cancelButton.setText("Done");
+										Thread.sleep(MIN_SHOW_TIME - showTime);
+								} catch (InterruptedException e) { }
+						}
 						cancelDialog.setVisible(false);
 						cancelDialog = null;
 				}
 				System.out.println("at 21 interruptMainThread");
 		}
 
-		public void showCancelDialog() {
+		private void showCancelDialog() {
 				System.out.println("at 8 ShowUITimer");
 				cancelDialog = new JDialog(PvpContext.getActiveUI().getFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 				cancelDialog.getContentPane().setLayout(new BorderLayout());
 
-				ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
-				JLabel icnLab = new JLabel(icn);
-				icnLab.setBorder(new EmptyBorder(16,25,16,24));
-				cancelDialog.getContentPane().add(icnLab, BorderLayout.WEST);
+				{
+						ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+						JLabel icnLab = new JLabel(icn);
+						icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
+						JPanel p = new JPanel(new BorderLayout());
+						p.add(icnLab, BorderLayout.NORTH);
+						cancelDialog.getContentPane().add(p, BorderLayout.WEST);
+				}
 
 				final JPanel centerPanel = new JPanel();
 				centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -121,20 +215,31 @@ public class LongTaskUI implements Runnable {
 						centerPanel.add(p);
 
 						p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-						progressLabel = new JLabel("");
-						p.add(progressLabel);
+						progressText = new JTextArea();
+
+						progressText.setPreferredSize(new Dimension(300,68));
+						progressText.setEditable(false);
+						progressText.setFont(BCUtil.getBodyFont());
+						progressText.setBackground(p.getBackground());
+
+
+						stepsChanged();
+						p.add(progressText);
 						centerPanel.add(p);
 
 						p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-						timerLabel = new JLabel("0");
+						timerLabel = new JLabel("Total Time: 0");
 						p.add(timerLabel);
 						centerPanel.add(p);
 				}
 
 				{
 						final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-						p.add(new JButton(new CancelAction()));
-						p.setBorder(new EmptyBorder(20,20,20,20));
+						cancelButton = new JButton(new CancelAction());
+						p.add(cancelButton);
+						p.setBorder(new EmptyBorder(4,20,10,16));
+						//p.setBorder(new MatteBorder(4,20,10,16, Color.MAGENTA));
+
 						centerPanel.add(p);
 				}
 
@@ -142,7 +247,8 @@ public class LongTaskUI implements Runnable {
 				timerThread.start();
 
 				cancelDialog.pack();
-				BCUtil.center(cancelDialog, PvpContext.getActiveUI().getFrame());
+			//	BCUtil.center(cancelDialog, PvpContext.getActiveUI().getFrame());
+				cancelDialog.setLocationRelativeTo(PvpContext.getActiveUI().getFrame());
 				cancelDialog.setResizable(false);
 				System.out.println("at 9 ShowUITimer");
 
@@ -151,9 +257,9 @@ public class LongTaskUI implements Runnable {
 				cancelDialog.setVisible(true); // this is the line that causes the dialog to Block
 		}
 
-		void updateTimerDisplay() {
+		private void updateTimerDisplay() {
 				System.out.println("at 10 updateTimerDisplay");
-				timerLabel.setText(Integer.toString((int)((System.currentTimeMillis() - startTime) / 1000)));
+				timerLabel.setText("Total Time: " + Integer.toString((int)((System.currentTimeMillis() - startTime) / 1000)));
 		}
 
 		class CancelAction extends AbstractAction {
@@ -163,7 +269,7 @@ public class LongTaskUI implements Runnable {
 				public void actionPerformed(ActionEvent e) {
 						System.out.println("at 11 CancelAction");
 						wasCanceled = true;
-						ltask.cancel(LongTaskUI.this);
+						ltask.cancel();
 						killStuff();
 				}
 		}

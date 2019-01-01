@@ -29,6 +29,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.view.LongTask;
 import com.graham.passvaultplus.view.LongTaskUI;
@@ -48,7 +49,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			//String newFormat = BCUtil.getFileExtension(fname, true);
 			//newFormat = newFormat + ":" + PvpPersistenceInterface.convertFileExtensionToEnglish("." + newFormat);
 			String newFormat = PvpPersistenceInterface.convertFileExtensionToEnglish(fname);
-			if  (existingFileFormats == null) {
+			if (existingFileFormats == null) {
 				existingFileFormats = newFormat;
 			} else {
 				existingFileFormats += ", " + newFormat;
@@ -266,7 +267,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	class LongTaskAuthorize implements LongTask {
 			Credential credential;
-			public void runLongTask(LongTaskUI ui) throws IOException {
+			public void runLongTask() throws IOException {
 					// Load client secrets.
 					InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
 					GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
@@ -278,7 +279,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 					context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
 			}
 
-			public void cancel(LongTaskUI ui) {
+			public void cancel() {
 					//VerificationCodeReceiver a = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).getReceiver();
 					//a.waitForCode()
 			}
@@ -306,6 +307,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	private void loadFileProps(boolean lookInFileList) {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.loadFileProps");
+		LongTaskUI.nextStep("Connecting to Google");
 		Drive driveService = null;
 		try {
 			final String id = context.prefs.getGoogleDriveDocId();
@@ -320,13 +322,10 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			}
 		} catch (Exception e) {
 			context.ui.notifyWarning("Google Doc File Properties Error", e);
-			if (driveService == null) {
-				nchecks.error = e.getMessage();
+			if (driveService == null || e instanceof UnknownHostException) {
 				lookInFileList = false;
-			}
-			if (e instanceof UnknownHostException) {
-				lookInFileList = false;
-				nchecks.error = CANT_CONNECT_MSG;
+		//		nchecks.error = e instanceof UnknownHostException ? CANT_CONNECT_MSG : e.getMessage();
+				this.setException(new PvpException(PvpException.GeneralErrCode.GoogleDrive, e));
 			}
 		}
 
@@ -337,12 +336,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 					return;
 				}
 			} catch (Exception e2) {
-				if (e2 instanceof UnknownHostException) {
-					nchecks.error = CANT_CONNECT_MSG;
-				} else {
-					nchecks.error = e2.getMessage();
-				}
 				context.ui.notifyWarning("Google Doc File Properties Error 2", e2);
+			//	nchecks.error = e2 instanceof UnknownHostException ? CANT_CONNECT_MSG : e2.getMessage();
+				this.setException(new PvpException(PvpException.GeneralErrCode.GoogleDrive, e2));
 			}
 		}
 
@@ -471,6 +467,10 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			} finally {
 				fileReader.close();
 			}
+		}
+
+		if (bs.nchecks.error == null && bs.exception != null) {
+				bs.nchecks.error = bs.getErrorMessageForDisplay();
 		}
 
 		return bs.nchecks;
