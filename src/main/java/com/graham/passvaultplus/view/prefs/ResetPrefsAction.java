@@ -4,13 +4,8 @@ package com.graham.passvaultplus.view.prefs;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
@@ -49,17 +44,26 @@ public class ResetPrefsAction extends AbstractAction {
   }
 
   public void doConfirmDialog() {
-
-			// context.ui.getFrame()
 		d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
-   // d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
+
+		{
+			ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+			JLabel icnLab = new JLabel(icn);
+			icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
+			JPanel p = new JPanel(new BorderLayout());
+			p.add(icnLab, BorderLayout.NORTH);
+			d.getContentPane().add(p, BorderLayout.WEST);
+		}
 
 		final JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 		d.getContentPane().add(centerPanel, BorderLayout.CENTER);
 
 		{
+			final JPanel sp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			sp1.add(new JLabel(" "));
+			centerPanel.add(sp1);
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			p.add(new JLabel("Are you sure you want to reset all settings?\nThis will also delete local encryption keys."));
 			centerPanel.add(p);
@@ -77,15 +81,13 @@ public class ResetPrefsAction extends AbstractAction {
 			final JPanel sp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			sp1.add(new JLabel(" "));
 			centerPanel.add(sp1);
-			final JPanel sp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			sp2.add(new JLabel(" "));
-			centerPanel.add(sp2);
 		}
 
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			p.add(new JButton(new CancelAction()));
 			p.add(new JButton(new OkAction()));
+			p.setBorder(new EmptyBorder(4,20,10,16));
 			centerPanel.add(p);
 		}
 
@@ -93,7 +95,6 @@ public class ResetPrefsAction extends AbstractAction {
 		BCUtil.center(d, context.ui.getFrame());
 		d.setResizable(false);
 		d.setVisible(true); // this is the line that causes the dialog to Block
-		//return actionHit;
   }
 
   class OkAction extends AbstractAction {

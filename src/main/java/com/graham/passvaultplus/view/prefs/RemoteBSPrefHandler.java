@@ -1,7 +1,6 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.prefs;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
 
@@ -110,10 +109,14 @@ public class RemoteBSPrefHandler {
 		d = new JDialog(parent, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 
-		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
-		JLabel icnLab = new JLabel(icn);
-		icnLab.setBorder(new EmptyBorder(16,25,16,24));
-		d.getContentPane().add(icnLab, BorderLayout.WEST);
+		{
+			ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+			JLabel icnLab = new JLabel(icn);
+			icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
+			JPanel p = new JPanel(new BorderLayout());
+			p.add(icnLab, BorderLayout.NORTH);
+			d.getContentPane().add(p, BorderLayout.WEST);
+		}
 
 		final JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -136,6 +139,12 @@ public class RemoteBSPrefHandler {
 		}
 
 		{
+			final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			p.add(new JLabel(" "));
+			centerPanel.add(p);
+		}
+
+		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			p.add(new JButton(new OverwriteAction()));
 			JButton mb = new JButton(new MergeAction(isNewDB));
@@ -144,13 +153,12 @@ public class RemoteBSPrefHandler {
 			}
 			p.add(mb);
 			p.add(new JButton(new CancelAction()));
-			p.setBorder(new EmptyBorder(20,20,20,20));
+			p.setBorder(new EmptyBorder(4,20,10,16));
 			centerPanel.add(p);
 		}
 
 		actionHit = FileAction.Cancel;
 		d.pack();
-		//BCUtil.center(d);
 		d.setLocationRelativeTo(parent);
 		d.setResizable(false);
 		d.setVisible(true); // this is the line that causes the dialog to Block

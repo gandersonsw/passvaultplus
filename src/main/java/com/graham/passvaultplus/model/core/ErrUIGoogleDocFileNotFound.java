@@ -6,12 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
 
@@ -30,9 +26,9 @@ public class ErrUIGoogleDocFileNotFound {
 
 	public JDialog buildDialog() {
 		JPanel p1 = new JPanel(new BorderLayout());
-		p1.add(buildTop(), BorderLayout.NORTH);
 		p1.add(buildCenter(), BorderLayout.CENTER);
 		p1.add(buildBottom(), BorderLayout.SOUTH);
+		p1.add(buildWest(), BorderLayout.WEST);
 
 		d = new JDialog(context.uiMain.getMainFrame(), "File not found", true);
 		d.setContentPane(p1);
@@ -42,15 +38,16 @@ public class ErrUIGoogleDocFileNotFound {
 		return d;
 	}
 
-	public JPanel buildTop() {
+	private JPanel buildCenter() {
+		final JPanel centerPanel = new JPanel();
+		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel a = new JLabel("Could not find file on Google Drive");
+		a.setBorder(new EmptyBorder(10,1,4,12));
 		p.add(a);
-		return p;
-	}
+		centerPanel.add(p);
 
-	public JPanel buildCenter() {
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JTextArea te = new JTextArea(
 				"Expected to find file with ID:" + context.prefs.getGoogleDriveDocId() +
 				"\nAlso looked for any files with the name: " + fileName +
@@ -59,16 +56,28 @@ public class ErrUIGoogleDocFileNotFound {
 				"\n\nIf you wish to not copy a file to Google Drive, uncheck \"Use Google Drive\" in the settings.");
 		te.setEditable(false);
 		final Font f1 = te.getFont().deriveFont(11.0f);
+		te.setBorder(new EmptyBorder(4,4,4,14));
 		te.setFont(f1);
-		p.add(te);
-		return p;
+		te.setBackground(centerPanel.getBackground());
+		centerPanel.add(te);
+		return centerPanel;
 	}
 
 
-	public JPanel buildBottom() {
+	private JPanel buildBottom() {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		p.add(new JButton(new UploadNowAction()));
 		p.add(new JButton(new DoneAction()));
+		p.setBorder(new EmptyBorder(4,20,10,16));
+		return p;
+	}
+
+	private JPanel buildWest() {
+		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+		JLabel icnLab = new JLabel(icn);
+		icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(icnLab, BorderLayout.NORTH);
 		return p;
 	}
 
@@ -92,8 +101,6 @@ public class ErrUIGoogleDocFileNotFound {
 			System.out.println("getting ready to copy to gggole");
 			context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
 			context.ui.enableQuitFromError(true);
-
-			//context.ui.getTabManager().removeOtherTab(panelInTabPane);
 		}
 	}
 
