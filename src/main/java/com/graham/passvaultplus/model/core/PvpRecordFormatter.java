@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 /**
  * Format the record in its default human readable plain-text format.
@@ -42,7 +43,7 @@ public class PvpRecordFormatter {
 			try {
 				parseFormat(format);
 			} catch (Exception e) {
-				PvpContext.getActiveUI().notifyWarning("PvpRecordFormatter: format=" + format, e);
+				PvpContextUI.getActiveUI().notifyWarning("PvpRecordFormatter: format=" + format, e);
 				formatParts = new ArrayList<>();
 				formatParts.add(new ConstantPart("format was bad: " + format));
 			}

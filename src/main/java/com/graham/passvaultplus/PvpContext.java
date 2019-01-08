@@ -30,7 +30,7 @@ public class PvpContext {
 	static final public int OPT_ICN_SCALE = 35;
 	static final public String USR_CANCELED = "operation cancelled by user";
 
-	static private PvpContextUI activeUI;
+
 
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
@@ -50,7 +50,7 @@ public class PvpContext {
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
 		PvpContext context = new PvpContext();
-		activeUI = context.ui;
+		//activeUI = context.ui;
 
 		if (pw != null) {
 			System.out.println("at 35353");
@@ -73,10 +73,6 @@ public class PvpContext {
 		} else {
 			new StartupOptionsFrame(context);
 		}
-	}
-
-	static public PvpContextUI getActiveUI() {
-		return activeUI;
 	}
 
 	public PvpContext() {
@@ -134,7 +130,7 @@ public class PvpContext {
 			cachedIcons.put(cachedName, i);
 			return i;
 		} catch (Exception e) {
-			PvpContext.getActiveUI().notifyWarning("PvpContext.getIcon :: " + imageName, e);
+			PvpContextUI.getActiveUI().notifyWarning("PvpContext.getIcon :: " + imageName, e);
 			return null;
 		}
 	}
@@ -165,7 +161,7 @@ public class PvpContext {
 			return sb.toString();
 
 		} catch (Exception e) {
-			PvpContext.getActiveUI().notifyWarning("WARN118 cant load resource text:" + rname, e);
+			PvpContextUI.getActiveUI().notifyWarning("WARN118 cant load resource text:" + rname, e);
 			return "";
 		} finally {
 			if (bufR != null) {

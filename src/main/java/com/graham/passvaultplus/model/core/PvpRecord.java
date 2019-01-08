@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 public class PvpRecord {
 
@@ -139,13 +140,13 @@ public class PvpRecord {
 			try {
 				creationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				PvpContext.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
+				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_MODIFICATION_DATE)) {
 			try {
 				modificationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
-				PvpContext.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
+				PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.USR_TYPE)) {
 			typeForValidate = fieldValue;

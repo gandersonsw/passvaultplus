@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 public class PinDialog {
 	private JDialog d;
@@ -40,7 +41,8 @@ public class PinDialog {
 	}
 	
 	public PinAction askForPin(final int pinWasBadCount) {
-		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+		d = PvpContextUI.createDialog("Pass Vault Plus");
+		//d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 		
 		final JPanel centerPanel = new JPanel();
@@ -109,10 +111,11 @@ public class PinDialog {
 			d.getRootPane().setDefaultButton(okB);
 		}
 		
-		d.pack();
-		BCUtil.center(d);
+		//d.pack();
+		//BCUtil.center(d);
 		d.setResizable(false);
-		d.setVisible(true); // this is the line that causes the dialog to Block
+		//d.setVisible(true); // this is the line that causes the dialog to Block
+		PvpContextUI.showDialog(d);
 		return actionHit;
 	}
 	
@@ -139,7 +142,8 @@ public class PinDialog {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = PinAction.Okay;
-			d.setVisible(false);
+			//d.setVisible(false);
+			PvpContextUI.hideDialog(d);
 		}
 	}
 	
@@ -149,7 +153,8 @@ public class PinDialog {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = PinAction.Configure;
-			d.setVisible(false);
+			//d.setVisible(false);
+			PvpContextUI.hideDialog(d);
 		}
 	}
 	
@@ -181,7 +186,8 @@ public class PinDialog {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = PinAction.UsePassword;
-			d.setVisible(false);
+			//d.setVisible(false);
+			PvpContextUI.hideDialog(d);
 		}
 	}
 }

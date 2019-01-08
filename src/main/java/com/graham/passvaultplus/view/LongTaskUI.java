@@ -3,10 +3,10 @@ package com.graham.passvaultplus.view;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -54,6 +54,7 @@ public class LongTaskUI implements Runnable {
 		private String taskDescription;
 		private boolean stillRinning;
 		private JButton cancelButton;
+		private boolean uiShowing;
 
 		private ArrayList<TaskStep> steps = new ArrayList<>();
 
@@ -83,17 +84,33 @@ public class LongTaskUI implements Runnable {
 						ltaskThread.start();
 
 						System.out.println("at 2 runLongTask");
-						try {
-								Thread.sleep(SHOW_DELAY);
-						}
-						catch (InterruptedException e1) {
-								System.out.println("at runLongTask InterruptedException 1");
-						}
-						synchronized (this) {
-								mainThread = null;
-						}
-						if (getShouldShowCancelDialog()) {
-								showCancelDialog();
+
+						while (getShouldShowCancelDialog()) {
+								System.out.println("at 2.1 runLongTask");
+								try {
+										Thread.sleep(SHOW_DELAY);
+								} catch (InterruptedException e1) {
+										System.out.println("at runLongTask InterruptedException 1");
+								}
+								System.out.println("at 2.2 runLongTask");
+								if (isUIShowing()) {
+										System.out.println("at 2.3 runLongTask");
+										waitUiDone();
+								} else if (getShouldShowCancelDialog()) {
+										initCancelDialog();
+										if (getShouldShowCancelDialog() && !this.isUIShowing()) {
+												synchronized (this) {
+														//if (this.uiShowing && this.shouldShowCancelDialog) {
+																mainThread = null; // set this to null because we dont want to have it intrupted anymore
+																System.out.println("at 2.4 runLongTask");
+													//	}
+												}
+											showCancelDialog();
+										}
+
+								} else {
+										System.out.println("should never be here 6482");
+								}
 						}
 
 						if (ltaskException != null) {
@@ -103,6 +120,43 @@ public class LongTaskUI implements Runnable {
 						return wasCanceled;
 				} finally {
 						stillRinning = false;
+				}
+		}
+
+		static public void goingToShowUI() {
+				if (activeTask != null) {
+						synchronized (activeTask) {
+								System.out.println("uiShowing = true : goingToShowUI");
+								activeTask.uiShowing = true;
+						}
+				}
+		}
+
+		static public void goingToHideUI() {
+				if (activeTask != null) {
+						synchronized (activeTask) {
+								System.out.println("uiShowing = false : goingToHideUI");
+								activeTask.uiShowing = false;
+								if (activeTask.mainThread != null) {
+										System.out.println("NOTIFY: LongTaskUI.goingToHideUI");
+										activeTask.mainThread.interrupt();
+								}
+						}
+				}
+		}
+
+		synchronized private boolean isUIShowing() {
+				return uiShowing;
+		}
+
+		private void waitUiDone() {
+				while (isUIShowing()) {
+						try {
+								Thread.sleep(30000);
+								System.out.println("NOTIFY: LongTaskUI.waitUiDone ??");
+						} catch (InterruptedException e1) {
+								System.out.println("at waitUiDone InterruptedException");
+						}
 				}
 		}
 
@@ -186,9 +240,13 @@ public class LongTaskUI implements Runnable {
 				System.out.println("at 21 interruptMainThread");
 		}
 
-		private void showCancelDialog() {
+		private void initCancelDialog() {
+				if (cancelDialog != null) {
+						System.out.println("initCancelDialog exiting");
+						return;
+				}
 				System.out.println("at 8 ShowUITimer");
-				cancelDialog = new JDialog(PvpContext.getActiveUI().getFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 				cancelDialog.getContentPane().setLayout(new BorderLayout());
 
 				{
@@ -217,11 +275,10 @@ public class LongTaskUI implements Runnable {
 						p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 						progressText = new JTextArea();
 
-						progressText.setPreferredSize(new Dimension(300,68));
+						progressText.setPreferredSize(new Dimension(300, 68));
 						progressText.setEditable(false);
 						progressText.setFont(BCUtil.getBodyFont());
 						progressText.setBackground(p.getBackground());
-
 
 						stepsChanged();
 						p.add(progressText);
@@ -237,23 +294,36 @@ public class LongTaskUI implements Runnable {
 						final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 						cancelButton = new JButton(new CancelAction());
 						p.add(cancelButton);
-						p.setBorder(new EmptyBorder(4,20,10,16));
+						p.setBorder(new EmptyBorder(4, 20, 10, 16));
 						//p.setBorder(new MatteBorder(4,20,10,16, Color.MAGENTA));
 
 						centerPanel.add(p);
 				}
 
-				timerThread = new Thread(() -> { try { while (true) { Thread.sleep(1000); updateTimerDisplay();} } catch (InterruptedException ie) { System.out.println("at Timer Thread InterruptedException 1"); } System.out.println("at 99 Timer Thread done"); }, "LongTaskUI Timer Thread");
+				timerThread = new Thread(() -> {
+						try {
+								while (true) {
+										Thread.sleep(1000);
+										updateTimerDisplay();
+								}
+						}
+						catch (InterruptedException ie) {
+								System.out.println("at Timer Thread InterruptedException 1");
+						}
+						System.out.println("at 99 Timer Thread done");
+				}, "LongTaskUI Timer Thread");
 				timerThread.start();
 
 				cancelDialog.pack();
-			//	BCUtil.center(cancelDialog, PvpContext.getActiveUI().getFrame());
-				cancelDialog.setLocationRelativeTo(PvpContext.getActiveUI().getFrame());
+				//	BCUtil.center(cancelDialog, PvpContext.getActiveUI().getFrame());
+				cancelDialog.setLocationRelativeTo(PvpContextUI.getActiveUI().getFrame());
 				cancelDialog.setResizable(false);
 				System.out.println("at 9 ShowUITimer");
 
 				cancelDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		}
 
+		private void showCancelDialog() {
 				cancelDialog.setVisible(true); // this is the line that causes the dialog to Block
 		}
 

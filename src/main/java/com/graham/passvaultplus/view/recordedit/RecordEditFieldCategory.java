@@ -5,6 +5,7 @@ import javax.swing.JComboBox;
 
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.model.core.PvpRecord;
 
 public class RecordEditFieldCategory extends RecordEditField {
@@ -48,7 +49,7 @@ public class RecordEditFieldCategory extends RecordEditField {
 
 	@Override
 	public String getFieldTextForCopy() {
-		PvpContext.getActiveUI().notifyWarning("RecordEditFieldCategory.getFieldTextForCopy :: should not be called");
+		PvpContextUI.getActiveUI().notifyWarning("RecordEditFieldCategory.getFieldTextForCopy :: should not be called");
 		return "";
 	}
 

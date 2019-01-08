@@ -3,6 +3,7 @@ package com.graham.passvaultplus.actions;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 import javax.swing.*;
 import java.awt.Desktop;
@@ -34,7 +35,7 @@ public class GoToUrlAction extends AbstractAction {
 				Desktop.getDesktop().browse(uri);
 			} catch (Exception ex) {
 					// TODO test this line when main ui not showing
-				PvpContext.getActiveUI().showMessageDialog("Error", "There was an error opening link: " + ex.getMessage());
+				PvpContextUI.getActiveUI().showMessageDialog("Error", "There was an error opening link: " + ex.getMessage());
 			}
 		}
 	}

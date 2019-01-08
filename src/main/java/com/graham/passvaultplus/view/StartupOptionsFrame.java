@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.view.prefs.PreferencesBuilder;
 import com.graham.passvaultplus.view.prefs.PreferencesConnectionStartup;
 
@@ -32,7 +33,7 @@ public class StartupOptionsFrame extends JFrame {
 		pack();
 		BCUtil.center(this);
 		setResizable(false);
-		PvpContext.getActiveUI().setFrame(this);
+		PvpContextUI.getActiveUI().setFrame(this);
 		setVisible(true);
 	}
 	

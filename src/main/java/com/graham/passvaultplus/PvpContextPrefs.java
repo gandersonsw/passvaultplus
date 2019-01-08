@@ -158,7 +158,7 @@ public class PvpContextPrefs {
 								tryingToGetValidPin = false;
 							} else {
 								if (pinTryCount >= getPinMaxTry()) {
-									PvpContext.getActiveUI().notifyInfo("PIN disabled after " + pinTryCount + " trys");
+									PvpContextUI.getActiveUI().notifyInfo("PIN disabled after " + pinTryCount + " trys");
 									// too many tries - delete the password
 									tryingToGetValidPin = false;
 									clearPassword();
@@ -168,7 +168,7 @@ public class PvpContextPrefs {
 							}
 						} catch (PvpException e) {
 							pin = "";
-							PvpContext.getActiveUI().notifyBadException(e, true, null);
+							PvpContextUI.getActiveUI().notifyBadException(e, true, null);
 						}
 					}
 				}
@@ -243,7 +243,7 @@ public class PvpContextPrefs {
 		try {
 			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
 		} catch (PvpException e) {
-			PvpContext.getActiveUI().notifyBadException(e, true, null);
+			PvpContextUI.getActiveUI().notifyBadException(e, true, null);
 		}
 		byte[] passwordToPersist;
 		if (makePersistant) {
