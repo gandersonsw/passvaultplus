@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
@@ -47,6 +48,10 @@ public class PvpRecord {
 
 	void setId(int idParam) {
 		id = idParam;
+	}
+
+	public void clearId() {
+		id = 0;
 	}
 
 	public PvpRecord getCategory() {
@@ -164,6 +169,27 @@ public class PvpRecord {
 
 	public String getFormated() {
 		return rtType.getFullFormatter().format(this);
+	}
+
+	public String getFullText(boolean includeEmptyFields) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("ID=");
+		sb.append(this.getId());
+		sb.append("; ");
+		for (Map.Entry<String, String> entry : getAllFields().entrySet()) {
+			if (!includeEmptyFields && entry.getValue().trim().length() > 0) {
+				sb.append(entry.getKey());
+				sb.append("=");
+				PvpField f = rtType.getField(entry.getKey());
+				if (f != null && f.isClassificationSecret()) {
+					sb.append("***");
+				} else {
+					sb.append(entry.getValue());
+				}
+				sb.append("; ");
+			}
+		}
+		return sb.toString();
 	}
 
 	/**

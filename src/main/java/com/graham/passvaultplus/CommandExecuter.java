@@ -1,18 +1,21 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.graham.passvaultplus.model.core.ErrUIGoogleDocFileNotFound;
-import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.JceDialog;
 import com.graham.passvaultplus.view.LongTask;
 import com.graham.passvaultplus.view.LongTaskUI;
 import com.graham.passvaultplus.view.prefs.RemoteBSPrefHandler;
 import com.graham.passvaultplus.view.prefs.ResetPrefsAction;
+import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
+import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 public class CommandExecuter {
 	
@@ -24,7 +27,7 @@ public class CommandExecuter {
 	}
 	
 	public String[] getCommands() {
-		String[] commands = { "TestLongTask", "TestJce", "TestEula", "TestRemoteAsk", "TestGDNF", "TestResetPrefs", "SetAllModDate", "SetAllCreateDate", "Exit" };
+		String[] commands = { "TestLongTask", "TestJce", "TestEula", "TestRemoteAsk", "TestGDNF", "TestResetPrefs", "SetAllModDate", "SetAllCreateDate", "SearchBackups", "OpenBackupRecord", "Exit" };
 		return commands;
 	}
 	
@@ -44,8 +47,11 @@ public class CommandExecuter {
 		if (command.equals("TestGDNF") ) {
 			return "TestFile.txt";
 		}
-		if (command.equals("Exit") || command.equals("TestResetPrefs") || command.equals("TestEula")) {
+		if (command.equals("Exit") || command.equals("TestResetPrefs") || command.equals("TestEula") || command.equals("SearchBackups")) {
 			return "";
+		}
+		if (command.equals("OpenBackupRecord")) {
+			return "filename.xml,12";
 		}
 		return "?";
 	}
@@ -70,11 +76,16 @@ public class CommandExecuter {
 			} else if (command.equals("SetAllCreateDate")) {
 				setCreationDates(df.parse(args));
 			} else if (command.equals("Exit")) {
-				doExit();
+					doExit();
+			} else if (command.equals("SearchBackups")) {
+					searchBackups(args);
+			} else if (command.equals("OpenBackupRecord")) {
+					String[] sa = args.split(",");
+					openBackupRecord(sa[0], Integer.parseInt(sa[1]));
 			} else {
 				context.ui.notifyInfo("Unkown Command:" + command);
 			}
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			context.ui.notifyInfo("Error:" + e);
 		}
 	}
@@ -130,6 +141,56 @@ public class CommandExecuter {
 	
 	private void doExit() {
 		System.exit(0);
+	}
+
+	private void searchBackups(String searchText) {
+			PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
+			File[] fArr = bsFileMain.getAllFiles();
+			int count = 0;
+			for (File f : fArr) {
+					context.ui.notifyInfo("- - - - Searching File: " + f.getName() + " - - - -");
+					PvpInStreamer fileReader = null;
+					try {
+							PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
+							fileReader = new PvpInStreamer(bsFileBackup, context);
+							BufferedInputStream inStream = fileReader.getStream();
+							PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+							PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
+							for (PvpRecord r : fr.records) {
+									context.ui.notifyInfo(r.getFullText(false));
+							}
+							count += fr.records.size();
+					} catch (Exception e) {
+							context.ui.notifyWarning("Failed to search file: " + f.getName(), e);
+					} finally {
+							if (fileReader != null) {
+									fileReader.close();
+							}
+					}
+			}
+			context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
+	}
+
+	private void openBackupRecord(String fileName, int id) {
+			File f = new File(context.prefs.getDataFile().getParent(), fileName);
+			PvpInStreamer fileReader = null;
+			try {
+					PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
+					fileReader = new PvpInStreamer(bsFileBackup, context);
+					BufferedInputStream inStream = fileReader.getStream();
+					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+					PvpRecord r = newDataInterface.getRecord(id);
+					r.clearId();
+					final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
+					context.uiMain.addRecordEditor(fileName + ":" + id, editor);
+					context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
+			} catch (Exception e) {
+					context.ui.notifyWarning("Failed to Open Record: " + f.getName(), e);
+			} finally {
+					if (fileReader != null) {
+							fileReader.close();
+					}
+			}
 	}
 
 	static class LongTaskTest implements LongTask {

@@ -38,7 +38,7 @@ public class PvpPersistenceInterface {
 		public PvpPersistenceInterface(final PvpContext contextParam) {
 				context = contextParam;
 				backingStores = new ArrayList<>();
-				backingStores.add(new PvpBackingStoreFile(context.prefs)); // File needs to be the first Backing Store in the list
+				backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
 				backingStores.add(new PvpBackingStoreGoogleDocs(context));
 		}
 

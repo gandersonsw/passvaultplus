@@ -10,14 +10,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.graham.passvaultplus.AppUtil;
-import com.graham.passvaultplus.PvpContextPrefs;
 
 public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
-	private final PvpContextPrefs contextPrefs;
+	private File theF;
 
-	public PvpBackingStoreFile(PvpContextPrefs contextParam) {
-		contextPrefs = contextParam;
+	public PvpBackingStoreFile(File f) {
+		theF = f;
 	}
 
 	@Override
@@ -32,25 +31,24 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(contextPrefs.getDataFile());
+		return new FileInputStream(theF);
 	}
 
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		checkBackupFileHourly(contextPrefs.getDataFile()); // TODO - is this correct? if this called and save does not happen - bad things will happen
-		return new FileOutputStream(contextPrefs.getDataFile());
+		checkBackupFileHourly(theF); // TODO - is this correct? if this called and save does not happen - bad things will happen
+		return new FileOutputStream(theF);
 	}
 
 	@Override
 	public boolean isCompressed(boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(contextPrefs.getDataFile().getName());
+		return PvpPersistenceInterface.isCompressed(theF.getName());
 	}
 
 	@Override
 	public boolean isEncrypted(boolean inFlag) {
-		return PvpPersistenceInterface.isEncrypted(contextPrefs.getDataFile().getName());
+		return PvpPersistenceInterface.isEncrypted(theF.getName());
 	}
-
 
 	/**
 	 * Check to see if a backup file has been created in the last hour. If it has not, rename the given file to the backup file name.
@@ -65,8 +63,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 		}
 	}
 
+	public File[] getAllFiles() {
+		return theF.getParentFile().listFiles(new MyFF(theF));
+	}
+
 	public void deleteAll() {
-		File[] fArr = contextPrefs.getDataFile().getParentFile().listFiles(new MyFF(contextPrefs.getDataFile()));
+		File[] fArr = getAllFiles();
 		for (File f : fArr) {
 			System.out.println("deleteAll: deleteing:" + f);
 			f.delete();
@@ -80,18 +82,18 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 		}
 		public boolean accept(File dir, String name) {
 			String testParts[] = AppUtil.getFileNameParts(name);
-			return filenameParts[0].startsWith(testParts[0]) && PvpPersistenceInterface.isPvpFileExt(filenameParts[1]);
+			return testParts[0].startsWith(filenameParts[0]) && PvpPersistenceInterface.isPvpFileExt(testParts[1]);
 		}
 	}
 
 	@Override
 	public long getLastUpdatedDate() {
-		return contextPrefs.getDataFile().lastModified();
+		return theF.lastModified();
 	}
 
 	@Override
 	public String getDisplayableResourceLocation() {
-		return "File: " + contextPrefs.getDataFile();
+		return "File: " + theF;
 	}
 
 	@Override

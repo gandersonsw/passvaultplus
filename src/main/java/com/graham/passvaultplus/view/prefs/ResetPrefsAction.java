@@ -35,7 +35,7 @@ public class ResetPrefsAction extends AbstractAction {
     context.uiMain.getMainFrame().setVisible(false);
     if (deleteDb.isSelected()) {
       System.out.println("deleteing stuff");
-      PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context.prefs);
+      PvpBackingStoreFile bsFile = new PvpBackingStoreFile(context.prefs.getDataFile());
       bsFile.deleteAll();
     }
     PvpBackingStoreGoogleDocs.deleteLocalCredentials();

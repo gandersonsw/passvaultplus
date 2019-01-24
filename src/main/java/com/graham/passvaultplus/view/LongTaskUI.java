@@ -246,7 +246,7 @@ public class LongTaskUI implements Runnable {
 						return;
 				}
 				System.out.println("at 8 ShowUITimer");
-				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (ML)", Dialog.ModalityType.MODELESS);
 				cancelDialog.getContentPane().setLayout(new BorderLayout());
 
 				{
