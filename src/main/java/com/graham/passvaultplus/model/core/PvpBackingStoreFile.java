@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Date;
 
 import com.graham.passvaultplus.AppUtil;
 
@@ -56,19 +58,27 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	private void checkBackupFileHourly(final File f) {
 		String filenameParts[] = AppUtil.getFileNameParts(f.getName());
 		String timeStamp = AppUtil.getHourlyTimeStamp();
-		File backupFile = new File(f.getParentFile(), filenameParts[0] + "-" + timeStamp + "." + filenameParts[1]);
+		File backupFile = new File(f.getParentFile(), filenameParts[0] + timeStamp + "." + filenameParts[1]);
 		// don't backup if a backup has been done within the last hour
 		if (!backupFile.exists()) {
 			f.renameTo(backupFile);
 		}
 	}
 
-	public File[] getAllFiles() {
-		return theF.getParentFile().listFiles(new MyFF(theF));
+	public File[] getAllFiles(boolean sortByDate) {
+		File[] files = theF.getParentFile().listFiles(new MyFF(theF));
+		if (sortByDate) {
+			Arrays.sort(files, (f1, f2) -> {
+				Date d1 = AppUtil.parseHourlyTimeStamp(f1.getName());
+				Date d2 = AppUtil.parseHourlyTimeStamp(f2.getName());
+				return d1.compareTo(d2);
+			});
+		}
+		return files;
 	}
 
 	public void deleteAll() {
-		File[] fArr = getAllFiles();
+		File[] fArr = getAllFiles(false);
 		for (File f : fArr) {
 			System.out.println("deleteAll: deleteing:" + f);
 			f.delete();

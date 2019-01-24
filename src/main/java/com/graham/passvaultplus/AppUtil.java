@@ -162,12 +162,20 @@ public class AppUtil {
 	}
 
   /**
-	 * A format like 2016-8-28-15
-	 * With year-month-day-hour
+	 * A format like -2016-8-28-15
+	 * With -year-month-day-hour
 	 */
 	public static String getHourlyTimeStamp() {
+		return getHourlyTimeStamp(null);
+	}
+
+	public static String getHourlyTimeStamp(Date d) {
 		Calendar c = Calendar.getInstance();
+		if (d != null) {
+			c.setTime(d);
+		}
 		StringBuffer ret = new StringBuffer();
+		ret.append("-");
 		ret.append(c.get(Calendar.YEAR));
 		ret.append("-");
 		ret.append(1 + c.get(Calendar.MONTH));
@@ -176,6 +184,31 @@ public class AppUtil {
 		ret.append("-");
 		ret.append(c.get(Calendar.HOUR_OF_DAY));
 		return ret.toString();
+	}
+
+	public static Date parseHourlyTimeStamp(String ts) {
+		String[] parts = ts.split("-");
+		for (int ioffs = 0; ioffs < parts.length - 3; ioffs++) {
+			try {
+				int year = Integer.parseInt(parts[ioffs]);
+				int month = Integer.parseInt(parts[ioffs + 1]);
+				int day = Integer.parseInt(parts[ioffs + 2]);
+				int hour;
+				if (parts[ioffs + 3].length() > 1 && Character.isDigit(parts[ioffs + 3].charAt(1))) {
+					hour = Integer.parseInt(parts[ioffs + 3].substring(0,2));
+				} else {
+					hour = Integer.parseInt(parts[ioffs + 3].substring(0,1));
+				}
+
+				Calendar c = Calendar.getInstance();
+				c.set(year, month - 1, day, hour, 0, 0);
+				return c.getTime();
+			} catch (Exception e) {
+				// ignore this
+			}
+		}
+
+		return new Date(); // return now as a default
 	}
 
 	public static String getExceptionStackTrace(final Exception e) {

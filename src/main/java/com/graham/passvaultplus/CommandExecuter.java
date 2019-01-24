@@ -145,7 +145,7 @@ public class CommandExecuter {
 
 	private void searchBackups(String searchText) {
 			PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
-			File[] fArr = bsFileMain.getAllFiles();
+			File[] fArr = bsFileMain.getAllFiles(true);
 			int count = 0;
 			for (File f : fArr) {
 					context.ui.notifyInfo("- - - - Searching File: " + f.getName() + " - - - -");
