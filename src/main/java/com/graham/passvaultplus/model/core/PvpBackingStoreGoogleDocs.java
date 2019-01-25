@@ -11,7 +11,6 @@ import java.util.List;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -146,7 +145,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		final List<File> files = result.getFiles();
 		if (files == null || files.size() == 0) {
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: No files found.");
-			return false; // TODO should never return null
+			return false;
 		} else {
 			final String localFileName = getFileName(false);
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Files:");
@@ -160,10 +159,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 					final String id = file.getId();
 					context.prefs.setGoogleDriveDocId(id);
 					return true;
-					//return driveService.files().get(id).executeMediaAsInputStream();
-					}
 				}
 			}
+		}
 		return false;
 	}
 
@@ -203,7 +201,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			throw new IOException(e);
 		}
 
-		final FileContent mediaContent = new FileContent(null, context.prefs.getDataFile()); // TODO not sure null is correct
+		final FileContent mediaContent = new FileContent(null, context.prefs.getDataFile()); // null for no file type
 		File returnedFileMetaData = null;
 		final String id = context.prefs.getGoogleDriveDocId();
 		final File newFileMetadata = new File();

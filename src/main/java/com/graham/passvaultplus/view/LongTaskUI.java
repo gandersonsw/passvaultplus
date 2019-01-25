@@ -109,7 +109,7 @@ public class LongTaskUI implements Runnable {
 										}
 
 								} else {
-										System.out.println("should never be here 6482");
+										System.out.println("should never be here 6482");// TODO we get here sometimes
 								}
 						}
 

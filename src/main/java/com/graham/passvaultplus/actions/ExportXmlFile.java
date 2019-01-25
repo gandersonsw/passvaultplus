@@ -39,8 +39,7 @@ public class ExportXmlFile extends AbstractAction {
 		} finally {
 			fileReader.close();
 		}
-		
-		// TODO test this
+
 		JTextArea te = new JTextArea();
 		te.setText(rawXML);
 		JScrollPane sp = new JScrollPane(te);

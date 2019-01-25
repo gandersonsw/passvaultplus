@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.model.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class PvpDataInterface {
 	static final public String TYPE_PASSWORD_GEN = "Password Generator";
 
 	static public class FilterResults {
-		public List<PvpRecord> records = new ArrayList<PvpRecord>();
+		public List<PvpRecord> records = new ArrayList<>();
 		public boolean allTheSameTypeFlag = true;
 	}
 
@@ -68,7 +67,7 @@ public class PvpDataInterface {
 
 	public List<PvpRecord> getRecordsOfType(String typeName) {
 		// TODO optimize this
-		List<PvpRecord> ret = new ArrayList<PvpRecord>();
+		List<PvpRecord> ret = new ArrayList<>();
 		for (PvpRecord r : records) {
 			if (PvpType.sameType(r.getType(), typeName)) {
 				ret.add(r);
@@ -98,55 +97,22 @@ public class PvpDataInterface {
 			int nextID = getNextMaxId();
 			r.setId(nextID);
 			records.add(r);
+		} else {
+			context.ui.notifyWarning("called saveRecord with ID not 0:" + r);
 		}
-		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance
-		context.uiMain.getViewListContext().filterUIChanged();
 	}
 
-	public void deleteRecord(final PvpRecord r) {
+	/**
+	 * @return True if it was deleted, false if no change was made.
+	 */
+	public boolean deleteRecord(final PvpRecord r) {
 		if (records.contains(r)) {
 			records.remove(r);
 			r.setId(0);
-			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.uiMain.getViewListContext().filterUIChanged();
+			return true;
 		} else {
 			context.ui.notifyWarning("WARN111 could not delete record because it is not in the list:" + r);
-		}
-	}
-
-	public void saveRecords(final Collection<PvpRecord> rCol) {
-		if (rCol == null || rCol.size() == 0) {
-			return;
-		}
-		for (PvpRecord r : rCol) {
-			if (r.getId() == 0) {
-				int nextID = getNextMaxId();
-				r.setId(nextID);
-				records.add(r);
-			}
-		}
-		context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependance on getFileInterface
-		context.uiMain.getViewListContext().filterUIChanged();
-	}
-
-	public void deleteRecords(final Collection<PvpRecord> rCol) {
-		if (rCol == null || rCol.size() == 0) {
-			return;
-		}
-		boolean changed = false;
-		for (PvpRecord r : rCol) {
-			if (records.contains(r)) {
-				records.remove(r);
-				r.setId(0);
-				changed = true;
-			} else {
-				context.ui.notifyWarning("WARN112 could not delete record because it is not in the list:" + r);
-			}
-		}
-
-		if (changed) {
-			context.data.getFileInterface().save(this, PvpPersistenceInterface.SaveTrigger.cud); // TODO remove dependence
-			context.uiMain.getViewListContext().filterUIChanged();
+			return false;
 		}
 	}
 

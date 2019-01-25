@@ -3,30 +3,68 @@ package com.graham.passvaultplus;
 
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
+import com.graham.passvaultplus.model.core.PvpRecord;
+
+import java.util.Collection;
 
 public class PvpContextData {
-  private PvpPersistenceInterface rtFileInterface;
-  private PvpDataInterface rtDataInterface;
-  private PvpContext context;
+	private PvpPersistenceInterface rtFileInterface;
+	private PvpDataInterface rtDataInterface;
+	private PvpContext context;
 
-  PvpContextData(PvpContext c) {
-    rtFileInterface = new PvpPersistenceInterface(c);
-    rtDataInterface = new PvpDataInterface(c);
-  }
+	PvpContextData(PvpContext c) {
+		context = c;
+		rtFileInterface = new PvpPersistenceInterface(c);
+		rtDataInterface = new PvpDataInterface(c);
+	}
 
 	public PvpPersistenceInterface getFileInterface() {
-		return this.rtFileInterface;
+		return rtFileInterface;
 	}
 
 	public PvpDataInterface getDataInterface() {
-		return this.rtDataInterface;
+		return rtDataInterface;
+	}
+
+	public void saveRecord(final PvpRecord r) {
+		rtDataInterface.saveRecord(r);
+		dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
+	}
+
+	public void saveRecords(final Collection<PvpRecord> rCol) {
+		if (rCol == null || rCol.size() == 0) {
+			return;
+		}
+		for (PvpRecord r : rCol) {
+			rtDataInterface.saveRecord(r);
+		}
+		dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
+	}
+
+	public void deleteRecords(final Collection<PvpRecord> rCol) {
+		if (rCol == null || rCol.size() == 0) {
+			return;
+		}
+		boolean changed = false;
+		for (PvpRecord r : rCol) {
+			changed = changed || rtDataInterface.deleteRecord(r);
+		}
+		if (changed) {
+			dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
+		}
 	}
 
   /**
    * To be called when a big change is made, and the database should be saved to the file, and the data view should be refreshed
    */
   public void saveAndRefreshDataList() {
-    getFileInterface().save(getDataInterface(), PvpPersistenceInterface.SaveTrigger.major);
-    context.uiMain.getViewListContext().filterUIChanged();
+		dataChanged(PvpPersistenceInterface.SaveTrigger.major);
   }
+
+  private void dataChanged(PvpPersistenceInterface.SaveTrigger trigger) {
+		rtFileInterface.save(rtDataInterface, trigger);
+		if (context.uiMain != null) {
+			context.uiMain.getViewListContext().filterUIChanged();
+		}
+	}
 }

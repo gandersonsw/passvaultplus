@@ -16,7 +16,7 @@ import com.graham.passvaultplus.PvpContext;
  */
 public class PvpDataMerger {
 
-	static public enum MergeResultState {
+	public enum MergeResultState {
 		NO_CHANGE(0),    // the 2 datasets are syncronized already
 		FROM_CHANGED(1), // the FROM dataset was changed with newer updates from the TO dataset
 		TO_CHANGED(2),   // the TO dataset was changed with newer updates from the FROM dataset

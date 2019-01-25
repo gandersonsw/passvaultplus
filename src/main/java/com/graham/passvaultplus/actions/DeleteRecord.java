@@ -69,7 +69,7 @@ public class DeleteRecord extends AbstractAction {
 			context.uiMain.removeRecordEditor(ec2);
 		}
 		if (records != null) {
-			context.data.getDataInterface().deleteRecords(records);
+			context.data.deleteRecords(records);
 			context.uiMain.getUndoManager().undoableEditHappened(new UndoableEditEvent(records, new DRUndoableEdit(records)));
 		}
 
@@ -86,7 +86,7 @@ public class DeleteRecord extends AbstractAction {
 
 		@Override
 		public void undo() throws CannotUndoException {
-			context.data.getDataInterface().saveRecords(records);
+			context.data.saveRecords(records);
 		}
 
 		@Override
@@ -96,7 +96,7 @@ public class DeleteRecord extends AbstractAction {
 
 		@Override
 		public void redo() throws CannotRedoException {
-			context.data.getDataInterface().deleteRecords(records);
+			context.data.deleteRecords(records);
 		}
 
 		@Override

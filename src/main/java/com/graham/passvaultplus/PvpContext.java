@@ -24,18 +24,16 @@ import com.graham.passvaultplus.view.MainFrame;
  * This is not a singleton, although in general there should
  * be one instance of this active at any time.
  */
-public class PvpContext {
+public class PvpContext implements Thread.UncaughtExceptionHandler {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
 	static final public String USR_CANCELED = "operation cancelled by user";
 
-
-
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
 	public final PvpContextUI ui;
-	public PvpContextUIMainFrame uiMain;
+	public PvpContextUIMainFrame uiMain; // this can be null if the Main UI is not initialized yet
 
 	/**
 	 * Action A: Select data file: new StartupOptionsFrame(...)
@@ -50,6 +48,7 @@ public class PvpContext {
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
 		PvpContext context = new PvpContext();
+		Thread.setDefaultUncaughtExceptionHandler(context);
 		//activeUI = context.ui;
 
 		if (pw != null) {
@@ -79,14 +78,20 @@ public class PvpContext {
 		prefs = new PvpContextPrefs();
 		data = new PvpContextData(this);
 		ui = new PvpContextUI(DiagnosticsManager.get());
-		//uiMain TODO
 	}
 
 	public PvpContext(PvpContext mainContext, PvpContextPrefs tempPrefs) {
 		prefs = tempPrefs;
 		data = null;
 		ui = mainContext.ui;
-		//uiMain TODO
+	}
+
+	public void uncaughtException(Thread t, Throwable e) {
+		if (e instanceof Exception) {
+			ui.notifyWarning("UncaughtException", (Exception)e);
+		} else {
+			e.printStackTrace();
+		}
 	}
 
 	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
