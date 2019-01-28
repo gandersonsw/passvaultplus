@@ -13,6 +13,7 @@ import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.OtherTab;
+import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 /**
@@ -30,7 +31,8 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		// if changes made don't require file rewrite, don't do it
 		if (wasChanges) {
 			//context.setDataFilePath(dataFile.getAbsolutePath());
-			context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major); // TODO if there is an exception here the changes from line 27 should not be applied
+			LTManager.runSync(context.data.getFileInterface().saveLT(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major), "Saving...");
+			//context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major); // TODO if there is an exception here the changes from line 27 should not be applied
 		}
 		context.uiMain.hideTab(OtherTab.Prefs);
 		return true;

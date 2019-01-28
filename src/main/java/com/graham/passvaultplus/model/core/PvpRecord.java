@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
@@ -270,11 +269,11 @@ public class PvpRecord {
 	 */
 	public boolean copyTo(PvpRecord otherRec) {
 		if (otherRec == null) {
-			System.out.println("cant copy to null");
+			System.out.println("PvpRecord.copyTo.A - cant copy to null");
 			return false;
 		}
 		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
-			System.out.println("cant copy to other type");
+			System.out.println("PvpRecord.copyTo.B - cant copy to other type");
 			return false;
 		}
 

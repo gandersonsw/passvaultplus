@@ -170,7 +170,7 @@ public class PvpDataMergerTest {
 		ArgumentCaptor<String> contextInfoCaptor = ArgumentCaptor.forClass(String.class);
 		verify(context, atLeastOnce()).ui.notifyInfo(contextInfoCaptor.capture());
 		for (String s : contextInfoCaptor.getAllValues()) {
-			System.out.println(s);
+			System.out.println("PvpDataMergerTest.printContextInfo - " + s);
 		}
 	}
 

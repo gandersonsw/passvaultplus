@@ -80,7 +80,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	public void deleteAll() {
 		File[] fArr = getAllFiles(false);
 		for (File f : fArr) {
-			System.out.println("deleteAll: deleteing:" + f);
+			System.out.println("PvpBackingStoreFile.deleteAll - deleteing:" + f);
 			f.delete();
 		}
 	}

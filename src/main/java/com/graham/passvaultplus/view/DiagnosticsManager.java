@@ -5,17 +5,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.longtask.CancelableLongTask;
+import com.graham.passvaultplus.view.longtask.LTCallback;
+import com.graham.passvaultplus.view.longtask.LongTask;
 
 public class DiagnosticsManager implements OtherTabBuilder {
 	private static DiagnosticsManager activeManager = new DiagnosticsManager();
@@ -24,6 +21,8 @@ public class DiagnosticsManager implements OtherTabBuilder {
 	private StringBuilder log = new StringBuilder();
 	private JTextField paramsTF;
 	private JComboBox<String> commandCB;
+	private JButton doIt;
+	private CommandExecuter executer;
 
 	public static DiagnosticsManager get() {
 		return activeManager;
@@ -37,7 +36,7 @@ public class DiagnosticsManager implements OtherTabBuilder {
 	}
 
 	public Component build(PvpContext context) {
-		final CommandExecuter executer = new CommandExecuter(context);
+		executer = new CommandExecuter(context, new CommandExeCallBack());
 		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
 		JScrollPane sp = new JScrollPane(ta);
@@ -48,7 +47,7 @@ public class DiagnosticsManager implements OtherTabBuilder {
 		commandP.add(commandCB, BorderLayout.WEST);
 		paramsTF = new JTextField();
 		commandP.add(paramsTF, BorderLayout.CENTER);
-		JButton doIt = new JButton(new DoCommandAction(executer));
+		doIt = new JButton(new DoCommandAction(executer));
 		commandP.add(doIt, BorderLayout.EAST);
 		mainP.add(commandP, BorderLayout.SOUTH);
 
@@ -118,5 +117,36 @@ public class DiagnosticsManager implements OtherTabBuilder {
 			paramsTF.setText(executer.getDefaultArguments((String)commandCB.getSelectedItem()));
 		}
 	}
+
+		class CommandExeCallBack extends AbstractAction implements LTCallback {
+			private LongTask currentLt;
+			public CommandExeCallBack() {
+					super("Cancel");
+			}
+			Action oldAction;
+				@Override
+				public void taskStarting(LongTask lt) {
+						currentLt = lt;
+						System.out.println("- - - CECB - - - taskStarting - - -");
+						oldAction = doIt.getAction();
+						doIt.setAction(this);
+				}
+				@Override
+				public void taskComplete(LongTask lt) {
+						System.out.println("- - - CECB - - - taskComplete - - -");
+						doIt.setAction(oldAction);
+				}
+				@Override
+				public void handleException(LongTask lt, Exception e) {
+						System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
+				}
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+						if (currentLt instanceof CancelableLongTask) {
+								((CancelableLongTask)currentLt).cancel();
+						}
+				}
+		}
 
 }

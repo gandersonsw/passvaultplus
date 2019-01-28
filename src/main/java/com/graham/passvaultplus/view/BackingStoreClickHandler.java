@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
+import com.graham.passvaultplus.model.core.PvpBackingStoreLTCB;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class BackingStoreClickHandler extends MouseAdapter {
 
@@ -23,7 +25,7 @@ public class BackingStoreClickHandler extends MouseAdapter {
 			backingStore.userAskedToHandleError();
 			context.ui.notifyInfo("BackingStoreClickHandler clicked : error");
 		} else if (backingStore.isDirty()) {
-			context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
+			LTManager.run(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));
 		} else {
 			context.ui.notifyInfo("BackingStoreClickHandler clicked : other");
 		}

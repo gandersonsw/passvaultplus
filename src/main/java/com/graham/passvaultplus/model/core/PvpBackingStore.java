@@ -120,6 +120,7 @@ public interface PvpBackingStore {
 	String getShortName();
 
 	void setStatusBox(StatusBox sb);
+	StatusBox getStatusBox();
 
 	void userAskedToHandleError();
 

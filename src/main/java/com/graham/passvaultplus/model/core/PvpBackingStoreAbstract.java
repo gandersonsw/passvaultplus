@@ -74,13 +74,18 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		updateStatusBox();
 	}
 
+	@Override
+	public StatusBox getStatusBox() {
+		return statusBox;
+	}
+
 	private void updateStatusBox() {
 		if (statusBox != null) {
 			if (exception != null) {
 				statusBox.setColor(Color.ORANGE);
 				statusBox.setToolTipText("Error:" + getErrorMessageForDisplay());
 			} else if (dirty) {
-				statusBox.setColor(Color.BLUE);
+				statusBox.setColor(Color.BLUE.brighter());
 				statusBox.setToolTipText("Not stored yet. Click to store now.");
 			} else {
 				statusBox.setColor(Color.GREEN);

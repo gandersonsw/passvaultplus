@@ -30,8 +30,9 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
-import com.graham.passvaultplus.view.LongTask;
-import com.graham.passvaultplus.view.LongTaskUI;
+import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LongTask;
+import com.graham.passvaultplus.view.longtask.LongTaskUI;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
@@ -247,40 +248,18 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	 * @throws IOException
 	 */
 	private Credential authorize() throws IOException {
-			LongTaskAuthorize lt = new LongTaskAuthorize();
-			LongTaskUI ui = new LongTaskUI(lt, "Authorizing with Google...");
-			try {
-					if (ui.runLongTask()) {
-							throw new IOException(PvpContext.USR_CANCELED);
-					} else {
-							return lt.credential;
-					}
-			} catch (IOException ioe) {
-					throw ioe;
-			} catch (Exception e) {
-					e.printStackTrace(); // should never get to this line because LongTaskAuthorize throws IOException
-					throw new RuntimeException(e);
-			}
-	}
+			LTManager.nextStep("Google Drive Authorize");
+			// Load client secrets.
+			InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
+			GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-	class LongTaskAuthorize implements LongTask {
-			Credential credential;
-			public void runLongTask() throws IOException {
-					// Load client secrets.
-					InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
-					GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-					// Build flow and trigger user authorization request.
-					GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-							clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-					credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-					context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-			}
-
-			public void cancel() {
-					//VerificationCodeReceiver a = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).getReceiver();
-					//a.waitForCode()
-			}
+			// Build flow and trigger user authorization request.
+			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+					clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+			Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+			LTManager.stepDone("Google Drive Authorize");
+			return credential;
 	}
 
 	/**
@@ -305,7 +284,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	private void loadFileProps(boolean lookInFileList) {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.loadFileProps");
-		LongTaskUI.nextStep("Connecting to Google");
+		LTManager.nextStep("Connecting to Google");
 		Drive driveService = null;
 		try {
 			final String id = context.prefs.getGoogleDriveDocId();
@@ -404,7 +383,11 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
 				} else {
 					try {
-						context.data.getFileInterface().load(context.data.getDataInterface());
+						// TODO LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()), new BsLtCallback());
+						LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()));
+						//context.data.getFileInterface().load(context.data.getDataInterface());
+						// TODO add this to callback
+							// TODO add a BS state of loading or saving ????
 						context.uiMain.getViewListContext().filterUIChanged();
 						setException(exception); // to update the status box
 					} catch (Exception e) {

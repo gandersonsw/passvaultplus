@@ -18,6 +18,7 @@ import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.MainFrame;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 /**
  * This is the global context for the entire application.
@@ -52,7 +53,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		//activeUI = context.ui;
 
 		if (pw != null) {
-			System.out.println("at 35353");
+			System.out.println("PvpContext.startApp.A");
 			context.prefs.setPassword(pw, false);
 		}
 
@@ -94,8 +95,9 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		}
 	}
 
-	public void dataFileSelectedForStartup() throws UserAskToChangeFileException, PvpException {
-		data.getFileInterface().load(data.getDataInterface());
+	public void dataFileSelectedForStartup() throws Exception {
+		LTManager.runSync(data.getFileInterface().loadLT(data.getDataInterface()), "Loading...");
+	//	data.getFileInterface().load(data.getDataInterface());
 		uiMain = new PvpContextUIMainFrame(this);
 		uiMain.mainFrame = new MainFrame(this);
 		ui.setFrame(uiMain.getMainFrame());

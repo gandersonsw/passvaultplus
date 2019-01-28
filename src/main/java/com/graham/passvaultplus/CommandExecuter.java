@@ -10,8 +10,9 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.JceDialog;
-import com.graham.passvaultplus.view.LongTask;
-import com.graham.passvaultplus.view.LongTaskUI;
+import com.graham.passvaultplus.view.longtask.CancelableLongTask;
+import com.graham.passvaultplus.view.longtask.LTCallback;
+import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.prefs.RemoteBSPrefHandler;
 import com.graham.passvaultplus.view.prefs.ResetPrefsAction;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
@@ -20,10 +21,12 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 public class CommandExecuter {
 	
 	private final PvpContext context;
+	private final LTCallback ltcb;
 	private SimpleDateFormat df = new SimpleDateFormat();
-	
-	public CommandExecuter(PvpContext c) {
+
+	public CommandExecuter(PvpContext c, LTCallback ltcbParam) {
 		context = c;
+		ltcb = ltcbParam;
 	}
 	
 	public String[] getCommands() {
@@ -93,9 +96,8 @@ public class CommandExecuter {
 	}
 
 	private void testLongTask(int bakeTime) {
-		LongTaskUI ui = new LongTaskUI(new LongTaskTest(bakeTime), "Making a pizza");
 		try {
-			if (ui.runLongTask()) {
+			if (LTManager.runSync(new LongTaskTest(bakeTime), "Making a pizza")) {
 				context.ui.notifyInfo("Cancel was pressed!");
 			}
 		} catch (Exception e) {
@@ -152,31 +154,51 @@ public class CommandExecuter {
 	}
 
 	private void searchBackups(String searchText) {
-			PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
-			File[] fArr = bsFileMain.getAllFiles(true);
-			int count = 0;
-			for (File f : fArr) {
-					context.ui.notifyInfo("- - - - Searching File: " + f.getName() + " - - - -");
-					PvpInStreamer fileReader = null;
-					try {
-							PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
-							fileReader = new PvpInStreamer(bsFileBackup, context);
-							BufferedInputStream inStream = fileReader.getStream();
-							PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-							PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
-							for (PvpRecord r : fr.records) {
-									context.ui.notifyInfo(r.getFullText(false));
+			LTManager.run(new SearchBU(searchText), ltcb);
+	}
+
+	class SearchBU implements CancelableLongTask {
+			String searchText;
+			boolean doCancel;
+			public SearchBU(String s) {
+					searchText = s;
+			}
+			@Override
+			public void runLongTask() {
+					PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
+					File[] fArr = bsFileMain.getAllFiles(true);
+					int count = 0;
+					for (File f : fArr) {
+							context.ui.notifyInfo("- - - - Searching File: " + f.getName() + " - - - -");
+							PvpInStreamer fileReader = null;
+							try {
+									PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
+									fileReader = new PvpInStreamer(bsFileBackup, context);
+									BufferedInputStream inStream = fileReader.getStream();
+									PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+									PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
+									for (PvpRecord r : fr.records) {
+											context.ui.notifyInfo(r.getFullText(false));
+									}
+									count += fr.records.size();
+							} catch (Exception e) {
+									context.ui.notifyWarning("Failed to search file: " + f.getName(), e);
+							} finally {
+									if (fileReader != null) {
+											fileReader.close();
+									}
 							}
-							count += fr.records.size();
-					} catch (Exception e) {
-							context.ui.notifyWarning("Failed to search file: " + f.getName(), e);
-					} finally {
-							if (fileReader != null) {
-									fileReader.close();
+							if (doCancel) {
+									context.ui.notifyInfo("- - - - Canceled Searching. - - - -");
+									return;
 							}
 					}
+					context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
 			}
-			context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
+			@Override
+			public void cancel() {
+					doCancel = true;
+			}
 	}
 
 	private void openBackupRecord(String fileName, int id) {
@@ -201,42 +223,43 @@ public class CommandExecuter {
 			}
 	}
 
-	static class LongTaskTest implements LongTask {
+	public void normalMethodThatCanTakeLong(int bakeTime) throws Exception {
+		LTManager.nextStep("Prepping dough");
+		Thread.sleep(3000);
+		LTManager.stepDone("Prepping dough");
+		LTManager.nextStep("Rolling out dough");
+		Thread.sleep(5000);
+		LTManager.stepDone("Rolling out dough");
+		LTManager.nextStep("Adding Sauce");
+		Thread.sleep(500);
+		LTManager.stepDone("Adding Sauce");
+		LTManager.nextStep("Adding Cheese");
+		Thread.sleep(1000);
+		LTManager.stepDone("Adding Cheese");
+		LTManager.nextStep("Adding Olives");
+		Thread.sleep(1000);
+		LTManager.stepDone("Adding Olives");
+		LTManager.nextStep("Baking");
+		Thread.sleep(1000 * bakeTime);
+		LTManager.stepDone("Baking");
+		LTManager.nextStep("Cutting");
+		Thread.sleep(4000);
+		LTManager.stepDone("Cutting");
+	}
 
-			final private int bakeTime;
-			public LongTaskTest(int bt) {
-					bakeTime = bt;
-			}
-
-			@Override
-			public void runLongTask() throws Exception {
-					LongTaskUI.nextStep("Prepping dough");
-					Thread.sleep(3000);
-					LongTaskUI.stepDone("Prepping dough");
-					LongTaskUI.nextStep("Rolling out dough");
-					Thread.sleep(5000);
-					LongTaskUI.stepDone("Rolling out dough");
-					LongTaskUI.nextStep("Adding Sauce");
-					Thread.sleep(500);
-					LongTaskUI.stepDone("Adding Sauce");
-					LongTaskUI.nextStep("Adding Cheese");
-					Thread.sleep(1000);
-					LongTaskUI.stepDone("Adding Cheese");
-					LongTaskUI.nextStep("Adding Olives");
-					Thread.sleep(1000);
-					LongTaskUI.stepDone("Adding Olives");
-					LongTaskUI.nextStep("Baking");
-					Thread.sleep(1000 * bakeTime);
-					LongTaskUI.stepDone("Baking");
-					LongTaskUI.nextStep("Cutting");
-					Thread.sleep(4000);
-					LongTaskUI.stepDone("Cutting");
-			}
-
-			@Override
-			public void cancel() {
-
-			}
+	class LongTaskTest implements CancelableLongTask {
+		final private int bakeTime;
+		public LongTaskTest(int bt) {
+			bakeTime = bt;
+		}
+		@Override
+		public void runLongTask() throws Exception {
+			normalMethodThatCanTakeLong(bakeTime);
+		}
+		@Override
+		public void cancel() {
+				System.out.println("CommandExecuter.LongTaskTest.cancel.A");
+		}
 	}
 
 }

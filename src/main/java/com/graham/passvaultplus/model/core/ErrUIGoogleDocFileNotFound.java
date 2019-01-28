@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class ErrUIGoogleDocFileNotFound {
 
@@ -98,8 +99,10 @@ public class ErrUIGoogleDocFileNotFound {
 			this.setEnabled(false);
 			d.setVisible(false);
 			context.ui.enableQuitFromError(false);
-			System.out.println("getting ready to copy to gggole");
-			context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
+			System.out.println("ErrUIGoogleDocFileNotFound.UploadNowAction.actionPerformed - getting ready to copy to google");
+			// TODO test this
+			LTManager.runSync(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), "Copy to Google Drive");
+			//context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
 			context.ui.enableQuitFromError(true);
 		}
 	}

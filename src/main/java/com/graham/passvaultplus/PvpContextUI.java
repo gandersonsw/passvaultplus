@@ -4,7 +4,8 @@ package com.graham.passvaultplus;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
-import com.graham.passvaultplus.view.LongTaskUI;
+import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LongTaskUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -125,15 +126,14 @@ public class PvpContextUI {
 			} else {
 					d.setLocationRelativeTo(activeUI.uiFrame);
 			}
-			LongTaskUI.goingToShowUI();
+			LTManager.waitingUserInputStart();
 			d.setVisible(true);
 
 	}
 
 	public static void hideDialog(JDialog d) {
-			LongTaskUI.goingToHideUI();
 			d.setVisible(false);
+			LTManager.waitingUserInputEnd();
 	}
-
 
 }
