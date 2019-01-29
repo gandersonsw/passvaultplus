@@ -11,16 +11,13 @@ public class LTRunnerAsync extends LTRunner {
 
 		private final LongTask lt;
 		private final LTCallback cb;
+		private boolean wasCanceled;
 
 		public LTRunnerAsync(LongTask ltParam) {
 				this(ltParam, null);
 		}
 
 		public LTRunnerAsync(LongTask ltParam, LTCallback cbParam) {
-				//if (ltParam == null) {
-				//		throw new NullPointerException("LongTask cannot be null");
-			//	}
-				//lt = ltParam;
 				lt = Objects.requireNonNull(ltParam, "LongTask must not be null");
 				cb = cbParam == null ? new LTCallbackDefaultImpl() : cbParam;
 		}
@@ -28,21 +25,37 @@ public class LTRunnerAsync extends LTRunner {
 		@Override
 		public void run() {
 				LTManager.registerLTThread(this);
-				cb.taskStarting(lt);
+				cb.taskStarting(this);
 				try {
 						lt.runLongTask();
 				} catch (Exception e) {
-						cb.handleException(lt, e);
+						cb.handleException(this, e);
 				} finally {
 						LTManager.clearLTThread();
-						cb.taskComplete(lt);
+						cb.taskComplete(this);
 				}
 		}
 
 		void nextStep(String stepDesc) {
+				if (wasCanceled) {
+						throw new LTCanceledException();
+				}
 			// TODO for now, do nothing with this. eventually this could be added to UI somehow
 		}
 
 		void stepDone(String stepDesc) {
+				if (wasCanceled) {
+						throw new LTCanceledException();
+				}
+		}
+
+		public void cancel() {
+				if (lt instanceof CancelableLongTask) {
+						wasCanceled = ((CancelableLongTask)lt).cancel();
+				}
+		}
+
+		public boolean wasCanceled() {
+				return wasCanceled;
 		}
 }

@@ -31,7 +31,7 @@ public class ToLocalCopier implements CancelableLongTaskNoEception {
 
 		@Override
 		public void runLongTask() {
-				// TODO we open the stream in doChecksForNewFile, and open again here. There is porbably a way to only open it once.
+				// TODO we open the stream in doChecksForNewFile, and open again here. There is probably a way to only open it once.
 				PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
 				//bs.nchecks.passwordWorks = true;
 				bs.loadFileProps(true);

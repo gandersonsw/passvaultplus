@@ -6,6 +6,7 @@ import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 import com.graham.passvaultplus.view.longtask.LongTask;
 
 import java.util.Collection;
@@ -65,25 +66,11 @@ public class PvpContextData {
   }
 
   private void dataChanged(PvpPersistenceInterface.SaveTrigger trigger) {
-		LTManager.run(rtFileInterface.saveLT(rtDataInterface, trigger), new TempCB());
+		LTManager.run(rtFileInterface.saveLT(rtDataInterface, trigger));
 		//rtFileInterface.save(rtDataInterface, trigger);
 		if (context.uiMain != null) {
 			context.uiMain.getViewListContext().filterUIChanged();
 		}
 	}
 
-	class TempCB implements LTCallback {
-			@Override
-			public void taskStarting(LongTask lt) {
-					context.ui.notifyInfo("callback for dataChanged - taskStarting.");
-			}
-			@Override
-			public void taskComplete(LongTask lt) {
-					context.ui.notifyInfo("callback for dataChanged - taskComplete.");
-			}
-			@Override
-			public void handleException(LongTask lt, Exception e) {
-					context.ui.notifyWarning("callback for dataChanged - handleException.", e);
-			}
-	}
 }

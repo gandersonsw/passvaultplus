@@ -2,6 +2,7 @@
 package com.graham.passvaultplus.model.core;
 
 import com.graham.passvaultplus.view.longtask.LTCallback;
+import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 import com.graham.passvaultplus.view.longtask.LongTask;
 
 public class PvpBackingStoreLTCB implements LTCallback {
@@ -13,17 +14,17 @@ public class PvpBackingStoreLTCB implements LTCallback {
 		}
 
 		@Override
-		public void taskStarting(LongTask lt) {
+		public void taskStarting(LTRunnerAsync lt) {
 				bs.getStatusBox().startAnimation();
 		}
 
 		@Override
-		public void taskComplete(LongTask lt) {
+		public void taskComplete(LTRunnerAsync lt) {
 				bs.getStatusBox().stopAnimation();
 		}
 
 		@Override
-		public void handleException(LongTask lt, Exception e) {
+		public void handleException(LTRunnerAsync lt, Exception e) {
 				// TODO bs.setException();
 		}
 }

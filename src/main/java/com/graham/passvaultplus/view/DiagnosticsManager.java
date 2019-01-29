@@ -12,6 +12,7 @@ import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.longtask.CancelableLongTask;
 import com.graham.passvaultplus.view.longtask.LTCallback;
+import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 import com.graham.passvaultplus.view.longtask.LongTask;
 
 public class DiagnosticsManager implements OtherTabBuilder {
@@ -119,33 +120,32 @@ public class DiagnosticsManager implements OtherTabBuilder {
 	}
 
 		class CommandExeCallBack extends AbstractAction implements LTCallback {
-			private LongTask currentLt;
+			private LTRunnerAsync currentLt;
 			public CommandExeCallBack() {
 					super("Cancel");
 			}
 			Action oldAction;
 				@Override
-				public void taskStarting(LongTask lt) {
+				public void taskStarting(LTRunnerAsync lt) {
 						currentLt = lt;
 						System.out.println("- - - CECB - - - taskStarting - - -");
 						oldAction = doIt.getAction();
 						doIt.setAction(this);
 				}
 				@Override
-				public void taskComplete(LongTask lt) {
+				public void taskComplete(LTRunnerAsync lt) {
 						System.out.println("- - - CECB - - - taskComplete - - -");
 						doIt.setAction(oldAction);
 				}
 				@Override
-				public void handleException(LongTask lt, Exception e) {
+				public void handleException(LTRunnerAsync lt, Exception e) {
 						System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
 				}
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-						if (currentLt instanceof CancelableLongTask) {
-								((CancelableLongTask)currentLt).cancel();
-						}
+						currentLt.cancel();
+
 				}
 		}
 
