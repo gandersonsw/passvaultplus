@@ -65,9 +65,10 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		if (conn.isDefaultPath(dataFile.getAbsolutePath())) {
-			boolean mkret = new File(dataFile.getParent()).mkdirs();
-			if (!mkret) {
-				JOptionPane.showMessageDialog(conn.getSuperFrame(), "There was a problem creating the directory:" + dataFile.getParent());
+			final File parDir = new File(dataFile.getParent());
+			boolean mkret = parDir.mkdirs();
+			if (!mkret && !parDir.isDirectory()) {
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), parDir.isDirectory() + ":There was a problem creating the directory:" + dataFile.getParent());
 				return false;
 			}
 		}

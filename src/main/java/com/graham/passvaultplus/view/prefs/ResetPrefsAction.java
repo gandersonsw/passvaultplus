@@ -9,7 +9,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
-import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
+import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpPrefFacade;
 

@@ -26,16 +26,11 @@ public class LTManager {
 		 */
 		static public void run(LongTask lt, LTCallback cb) {
 				LTRunnerAsync r = new LTRunnerAsync(lt, cb);
-				Thread ltThread = new Thread(r, "LTManager Thread");
+				Thread ltThread = new Thread(r, "LTManagerThread");
 				ltThread.start();
 		}
 
-		static private LTRunnerSync createLTRunner(LongTask lt, String desc) {
-				LTRunnerSync r = new LTRunnerSync(lt, desc);
-				return r;
-		}
-
-		static void registerSyncThread(LTRunner r) {
+		static void registerLTThread(LTRunner r) {
 				synchronized (lockObject) { // TODO is the correct?
 						if (tlr.get() != null) {
 								throw new RuntimeException("cannot start new LongTask when one is running on the current thread");
@@ -44,7 +39,7 @@ public class LTManager {
 				}
 		}
 
-		static void clearSyncThread() {
+		static void clearLTThread() {
 				synchronized (lockObject) { // TODO is the correct?
 						tlr.remove();
 				}
@@ -54,7 +49,7 @@ public class LTManager {
 		 * Run a LongTask synchronous.
 		 */
 		static public void runSync(LongTask lt, String desc) throws Exception {
-				LTRunnerSync r = createLTRunner(lt, desc);
+				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				r.runLongTask();
 		}
 
@@ -62,7 +57,7 @@ public class LTManager {
 		 * Run a LongTask synchronous.
 		 */
 		static public void runSync(LongTaskNoException lt, String desc) {
-				LTRunnerSync r = createLTRunner(lt, desc);
+				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				try {
 						r.runLongTask();
 				} catch (Exception e) {
@@ -76,7 +71,7 @@ public class LTManager {
 		 * Returns true if it was canceled.
 		 */
 		static public boolean runSync(CancelableLongTask lt, String desc) throws Exception {
-				LTRunnerSync r = createLTRunner(lt, desc);
+				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				return r.runLongTask();
 		}
 
@@ -85,7 +80,7 @@ public class LTManager {
 		 * Returns true if it was canceled.
 		 */
 		static public boolean runSync(CancelableLongTaskNoEception lt, String desc) {
-				LTRunnerSync r = createLTRunner(lt, desc);
+				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				boolean ret = true;
 				try {
 						ret = r.runLongTask();
@@ -96,6 +91,10 @@ public class LTManager {
 				return ret;
 		}
 
+		/**
+		 * Will throw a LTCanceledException if the Task was successfully canceled.
+		 * Will assume the last step is completed if stepDone was not called.
+		 */
 		static public void nextStep(String stepDesc) {
 				LTRunner r = tlr.get();
 				if (r == null) {
@@ -105,6 +104,10 @@ public class LTManager {
 				}
 		}
 
+		/**
+		 * Will throw a LTCanceledException if the Task was successfully canceled.
+		 * This does not need to be called. can just use nextStep.
+		 */
 		static public void stepDone(String stepDesc) {
 				LTRunner r = tlr.get();
 				if (r == null) {

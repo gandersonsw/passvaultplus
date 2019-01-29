@@ -94,7 +94,7 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		}
 	}
 
-	String getErrorMessageForDisplay() {
+	protected String getErrorMessageForDisplay() {
 		exception.printStackTrace();
 		return exception.getMessage();
 

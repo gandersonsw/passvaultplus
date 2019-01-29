@@ -29,7 +29,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
-	static final public String USR_CANCELED = "operation cancelled by user";
+	static final public String USR_CANCELED = "operation canceled by user";
 
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
@@ -48,37 +48,39 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	 *    user clicked cancel            -> Select data file
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
-		PvpContext context = new PvpContext();
-		Thread.setDefaultUncaughtExceptionHandler(context);
-		//activeUI = context.ui;
+		PvpContext context = null;
+		try {
+			context = new PvpContext();
+			Thread.setDefaultUncaughtExceptionHandler(context);
+			//activeUI = context.ui;
 
-		if (pw != null) {
-			System.out.println("PvpContext.startApp.A");
-			context.prefs.setPassword(pw, false);
-		}
-
-		if (!context.prefs.isDataFilePresent()) {
-			final EulaDialog eula = new EulaDialog();
-			eula.showEula();
-		}
-
-		if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
-			try {
-				context.dataFileSelectedForStartup();
-			} catch (UserAskToChangeFileException cfe) {
-				new StartupOptionsFrame(context);
-			} catch (Exception e) {
-				context.ui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
+			if (pw != null) {
+				System.out.println("PvpContext.startApp.A");
+				context.prefs.setPassword(pw, false);
 			}
-		} else {
+
+			if (!context.prefs.isDataFilePresent()) {
+				final EulaDialog eula = new EulaDialog();
+				eula.showEula();
+			}
+
+			if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
+				context.dataFileSelectedForStartup();
+			} else {
+				new StartupOptionsFrame(context);
+			}
+		} catch (UserAskToChangeFileException cfe) {
 			new StartupOptionsFrame(context);
+		} catch (Exception e) {
+			PvpContextUI cui = context == null || context.ui == null ? new PvpContextUI() : context.ui;
+			cui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
 		}
 	}
 
 	public PvpContext() {
 		prefs = new PvpContextPrefs();
 		data = new PvpContextData(this);
-		ui = new PvpContextUI(DiagnosticsManager.get());
+		ui = new PvpContextUI();
 	}
 
 	public PvpContext(PvpContext mainContext, PvpContextPrefs tempPrefs) {

@@ -13,6 +13,7 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.actions.ExportXmlFile;
+import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
@@ -33,14 +34,12 @@ public class PvpPersistenceInterface {
 		public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
 
 		final private PvpContext context;
-		final private List<PvpBackingStore> backingStores;
+		private List<PvpBackingStore> backingStores;
 		private boolean errorHappened;
 
 		public PvpPersistenceInterface(final PvpContext contextParam) {
 				context = contextParam;
-				backingStores = new ArrayList<>();
-				backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
-				backingStores.add(new PvpBackingStoreGoogleDocs(context));
+
 		}
 
 		public static boolean isCompressed(final String path) {
@@ -91,6 +90,11 @@ public class PvpPersistenceInterface {
 		}
 
 		public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
+				if (backingStores == null) {
+						backingStores = new ArrayList<>();
+						backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
+						backingStores.add(new PvpBackingStoreGoogleDocs(context));
+				}
 				List<PvpBackingStore> bsList = new ArrayList<>();
 				for (PvpBackingStore bs : backingStores) {
 						if (bs.isEnabled() && (includeUnmodifiedRemotes || !bs.isUnmodifiedRemote())) {

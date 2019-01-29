@@ -22,8 +22,8 @@ public class PvpContextUI {
 	final DiagnosticsManager diagnosticsManager;
 	private ErrorFrame eframe;
 
-	public PvpContextUI(DiagnosticsManager dm) {
-		diagnosticsManager = dm;
+	public PvpContextUI() {
+		diagnosticsManager = DiagnosticsManager.get();
 		activeUI = this;
 	}
 

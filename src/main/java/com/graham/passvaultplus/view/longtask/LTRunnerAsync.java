@@ -1,7 +1,7 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.longtask;
 
-import com.graham.passvaultplus.PvpContextUI;
+import java.util.Objects;
 
 /**
  * Handle the running of one LongTask.
@@ -12,28 +12,30 @@ public class LTRunnerAsync extends LTRunner {
 		private final LongTask lt;
 		private final LTCallback cb;
 
+		public LTRunnerAsync(LongTask ltParam) {
+				this(ltParam, null);
+		}
+
 		public LTRunnerAsync(LongTask ltParam, LTCallback cbParam) {
-				lt = ltParam;
-				cb = cbParam;
+				//if (ltParam == null) {
+				//		throw new NullPointerException("LongTask cannot be null");
+			//	}
+				//lt = ltParam;
+				lt = Objects.requireNonNull(ltParam, "LongTask must not be null");
+				cb = cbParam == null ? new LTCallbackDefaultImpl() : cbParam;
 		}
 
 		@Override
 		public void run() {
-				LTManager.registerSyncThread(this);
+				LTManager.registerLTThread(this);
 				cb.taskStarting(lt);
 				try {
 						lt.runLongTask();
 				} catch (Exception e) {
-						if (cb == null) {
-								PvpContextUI.getActiveUI().notifyWarning("Exception in LTRunnerAsync", e);
-						} else {
-								cb.handleException(lt, e);
-						}
+						cb.handleException(lt, e);
 				} finally {
-						LTManager.clearSyncThread();
-						if (cb != null) {
-								cb.taskComplete(lt);
-						}
+						LTManager.clearLTThread();
+						cb.taskComplete(lt);
 				}
 		}
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.passvaultplus.model.core;
+package com.graham.passvaultplus.model.gdocs;
 
 import java.io.*;
 import java.net.UnknownHostException;
@@ -30,9 +30,8 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
+import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.longtask.LTManager;
-import com.graham.passvaultplus.view.longtask.LongTask;
-import com.graham.passvaultplus.view.longtask.LongTaskUI;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
@@ -85,7 +84,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	private Drive driveService;
 	private DateTime lastUpdatedDate;
 	private String remoteFileName;
-	private NewChecks nchecks = new NewChecks();
+	NewChecks nchecks = new NewChecks();
 
 	public PvpBackingStoreGoogleDocs(PvpContext contextParam) {
 		context = contextParam;
@@ -103,7 +102,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 	@Override
 	public boolean shouldBeSaved() {
-		return super.shouldBeSaved() || (exception != null && exception.getCause() instanceof FileNotFoundException);
+		return super.shouldBeSaved() || (getException() != null && getException().getCause() instanceof FileNotFoundException);
 	}
 
 	@Override
@@ -282,7 +281,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		return driveService;
 	}
 
-	private void loadFileProps(boolean lookInFileList) {
+	void loadFileProps(boolean lookInFileList) {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.loadFileProps");
 		LTManager.nextStep("Connecting to Google");
 		Drive driveService = null;
@@ -334,8 +333,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	@Override
 	public void clearTransientData() {
 		if (isEnabled()) {
-			if (exception != null) {
-				Throwable t = exception.getCause();
+			if (getException() != null) {
+				Throwable t = getException().getCause();
 				if (t instanceof FileNotFoundException) {
 					// In this case, we want to treat it as if it was loaded, because there is no file we need to be careful of overwriting
 					setDirty(true);
@@ -360,24 +359,24 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	String getErrorMessageForDisplay() {
-		Throwable t = exception.getCause();
+	protected String getErrorMessageForDisplay() {
+		Throwable t = getException().getCause();
 		if (t instanceof UnknownHostException) {
 			return CANT_CONNECT_MSG;
 		} else if (t instanceof FileNotFoundException) {
 			return "File not found on Google Drive Server. A new file will be created when saving.";
 		}
-		return exception.getMessage();
+		return getException().getMessage();
 	}
 
 	@Override
 	public void userAskedToHandleError() {
-		Throwable t = exception.getCause();
+		Throwable t = getException().getCause();
 		if (t instanceof UnknownHostException) {
 			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
 			if (tryReconnect) {
 				context.ui.notifyInfo("trying to reconnect to google...");
-				exception = null; // TODO not sure this is right. do we want to call super.clearTransientData ?
+				this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
 				loadFileProps(true);
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
 					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
@@ -389,7 +388,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 						// TODO add this to callback
 							// TODO add a BS state of loading or saving ????
 						context.uiMain.getViewListContext().filterUIChanged();
-						setException(exception); // to update the status box
+						setException(getException()); // to update the status box
 					} catch (Exception e) {
 						context.ui.notifyBadException(e, true, false, null);
 					}
@@ -420,41 +419,6 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		}
 		context.ui.notifyInfo("BS_Google: isUnmodifiedRemote:" + (lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate()) + ":" + lastUpdatedDate + ":" + new Date(context.prefs.getGoogleDriveDocUpdateDate()));
 		return lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate();
-	}
-
-	/**
-	 * note that context may not have all the correct settings at this time.
-	 */
-	public static NewChecks doChecksForNewFile(PvpContext context, boolean saveFile) {
-		PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
-		bs.nchecks.passwordWorks = true;
-		bs.loadFileProps(true);
-
-		if (bs.nchecks.sameFormatExists) {
-			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
-			try {
-				BufferedInputStream inStream = fileReader.getStream();
-				if (saveFile) {
-					BCUtil.copyFile(inStream, context.prefs.getDataFile());
-				}
-			} catch (UserAskToChangeFileException ucf) {
-				bs.nchecks.passwordWorks = false;
-				context.ui.notifyInfo("doChecksForNewFile: at UserAskToChangeFileException");
-			} catch (InvalidKeyException e) {
-				context.ui.notifyInfo("doChecksForNewFile: at InvalidKeyException");
-				bs.nchecks.passwordWorks = false;
-			} catch (Exception e) {
-				bs.nchecks.error = e.getMessage();
-			} finally {
-				fileReader.close();
-			}
-		}
-
-		if (bs.nchecks.error == null && bs.exception != null) {
-				bs.nchecks.error = bs.getErrorMessageForDisplay();
-		}
-
-		return bs.nchecks;
 	}
 
 	public static void deleteOfType(PvpContext context) {

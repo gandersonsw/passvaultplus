@@ -2,7 +2,9 @@
 package com.graham.passvaultplus.view.prefs;
 
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.model.core.PvpBackingStoreGoogleDocs;
+import com.graham.passvaultplus.model.gdocs.ChecksForNewFile;
+import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
+import com.graham.passvaultplus.model.gdocs.ToLocalCopier;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -71,7 +73,8 @@ public class RemoteBSPrefHandler {
 		if (useGoogleDrive.isSelected() && !useGoogleDriveFlag) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
 			// TODO verify mainUI is not used by this context
-			PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext, false);
+			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext);
+			PvpBackingStoreGoogleDocs.NewChecks nc = ChecksForNewFile.doIt(tempContext);
 			if (nc.error != null) {
 				if (!nc.error.equals(PvpContext.USR_CANCELED)) {
 					ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
@@ -194,9 +197,11 @@ public class RemoteBSPrefHandler {
 
 	public boolean createFiles() {
 		if (useGoogleDrive.isSelected()) {
+			//PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
 				// TODO verify mainUI is not used by this context
-			PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext, true);
+			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.copyFileToLocal(tempContext);
+			PvpBackingStoreGoogleDocs.NewChecks nc = ToLocalCopier.doIt(tempContext);
 			if (nc.error != null) {
 				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
 				JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);

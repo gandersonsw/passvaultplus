@@ -96,6 +96,7 @@ public class CommandExecuter {
 	}
 
 	private void testLongTask(int bakeTime) {
+			System.out.println("testLongTask testLongTask testLongTask testLongTask testLongTask testLongTask");
 		try {
 			if (LTManager.runSync(new LongTaskTest(bakeTime), "Making a pizza")) {
 				context.ui.notifyInfo("Cancel was pressed!");
@@ -196,8 +197,9 @@ public class CommandExecuter {
 					context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
 			}
 			@Override
-			public void cancel() {
+			public boolean cancel() {
 					doCancel = true;
+					return true;
 			}
 	}
 
@@ -226,25 +228,26 @@ public class CommandExecuter {
 	public void normalMethodThatCanTakeLong(int bakeTime) throws Exception {
 		LTManager.nextStep("Prepping dough");
 		Thread.sleep(3000);
-		LTManager.stepDone("Prepping dough");
+		//LTManager.stepDone("Prepping dough");
 		LTManager.nextStep("Rolling out dough");
 		Thread.sleep(5000);
-		LTManager.stepDone("Rolling out dough");
+		//LTManager.stepDone("Rolling out dough");
 		LTManager.nextStep("Adding Sauce");
 		Thread.sleep(500);
-		LTManager.stepDone("Adding Sauce");
+		//LTManager.stepDone("Adding Sauce");
 		LTManager.nextStep("Adding Cheese");
 		Thread.sleep(1000);
-		LTManager.stepDone("Adding Cheese");
+		//LTManager.stepDone("Adding Cheese");
 		LTManager.nextStep("Adding Olives");
 		Thread.sleep(1000);
-		LTManager.stepDone("Adding Olives");
+		//LTManager.stepDone("Adding Olives");
 		LTManager.nextStep("Baking");
 		Thread.sleep(1000 * bakeTime);
-		LTManager.stepDone("Baking");
+		//LTManager.stepDone("Baking");
 		LTManager.nextStep("Cutting");
 		Thread.sleep(4000);
 		LTManager.stepDone("Cutting");
+		System.out.println("normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong");
 	}
 
 	class LongTaskTest implements CancelableLongTask {
@@ -257,8 +260,9 @@ public class CommandExecuter {
 			normalMethodThatCanTakeLong(bakeTime);
 		}
 		@Override
-		public void cancel() {
+		public boolean cancel() {
 				System.out.println("CommandExecuter.LongTaskTest.cancel.A");
+				return true;
 		}
 	}
 

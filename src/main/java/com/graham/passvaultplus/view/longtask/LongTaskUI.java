@@ -131,6 +131,12 @@ public class LongTaskUI  {
 				cancelDialog = null;
 		}
 
+		void setCannotCancel() {
+				cancelButton.setEnabled(false);
+				cancelButton.setText("Can't Cancel");
+				cancelButton.setToolTipText("The task cannot be canceled anymore. It is too far along.");
+		}
+
 		void showCancelDialog() {
 				cancelDialog.setVisible(true); // this is the line that causes the dialog to Block
 		}
