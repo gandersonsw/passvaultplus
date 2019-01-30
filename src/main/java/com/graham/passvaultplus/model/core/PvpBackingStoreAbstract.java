@@ -9,8 +9,8 @@ import com.graham.passvaultplus.view.StatusBox;
 
 public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	private boolean dirty;
-	private LoadState loadState = LoadState.startState;
-	PvpException exception;
+	private volatile BsState bsState = BsState.StartState;
+	private PvpException exception;
 	private StatusBox statusBox;
 
 	@Override
@@ -35,18 +35,66 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	@Override
-	public PvpBackingStore.LoadState getLoadState() {
-		return loadState;
+	public BsState getBsState() {
+		return bsState;
 	}
 
 	@Override
-	public void setLoadState(final PvpBackingStore.LoadState loadStateParam) {
-		loadState = loadStateParam;
+	public void stateTrans(BsStateTrans trans) {
+			boolean badStateTran = false;
+			BsState newState;
+			switch (trans) {
+					case StartLoading:
+							newState = BsState.Loading;
+							if (bsState == BsState.Loading || bsState == BsState.Saving) {
+									badStateTran = true;
+							} else {
+									exception = null; // clear the exception because we are starting new
+							}
+							break;
+					case StartSaving:
+							newState = BsState.Saving;
+							if (bsState == BsState.StartState || bsState == BsState.Loading || bsState == BsState.Saving || bsState == BsState.ErrorLoading) {
+									badStateTran = true;
+							} else {
+									exception = null; // clear the exception because we are starting new
+							}
+							break;
+					case EndLoading:
+							if (bsState == BsState.ErrorLoading) {
+									return;
+							}
+							if (bsState == BsState.StartState || bsState == BsState.Saving || bsState == BsState.ErrorSaving) {
+									badStateTran = true;
+							}
+							newState = exception == null ? BsState.AllGood : BsState.ErrorLoading;
+							break;
+					case EndSaving:
+							if (bsState == BsState.ErrorSaving) {
+									return;
+							}
+							if (bsState == BsState.StartState || bsState == BsState.Loading || bsState == BsState.ErrorLoading) {
+									badStateTran = true;
+							}
+							newState = exception == null ? BsState.AllGood : BsState.ErrorSaving;
+							break;
+					default:
+							throw new IllegalArgumentException("unknown BsStateTrans:" + trans);
+			}
+
+			if (badStateTran) {
+					throw new IllegalArgumentException("cannot go from " + bsState + " to " + newState);
+			}
+			System.out.println(this.getClass().getName() +  " :STATE TRAN: "+ bsState + " to " + newState);
+			bsState = newState;
+			if (trans == BsStateTrans.EndLoading || trans == BsStateTrans.EndSaving) {
+					updateStatusBox();
+			}
 	}
 
 	@Override
 	public boolean shouldBeSaved() {
-		return loadState != PvpBackingStore.LoadState.error;
+		return bsState != BsState.ErrorLoading;
 	}
 
 	@Override
@@ -59,6 +107,9 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 
 	@Override
 	public void setException(PvpException e) {
+		if (e == null) {
+			throw new NullPointerException("exception cannot be null.");
+		}
 		exception = e;
 		updateStatusBox();
 	}

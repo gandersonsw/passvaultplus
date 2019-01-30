@@ -5,14 +5,12 @@ import com.graham.passvaultplus.PvpContextUI;
 
 public class LTManager {
 
-		private static LTManager lockObject = new LTManager(); // this is only used for synchronized
-
 		private static ThreadLocal<LTRunner> tlr = new ThreadLocal<>();
 
 		/**
 		 * This is true if some user input UI is showing now. So that means don't make the cancel dialog visible - because we are waiting for user input.
 		 */
-		private static boolean waitingUserInput = false;
+		private static volatile boolean waitingUserInput = false;
 
 		/**
 		 * Run a LongTask asynchronous.
@@ -31,18 +29,14 @@ public class LTManager {
 		}
 
 		static void registerLTThread(LTRunner r) {
-				synchronized (lockObject) { // TODO is the correct?
-						if (tlr.get() != null) {
-								throw new RuntimeException("cannot start new LongTask when one is running on the current thread");
-						}
-						tlr.set(r);
+				if (tlr.get() != null) {
+						throw new RuntimeException("cannot start new LongTask when one is running on the current thread");
 				}
+				tlr.set(r);
 		}
 
 		static void clearLTThread() {
-				synchronized (lockObject) { // TODO is the correct?
-						tlr.remove();
-				}
+				tlr.remove();
 		}
 
 		/**
@@ -95,7 +89,7 @@ public class LTManager {
 		 * Will throw a LTCanceledException if the Task was successfully canceled.
 		 * Will assume the last step is completed if stepDone was not called.
 		 */
-		static public void nextStep(String stepDesc) {
+		static public void nextStep(String stepDesc) throws LTCanceledException {
 				LTRunner r = tlr.get();
 				if (r == null) {
 						PvpContextUI.getActiveUI().notifyWarning("Called nextStep when no LongTask active: " + stepDesc, new Exception());
@@ -108,7 +102,7 @@ public class LTManager {
 		 * Will throw a LTCanceledException if the Task was successfully canceled.
 		 * This does not need to be called. can just use nextStep.
 		 */
-		static public void stepDone(String stepDesc) {
+		static public void stepDone(String stepDesc) throws LTCanceledException {
 				LTRunner r = tlr.get();
 				if (r == null) {
 						PvpContextUI.getActiveUI().notifyWarning("Called stepDone when no LongTask active: " + stepDesc, new Exception());
@@ -118,20 +112,21 @@ public class LTManager {
 		}
 
 		static public void waitingUserInputStart() { // waitingUserInput
-				synchronized (lockObject) {
-						System.out.println("LTManager.waitingUserInputStart");
-						waitingUserInput = true;
+				System.out.println("LTManager.waitingUserInputStart");
+				if (waitingUserInput == true) {
+						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart waitingUserInput is true");
 				}
+				waitingUserInput = true;
 		}
 
 		static public void waitingUserInputEnd() {
-				synchronized (lockObject) {
-						System.out.println("LTManager.waitingUserInputEnd");
-						waitingUserInput = false;
-
-						if (tlr.get() != null) { // TODO should this be called on all LTRuuners?
-								tlr.get().interruptForUserInputEnd();
-						}
+				System.out.println("LTManager.waitingUserInputEnd");
+				if (waitingUserInput == false) {
+						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputEnd waitingUserInput is false");
+				}
+				waitingUserInput = false;
+				if (tlr.get() != null) { // TODO should this be called on all LTRunners?
+						tlr.get().interruptForUserInputEnd();
 				}
 		}
 

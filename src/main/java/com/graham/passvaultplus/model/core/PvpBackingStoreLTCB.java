@@ -1,6 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 import com.graham.passvaultplus.view.longtask.LongTask;
@@ -25,6 +26,7 @@ public class PvpBackingStoreLTCB implements LTCallback {
 
 		@Override
 		public void handleException(LTRunnerAsync lt, Exception e) {
+				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e));
 				// TODO bs.setException();
 		}
 }

@@ -31,7 +31,9 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.model.core.*;
+import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
@@ -338,7 +340,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				if (t instanceof FileNotFoundException) {
 					// In this case, we want to treat it as if it was loaded, because there is no file we need to be careful of overwriting
 					setDirty(true);
-					setLoadState(PvpBackingStore.LoadState.loaded);
+					this.stateTrans(BsStateTrans.StartLoading);
+					this.stateTrans(BsStateTrans.EndLoading);
+					//setLoadState(PvpBackingStore.LoadState.loaded);
 				}
 			}
 			driveService = null;
@@ -376,22 +380,12 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
 			if (tryReconnect) {
 				context.ui.notifyInfo("trying to reconnect to google...");
-				this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
+				//this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
 				loadFileProps(true);
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
 					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
 				} else {
-					try {
-						// TODO LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()), new BsLtCallback());
-						LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()));
-						//context.data.getFileInterface().load(context.data.getDataInterface());
-						// TODO add this to callback
-							// TODO add a BS state of loading or saving ????
-						context.uiMain.getViewListContext().filterUIChanged();
-						setException(getException()); // to update the status box
-					} catch (Exception e) {
-						context.ui.notifyBadException(e, true, false, null);
-					}
+					LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()), new UatheCb(this));
 				}
 			}
 
@@ -400,13 +394,26 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		}
 	}
 
+	class UatheCb extends PvpBackingStoreLTCB {
+		public UatheCb(PvpBackingStore bsParam) {
+			super(bsParam);
+		}
+		@Override
+		public void taskComplete(LTRunnerAsync lt) {
+			super.taskComplete(lt);
+			context.uiMain.getViewListContext().filterUIChanged();
+		}
+	}
+
 	@Override
 	public void allStoresAreUpToDate() {
 		if (lastUpdatedDate == null) {
 			loadFileProps(true);
 		}
-		if (getLoadState() == LoadState.startState) {
-			setLoadState(LoadState.skipped); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
+		if (getBsState() == BsState.StartState) {
+				stateTrans(BsStateTrans.StartLoading);
+				stateTrans(BsStateTrans.EndLoading);
+		//	setLoadState(LoadState.skipped); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
 		}
 		context.ui.notifyInfo("BS_Google: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
 		context.prefs.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());

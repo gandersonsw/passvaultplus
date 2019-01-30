@@ -13,7 +13,7 @@ public class ToLocalCopier implements CancelableLongTaskNoEception {
 
 		final private PvpContext context;
 		final private PvpBackingStoreGoogleDocs bs;
-		private boolean canCancel = true;
+		private volatile boolean canCancel = true;
 
 		/**
 		 * note that context may not have all the correct settings at this time.

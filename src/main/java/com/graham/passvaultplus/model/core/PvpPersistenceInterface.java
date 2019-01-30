@@ -74,16 +74,13 @@ public class PvpPersistenceInterface {
 				if (isCompressed(fileExtension)) {
 						if (isEncrypted(fileExtension)) {
 								return "Compressed and Encrypted";
-						}
-						else {
+						} else {
 								return "Compressed only";
 						}
-				}
-				else {
+				} else {
 						if (isEncrypted(fileExtension)) {
 								return "Encrypted only";
-						}
-						else {
+						} else {
 								return "Not Compressed or Encrypted";
 						}
 				}
@@ -104,10 +101,8 @@ public class PvpPersistenceInterface {
 				return bsList;
 		}
 
-		private void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
+		private void load(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
 				context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
-
-				final List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
 
 				for (PvpBackingStore bs : enabledBs) {
 						bs.clearTransientData();
@@ -166,7 +161,6 @@ public class PvpPersistenceInterface {
 										doMerge = true;
 								}
 								context.prefs.setEncryptionStrengthBits(fileReader.getAesBits());
-								bs.setLoadState(PvpBackingStore.LoadState.loaded);
 						}
 						catch (UserAskToChangeFileException ucf) {
 								throw ucf;
@@ -215,12 +209,23 @@ public class PvpPersistenceInterface {
 		}
 
 		class LongTaskLoad implements LongTask {
-				private PvpDataInterface dataInterface;
+				final private PvpDataInterface dataInterface;
+				private List<PvpBackingStore> enabledBs;
 				public LongTaskLoad(PvpDataInterface dataInterfaceParam) {
 						dataInterface = dataInterfaceParam;
 				}
 				public void runLongTask() throws Exception {
-						load(dataInterface);
+						try {
+								enabledBs = getEnabledBackingStores(false);
+								for (PvpBackingStore bs : enabledBs) {
+										bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
+								}
+								load(dataInterface, enabledBs);
+						} finally {
+								for (PvpBackingStore bs : enabledBs) {
+									bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
+								}
+						}
 				}
 			//	public void cancel() {
 			//	}
@@ -230,14 +235,12 @@ public class PvpPersistenceInterface {
 	 * return true to Quit. Return false to cancel Quit, and keep app running
 	 */
 	public boolean appQuiting() {
-			// TODO test when cancel is pressed
+		// TODO test when cancel is pressed
 		LTManager.runSync(saveLT(context.data.getDataInterface(), SaveTrigger.quit), "Saving...");
-		//save(context.data.getDataInterface(), SaveTrigger.quit);
 		return !errorHappened;
 	}
 
-		private void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
-				final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
+		private void save(PvpDataInterface dataInterface, SaveTrigger saveTrig, List<PvpBackingStore> enabledBs) {
 				errorHappened = false;
 
 				for (PvpBackingStore bs : enabledBs) {
@@ -292,14 +295,25 @@ public class PvpPersistenceInterface {
 		}
 
 		class LongTaskSave implements LongTaskNoException {
-				private PvpDataInterface dataInterface;
-				private PvpPersistenceInterface.SaveTrigger saveTrig;
+				private final PvpDataInterface dataInterface;
+				private final PvpPersistenceInterface.SaveTrigger saveTrig;
+				private final List<PvpBackingStore> enabledBs;
 				public LongTaskSave(PvpDataInterface dataInterfaceParam, PvpPersistenceInterface.SaveTrigger saveTrigParam) {
 						dataInterface = dataInterfaceParam;
 						saveTrig = saveTrigParam;
+						enabledBs = getEnabledBackingStores(true);
+						for (PvpBackingStore bs : enabledBs) {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
+						}
 				}
 				public void runLongTask() {
-						save(dataInterface, saveTrig);
+						try {
+								save(dataInterface, saveTrig, enabledBs);
+						} finally {
+								for (PvpBackingStore bs : enabledBs) {
+										bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
+								}
+						}
 				}
 			//	public void cancel() {
 			//	}
@@ -333,10 +347,9 @@ public class PvpPersistenceInterface {
 								}
 						}
 						bs.setDirty(false);
-						bs.setLoadState(PvpBackingStore.LoadState.loaded); // set this because we want this BS to be treated as if it loaded successfully now
-						bs.setException(null);
 				} catch (Exception e) {
 						errorHappened = true;
+						bs.setException(new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e));
 						context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
 				}
 		}
@@ -351,9 +364,14 @@ public class PvpPersistenceInterface {
 				public LongTaskSaveOneBS(PvpDataInterface dataInterfaceParam, PvpBackingStore bsParam) {
 						dataInterface = dataInterfaceParam;
 						bs = bsParam;
+						bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
 				}
 				public void runLongTask() {
-						saveOneBackingStore(dataInterface, bs);
+						try {
+								saveOneBackingStore(dataInterface, bs);
+						} finally {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
+						}
 				}
 				//	public void cancel() {
 				//	}

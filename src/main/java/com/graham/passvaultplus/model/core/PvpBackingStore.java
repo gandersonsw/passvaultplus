@@ -15,7 +15,7 @@ import com.graham.passvaultplus.view.StatusBox;
  */
 public interface PvpBackingStore {
 
-	public enum ChattyLevel {
+	enum ChattyLevel {
 		/**
 		 * This level would be used for something like in memory data.
 		 * A very fast backing store.
@@ -67,11 +67,22 @@ public interface PvpBackingStore {
 		mostRestricted
 	}
 
-	public enum LoadState {
-		startState, // load has not been attempted
-		loaded,     // this BS was loaded
-		skipped,    // this BS was not loaded because it does not have new changes
-		error       // there was an error preventing this BS from loading
+	// Backing Store State
+	enum BsState {
+		StartState,  // load has not been attempted
+		AllGood,     // this BS was loaded
+		ErrorSaving, // there was an error preventing this BS from saving
+		ErrorLoading,// there was an error preventing this BS from loading
+		Loading,		// A task is currently loading this data
+		Saving			// A task is currently saving this data
+	}
+
+	// Backing Store State Transition
+	enum BsStateTrans {
+		StartLoading,
+		StartSaving,
+		EndLoading,
+		EndSaving
 	}
 
 	ChattyLevel getChattyLevel();
@@ -89,8 +100,8 @@ public interface PvpBackingStore {
 	boolean isDirty();
 	void setDirty(boolean dirty);
 
-	LoadState getLoadState();
-	void setLoadState(LoadState loadState);
+	BsState getBsState();
+	void stateTrans(BsStateTrans trans);
 	boolean shouldBeSaved();
 
 	boolean isCompressed(boolean inFlag);

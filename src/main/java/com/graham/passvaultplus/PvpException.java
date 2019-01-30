@@ -5,13 +5,17 @@ import javax.swing.Action;
 
 import com.graham.passvaultplus.view.JceDialog;
 
+/**
+ * This is used for any error that can't be handled and will be reported to the user.
+ * Usually it will cause a major part of functionality to fail.
+ */
 public class PvpException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	public interface ErrCode {
-		public String getTitle();
-		public String getDescription();
-		public String getHelpId();
+		String getTitle();
+		String getDescription();
+		String getHelpId();
 	}
 	
 	public enum SpecificErrCode implements ErrCode {
@@ -53,7 +57,7 @@ public class PvpException extends Exception {
 		}, 
 		CantReadEncryptionHeader("There was an error that prevented the encryption information from loading.", null),
 		CantOpenMainWindow("There was an error that prevented the application from starting", null),
-		CantCreateNewDatabase("There was an error that prevented the data file from being created.", null),
+		//CantCreateNewDatabase("There was an error that prevented the data file from being created.", null),
 		CantDecryptPassword("There was an error that prevented the password from being decrypted.", null),
 		CantEncryptPassword("There was an error that prevented the password from being encrypted.", null),
 		GoogleDrive("There was an error connecting to Google Drive", null);

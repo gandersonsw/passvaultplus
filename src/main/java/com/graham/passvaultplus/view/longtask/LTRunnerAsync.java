@@ -11,7 +11,7 @@ public class LTRunnerAsync extends LTRunner {
 
 		private final LongTask lt;
 		private final LTCallback cb;
-		private boolean wasCanceled;
+		private volatile boolean wasCanceled;
 
 		public LTRunnerAsync(LongTask ltParam) {
 				this(ltParam, null);
@@ -36,14 +36,14 @@ public class LTRunnerAsync extends LTRunner {
 				}
 		}
 
-		void nextStep(String stepDesc) {
+		void nextStep(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
 			// TODO for now, do nothing with this. eventually this could be added to UI somehow
 		}
 
-		void stepDone(String stepDesc) {
+		void stepDone(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}

@@ -17,7 +17,7 @@ public class LTRunnerSync extends LTRunner {
 		private ArrayList<LTStep> steps = new ArrayList<>();
 		private Exception ltaskException;
 		private Thread mainThread;
-		private boolean wasCanceled;
+		private volatile boolean wasCanceled;
 		private long startTime;
 		private boolean shouldShowCancelDialog;
 		private LongTaskUI ltUi;
@@ -121,7 +121,7 @@ public class LTRunnerSync extends LTRunner {
 				return shouldShowCancelDialog;
 		}
 
-		synchronized void nextStep(String stepDesc) {
+		synchronized void nextStep(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
@@ -137,7 +137,7 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-		synchronized void stepDone(String stepDesc) {
+		synchronized void stepDone(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
