@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import com.graham.framework.BCUtil;
+import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.longtask.CancelableLongTask;
@@ -15,7 +16,7 @@ import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 import com.graham.passvaultplus.view.longtask.LongTask;
 
-public class DiagnosticsManager implements OtherTabBuilder {
+public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	private static DiagnosticsManager activeManager = new DiagnosticsManager();
 
 	private JTextArea ta;
@@ -65,7 +66,8 @@ public class DiagnosticsManager implements OtherTabBuilder {
 		commandCB = null;
 	}
 
-	public void warning(final String s, final Exception e) {
+	public synchronized void warning(final String s, final Exception e) {
+		appendTimeStamp();
 		log.append(s);
 		if (e != null) {
 			log.append("::");
@@ -79,16 +81,24 @@ public class DiagnosticsManager implements OtherTabBuilder {
 		logUpdated();
 	}
 
-	public void info(String s) {
+	public synchronized void info(String s) {
+		appendTimeStamp();
 		log.append(s);
 		log.append("\n");
 		logUpdated();
 	}
 
 	private void logUpdated() {
-		if (log.length() > 100000) {
-			log = new StringBuilder("<<< log trimmed >>>" + log.substring(50000));
+		if (log.length() > 500000) {
+			log = new StringBuilder("<<< log trimmed >>>" + log.substring(400000));
 		}
+		if (ta != null) {
+			SwingUtilities.invokeLater(this); // call this.run()
+		}
+	}
+
+	@Override
+	public void run() {
 		if (ta != null) {
 			ta.setText(log.toString());
 		}
@@ -147,6 +157,13 @@ public class DiagnosticsManager implements OtherTabBuilder {
 						currentLt.cancel();
 
 				}
+		}
+
+		private void appendTimeStamp() {
+			log.append(AppUtil.getMillisecondTimeStamp());
+			log.append("|");
+			log.append(Thread.currentThread().getName());
+			log.append("| ");
 		}
 
 }

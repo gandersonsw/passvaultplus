@@ -4,7 +4,6 @@ package com.graham.passvaultplus.model.gdocs;
 import java.io.*;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -26,12 +25,9 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
-import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.model.core.*;
-import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
@@ -123,7 +119,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			try {
 				return driveService.files().get(id).executeMediaAsInputStream();
 			} catch (HttpResponseException e) {
-				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream :: HttpResponseException : " + e.getStatusCode() );
+				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream::HttpResponseException: " + e.getStatusCode() );
 				if (e.getStatusCode() == 404) {
 					// process below
 				} else {
@@ -146,7 +142,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		final FileList result = driveService.files().list().execute();
 		final List<File> files = result.getFiles();
 		if (files == null || files.size() == 0) {
-			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: No files found.");
+			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Zero files found.");
 			return false;
 		} else {
 			final String localFileName = getFileName(false);
@@ -379,7 +375,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		if (t instanceof UnknownHostException) {
 			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
 			if (tryReconnect) {
-				context.ui.notifyInfo("trying to reconnect to google...");
+				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.userAskedToHandleError :: reconnecting...");
 				//this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
 				loadFileProps(true);
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
@@ -415,7 +411,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				stateTrans(BsStateTrans.EndLoading);
 		//	setLoadState(LoadState.skipped); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
 		}
-		context.ui.notifyInfo("BS_Google: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
+		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.allStoresAreUpToDate :: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
 		context.prefs.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());
 	}
 
@@ -424,7 +420,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		if (lastUpdatedDate == null) {
 			loadFileProps(true);
 		}
-		context.ui.notifyInfo("BS_Google: isUnmodifiedRemote:" + (lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate()) + ":" + lastUpdatedDate + ":" + new Date(context.prefs.getGoogleDriveDocUpdateDate()));
+		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.isUnmodifiedRemote :: " + (lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate()) + ":" + lastUpdatedDate + ":" + new Date(context.prefs.getGoogleDriveDocUpdateDate()));
 		return lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate();
 	}
 
@@ -438,7 +434,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	private void deleteOfType2() throws IOException {
-		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.deleteOfType2 :: START" );
+		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.deleteOfType2::START" );
 
 		Drive driveService;
 		try {
@@ -450,7 +446,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		if (lookForFileInList(driveService)) {
 			final String id = context.prefs.getGoogleDriveDocId();
 			driveService.files().delete(id);
-			context.ui.notifyInfo("deleted file id :: " + id);
+			context.ui.notifyInfo("deleted file id::" + id);
 		}
 	}
 

@@ -320,7 +320,7 @@ public class PvpPersistenceInterface {
 		}
 
 		public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
-				context.ui.notifyInfo("SAVING BACKING STORE:" + bs.getClass().getName());
+				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
 				if (!bs.shouldBeSaved()) {
 						context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
 						return;
@@ -352,6 +352,7 @@ public class PvpPersistenceInterface {
 						bs.setException(new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e));
 						context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
 				}
+				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.END");
 		}
 
 		public LongTaskNoException saveOneBackingStoreLT(PvpDataInterface dataInterface, PvpBackingStore bs) {

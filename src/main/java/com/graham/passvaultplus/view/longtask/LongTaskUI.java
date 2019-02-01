@@ -92,7 +92,7 @@ public class LongTaskUI  {
 								//System.out.println("at Timer Thread InterruptedException 1");
 						}
 						//System.out.println("LongTaskUI.LongTaskUI.B - at 99 Timer Thread done");
-				}, "LongTaskUITimerThread");
+				}, "tuit"); // task UI thread
 				timerThread.start();
 
 				cancelDialog.pack();

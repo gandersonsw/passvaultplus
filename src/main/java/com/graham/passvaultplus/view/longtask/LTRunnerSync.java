@@ -34,7 +34,7 @@ public class LTRunnerSync extends LTRunner {
 				System.out.println("LTRunnerSync.runLongTask.A");
 				shouldShowCancelDialog = true;
 				mainThread = Thread.currentThread();
-				Thread ltaskThread = new Thread(this, "LTRunnerSyncThread");
+				Thread ltaskThread = new Thread(this, "ltsy"); // Long Task Synchronous thread
 				startTime = System.currentTimeMillis();
 				ltaskThread.start();
 

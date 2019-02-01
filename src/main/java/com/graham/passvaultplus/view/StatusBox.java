@@ -4,8 +4,9 @@ package com.graham.passvaultplus.view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.List;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 
 /**
  * Simple status feedback element with a fill color
@@ -57,42 +58,50 @@ public class StatusBox extends JComponent {
 
 	public void startAnimation() {
 		sba = new SBAnimation();
-		Thread t = new Thread(sba, "StatusBoxAnimation");
-		t.start();
+		sba.execute();
 	}
 
 	public void stopAnimation() {
-		sba.cancel = true;
+		sba.cancel(true);
 		sba = null;
 	}
 
-	class SBAnimation implements Runnable {
-		boolean cancel;
+	class SBAnimation extends SwingWorker<Void, Color> {
 		int kf = 0;
 		Color[] colors;
 		Color originalColor;
 		public SBAnimation() {
 			colors = new Color[10];
 			originalColor = statusColor;
-			Color next = statusColor;
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			Color next = originalColor;
 			for (int i = 0; i < 5; i++) {
 				colors[i] = next;
 				colors[9 - i] = next;
 				next = next.darker();
 			}
-		}
-		@Override
-		public void run() {
-			while (!cancel) {
-				statusColor = colors[kf];
-				repaint();
-				kf = (kf + 1) % 10;
-				try {
+
+			try {
+				while (true) {
+					publish(colors[kf]);
+					kf = (kf + 1) % 10;
 					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
-			}
+			} catch (InterruptedException e) { }
+			return null;
+		}
+
+		@Override
+		protected void	process(List<Color> chunks) {
+			statusColor = chunks.get(0);
+			repaint();
+		}
+
+		@Override
+		protected void done() {
 			statusColor = originalColor;
 			repaint();
 		}

@@ -161,6 +161,27 @@ public class AppUtil {
 		return ret;
 	}
 
+	/**
+	 * A format like 23:59:59.999
+	 * With HH:HH:SS.mmm
+	 * with current time
+	 */
+	public static String getMillisecondTimeStamp() {
+			return getMillisecondTimeStamp(null);
+	}
+
+	/**
+	 * A format like 23:59:59.999
+	 * With HH:HH:SS.mmm
+	 */
+	public static String getMillisecondTimeStamp(Date d) {
+			Calendar c = Calendar.getInstance();
+			if (d != null) {
+					c.setTime(d);
+			}
+			return String.format("%02d:%02d:%02d.%03d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), c.get(Calendar.MILLISECOND));
+	}
+
   /**
 	 * A format like -2016-8-28-15
 	 * With -year-month-day-hour

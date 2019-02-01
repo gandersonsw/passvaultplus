@@ -24,7 +24,7 @@ public class LTManager {
 		 */
 		static public void run(LongTask lt, LTCallback cb) {
 				LTRunnerAsync r = new LTRunnerAsync(lt, cb);
-				Thread ltThread = new Thread(r, "LTManagerThread");
+				Thread ltThread = new Thread(r, "ltay"); // LongTask Async thread
 				ltThread.start();
 		}
 

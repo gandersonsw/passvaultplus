@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.EulaDialog;
@@ -48,6 +48,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	 *    user clicked cancel            -> Select data file
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
+			System.out.println("startApp at 1: " + SwingUtilities.isEventDispatchThread());
 		PvpContext context = null;
 		try {
 			context = new PvpContext();
@@ -60,8 +61,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 			}
 
 			if (!context.prefs.isDataFilePresent()) {
-				final EulaDialog eula = new EulaDialog();
-				eula.showEula();
+				new EulaDialog().showEula();
 			}
 
 			if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
