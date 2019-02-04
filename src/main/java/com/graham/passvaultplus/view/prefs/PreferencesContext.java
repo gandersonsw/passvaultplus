@@ -193,6 +193,10 @@ public class PreferencesContext {
 		}
 	}
 
+	public void cleanup() {
+		remoteBS.cleanup();
+	}
+
 	class SetDefaultDataFile extends AbstractAction {
 		final private File defaultFile;
 		public SetDefaultDataFile(final File f) {

@@ -36,6 +36,7 @@ public class JceDialog {
 	}
 	
 	public void showDialog(final Window parent, int maxKeySize) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0152");
 		d = new JDialog(parent, "Pass Vault Plus : JCE", Dialog.ModalityType.APPLICATION_MODAL);
 		
 		d.getContentPane().setLayout(new BoxLayout(d.getContentPane(), BoxLayout.Y_AXIS));

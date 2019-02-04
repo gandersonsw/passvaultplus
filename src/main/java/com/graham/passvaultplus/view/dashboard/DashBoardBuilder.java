@@ -23,6 +23,7 @@ public class DashBoardBuilder implements OtherTabBuilder {
 	}
 
 	public Component build(PvpContext context) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0014");
 		final JPanel p = new JPanel(new BorderLayout());
 		final UpcomingDatesTableModel tm = new UpcomingDatesTableModel(context);
 		p.add(buildUpcomingDatesHeader(context, tm), BorderLayout.NORTH);
@@ -76,6 +77,7 @@ public class DashBoardBuilder implements OtherTabBuilder {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("0015");
 			JComboBox cb = (JComboBox)e.getSource();
 			tm.setNumberOfDays(context, (Integer)cb.getSelectedItem());
 		}

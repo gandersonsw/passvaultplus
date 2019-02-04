@@ -2,9 +2,9 @@
 package com.graham.passvaultplus.view.longtask;
 
 public interface LTCallback {
-		void taskStarting(LTRunnerAsync lt);
+		void taskStarting(LTRunner lt);
 
-		void taskComplete(LTRunnerAsync lt);
+		void taskComplete(LTRunner lt);
 
-		void handleException(LTRunnerAsync lt, Exception e);
+		void handleException(LTRunner lt, Exception e);
 }

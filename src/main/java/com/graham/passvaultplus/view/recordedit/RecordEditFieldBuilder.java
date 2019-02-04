@@ -50,6 +50,7 @@ class RecordEditFieldBuilder {
 	}
 
 	private void build() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0089");
 		final PvpField field = reb.record.getType().getField(name);
 
 		JTextComponent tf;

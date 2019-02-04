@@ -95,6 +95,7 @@ public class PvpViewListContext {
 	}
 	
 	private void setTableHeaders() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0107");
 		listTable.getColumnModel().getColumn(0).setHeaderValue("Field");
 		listTable.getColumnModel().getColumn(1).setHeaderValue("Value");
 	}

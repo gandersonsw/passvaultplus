@@ -15,6 +15,7 @@ public class ShowPasswordAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0071");
 		if (context.showPassword.isSelected()) {
 			String pw = new String(context.password.getPassword());
 			context.passwordClearText.setText(pw);

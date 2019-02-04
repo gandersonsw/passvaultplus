@@ -43,6 +43,7 @@ public class PwDialog {
 	}
 	
 	public PwAction askForPw(final boolean passwordWasBad, final String resourseLocation) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0174");
 		d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
 		

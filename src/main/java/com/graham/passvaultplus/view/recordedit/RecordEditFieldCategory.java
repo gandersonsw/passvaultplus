@@ -4,7 +4,6 @@ package com.graham.passvaultplus.view.recordedit;
 import javax.swing.JComboBox;
 
 import com.graham.passvaultplus.AppUtil;
-import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.model.core.PvpRecord;
 

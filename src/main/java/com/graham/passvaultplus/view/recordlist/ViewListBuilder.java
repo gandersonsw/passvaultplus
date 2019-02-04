@@ -32,6 +32,7 @@ public class ViewListBuilder implements OtherTabBuilder {
 	}
 
 	public Component build(PvpContext context) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0111");
 		JPanel viewList = new JPanel(new BorderLayout());
 		viewList.add(buildTopPanel(context), BorderLayout.NORTH);
 		viewList.add(buildCenterPanel(context), BorderLayout.CENTER);

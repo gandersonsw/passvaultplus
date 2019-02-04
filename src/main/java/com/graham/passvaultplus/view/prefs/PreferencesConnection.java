@@ -15,6 +15,7 @@ public abstract class PreferencesConnection {
 	protected final PvpContext context; // The real context
 	protected final PvpContextPrefs contextPrefsForSettingsUI; // a temporary context prefs that has been edited
 
+
 	public PreferencesConnection(final PvpContext contextParam, final PvpContextPrefs cp) {
 		context = contextParam;
 		contextPrefsForSettingsUI = cp;
@@ -22,13 +23,13 @@ public abstract class PreferencesConnection {
 
 	public abstract Action getCancelAction();
 
-	public abstract boolean doSave(final boolean wasChanges);
+	public abstract void doSave(boolean wasChanges, PreferencesContext pc);
 
-	public abstract boolean doOpen();
+	public abstract void doOpen(PreferencesContext pc);
 
 	public abstract JFrame getSuperFrame();
 
-	public abstract boolean isDefaultPath(final String path);
+	public abstract boolean isDefaultPath(String path);
 
 	public boolean supportsChangeDataFileOptions() {
 		return false;

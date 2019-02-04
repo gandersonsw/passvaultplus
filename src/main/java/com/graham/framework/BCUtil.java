@@ -40,6 +40,7 @@ public class BCUtil {
 	}
 	
 	public static void setFrameSizeAndCenter(java.awt.Component c, int width, int height) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0002");
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		double screenWidth = dim.getWidth();//1024;
 		double screenHeight = dim.getWidth();//768;
@@ -58,11 +59,12 @@ public class BCUtil {
 			d.setSize(d.getWidth() > screenWidth - 80 ? screenWidth - 80 : d.getWidth(), d.getHeight() > screenHeight - 120 ? screenHeight - 120 : d.getHeight());
 			c.setSize(d);
 		}
-
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0003");
 		c.setLocation((int)((screenWidth - d.getWidth()) / 2), (int)((screenHeight - d.getHeight()) / 3));
 	}
 
 	public static void center(java.awt.Component c, JFrame owner) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0004");
 			if (owner == null) {
 					center(c);
 			} else {
@@ -105,6 +107,7 @@ public class BCUtil {
 	}
 	
 	private void showStopDialog2(Frame owner, String message, Exception e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0006");
 		JDialog d;
 		if (owner == null)
 			d = new JDialog();
@@ -200,7 +203,7 @@ public class BCUtil {
     }
     
     public static List<String> convertListToArray(String s) {
-    		List<String> arr = new ArrayList<String>();
+    		List<String> arr = new ArrayList<>();
     		
     		if (s == null || s.length() == 0)
     			return arr;

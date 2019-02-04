@@ -82,7 +82,8 @@ public interface PvpBackingStore {
 		StartLoading,
 		StartSaving,
 		EndLoading,
-		EndSaving
+		EndSaving,
+			initSave // TODO maybe delete this
 	}
 
 	ChattyLevel getChattyLevel();

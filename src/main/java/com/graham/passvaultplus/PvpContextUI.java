@@ -5,10 +5,10 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.longtask.LTManager;
-import com.graham.passvaultplus.view.longtask.LongTaskUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Interface to general UI. This is available at all times, can get active UI with PvpContext.getActiveUI()
@@ -16,10 +16,11 @@ import java.awt.*;
 public class PvpContextUI {
 	static private PvpContextUI activeUI;
 
+	final private DiagnosticsManager diagnosticsManager;
+
 	private JFrame uiFrame;
 	private boolean canQuitOrGotoSetup = true;
 	private StringBuilder warnings = new StringBuilder();
-	final DiagnosticsManager diagnosticsManager;
 	private ErrorFrame eframe;
 
 	public PvpContextUI() {
@@ -36,6 +37,9 @@ public class PvpContextUI {
 	}
 
 	public JFrame getFrame() {
+
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0211");
+			// I think it is safe to call from non-evt thread
 		if (uiFrame != null && uiFrame.isVisible()) {
 			return uiFrame;
 		}
@@ -100,40 +104,69 @@ public class PvpContextUI {
 	}
 
 	public void showMessageDialog(String title, String message) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0230");
 		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
 		JOptionPane.showMessageDialog(getFrame(), message, title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
 	public void showErrorDialog(String title, String message) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0231");
 		ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
 		JOptionPane.showMessageDialog(getFrame(), message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
 	}
 
 	public boolean showConfirmDialog(String title, String message) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0232");
 		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
 		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(getFrame(), message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 	}
 
+	/**
+	 * @param title Can be null, default to "Pass Vault Plus"
+	 */
 	public static JDialog createDialog(String title) {
-			JDialog d = new JDialog(activeUI.uiFrame, title, Dialog.ModalityType.APPLICATION_MODAL);
-			return d;
+		com.graham.passvaultplus.PvpContextUI.checkEvtThread("2301");
+		return new JDialog(activeUI.uiFrame, title == null ? "Pass Vault Plus" : title, Dialog.ModalityType.APPLICATION_MODAL);
 	}
 
 	public static void showDialog(JDialog d) {
-			d.pack();
-			if (activeUI.uiFrame == null) {
-					BCUtil.center(d);
-			} else {
-					d.setLocationRelativeTo(activeUI.uiFrame);
-			}
-			LTManager.waitingUserInputStart();
-			d.setVisible(true);
-
+		//com.graham.passvaultplus.PvpContextUI.checkEvtThread("2302");
+		d.pack();
+		if (activeUI.uiFrame == null) {
+			BCUtil.center(d);
+		} else {
+			d.setLocationRelativeTo(activeUI.uiFrame);
+		}
+		try {
+				if (SwingUtilities.isEventDispatchThread()) {
+						SwingUtilities.invokeLater(() -> d.toFront());
+						LTManager.waitingUserInputStart();
+						d.setVisible(true); // this is the line that causes the dialog to Block
+				} else {
+						SwingUtilities.invokeAndWait(() -> {
+								SwingUtilities.invokeLater(() -> d.toFront());
+								LTManager.waitingUserInputStart();
+								d.setVisible(true); // this is the line that causes the dialog to Block
+						});
+						activeUI.notifyWarning("PvpContextUI.showDialog SwingUtilities.isEventDispatchThread() = false");
+				}
+		} catch (InterruptedException | InvocationTargetException e) {
+			activeUI.notifyWarning("PvpContextUI.showDialog", e);
+		}
 	}
 
 	public static void hideDialog(JDialog d) {
-			d.setVisible(false);
-			LTManager.waitingUserInputEnd();
+		com.graham.passvaultplus.PvpContextUI.checkEvtThread("0236");
+		d.setVisible(false);
+		LTManager.waitingUserInputEnd();
 	}
+
+	public static void checkEvtThread(String id) {
+		if (!SwingUtilities.isEventDispatchThread()) {
+			com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyWarning("checkEvtThread failed :: " + id);
+		}
+	}
+
+
 
 }

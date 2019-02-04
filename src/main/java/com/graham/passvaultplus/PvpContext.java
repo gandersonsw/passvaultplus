@@ -14,11 +14,10 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.MainFrame;
-import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.*;
 
 /**
  * This is the global context for the entire application.
@@ -48,12 +47,11 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	 *    user clicked cancel            -> Select data file
 	 */
 	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
-			System.out.println("startApp at 1: " + SwingUtilities.isEventDispatchThread());
-		PvpContext context = null;
+		StartAppCB cb = new StartAppCB();
 		try {
-			context = new PvpContext();
+			final PvpContext context = new PvpContext();
+			cb.setContext(context);
 			Thread.setDefaultUncaughtExceptionHandler(context);
-			//activeUI = context.ui;
 
 			if (pw != null) {
 				System.out.println("PvpContext.startApp.A");
@@ -65,16 +63,32 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 			}
 
 			if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
-				context.dataFileSelectedForStartup();
+				LTManager.run(() -> context.dataFileSelectedForStartup(), cb);
+				//context.dataFileSelectedForStartup();
 			} else {
-				new StartupOptionsFrame(context);
+				StartupOptionsFrame.showAndContinue(context);
 			}
-		} catch (UserAskToChangeFileException cfe) {
-			new StartupOptionsFrame(context);
+	// TODO !!!!!!	} catch (UserAskToChangeFileException cfe) {
+	//		StartupOptionsFrame.showAndContinue(contextCopy);
 		} catch (Exception e) {
-			PvpContextUI cui = context == null || context.ui == null ? new PvpContextUI() : context.ui;
-			cui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
+			cb.handleException(null, e);
 		}
+	}
+
+	static class StartAppCB extends LTCallbackDefaultImpl {
+			PvpContext contextCopy;
+			void setContext(PvpContext c) {
+					contextCopy = c;
+			}
+			@Override
+			public void handleException(LTRunner lt, Exception e) {
+					if (e instanceof UserAskToChangeFileException) {
+							StartupOptionsFrame.showAndContinue(contextCopy);
+					} else {
+							PvpContextUI cui = contextCopy == null || contextCopy.ui == null ? new PvpContextUI() : contextCopy.ui;
+							cui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
+					}
+			}
 	}
 
 	public PvpContext() {
@@ -98,16 +112,18 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	}
 
 	public void dataFileSelectedForStartup() throws Exception {
-		LTManager.runSync(data.getFileInterface().loadLT(data.getDataInterface()), "Loading...");
-	//	data.getFileInterface().load(data.getDataInterface());
-		uiMain = new PvpContextUIMainFrame(this);
-		uiMain.mainFrame = new MainFrame(this);
-		ui.setFrame(uiMain.getMainFrame());
+		//LTManager.setTitle("Loading...");
+		data.getFileInterface().load(data.getDataInterface());
+		SwingUtilities.invokeLater(() -> {
+			uiMain = new PvpContextUIMainFrame(this);
+			uiMain.mainFrame = new MainFrame(this);
+			ui.setFrame(uiMain.getMainFrame());
 
-	//	ui.schedulePinTimerTask();
-		if (prefs.pinWasReset) {
-			ui.showMessageDialog("PIN Reset", "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
-		}
+			//	ui.schedulePinTimerTask();
+			if (prefs.pinWasReset) {
+				ui.showMessageDialog("PIN Reset", "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
+			}
+		});
 	}
 
 	private static final Map<String, ImageIcon> cachedIcons = new HashMap<>();

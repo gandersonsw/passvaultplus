@@ -35,6 +35,7 @@ public class SchemaEditBuilder implements OtherTabBuilder {
 	}
 
 	public Component build(PvpContext c) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0120");
 		SchemaEditBuilder builder = new SchemaEditBuilder();
 		builder.context = c;
 		builder.scContext = new SchemaChangesContext();

@@ -3,14 +3,14 @@ package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 /**
  * When the app is first starting and the just the preferences are displayed.
@@ -36,21 +36,26 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	}
 
 	@Override
-	public boolean doSave(final boolean wasChanges) {
+	public void doSave(final boolean wasChanges, PreferencesContext pc) {
 		throw new RuntimeException("unsupported operation");
 	}
 
 	@Override
-	public boolean doOpen() {
-		copyPrefsToReal();
-		startupOptionsFrame.setVisible(false);
-		try {
-			context.dataFileSelectedForStartup();
-			return true;
-		} catch (Exception e1) {
-			context.ui.notifyBadException(e1, false, PvpException.GeneralErrCode.CantOpenMainWindow);
-			return false;
-		}
+	public void doOpen(PreferencesContext pc) {
+
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("3524");
+			copyPrefsToReal();
+			try { SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false)); } catch (Exception e) { PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A"); }
+			//startupOptionsFrame.setVisible(false);
+			try {
+				context.dataFileSelectedForStartup();
+				pc.cleanup();
+				//return true;
+			} catch (Exception e1) {
+				context.ui.notifyBadException(e1, false, PvpException.GeneralErrCode.CantOpenMainWindow);
+				//return false;
+			}
+
 	}
 
 	@Override

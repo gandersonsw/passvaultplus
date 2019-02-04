@@ -25,8 +25,9 @@ public class LongTaskUI  {
 		private JButton cancelButton;
 		private long startTime;
 
-		public LongTaskUI(String taskDescription, ArrayList<LTStep> steps, long startTimeParam, CancelAction cancelA) {
-				System.out.println("LongTaskUI.LongTaskUI.A");
+		public LongTaskUI(String taskTitle, ArrayList<LTStep> steps, long startTimeParam, CancelAction cancelA) {
+				//System.out.println("LongTaskUI.LongTaskUI.A");
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("3901");
 				startTime = startTimeParam;
 				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (AM)", Dialog.ModalityType.APPLICATION_MODAL);
 				cancelDialog.getContentPane().setLayout(new BorderLayout());
@@ -51,7 +52,7 @@ public class LongTaskUI  {
 				}
 				{
 						JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-						p.add(new JLabel(taskDescription));
+						p.add(new JLabel(taskTitle));
 						centerPanel.add(p);
 
 						p = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -131,13 +132,15 @@ public class LongTaskUI  {
 				cancelDialog = null;
 		}
 
-		void setCannotCancel() {
-				cancelButton.setEnabled(false);
-				cancelButton.setText("Can't Cancel");
-				cancelButton.setToolTipText("The task cannot be canceled anymore. It is too far along.");
+		void setCanCancel(boolean cc) {
+				PvpContextUI.checkEvtThread("5473");
+				cancelButton.setEnabled(cc);
+				cancelButton.setText(cc ? "Cancel" : "Can't Cancel");
+				//cancelButton.setToolTipText(cc ? null : "The task cannot be canceled anymore. It is too far along.");
 		}
 
 		void showCancelDialog() {
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("3902");
 				cancelDialog.setVisible(true); // this is the line that causes the dialog to Block
 		}
 

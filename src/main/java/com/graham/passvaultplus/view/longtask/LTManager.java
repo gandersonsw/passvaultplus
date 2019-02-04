@@ -10,26 +10,94 @@ public class LTManager {
 		/**
 		 * This is true if some user input UI is showing now. So that means don't make the cancel dialog visible - because we are waiting for user input.
 		 */
-		private static volatile boolean waitingUserInput = false;
+	//	private static volatile boolean waitingUserInput = false;
+		private static volatile int waitingUserInputId = 0;
+
+		static public boolean isLTThread() {
+			return Thread.currentThread().getName().equals("pvplt"); // TODO make const
+		}
+/*
+		static public LTRunner getLTRunner() {
+				Thread t = Thread.currentThread();
+				if (t instanceof LTThread) {
+						LTThread ltt = (LTThread)t;
+						return ltt.rnr;
+				}
+				return null;
+		}*/
+
+		static public void registerCancelFunc(Runnable r) {
+				Thread t = Thread.currentThread();
+				if (t instanceof LTThread) {
+						LTThread ltt = (LTThread)t;
+						ltt.rnr.registerCancelCB(r);
+				}
+		}
+
+		static public void unregisterCancelFunc(Runnable r) {
+				Thread t = Thread.currentThread();
+				if (t instanceof LTThread) {
+						LTThread ltt = (LTThread)t;
+						ltt.rnr.unregisterCancelCB(r);
+				}
+		}
 
 		/**
-		 * Run a LongTask asynchronous.
+		 * Run a LongTask asynchronous. Don't allow cancel, and don't show a progress window.
 		 */
 		static public void run(LongTask lt) {
 				run(lt, null);
 		}
 
 		/**
-		 * Run a LongTask asynchronous.
+		 * Run a LongTask asynchronous. Don't allow cancel, and don't show a progress window.
 		 */
 		static public void run(LongTask lt, LTCallback cb) {
-				LTRunnerAsync r = new LTRunnerAsync(lt, cb);
-				Thread ltThread = new Thread(r, "ltay"); // LongTask Async thread
-				ltThread.start();
+				if (isLTThread()) {
+						System.out.println("LTManager.run.A isLTThread=true");
+						try {
+								cb.taskStarting(new LTRunnerAsync(lt, cb)); // TODO
+								lt.runLongTask();
+								cb.taskComplete(new LTRunnerAsync(lt, cb)); // TODO
+						} catch (Exception e) {
+								cb.handleException(new LTRunnerAsync(lt, cb), e); // TODO
+						}
+				} else {
+						System.out.println("LTManager.run.A isLTThread=false");
+						LTRunnerAsync r = new LTRunnerAsync(lt, cb);
+						Thread ltThread = new Thread(r, "pvplt"); // // Pvp Long Task // TODO make const
+						ltThread.start();
+				}
+		}
+
+		/**
+		 * Run a LongTask asynchronous. Show a progress window after 0.5 seconds, and allow cancel.
+		 */
+		static public void runWithProgress(LongTask lt, String progressTitle) {
+				runWithProgress(lt, progressTitle, null);
+		}
+
+		/**
+		 * Run a LongTask asynchronous. Show a progress window after 0.5 seconds, and allow cancel.
+		 */
+		static public void runWithProgress(LongTask lt, String progressTitle, LTCallback cb) {
+				if (isLTThread()) {
+						try {
+								lt.runLongTask();
+						} catch (Exception e) {
+								if (cb != null) {
+										cb.handleException(new LTRunnerAsync(lt, cb), e); // TODO
+								}
+						}
+				} else {
+						LTRunnerSync r = new LTRunnerSync(lt, progressTitle, cb);
+						r.runLongTask();
+				}
 		}
 
 		static void registerLTThread(LTRunner r) {
 				if (tlr.get() != null) {
+						// TODO this is not true
 						throw new RuntimeException("cannot start new LongTask when one is running on the current thread");
 				}
 				tlr.set(r);
@@ -39,17 +107,13 @@ public class LTManager {
 				tlr.remove();
 		}
 
-		/**
-		 * Run a LongTask synchronous.
-		 */
+	/*
 		static public void runSync(LongTask lt, String desc) throws Exception {
 				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				r.runLongTask();
 		}
 
-		/**
-		 * Run a LongTask synchronous.
-		 */
+
 		static public void runSync(LongTaskNoException lt, String desc) {
 				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				try {
@@ -60,19 +124,13 @@ public class LTManager {
 				}
 		}
 
-		/**
-		 * Run a LongTask synchronous.
-		 * Returns true if it was canceled.
-		 */
+
 		static public boolean runSync(CancelableLongTask lt, String desc) throws Exception {
 				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				return r.runLongTask();
 		}
 
-		/**
-		 * Run a LongTask synchronous.
-		 * Returns true if it was canceled.
-		 */
+
 		static public boolean runSync(CancelableLongTaskNoEception lt, String desc) {
 				LTRunnerSync r = new LTRunnerSync(lt, desc);
 				boolean ret = true;
@@ -84,6 +142,7 @@ public class LTManager {
 				}
 				return ret;
 		}
+		*/
 
 		/**
 		 * Will throw a LTCanceledException if the Task was successfully canceled.
@@ -112,26 +171,58 @@ public class LTManager {
 		}
 
 		static public void waitingUserInputStart() { // waitingUserInput
-				System.out.println("LTManager.waitingUserInputStart");
-				if (waitingUserInput == true) {
-						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart waitingUserInput is true");
-				}
-				waitingUserInput = true;
+				waitingUserInputStart(1);
+			//	System.out.println("LTManager.waitingUserInputStart");
+			///	if (waitingUserInputId != 0) {
+			//			PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart waitingUserInput is : " + waitingUserInputId);
+			//	}
+			//	waitingUserInputId = 1;
 		}
 
 		static public void waitingUserInputEnd() {
-				System.out.println("LTManager.waitingUserInputEnd");
-				if (waitingUserInput == false) {
-						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputEnd waitingUserInput is false");
-				}
-				waitingUserInput = false;
-				if (tlr.get() != null) { // TODO should this be called on all LTRunners?
-						tlr.get().interruptForUserInputEnd();
+				waitingUserInputEnd(1);
+			//	if (waitingUserInputId == 1) {
+			///			System.out.println("LTManager.waitingUserInputEnd");
+			//			if (waitingUserInputId == 0) {
+			//					PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputEnd waitingUserInput is 0");
+			///			}
+			//			waitingUserInputId = 0;
+			//			if (tlr.get() != null) { // TODO should this be called on all LTRunners?
+			///					tlr.get().interruptForUserInputEnd();
+			//			}
+			//	}
+		}
+
+
+		static public void waitingUserInputStart(int id) { // waitingUserInput
+				System.out.println("LTManager.waitingUserInputStart: " + id + " > " + waitingUserInputId);
+				if (id > waitingUserInputId) {
+
+						//if (waitingUserInputId != 0) {
+						//		PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart waitingUserInput is : " + waitingUserInputId);
+						//}
+						waitingUserInputId = id;
 				}
 		}
 
+		static public void waitingUserInputEnd(int id) {
+				System.out.println("LTManager.waitingUserInputEnd: " + id + " == " + waitingUserInputId);
+				if (id == waitingUserInputId) {
+						//if (waitingUserInputId == 1) {
+					//			System.out.println("LTManager.waitingUserInputEnd");
+						//		if (waitingUserInputId == 0) {
+						//				PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputEnd waitingUserInput is 0");
+						//		}
+								waitingUserInputId = 0;
+								if (tlr.get() != null) { // TODO should this be called on all LTRunners?
+										tlr.get().interruptForUserInputEnd();
+								}
+						}
+			//	}
+		}
+
 		static public boolean isWaitingUserInput() {
-				return waitingUserInput;
+				return waitingUserInputId != 0;
 		}
 
 }

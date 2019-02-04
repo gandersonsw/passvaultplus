@@ -66,7 +66,7 @@ public class PvpContextData {
   }
 
   private void dataChanged(PvpPersistenceInterface.SaveTrigger trigger) {
-		LTManager.run(rtFileInterface.saveLT(rtDataInterface, trigger));
+		LTManager.run(() -> rtFileInterface.save(rtDataInterface, trigger));
 		//rtFileInterface.save(rtDataInterface, trigger);
 		if (context.uiMain != null) {
 			context.uiMain.getViewListContext().filterUIChanged();

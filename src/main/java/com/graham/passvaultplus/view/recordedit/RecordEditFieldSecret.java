@@ -57,6 +57,7 @@ public class RecordEditFieldSecret extends RecordEditFieldJTextComponent {
 	}
 	
 	public void setIsLockedAndHidden(final boolean isLockedParam) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0091");
 		isLocked = isLockedParam;
 		if (isLocked) {
 			clearText = tc.getText();
@@ -70,6 +71,7 @@ public class RecordEditFieldSecret extends RecordEditFieldJTextComponent {
 	
 	@Override
 	public String getFieldTextForCopy() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0092");
 		if (isLocked) {
 			return clearText;
 		}

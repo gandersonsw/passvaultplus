@@ -16,9 +16,14 @@ import com.graham.passvaultplus.view.prefs.PreferencesBuilder;
 import com.graham.passvaultplus.view.prefs.PreferencesConnectionStartup;
 
 public class StartupOptionsFrame extends JFrame {
+
+	public static void showAndContinue(final PvpContext context) {
+		javax.swing.SwingUtilities.invokeLater(() -> new StartupOptionsFrame(context));
+	}
 	
 	public StartupOptionsFrame(final PvpContext context) {
 		super("Pass Vault Plus: Configuration");
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0191");
 		Component c = PreferencesBuilder.buildPrefs(new PreferencesConnectionStartup(context, this));
 		this.getContentPane().setLayout(new BorderLayout());
 		this.getContentPane().add(c, BorderLayout.CENTER);

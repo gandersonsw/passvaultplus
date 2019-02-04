@@ -21,6 +21,7 @@ public class NewRecordTypeChangedAction  extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0080");
 		try {
 			JComboBox typeSelector = (JComboBox)arg0.getSource();
 			PvpType type = (PvpType)typeSelector.getSelectedItem();

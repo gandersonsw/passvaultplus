@@ -10,8 +10,13 @@ import javax.swing.JOptionPane;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.model.core.DatabaseReader;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
+import com.graham.passvaultplus.model.core.PvpDataInterface;
+import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.JceDialog;
+import com.graham.passvaultplus.view.longtask.LongTask;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class SavePrefsAction extends AbstractAction {
 
@@ -25,42 +30,43 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		boolean completed;
+		//boolean completed;
 		if (prefsContext.configAction == ConfigAction.Create) {
-			completed = doCreate();
+			doCreate();
 		} else if (prefsContext.configAction == ConfigAction.Open) {
-			completed = doOpen();
+			doOpen();
 		} else if (prefsContext.configAction == ConfigAction.Change) {
-			completed = doChange();
+			doChange();
 		} else {
 			throw new RuntimeException("unexpected action: " + prefsContext.configAction);
 		}
-		if (completed) {
-			prefsContext.remoteBS.cleanup();
-		}
+		//if (completed) {
+		//	prefsContext.remoteBS.cleanup();
+		//}
 	}
 
-	private boolean doCreate() {
+	private void doCreate() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0047");
 		final String newPassword = prefsContext.getPasswordText();
 
 		final File dataFile = prefsContext.getDataFile();
 		if (dataFile.isFile()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "When creating a new database, a file must not exist in the choosen location. \nPlease choose a directory where there is no file, or use the \"Open Existing Database\" option.");
-			return false;
+			return;
 		}
 
 		setContextPrefsValues();
 		if (!validatePin()) {
-			return false;
+			return;
 		}
 
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				return false;
+				return;
 			}
 			if (checkEncryptionStrength()) {
-				return false;
+				return;
 			}
 		}
 
@@ -69,50 +75,57 @@ public class SavePrefsAction extends AbstractAction {
 			boolean mkret = parDir.mkdirs();
 			if (!mkret && !parDir.isDirectory()) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), parDir.isDirectory() + ":There was a problem creating the directory:" + dataFile.getParent());
-				return false;
+				return;
 			}
 		}
 
-		if (!prefsContext.remoteBS.presave(true)) {
-			return false;
-		}
-
-		try {
-			createFiles();
-		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
-			return false;
-		}
-
-		return conn.doOpen();
+		// TODO Maybe start new thread here? instead of in ToLocalCopier
+			LTManager.run(() -> {
+					if (!prefsContext.remoteBS.presave(true)) {
+							return;
+					}
+					try {
+							createFiles();
+					} catch (Exception ex) {
+							// TODO need to make a method in PvpConextUI for this
+							System.out.println("RemoteBSPrefHandler.doCreate.A");
+							JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
+							return;
+					}
+					conn.doOpen(prefsContext);
+			});
 	}
 
-	private boolean doOpen() {
+	private void doOpen() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0049");
 		final String newPassword = prefsContext.getPasswordText();
 
 		if (newPassword.trim().length() == 0 && prefsContext.encrypted.isSelected()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-			return false;
+			return;
 		}
 
 		if (!validatePin()) {
-			return false;
+			return;
 		}
 
 		final File dataFile = prefsContext.getDataFile();
 		if (!dataFile.isFile()) {
 			JOptionPane.showMessageDialog(conn.getSuperFrame(), "That file does not exist on the file system. Please create it or use a different path.");
-			return false;
+			return;
 		}
 
-		if (!prefsContext.remoteBS.presave(false)) {
-			return false;
-		}
-		setContextPrefsValues();
-		return conn.doOpen();
+			LTManager.run(() -> {
+					if (!prefsContext.remoteBS.presave(false)) {
+							return;
+					}
+					setContextPrefsValues();
+					conn.doOpen(prefsContext);
+			});
 	}
 
-	private boolean doChange() {
+	private void doChange() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0051");
 		final String newPassword = prefsContext.getPasswordText();
 		boolean saveFlag = false;
 		setContextPrefsValues();
@@ -120,7 +133,7 @@ public class SavePrefsAction extends AbstractAction {
 		if (prefsContext.encrypted.isSelected()) {
 			if (newPassword.trim().length() == 0) {
 				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Password required when encrypted.");
-				return false;
+				return;
 			}
 			String oldPassword = conn.getContextPrefsOriginal().getPassword();
 			if (oldPassword == null) {
@@ -133,12 +146,12 @@ public class SavePrefsAction extends AbstractAction {
 				saveFlag = true;
 			}
 			if (checkEncryptionStrength()) {
-				return false;
+				return;
 			}
 		}
 
 		if (!validatePin()) {
-			return false;
+			return;
 		}
 
 		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
@@ -153,13 +166,17 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 
-		if (!prefsContext.remoteBS.presave(false)) {
-			return false;
-		}
-		return conn.doSave(saveFlag);
+		final boolean saveFlagCopy = saveFlag;
+	//		LTManager.run(() -> {
+			LTManager.runWithProgress(() -> {
+					if (prefsContext.remoteBS.presave(false)) {
+							conn.doSave(saveFlagCopy, prefsContext);
+					}
+			}, "Updating Settings");
 	}
 
 	private boolean validatePin() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0066");
 		if (prefsContext.usePin.isSelected()) {
 			final String pin = prefsContext.getPinText();
 			if (pin.length() == 0) {
@@ -195,6 +212,7 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	private boolean checkEncryptionStrength() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0067");
 		try {
 			final int aesBits = conn.getContextPrefs().getEncryptionStrengthBits();
 			final int maxKL = MyCipherFactory.getMaxAllowedAESKeyLength();
@@ -225,7 +243,13 @@ public class SavePrefsAction extends AbstractAction {
 				File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
 				sourceStream = new FileInputStream(sourceFile);
 			}
-			BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
+			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
+			PvpDataInterface newDataInterface = DatabaseReader.read(tempContext, sourceStream);
+			PvpPersistenceInterface pi = new PvpPersistenceInterface(tempContext);
+			pi.save(newDataInterface, PvpPersistenceInterface.SaveTrigger.init); // TODO test these lines
+
+
+			//BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
 		} finally {
 			if (sourceStream != null) {
 				try { sourceStream.close(); } catch (Exception e) { }

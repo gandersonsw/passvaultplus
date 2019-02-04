@@ -41,6 +41,7 @@ public class PinDialog {
 	}
 	
 	public PinAction askForPin(final int pinWasBadCount) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0157");
 		d = PvpContextUI.createDialog("Pass Vault Plus");
 		//d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
 		d.getContentPane().setLayout(new BorderLayout());
@@ -110,12 +111,9 @@ public class PinDialog {
 			centerPanel.add(p);
 			d.getRootPane().setDefaultButton(okB);
 		}
-		
-		//d.pack();
-		//BCUtil.center(d);
+
 		d.setResizable(false);
-		//d.setVisible(true); // this is the line that causes the dialog to Block
-		PvpContextUI.showDialog(d);
+		PvpContextUI.showDialog(d); // this is the line that causes the dialog to Block
 		return actionHit;
 	}
 	

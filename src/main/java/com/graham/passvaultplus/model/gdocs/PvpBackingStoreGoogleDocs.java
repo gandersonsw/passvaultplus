@@ -29,6 +29,7 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
@@ -41,7 +42,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		public boolean sameFormatExists;
 		public boolean passwordWorks;
 		public String existingFileFormats;
-		public String error;
+		public Exception excep;
+		public boolean wasCanceled;
 		void addFileFormat(String fname) {
 			//String newFormat = BCUtil.getFileExtension(fname, true);
 			//newFormat = newFormat + ":" + PvpPersistenceInterface.convertFileExtensionToEnglish("." + newFormat);
@@ -253,7 +255,17 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			// Build flow and trigger user authorization request.
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
 					clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-			Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+			LocalServerReceiver lsr = new LocalServerReceiver();
+			Runnable cancelCB = () -> {
+					try {
+							lsr.stop();
+					} catch (IOException ioe) {
+							context.ui.notifyWarning("LocalServerReceiver.stop :: failed", ioe);
+					}
+			};
+			LTManager.registerCancelFunc(cancelCB);
+			Credential credential = new AuthorizationCodeInstalledApp(flow, lsr).authorize("user");
+			LTManager.unregisterCancelFunc(cancelCB);
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
 			LTManager.stepDone("Google Drive Authorize");
 			return credential;
@@ -381,7 +393,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
 					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
 				} else {
-					LTManager.run(context.data.getFileInterface().loadLT(context.data.getDataInterface()), new UatheCb(this));
+						// TODO clean up
+					LTManager.run(() -> context.data.getFileInterface().load(context.data.getDataInterface()), new UatheCb(this));
 				}
 			}
 
@@ -395,7 +408,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			super(bsParam);
 		}
 		@Override
-		public void taskComplete(LTRunnerAsync lt) {
+		public void taskComplete(LTRunner lt) {
 			super.taskComplete(lt);
 			context.uiMain.getViewListContext().filterUIChanged();
 		}

@@ -12,21 +12,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.net.URI;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.actions.GoToUrlAction;
 
@@ -43,6 +35,23 @@ public class ErrorFrame {
 	
 	public void notify(final Exception e, final boolean canContinue, final boolean canGoToSetup, final boolean canQuit, final PvpException.GeneralErrCode gErrCode, final StringBuilder warnings) {
 
+			if (SwingUtilities.isEventDispatchThread()) {
+					notifyInternal(e, canContinue, canGoToSetup, canQuit, gErrCode, warnings);
+			} else {
+					try {
+							SwingUtilities.invokeAndWait(() -> notifyInternal(e, canContinue, canGoToSetup, canQuit, gErrCode, warnings));
+					} catch (Exception excep) {
+							PvpContextUI.getActiveUI().notifyWarning("ErrorFrame.notify", excep);
+					}
+			}
+	}
+
+
+	private void notifyInternal(final Exception e, final boolean canContinue, final boolean canGoToSetup, final boolean canQuit, final PvpException.GeneralErrCode gErrCode, final StringBuilder warnings) {
+
+
+				//com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyInfo("check thread 151");
+			com.graham.passvaultplus.PvpContextUI.getActiveUI().checkEvtThread("3029");
 		if (detailsText != null) {
 			if (badExceptionMessageCount < 10) {
 				detailsText.append("\n\n" + e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
@@ -89,6 +98,7 @@ public class ErrorFrame {
 	}
 	
 	private JPanel buildTopPanel(String errTitle, String errDesc, String errHelpId) {
+			// com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyInfo("check thread 132");
 		final JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		final JLabel tileLabel = new JLabel(errTitle);
@@ -192,6 +202,7 @@ public class ErrorFrame {
 	}
 	
 	class ContinueAction extends AbstractAction {
+			// TODO test this  - sometimes we want to use text "Continue" and sometimes "Close"
 		public ContinueAction() {
 			super("Continue");
 		}

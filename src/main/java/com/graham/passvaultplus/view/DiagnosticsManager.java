@@ -11,10 +11,9 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.view.longtask.CancelableLongTask;
 import com.graham.passvaultplus.view.longtask.LTCallback;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
-import com.graham.passvaultplus.view.longtask.LongTask;
 
 public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	private static DiagnosticsManager activeManager = new DiagnosticsManager();
@@ -38,6 +37,7 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 	public Component build(PvpContext context) {
+			// com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyInfo("check thread 131");
 		executer = new CommandExecuter(context, new CommandExeCallBack());
 		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
@@ -67,6 +67,7 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 	public synchronized void warning(final String s, final Exception e) {
+			System.out.println("warning:" + Thread.currentThread().getName() + "| " + s);
 		appendTimeStamp();
 		log.append(s);
 		if (e != null) {
@@ -82,6 +83,7 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 	public synchronized void info(String s) {
+			System.out.println("info:" + Thread.currentThread().getName() + "| " + s);
 		appendTimeStamp();
 		log.append(s);
 		log.append("\n");
@@ -130,25 +132,25 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 		class CommandExeCallBack extends AbstractAction implements LTCallback {
-			private LTRunnerAsync currentLt;
+			private LTRunner currentLt;
 			public CommandExeCallBack() {
 					super("Cancel");
 			}
 			Action oldAction;
 				@Override
-				public void taskStarting(LTRunnerAsync lt) {
+				public void taskStarting(LTRunner lt) {
 						currentLt = lt;
 						System.out.println("- - - CECB - - - taskStarting - - -");
 						oldAction = doIt.getAction();
 						doIt.setAction(this);
 				}
 				@Override
-				public void taskComplete(LTRunnerAsync lt) {
+				public void taskComplete(LTRunner lt) {
 						System.out.println("- - - CECB - - - taskComplete - - -");
 						doIt.setAction(oldAction);
 				}
 				@Override
-				public void handleException(LTRunnerAsync lt, Exception e) {
+				public void handleException(LTRunner lt, Exception e) {
 						System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
 				}
 

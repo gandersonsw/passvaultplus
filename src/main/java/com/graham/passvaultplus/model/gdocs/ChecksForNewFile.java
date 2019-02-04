@@ -4,13 +4,13 @@ package com.graham.passvaultplus.model.gdocs;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.model.core.PvpInStreamer;
-import com.graham.passvaultplus.view.longtask.CancelableLongTaskNoEception;
+import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 import com.graham.passvaultplus.view.longtask.LTManager;
 
 import java.io.BufferedInputStream;
 import java.security.InvalidKeyException;
 
-public class ChecksForNewFile implements CancelableLongTaskNoEception {
+public class ChecksForNewFile implements LongTaskNoException {
 
 		final private PvpContext context;
 		final private PvpBackingStoreGoogleDocs bs;
@@ -20,7 +20,8 @@ public class ChecksForNewFile implements CancelableLongTaskNoEception {
 		 */
 		public static PvpBackingStoreGoogleDocs.NewChecks doIt(PvpContext contextParam) {
 				ChecksForNewFile c = new ChecksForNewFile(contextParam);
-				LTManager.runSync(c, "Verifying Google File");
+				c.runLongTask(); // TODO clean this up
+			//	LTManager.runSync(c, "Verifying Google File");
 				return c.bs.nchecks;
 		}
 
@@ -31,6 +32,7 @@ public class ChecksForNewFile implements CancelableLongTaskNoEception {
 
 		@Override
 		public void runLongTask() {
+				LTManager.registerCancelFunc(() -> bs.nchecks.wasCanceled = true);
 				LTManager.nextStep("loadFileProps");
 				bs.nchecks.passwordWorks = true;
 				bs.loadFileProps(true);
@@ -48,20 +50,16 @@ public class ChecksForNewFile implements CancelableLongTaskNoEception {
 								context.ui.notifyInfo("doChecksForNewFile: at InvalidKeyException");
 								bs.nchecks.passwordWorks = false;
 						} catch (Exception e) {
-								bs.nchecks.error = e.getMessage();
+								bs.nchecks.excep = e;
 						} finally {
 								fileReader.close();
 						}
 				}
 
-				if (bs.nchecks.error == null && bs.getException() != null) {
-						bs.nchecks.error = bs.getErrorMessageForDisplay();
+				if (bs.nchecks.excep == null && bs.getException() != null) {
+						//bs.nchecks.error = bs.getErrorMessageForDisplay(); TODO sometimes we want a more freindly message if it is a "cant connect" or something
+						bs.nchecks.excep = bs.getException();
 				}
 		}
 
-		@Override
-		public boolean cancel() {
-				return true; // this can always be canceled
-				// Don't need to do anything, the nextStep will throw an exception
-		}
 }

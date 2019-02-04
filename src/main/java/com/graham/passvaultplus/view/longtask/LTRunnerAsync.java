@@ -5,13 +5,14 @@ import java.util.Objects;
 
 /**
  * Handle the running of one LongTask.
- * For running asyncronously - will not show the Progress/Cancel dialog
+ * For running asyncronously - will not show the Progress/Cancel dialog.
+ * Meaning UI is chugging along, but this is running in the background.
+ * We are not blocking the user from using the app.
  */
 public class LTRunnerAsync extends LTRunner {
 
 		private final LongTask lt;
 		private final LTCallback cb;
-		private volatile boolean wasCanceled;
 
 		public LTRunnerAsync(LongTask ltParam) {
 				this(ltParam, null);
@@ -49,11 +50,12 @@ public class LTRunnerAsync extends LTRunner {
 				}
 		}
 
-		public void cancel() {
-				if (lt instanceof CancelableLongTask) {
-						wasCanceled = ((CancelableLongTask)lt).cancel();
-				}
-		}
+	//	@Override
+	//	public void cancel() {
+	//			if (lt instanceof CancelableLongTask) {
+	//					wasCanceled = ((CancelableLongTask)lt).cancel();
+	//			}
+	//	}
 
 		public boolean wasCanceled() {
 				return wasCanceled;

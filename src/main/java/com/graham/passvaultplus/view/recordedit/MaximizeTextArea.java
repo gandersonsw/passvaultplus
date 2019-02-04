@@ -27,6 +27,7 @@ public class MaximizeTextArea extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0078");
 		editContext.maximizedTextAreaPanel = new JPanel(new BorderLayout());
 		
 		// the parent will always be the ScrollPane JViewport

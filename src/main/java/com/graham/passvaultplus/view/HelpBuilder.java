@@ -31,6 +31,7 @@ public class HelpBuilder implements OtherTabBuilder {
 		}
 
 		public Component build(PvpContext context) {
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("00151");
 				final JPanel mainPanel = new JPanel(new BorderLayout());
 
 				final JPanel p55 = new JPanel();

@@ -7,6 +7,8 @@ import java.io.IOException;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.StatusBox;
 
+import javax.swing.*;
+
 public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	private boolean dirty;
 	private volatile BsState bsState = BsState.StartState;
@@ -78,6 +80,9 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 							}
 							newState = exception == null ? BsState.AllGood : BsState.ErrorSaving;
 							break;
+					case initSave:
+							newState = BsState.Saving;
+							break;
 					default:
 							throw new IllegalArgumentException("unknown BsStateTrans:" + trans);
 			}
@@ -131,22 +136,24 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	private void updateStatusBox() {
-		if (statusBox != null) {
-			if (exception != null) {
-				statusBox.setColor(Color.ORANGE);
-				statusBox.setToolTipText("Error:" + getErrorMessageForDisplay());
-			} else if (dirty) {
-				statusBox.setColor(Color.BLUE.brighter());
-				statusBox.setToolTipText("Not stored yet. Click to store now.");
-			} else {
-				statusBox.setColor(Color.GREEN);
-				statusBox.setToolTipText("All data stored");
+		SwingUtilities.invokeLater(() -> {
+			if (statusBox != null) {
+				if (exception != null) {
+					statusBox.setColor(Color.ORANGE);
+					statusBox.setToolTipText("Error:" + getErrorMessageForDisplay());
+				} else if (dirty) {
+					statusBox.setColor(Color.BLUE.brighter());
+					statusBox.setToolTipText("Not stored yet. Click to store now.");
+				} else {
+					statusBox.setColor(Color.GREEN);
+					statusBox.setToolTipText("All data stored"); // TODO click to download data ?
+				}
 			}
-		}
+		});
 	}
 
 	protected String getErrorMessageForDisplay() {
-		exception.printStackTrace();
+		//exception.printStackTrace();
 		return exception.getMessage();
 
 	}

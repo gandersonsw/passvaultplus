@@ -3,8 +3,7 @@ package com.graham.passvaultplus.model.core;
 
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.longtask.LTCallback;
-import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
-import com.graham.passvaultplus.view.longtask.LongTask;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 public class PvpBackingStoreLTCB implements LTCallback {
 
@@ -15,17 +14,17 @@ public class PvpBackingStoreLTCB implements LTCallback {
 		}
 
 		@Override
-		public void taskStarting(LTRunnerAsync lt) {
+		public void taskStarting(LTRunner lt) {
 				bs.getStatusBox().startAnimation();
 		}
 
 		@Override
-		public void taskComplete(LTRunnerAsync lt) {
+		public void taskComplete(LTRunner lt) {
 				bs.getStatusBox().stopAnimation();
 		}
 
 		@Override
-		public void handleException(LTRunnerAsync lt, Exception e) {
+		public void handleException(LTRunner lt, Exception e) {
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e));
 				// TODO bs.setException();
 		}

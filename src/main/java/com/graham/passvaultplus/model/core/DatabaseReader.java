@@ -75,7 +75,8 @@ public class DatabaseReader {
 			sb.append(" Text:");
 			sb.append(new String(goodData, start, length));
 		}
-		
+
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0008");
 		JOptionPane.showMessageDialog(null, sb.toString());
 		
 		return new ByteArrayInputStream(goodData, 0, goodDataCount);

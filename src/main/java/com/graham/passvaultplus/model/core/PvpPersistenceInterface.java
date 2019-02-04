@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.actions.ExportXmlFile;
@@ -25,7 +26,8 @@ public class PvpPersistenceInterface {
 		public enum SaveTrigger {
 				quit, // the application is quiting
 				cud,  // there was a Create, Update or Delete
-				major // some major change
+				major, // some major change
+				init // TODO maybe delete this
 		}
 
 		public static final String EXT_COMPRESS = "zip";
@@ -101,7 +103,7 @@ public class PvpPersistenceInterface {
 				return bsList;
 		}
 
-		private void load(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
+		private void loadInternal(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
 				context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
 
 				for (PvpBackingStore bs : enabledBs) {
@@ -204,31 +206,24 @@ public class PvpPersistenceInterface {
 				}
 		}
 
-		public LongTask loadLT(PvpDataInterface dataInterface) {
-				return new LongTaskLoad(dataInterface);
-		}
-
-		class LongTaskLoad implements LongTask {
-				final private PvpDataInterface dataInterface;
-				private List<PvpBackingStore> enabledBs;
-				public LongTaskLoad(PvpDataInterface dataInterfaceParam) {
-						dataInterface = dataInterfaceParam;
+		public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
+				if (!LTManager.isLTThread()) {
+						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.load :: LTManager.isLTThread() = false");
 				}
-				public void runLongTask() throws Exception {
-						try {
-								enabledBs = getEnabledBackingStores(false);
-								for (PvpBackingStore bs : enabledBs) {
-										bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
-								}
-								load(dataInterface, enabledBs);
-						} finally {
-								for (PvpBackingStore bs : enabledBs) {
-									bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
-								}
+
+				// TODO cleanup
+				List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
+				try {
+
+						for (PvpBackingStore bs : enabledBs) {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
+						}
+						loadInternal(dataInterface, enabledBs);
+				} finally {
+						for (PvpBackingStore bs : enabledBs) {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
 						}
 				}
-			//	public void cancel() {
-			//	}
 		}
 
 	/**
@@ -236,11 +231,12 @@ public class PvpPersistenceInterface {
 	 */
 	public boolean appQuiting() {
 		// TODO test when cancel is pressed
-		LTManager.runSync(saveLT(context.data.getDataInterface(), SaveTrigger.quit), "Saving...");
+			// "Saving...");
+		save(context.data.getDataInterface(), SaveTrigger.quit);
 		return !errorHappened;
 	}
 
-		private void save(PvpDataInterface dataInterface, SaveTrigger saveTrig, List<PvpBackingStore> enabledBs) {
+		private void saveInternal(PvpDataInterface dataInterface, SaveTrigger saveTrig, List<PvpBackingStore> enabledBs) {
 				errorHappened = false;
 
 				for (PvpBackingStore bs : enabledBs) {
@@ -290,36 +286,42 @@ public class PvpPersistenceInterface {
 				}
 		}
 
-		public LongTaskNoException saveLT(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
-			return new LongTaskSave(dataInterface, saveTrig);
-		}
+		public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
+			// TODO clean this up
+		//	new LongTaskSave(dataInterface, saveTrig).runLongTask();
 
-		class LongTaskSave implements LongTaskNoException {
-				private final PvpDataInterface dataInterface;
-				private final PvpPersistenceInterface.SaveTrigger saveTrig;
-				private final List<PvpBackingStore> enabledBs;
-				public LongTaskSave(PvpDataInterface dataInterfaceParam, PvpPersistenceInterface.SaveTrigger saveTrigParam) {
-						dataInterface = dataInterfaceParam;
-						saveTrig = saveTrigParam;
-						enabledBs = getEnabledBackingStores(true);
+				if (!LTManager.isLTThread()) {
+						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.save :: LTManager.isLTThread() = false");
+				}
+
+				final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
+
+				if (saveTrig == SaveTrigger.init) {
+						saveTrig = SaveTrigger.major;
+						for (PvpBackingStore bs : enabledBs) {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.initSave);
+						}
+				} else {
 						for (PvpBackingStore bs : enabledBs) {
 								bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
 						}
 				}
-				public void runLongTask() {
-						try {
-								save(dataInterface, saveTrig, enabledBs);
-						} finally {
-								for (PvpBackingStore bs : enabledBs) {
-										bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
-								}
+
+				try {
+						saveInternal(dataInterface, saveTrig, enabledBs);
+				} finally {
+						for (PvpBackingStore bs : enabledBs) {
+								bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
 						}
 				}
-			//	public void cancel() {
-			//	}
 		}
 
+
 		public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
+				if (!LTManager.isLTThread()) {
+						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.saveOneBackingStore :: LTManager.isLTThread() = false");
+				}
+
 				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
 				if (!bs.shouldBeSaved()) {
 						context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());

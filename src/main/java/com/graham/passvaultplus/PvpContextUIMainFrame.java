@@ -51,6 +51,7 @@ public class PvpContextUIMainFrame {
 	}
 
 	public void hideTab(OtherTab t) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0242");
 		if (otherTabComps.get(t) != null) {
 			mainTabPane.remove(otherTabComps.get(t));
 			context.uiMain.getUndoManager().notifyCloseTab(otherTabComps.get(t));
@@ -130,6 +131,7 @@ public class PvpContextUIMainFrame {
 	}
 
 	public RecordEditContext getCurrentTabRecordEditContext() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0244");
 		if (isCurrentTabList()) {
 			return null;
 		}

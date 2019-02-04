@@ -26,24 +26,28 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	}
 
 	@Override
-	public boolean doSave(final boolean wasChanges) {
-		copyPrefsToReal();
-		// if changes made don't require file rewrite, don't do it
-		if (wasChanges) {
-			//context.setDataFilePath(dataFile.getAbsolutePath());
-			LTManager.runSync(context.data.getFileInterface().saveLT(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major), "Saving...");
-			//context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major); // TODO if there is an exception here the changes from line 27 should not be applied
-		}
-		context.uiMain.hideTab(OtherTab.Prefs);
-		return true;
+	public void doSave(final boolean wasChanges, final PreferencesContext pc) {
+			// TODO support cancel "Saving..."
+		//LTManager.run(() -> {
+			copyPrefsToReal();
+			// if changes made don't require file rewrite, don't do it
+			if (wasChanges) {
+				//context.setDataFilePath(dataFile.getAbsolutePath());
+				context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major);
+				 // TODO if there is an exception here the changes from line 27 should not be applied
+			}
+			context.uiMain.hideTab(OtherTab.Prefs);
+			pc.cleanup();
+		//});
 	}
 
 	@Override
-	public boolean doOpen() {
+	public void doOpen(PreferencesContext pc) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("3523");
 		if (hasUnsavedChanges()) {
 			boolean b = context.ui.showConfirmDialog("Unsaved changes", "There are some records that have been edited but not saved. Are you sure you want to discard them?");
 			if (!b) {
-				return false;
+				return;
 			}
 		}
 
@@ -52,7 +56,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		copyPrefsToReal();
 
 		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword()); // psp.pw TODO
-		return true;
+		pc.cleanup(); // TODO this should be on same thread
 	}
 
 	private boolean hasUnsavedChanges() {

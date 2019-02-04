@@ -30,6 +30,7 @@ public class MainFrame extends JFrame {
 
 	public MainFrame(final PvpContext context) {
 		super("");
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0156");
 		setTitle("Pass Vault Plus");
 		this.addWindowListener(new ThisWindAdapter(new QuitAction(context)));
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

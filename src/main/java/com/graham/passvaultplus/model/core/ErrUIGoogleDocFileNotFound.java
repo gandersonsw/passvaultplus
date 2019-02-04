@@ -26,6 +26,7 @@ public class ErrUIGoogleDocFileNotFound {
 	}
 
 	public JDialog buildDialog() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0009");
 		JPanel p1 = new JPanel(new BorderLayout());
 		p1.add(buildCenter(), BorderLayout.CENTER);
 		p1.add(buildBottom(), BorderLayout.SOUTH);
@@ -101,8 +102,9 @@ public class ErrUIGoogleDocFileNotFound {
 			context.ui.enableQuitFromError(false);
 			System.out.println("ErrUIGoogleDocFileNotFound.UploadNowAction.actionPerformed - getting ready to copy to google");
 			// TODO test this
-			LTManager.runSync(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), "Copy to Google Drive");
-			//context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
+				// TODO make async
+			// LTManager.runSync(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), "Copy to Google Drive");
+			context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
 			context.ui.enableQuitFromError(true);
 		}
 	}

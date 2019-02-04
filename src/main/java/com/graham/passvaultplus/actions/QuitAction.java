@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 public class QuitAction extends AbstractAction {
@@ -26,9 +27,12 @@ public class QuitAction extends AbstractAction {
 		}
 
 		if (shouldQuit) {
-			if (context.data.getFileInterface().appQuiting()) {
-				System.exit(0);
-			}
+			// TODO show the dialog and test cancel
+			LTManager.run(() -> {
+				if (context.data.getFileInterface().appQuiting()) {
+					System.exit(0);
+				}
+			});
 		}
 	}
 

@@ -47,6 +47,7 @@ public class PreferencesBuilder implements OtherTabBuilder {
 	}
 
 	private Component build() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0018");
 		final JPanel p = new JPanel(new BorderLayout());
 		p.add(buildTop(), BorderLayout.CENTER);
 		p.add(buildBottom(p), BorderLayout.SOUTH);

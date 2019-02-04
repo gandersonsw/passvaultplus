@@ -14,6 +14,7 @@ public class ShowPinAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0072");
 		if (context.showPin.isSelected()) {
 			final String pin = new String(context.pin.getPassword());
 			context.pinClearText.setText(pin);

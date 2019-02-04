@@ -27,6 +27,7 @@ public class ResetPrefsAction extends AbstractAction {
 	}
 
   public void actionPerformed(ActionEvent e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0044");
     doConfirmDialog();
     if (cancel) {
       return;

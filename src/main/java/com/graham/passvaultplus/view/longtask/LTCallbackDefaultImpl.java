@@ -4,13 +4,13 @@ package com.graham.passvaultplus.view.longtask;
 import com.graham.passvaultplus.PvpContextUI;
 
 public class LTCallbackDefaultImpl implements LTCallback {
-		public void taskStarting(LTRunnerAsync lt) {
+		public void taskStarting(LTRunner lt) {
 		}
 
-		public void taskComplete(LTRunnerAsync lt) {
+		public void taskComplete(LTRunner lt) {
 		}
 
-		public void handleException(LTRunnerAsync lt, Exception e) {
-				PvpContextUI.getActiveUI().notifyWarning("Exception in LTRunnerAsync", e);
+		public void handleException(LTRunner lt, Exception e) {
+				PvpContextUI.getActiveUI().notifyWarning("Exception in a LongTask", e);
 		}
 }

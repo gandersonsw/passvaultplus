@@ -48,6 +48,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 		
 		textField.addFocusListener(this);
 		this.addInputAndActionMapItems();
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0101");
 		textField.getDocument().addDocumentListener(new TextFieldChangeForwarder(new DocumentAnyChangeListener()));
 	}
 
@@ -106,6 +107,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 	}
 	
 	public void addInputAndActionMapItems() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0103");
 		textField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapepuw");
 		textField.getActionMap().put("escapepuw", new EscapeHandler());
 		

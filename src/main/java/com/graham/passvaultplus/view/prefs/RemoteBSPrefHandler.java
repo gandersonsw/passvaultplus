@@ -2,6 +2,8 @@
 package com.graham.passvaultplus.view.prefs;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.gdocs.ChecksForNewFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.model.gdocs.ToLocalCopier;
@@ -41,6 +43,7 @@ public class RemoteBSPrefHandler {
 	}
 
 	public JPanel buildPrefsUI() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0021");
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		useGoogleDrive = new JCheckBox("Use Google™ Drive");
 		useGoogleDrive.setSelected(useGoogleDriveFlag);
@@ -57,7 +60,7 @@ public class RemoteBSPrefHandler {
 		}
 		if (useGoogleDrive.isSelected() != useGoogleDriveFlag) {
 			// TODO uiMain this might bomb on first start
-			prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("RemoteBSPrefHandler.cleanup:" + (prefsContext.conn.getPvpContextOriginal().uiMain != null) + ":" + (prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame() != null));
+			prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("RemoteBSPrefHandler.cleanup:" + (prefsContext.conn.getPvpContextOriginal().uiMain != null));
 			if (prefsContext.conn.getPvpContextOriginal().uiMain != null && prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame() != null) {
 				prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame().reinitStatusPanel(prefsContext.conn.getPvpContextOriginal());
 			}
@@ -71,15 +74,23 @@ public class RemoteBSPrefHandler {
 	/** return true if continue */
 	public boolean presave(boolean isNewDB) {
 		if (useGoogleDrive.isSelected() && !useGoogleDriveFlag) {
-			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
+			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 			// TODO verify mainUI is not used by this context
 			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext);
 			PvpBackingStoreGoogleDocs.NewChecks nc = ChecksForNewFile.doIt(tempContext);
-			if (nc.error != null) {
-				if (!nc.error.equals(PvpContext.USR_CANCELED)) {
+			if (nc.excep != null) {
+			//	if (!nc.wasCanceled) {
 					ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-					JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
-				}
+					// TODO need tell LT not to show cancel dialog
+					try {
+							// TODO need to make a method in PvpConextUI for this
+							System.out.println("RemoteBSPrefHandler.presave.A");
+							this.prefsContext.conn.context.ui.enableQuitFromError(false);
+							this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);
+							this.prefsContext.conn.context.ui.enableQuitFromError(true);
+							//SwingUtilities.invokeAndWait(() -> JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn));
+					} catch (Exception e) {}
+			//	}
 				return false;
 			}
 			if (nc.sameFormatExists) {
@@ -101,6 +112,8 @@ public class RemoteBSPrefHandler {
 					message = "No existing file was found on Google drive, your local database will be copied there.";
 				}
 				ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+				// TODO need to make a method in PvpConextUI for this
+					System.out.println("RemoteBSPrefHandler.presave.B");
 				int b = JOptionPane.showConfirmDialog(prefsContext.conn.getSuperFrame(), message, "New Remote File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 				return b == JOptionPane.OK_OPTION;
 			}
@@ -109,7 +122,7 @@ public class RemoteBSPrefHandler {
 	}
 
 	public void askAboutExistingFile(JFrame parent, boolean passwordWorks, boolean isNewDB) {
-		d = new JDialog(parent, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
+		d = prefsContext.conn.context.ui.createDialog(null);
 		d.getContentPane().setLayout(new BorderLayout());
 
 		{
@@ -161,10 +174,8 @@ public class RemoteBSPrefHandler {
 		}
 
 		actionHit = FileAction.Cancel;
-		d.pack();
-		d.setLocationRelativeTo(parent);
 		d.setResizable(false);
-		d.setVisible(true); // this is the line that causes the dialog to Block
+		prefsContext.conn.context.ui.showDialog(d); // this is the line that causes the dialog to Block
 	}
 
 	class OverwriteAction extends AbstractAction {
@@ -173,7 +184,7 @@ public class RemoteBSPrefHandler {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = FileAction.Overwrite;
-			d.setVisible(false);
+			prefsContext.conn.context.ui.hideDialog(d);
 		}
 	}
 	class MergeAction extends AbstractAction {
@@ -182,7 +193,7 @@ public class RemoteBSPrefHandler {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = FileAction.Merge;
-			d.setVisible(false);
+			prefsContext.conn.context.ui.hideDialog(d);
 		}
 	}
 	class CancelAction extends AbstractAction {
@@ -191,24 +202,29 @@ public class RemoteBSPrefHandler {
 		}
 		public void actionPerformed(ActionEvent e) {
 			actionHit = FileAction.Cancel;
-			d.setVisible(false);
+			prefsContext.conn.context.ui.hideDialog(d);
 		}
 	}
 
 	public boolean createFiles() {
 		if (useGoogleDrive.isSelected()) {
-			//PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
-			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs());
+			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 				// TODO verify mainUI is not used by this context
 			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.copyFileToLocal(tempContext);
 			PvpBackingStoreGoogleDocs.NewChecks nc = ToLocalCopier.doIt(tempContext);
-			if (nc.error != null) {
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("0041");
+			if (nc.excep != null) {
 				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-				JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
-				return false;
+
+				this.prefsContext.conn.context.ui.enableQuitFromError(false);
+				this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);
+				this.prefsContext.conn.context.ui.enableQuitFromError(true);
+				//JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
+			} else if (nc.sameFormatExists) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public void save() {

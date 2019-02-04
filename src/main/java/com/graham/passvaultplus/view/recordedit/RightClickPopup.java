@@ -1,8 +1,6 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.recordedit;
 
-import java.util.List;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,8 +14,6 @@ import javax.swing.text.JTextComponent;
 
 import com.graham.framework.PasswordGenerator;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.model.core.PvpDataInterface;
-import com.graham.passvaultplus.model.core.PvpRecord;
 
 public class RightClickPopup extends MouseAdapter {
   private PvpContext context;
@@ -41,6 +37,7 @@ public class RightClickPopup extends MouseAdapter {
   }
 
   private void showPopup(MouseEvent e) {
+    com.graham.passvaultplus.PvpContextUI.checkEvtThread("0099");
       if (e.isPopupTrigger()) {
         JTextComponent tc = (JTextComponent)e.getComponent();
         getPopupMenu(tc).show(tc, e.getX(), e.getY());
@@ -48,6 +45,7 @@ public class RightClickPopup extends MouseAdapter {
   }
 
   JPopupMenu getPopupMenu(JTextComponent tc) {
+    com.graham.passvaultplus.PvpContextUI.checkEvtThread("0097");
 		JPopupMenu popupMenu = new JPopupMenu("Edit");
   	popupMenu.add(new JMenuItem(new ClearFieldAction(tc)));
   	popupMenu.add(new JMenuItem(new ClearAndPasteAction(tc)));
@@ -63,6 +61,7 @@ public class RightClickPopup extends MouseAdapter {
 	}
 
   void addPasswordGen(JMenu passwordMenu, JTextComponent tc) {
+    com.graham.passvaultplus.PvpContextUI.checkEvtThread("0095");
     //List<PvpRecord> pwGenList = context.data.getDataInterface().getRecordsOfType(PvpDataInterface.TYPE_PASSWORD_GEN);
     //if (pwGenList.size() == 0) {
     PasswordGenerator.PwGenParams params = new PasswordGenerator.PwGenParams();

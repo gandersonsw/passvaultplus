@@ -24,6 +24,7 @@ public class MinimizeTextArea extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0079");
 		ta.getParent().remove(ta);
 		taParent.add(ta);
 		editContext.panelInTabPane.remove(editContext.maximizedTextAreaPanel);

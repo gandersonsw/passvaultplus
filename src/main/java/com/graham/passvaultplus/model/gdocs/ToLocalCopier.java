@@ -3,13 +3,13 @@ package com.graham.passvaultplus.model.gdocs;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.view.longtask.CancelableLongTaskNoEception;
+import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 import com.graham.passvaultplus.view.longtask.LTManager;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
-public class ToLocalCopier implements CancelableLongTaskNoEception {
+public class ToLocalCopier implements LongTaskNoException {
 
 		final private PvpContext context;
 		final private PvpBackingStoreGoogleDocs bs;
@@ -20,7 +20,8 @@ public class ToLocalCopier implements CancelableLongTaskNoEception {
 		 */
 		public static PvpBackingStoreGoogleDocs.NewChecks doIt(PvpContext contextParam) {
 				ToLocalCopier c = new ToLocalCopier(contextParam);
-				LTManager.runSync(c, "Verifying Google File");
+			//	LTManager.runWithProgress(c, "Verifying Google File");
+				c.runLongTask(); // TODO clean up - don't need Task stuff anymore
 				return c.bs.nchecks;
 		}
 
@@ -43,7 +44,7 @@ public class ToLocalCopier implements CancelableLongTaskNoEception {
 								canCancel = false;
 								BCUtil.copyFile(inStream, context.prefs.getDataFile());
 						} catch (Exception e) {
-								bs.nchecks.error = e.getMessage();
+								bs.nchecks.excep = e;
 						} finally {
 								if (inStream != null) {
 										try { inStream.close(); } catch (IOException e) { }
@@ -51,13 +52,15 @@ public class ToLocalCopier implements CancelableLongTaskNoEception {
 						}
 				}
 
-				if (bs.nchecks.error == null && bs.getException() != null) {
-						bs.nchecks.error = bs.getErrorMessageForDisplay();
+				if (bs.nchecks.excep == null && bs.getException() != null) {
+					//	bs.nchecks.errorMsg = bs.getErrorMessageForDisplay(); TODO sometimes we want a more freindly message if it is a "cant connect" or something
+						bs.nchecks.excep = bs.getException();
 				}
 		}
 
-		@Override
-		public boolean cancel() {
-				return canCancel;
-		}
+		// TODO handle cancel
+	//	@Override
+	//	public boolean cancel() {
+	//			return canCancel;
+	//	}
 }

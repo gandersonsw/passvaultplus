@@ -10,7 +10,7 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.JceDialog;
-import com.graham.passvaultplus.view.longtask.CancelableLongTask;
+import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.prefs.RemoteBSPrefHandler;
@@ -97,13 +97,16 @@ public class CommandExecuter {
 
 	private void testLongTask(int bakeTime) {
 			System.out.println("testLongTask testLongTask testLongTask testLongTask testLongTask testLongTask");
-		try {
-			if (LTManager.runSync(new LongTaskTest(bakeTime), "Making a pizza")) {
-				context.ui.notifyInfo("Cancel was pressed!");
-			}
-		} catch (Exception e) {
-			context.ui.notifyWarning("TestLongTask Exception", e);
-		}
+
+			LTManager.runWithProgress(new LongTaskTest(bakeTime), "Making a pizza");
+
+	//	try {
+	//		if (LTManager.runSync(new LongTaskTest(bakeTime), "Making a pizza")) {
+	//			context.ui.notifyInfo("Cancel was pressed!");
+	//		}
+	//	} catch (Exception e) {
+	//		context.ui.notifyWarning("TestLongTask Exception", e);
+//		}
 	}
 
 	private void testJceDialog(int maxKeySize) {
@@ -112,8 +115,7 @@ public class CommandExecuter {
 	}
 
 	private void testEula() {
-		final EulaDialog eula = new EulaDialog();
-		eula.showEula();
+		new EulaDialog().showEula();
 	}
 
 	private void testRemoteAsk(boolean passwordWorks, boolean isNewDB) {
@@ -158,7 +160,7 @@ public class CommandExecuter {
 			LTManager.run(new SearchBU(searchText), ltcb);
 	}
 
-	class SearchBU implements CancelableLongTask {
+	class SearchBU implements LongTask {
 			String searchText;
 			boolean doCancel;
 			public SearchBU(String s) {
@@ -166,6 +168,7 @@ public class CommandExecuter {
 			}
 			@Override
 			public void runLongTask() {
+					LTManager.registerCancelFunc(() -> doCancel = true);
 					PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
 					File[] fArr = bsFileMain.getAllFiles(true);
 					int count = 0;
@@ -196,11 +199,11 @@ public class CommandExecuter {
 					}
 					context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
 			}
-			@Override
-			public boolean cancel() {
-					doCancel = true;
-					return true;
-			}
+		//	@Override
+		//	public boolean cancel() {
+		//			doCancel = true;
+		//			return true;
+		//	}
 	}
 
 	private void openBackupRecord(String fileName, int id) {
@@ -226,8 +229,14 @@ public class CommandExecuter {
 	}
 
 	public void normalMethodThatCanTakeLong(int bakeTime) throws Exception {
+			Runnable cc = () -> context.ui.notifyInfo("CommandExecuter.normalMethodThatCanTakeLong :: canceled");
+			LTManager.registerCancelFunc(cc);
+			// Cancel of this task is handled by the fact that nextStep will throw an exception if it has been cancled. Which is a fine way to handle it in this case
+			System.out.println("normalMethodThatCanTakeLong.A");
 		LTManager.nextStep("Prepping dough");
+			System.out.println("normalMethodThatCanTakeLong.B");
 		Thread.sleep(3000);
+			System.out.println("normalMethodThatCanTakeLong.C");
 		//LTManager.stepDone("Prepping dough");
 		LTManager.nextStep("Rolling out dough");
 		Thread.sleep(5000);
@@ -236,34 +245,42 @@ public class CommandExecuter {
 		Thread.sleep(500);
 		//LTManager.stepDone("Adding Sauce");
 		LTManager.nextStep("Adding Cheese");
+			System.out.println("normalMethodThatCanTakeLong.G");
 		Thread.sleep(1000);
 		//LTManager.stepDone("Adding Cheese");
 		LTManager.nextStep("Adding Olives");
 		Thread.sleep(1000);
 		//LTManager.stepDone("Adding Olives");
-		LTManager.nextStep("Baking");
+
+			LTManager.unregisterCancelFunc(cc);
+		LTManager.nextStep("Baking (cannot cancel)");
 		Thread.sleep(1000 * bakeTime);
+			LTManager.registerCancelFunc(cc);
 		//LTManager.stepDone("Baking");
+			System.out.println("normalMethodThatCanTakeLong.M");
 		LTManager.nextStep("Cutting");
 		Thread.sleep(4000);
 		LTManager.stepDone("Cutting");
 		System.out.println("normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong");
 	}
 
-	class LongTaskTest implements CancelableLongTask {
+	class LongTaskTest implements LongTask {
 		final private int bakeTime;
 		public LongTaskTest(int bt) {
 			bakeTime = bt;
 		}
 		@Override
 		public void runLongTask() throws Exception {
+				System.out.println("LongTaskTest.A");
 			normalMethodThatCanTakeLong(bakeTime);
+				System.out.println("LongTaskTest.B");
 		}
-		@Override
-		public boolean cancel() {
-				System.out.println("CommandExecuter.LongTaskTest.cancel.A");
-				return true;
-		}
+		//@Override
+		//public boolean cancel() {
+		//		context.ui.notifyInfo("Cancel was pressed!");
+		//		System.out.println("CommandExecuter.LongTaskTest.cancel.A");
+		//		return true;
+		//}
 	}
 
 }

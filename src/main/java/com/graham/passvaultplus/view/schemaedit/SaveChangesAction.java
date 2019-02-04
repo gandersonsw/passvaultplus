@@ -57,6 +57,7 @@ public class SaveChangesAction extends AbstractAction {
 	}
 
 	private void createNewType() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0112");
 		// ***** do validation ****
 		clearValidationErrors();
 		final Set<String> fieldsIncNew = getFieldsIncNew();
@@ -93,6 +94,7 @@ public class SaveChangesAction extends AbstractAction {
 	}
 
 	private void changeExistingType() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0113");
 		final PvpType t = context.data.getDataInterface().getType(scContext.tm.getOriginalName());
 		final boolean isCatType = PvpType.sameType(t, PvpDataInterface.TYPE_CATEGORY);
 

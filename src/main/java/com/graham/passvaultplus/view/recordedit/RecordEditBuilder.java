@@ -42,6 +42,7 @@ public class RecordEditBuilder {
 	}
 
 	private RecordEditContext build() {
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0087");
 		editContext.panelInTabPane = new JPanel(new BorderLayout());
 		if (isNewRecord) {
 			editContext.panelInTabPane.add(buildEditorChooseType(), BorderLayout.NORTH);

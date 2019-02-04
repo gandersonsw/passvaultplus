@@ -24,7 +24,7 @@ public class ChooseDirAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-
+			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0016");
 		final JFileChooser chooser = new JFileChooser();
 
 		if (context.configAction == ConfigAction.Create || context.configAction == ConfigAction.Change) {
