@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class LongTaskUI  {
 
-		static long SHOW_DELAY = 800;
+		static long SHOW_DELAY = 600;
 		static long MIN_SHOW_TIME = 500;
 
 		private JDialog cancelDialog;
@@ -26,7 +26,6 @@ public class LongTaskUI  {
 		private long startTime;
 
 		public LongTaskUI(String taskTitle, ArrayList<LTStep> steps, long startTimeParam, CancelAction cancelA) {
-				//System.out.println("LongTaskUI.LongTaskUI.A");
 				com.graham.passvaultplus.PvpContextUI.checkEvtThread("3901");
 				startTime = startTimeParam;
 				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (AM)", Dialog.ModalityType.APPLICATION_MODAL);
@@ -89,19 +88,14 @@ public class LongTaskUI  {
 										Thread.sleep(1000);
 										updateTimerDisplay();
 								}
-						} catch (InterruptedException ie) {
-								//System.out.println("at Timer Thread InterruptedException 1");
-						}
+						} catch (InterruptedException ie) { }
 						//System.out.println("LongTaskUI.LongTaskUI.B - at 99 Timer Thread done");
 				}, "tuit"); // task UI thread
 				timerThread.start();
 
 				cancelDialog.pack();
-				//	BCUtil.center(cancelDialog, PvpContext.getActiveUI().getFrame());
 				cancelDialog.setLocationRelativeTo(PvpContextUI.getActiveUI().getFrame());
 				cancelDialog.setResizable(false);
-				System.out.println("LongTaskUI.LongTaskUI.C");
-
 				cancelDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		}
 
@@ -112,7 +106,6 @@ public class LongTaskUI  {
 							sb.append(steps.get(i));
 							sb.append("\n");
 					}
-				//	System.out.println("LongTaskUI.stepsChanged.A - " + sb.toString());
 					progressText.setText(sb.toString());
 				}
 		}
@@ -120,8 +113,8 @@ public class LongTaskUI  {
 		synchronized void killStuff() {
 				timerThread.interrupt();
 				long showTime = System.currentTimeMillis() - startTime - SHOW_DELAY;
-				System.out.println("LongTaskUI.showTime.A - " + showTime);
 				if (showTime < MIN_SHOW_TIME) {
+						// TODO test this
 						try {
 								cancelButton.setEnabled(false);
 								cancelButton.setText("Done");
@@ -136,7 +129,6 @@ public class LongTaskUI  {
 				PvpContextUI.checkEvtThread("5473");
 				cancelButton.setEnabled(cc);
 				cancelButton.setText(cc ? "Cancel" : "Can't Cancel");
-				//cancelButton.setToolTipText(cc ? null : "The task cannot be canceled anymore. It is too far along.");
 		}
 
 		void showCancelDialog() {
@@ -145,7 +137,6 @@ public class LongTaskUI  {
 		}
 
 		private void updateTimerDisplay() {
-				//System.out.println("LongTaskUI.updateTimerDisplay.A");
 				timerLabel.setText("Total Time: " + Integer.toString((int)((System.currentTimeMillis() - startTime) / 1000)));
 		}
 

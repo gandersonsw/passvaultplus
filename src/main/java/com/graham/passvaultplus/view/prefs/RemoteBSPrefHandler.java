@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.view.prefs;
 
 import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.gdocs.ChecksForNewFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
@@ -54,7 +53,6 @@ public class RemoteBSPrefHandler {
 	/** after prefs are changed and work is done, handle any cleanup */
 	public void cleanup() {
 		if (!useGoogleDrive.isSelected() && useGoogleDriveFlag) {
-			//	System.out.println("temp not deleteing google files"); // TODO
 			prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("deleteing Google Credientials if present");
 			PvpBackingStoreGoogleDocs.deleteLocalCredentials();
 		}

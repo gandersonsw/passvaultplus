@@ -1,8 +1,6 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.longtask;
 
-import com.graham.passvaultplus.PvpContextUI;
-
 import java.util.ArrayList;
 
 /**
@@ -17,9 +15,7 @@ public class LTRunnerSync extends LTRunner {
 		final private LTCallback ltCb;
 
 		private ArrayList<LTStep> steps = new ArrayList<>();
-		//private Thread smThread;
 		private Thread parentThread;
-		//private volatile boolean wasCanceled;
 		private long startTime;
 		private LTSyncManager syncManager;
 
@@ -50,9 +46,9 @@ public class LTRunnerSync extends LTRunner {
 		public void run() {
 				try {
 						LTManager.registerLTThread(this);
-						System.out.println("LTRunnerSync.run.A");
+						//System.out.println("LTRunnerSync.run.A");
 						ltask.runLongTask();
-						System.out.println("LTRunnerSync.run.B");
+						//System.out.println("LTRunnerSync.run.B");
 				} catch (LTCanceledException ltce) {
 						System.out.println("LTRunnerSync.run.C - LTCanceledException");
 				} catch (Exception e) {
@@ -79,9 +75,6 @@ public class LTRunnerSync extends LTRunner {
 				}
 				System.out.println("LTRunnerSync.killStuff.C");
 		}
-
-
-
 
 		synchronized void nextStep(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
@@ -115,12 +108,6 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-	//	@Override
-	//	public void cancel() {
-	//			wasCanceled = ltask.cancel();
-	//	}
-
-
 		void registerCancelCB(Runnable r) {
 				super.registerCancelCB(r);
 				if (ltUi != null) {
@@ -135,12 +122,6 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-	//	void setCannotCancel() {
-		//		if (ltUi != null) {
-	//					ltUi.setCannotCancel();
-	//			}
-	//	}
-
 		void interruptForUserInputEnd() {
 				if (parentThread != null) {
 						parentThread.interrupt();
@@ -150,16 +131,16 @@ public class LTRunnerSync extends LTRunner {
 		void showCancelDialog() {
 				// TODO does this need to be syncronized? this is causing a deadlock
 				ltUi = new LongTaskUI(taskTitle, steps, startTime, new CancelAction(LTRunnerSync.this));
-			//	if (getShouldShowCancelDialog() && !LTManager.isWaitingUserInput()) {
+				//	if (getShouldShowCancelDialog() && !LTManager.isWaitingUserInput()) {
 				//		synchronized (this) {
-								//if (this.uiShowing && this.shouldShowCancelDialog) {
+				//if (this.uiShowing && this.shouldShowCancelDialog) {
 				parentThread = null; // set this to null because we dont want to have it intrupted anymore
-								System.out.println("LTSyncManager.showCancelDialog.G");
-								//	}
-			//			}
-						ltUi.showCancelDialog();
+				System.out.println("LTSyncManager.showCancelDialog.G");
+				//	}
+				//			}
+				ltUi.showCancelDialog();
 				System.out.println("LTSyncManager.showCancelDialog.H");
-			//	}
+				//	}
 		}
 
 }
@@ -198,6 +179,7 @@ class LTSyncManager implements Runnable {
 								System.out.println("- - - - - LTSyncManager.run.I - should never be here 6482");// TODO we get here sometimes
 						}
 				}
+				System.out.println("- - - - - LTSyncManager.run.Z");
 		}
 
 		private void waitUiDone() {

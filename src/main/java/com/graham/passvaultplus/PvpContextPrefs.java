@@ -130,46 +130,43 @@ public class PvpContextPrefs {
 	 * @return
 	 */
 	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
-			//boolean iwfui = LTManager.isWaitingUserInput();
-			GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation);
-			try {
-					LTManager.waitingUserInputStart(99);
-					SwingUtilities.invokeAndWait(pw);
-					//return getPasswordOrAskUserInternal(passwordWasBad, resourseLocation);
-			} catch (Exception e) {
-					PvpContextUI.getActiveUI().notifyWarning("getPasswordOrAskUser error", e);
-			} finally {
-					LTManager.waitingUserInputEnd(99);
-			}
-			if (pw.resultException != null) {
-					throw pw.resultException;
-			}
-			return pw.resultString;
+		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation);
+		try {
+			LTManager.waitingUserInputStart(99);
+			SwingUtilities.invokeAndWait(pw);
+		} catch (Exception e) {
+			PvpContextUI.getActiveUI().notifyWarning("getPasswordOrAskUser error", e);
+		} finally {
+			LTManager.waitingUserInputEnd(99);
+		}
+		if (pw.resultException != null) {
+			throw pw.resultException;
+		}
+		return pw.resultString;
 	}
 
 	class GetPWOrAsk implements Runnable {
-			final boolean passwordWasBad;
-			final String resourseLocation;
+		final boolean passwordWasBad;
+		final String resourseLocation;
 
-			String resultString;
-			UserAskToChangeFileException resultException;
+		String resultString;
+		UserAskToChangeFileException resultException;
 
-			public GetPWOrAsk(final boolean passwordWasBadParam, final String resourseLocationParam) throws UserAskToChangeFileException {
-					passwordWasBad = passwordWasBadParam;
-					resourseLocation = resourseLocationParam;
+		public GetPWOrAsk(final boolean passwordWasBadParam, final String resourseLocationParam) {
+			passwordWasBad = passwordWasBadParam;
+			resourseLocation = resourseLocationParam;
+		}
+
+		@Override
+		public void run() {
+			try {
+				resultString = getPasswordOrAskUserInternal();
+			} catch (UserAskToChangeFileException e) {
+				resultException = e;
 			}
-
-			@Override
-			public void run() {
-					try {
-							resultString = getPasswordOrAskUserInternal();
-					} catch (UserAskToChangeFileException e) {
-							resultException = e;
-					}
-			}
+		}
 
 	private String getPasswordOrAskUserInternal() throws UserAskToChangeFileException {
-			//com.graham.passvaultplus.PvpContextUI.checkEvtThread("0210");
 		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
 			usePin = getUsePin();
 			encryptedPassword = userPrefs.getByteArray("ecp", null); // ecp = encrypted cipher password
@@ -236,7 +233,6 @@ public class PvpContextPrefs {
 		password = pd.getPw();
 		return password;
 	}
-
 
 	}
 

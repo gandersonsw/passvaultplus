@@ -5,6 +5,9 @@ import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunner;
 
+/**
+ * PassVaultPlus BackingStore LongTask CallBack - pvpBsLtCb
+ */
 public class PvpBackingStoreLTCB implements LTCallback {
 
 		final private PvpBackingStore bs;

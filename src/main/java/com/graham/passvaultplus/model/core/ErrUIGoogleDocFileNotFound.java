@@ -102,9 +102,8 @@ public class ErrUIGoogleDocFileNotFound {
 			context.ui.enableQuitFromError(false);
 			System.out.println("ErrUIGoogleDocFileNotFound.UploadNowAction.actionPerformed - getting ready to copy to google");
 			// TODO test this
-				// TODO make async
 			// LTManager.runSync(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), "Copy to Google Drive");
-			context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore);
+			LTManager.runWithProgress(() -> context.data.getFileInterface().saveOneBackingStore(context.data.getDataInterface(), backingStore), "Uploading");
 			context.ui.enableQuitFromError(true);
 		}
 	}

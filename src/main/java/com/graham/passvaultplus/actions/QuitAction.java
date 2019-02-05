@@ -28,11 +28,11 @@ public class QuitAction extends AbstractAction {
 
 		if (shouldQuit) {
 			// TODO show the dialog and test cancel
-			LTManager.run(() -> {
+			LTManager.runWithProgress(() -> {
 				if (context.data.getFileInterface().appQuiting()) {
 					System.exit(0);
 				}
-			});
+			}, "Saving");
 		}
 	}
 

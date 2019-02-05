@@ -54,7 +54,6 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 			Thread.setDefaultUncaughtExceptionHandler(context);
 
 			if (pw != null) {
-				System.out.println("PvpContext.startApp.A");
 				context.prefs.setPassword(pw, false);
 			}
 
@@ -63,32 +62,29 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 			}
 
 			if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
-				LTManager.run(() -> context.dataFileSelectedForStartup(), cb);
-				//context.dataFileSelectedForStartup();
+				LTManager.runWithProgress(() -> context.dataFileSelectedForStartup(), "Loading", cb);
 			} else {
 				StartupOptionsFrame.showAndContinue(context);
 			}
-	// TODO !!!!!!	} catch (UserAskToChangeFileException cfe) {
-	//		StartupOptionsFrame.showAndContinue(contextCopy);
 		} catch (Exception e) {
 			cb.handleException(null, e);
 		}
 	}
 
 	static class StartAppCB extends LTCallbackDefaultImpl {
-			PvpContext contextCopy;
-			void setContext(PvpContext c) {
-					contextCopy = c;
+		PvpContext contextCopy;
+		void setContext(PvpContext c) {
+			contextCopy = c;
+		}
+		@Override
+		public void handleException(LTRunner lt, Exception e) {
+			if (e instanceof UserAskToChangeFileException) {
+				StartupOptionsFrame.showAndContinue(contextCopy);
+			} else {
+				PvpContextUI cui = contextCopy == null || contextCopy.ui == null ? new PvpContextUI() : contextCopy.ui;
+				cui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
 			}
-			@Override
-			public void handleException(LTRunner lt, Exception e) {
-					if (e instanceof UserAskToChangeFileException) {
-							StartupOptionsFrame.showAndContinue(contextCopy);
-					} else {
-							PvpContextUI cui = contextCopy == null || contextCopy.ui == null ? new PvpContextUI() : contextCopy.ui;
-							cui.notifyBadException(e, false, PvpException.GeneralErrCode.CantOpenMainWindow);
-					}
-			}
+		}
 	}
 
 	public PvpContext() {

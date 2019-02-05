@@ -16,92 +16,90 @@ import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.view.longtask.LTManager;
-import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 
 /**
  * All methods to load data into RtDataInterface from the file
  */
 public class PvpPersistenceInterface {
-		public enum SaveTrigger {
-				quit, // the application is quiting
-				cud,  // there was a Create, Update or Delete
-				major, // some major change
-				init // TODO maybe delete this
-		}
+	public enum SaveTrigger {
+		quit, // the application is quiting
+		cud,  // there was a Create, Update or Delete
+		major, // some major change
+		init // TODO maybe delete this
+	}
 
-		public static final String EXT_COMPRESS = "zip";
-		public static final String EXT_ENCRYPT = "bmn";
-		public static final String EXT_XML = "xml";
-		public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
+	public static final String EXT_COMPRESS = "zip";
+	public static final String EXT_ENCRYPT = "bmn";
+	public static final String EXT_XML = "xml";
+	public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
 
-		final private PvpContext context;
-		private List<PvpBackingStore> backingStores;
-		private boolean errorHappened;
+	final private PvpContext context;
+	private List<PvpBackingStore> backingStores;
+	private boolean errorHappened;
 
-		public PvpPersistenceInterface(final PvpContext contextParam) {
-				context = contextParam;
+	public PvpPersistenceInterface(final PvpContext contextParam) {
+		context = contextParam;
+	}
 
-		}
+	public static boolean isCompressed(final String path) {
+		// path is .zip or .zip.bmn
+		return path.endsWith("." + EXT_COMPRESS) || path.endsWith("." + EXT_BOTH);
+	}
 
-		public static boolean isCompressed(final String path) {
-				// path is .zip or .zip.bmn
-				return path.endsWith("." + EXT_COMPRESS) || path.endsWith("." + EXT_BOTH);
-		}
+	public static boolean isEncrypted(final String path) {
+		// path is .bmn or .zip.bmn
+		return path.endsWith("." + EXT_ENCRYPT);
+	}
 
-		public static boolean isEncrypted(final String path) {
-				// path is .bmn or .zip.bmn
-				return path.endsWith("." + EXT_ENCRYPT);
-		}
-
-		public static boolean isPvpFileExt(final String fileExtension) {
+	public static boolean isPvpFileExt(final String fileExtension) {
 				return fileExtension.equals(EXT_COMPRESS) || fileExtension.equals(EXT_ENCRYPT) || fileExtension.equals(EXT_XML) || fileExtension.equals(EXT_BOTH);
 		}
 
-		public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
-				String fname = BCUtil.getFileNameNoExt(fnameWithExt, true);
-				if (compressed) {
-						fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
-				}
-				if (encrypted) {
-						fname = fname + "." + PvpPersistenceInterface.EXT_ENCRYPT;
-				}
-				if (!compressed && !encrypted) {
-						fname = fname + "." + PvpPersistenceInterface.EXT_XML;
-				}
-				return fname;
+	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
+		String fname = BCUtil.getFileNameNoExt(fnameWithExt, true);
+		if (compressed) {
+			fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
 		}
+		if (encrypted) {
+			fname = fname + "." + PvpPersistenceInterface.EXT_ENCRYPT;
+		}
+		if (!compressed && !encrypted) {
+			fname = fname + "." + PvpPersistenceInterface.EXT_XML;
+		}
+		return fname;
+	}
 
-		public static String convertFileExtensionToEnglish(final String fileExtension) {
-				if (isCompressed(fileExtension)) {
-						if (isEncrypted(fileExtension)) {
-								return "Compressed and Encrypted";
-						} else {
-								return "Compressed only";
-						}
-				} else {
-						if (isEncrypted(fileExtension)) {
-								return "Encrypted only";
-						} else {
-								return "Not Compressed or Encrypted";
-						}
-				}
+	public static String convertFileExtensionToEnglish(final String fileExtension) {
+		if (isCompressed(fileExtension)) {
+			if (isEncrypted(fileExtension)) {
+				return "Compressed and Encrypted";
+			} else {
+				return "Compressed only";
+			}
+		} else {
+			if (isEncrypted(fileExtension)) {
+				return "Encrypted only";
+			} else {
+				return "Not Compressed or Encrypted";
+			}
 		}
+	}
 
-		public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
-				if (backingStores == null) {
-						backingStores = new ArrayList<>();
-						backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
-						backingStores.add(new PvpBackingStoreGoogleDocs(context));
-				}
-				List<PvpBackingStore> bsList = new ArrayList<>();
-				for (PvpBackingStore bs : backingStores) {
-						if (bs.isEnabled() && (includeUnmodifiedRemotes || !bs.isUnmodifiedRemote())) {
-								bsList.add(bs);
-						}
-				}
-				return bsList;
+	public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
+		if (backingStores == null) {
+			backingStores = new ArrayList<>();
+			backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
+			backingStores.add(new PvpBackingStoreGoogleDocs(context));
 		}
+		List<PvpBackingStore> bsList = new ArrayList<>();
+		for (PvpBackingStore bs : backingStores) {
+			if (bs.isEnabled() && (includeUnmodifiedRemotes || !bs.isUnmodifiedRemote())) {
+				bsList.add(bs);
+			}
+		}
+		return bsList;
+	}
 
 		private void loadInternal(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
 				context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
@@ -109,12 +107,6 @@ public class PvpPersistenceInterface {
 				for (PvpBackingStore bs : enabledBs) {
 						bs.clearTransientData();
 				}
-
-				/*try {
-						Thread.sleep(2000); // for testing
-				} catch (InterruptedException e) {
-						e.printStackTrace();
-				} */
 
 				// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
 				PvpBackingStore[] sortedBSArr = new PvpBackingStore[enabledBs.size()];
@@ -214,7 +206,6 @@ public class PvpPersistenceInterface {
 				// TODO cleanup
 				List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
 				try {
-
 						for (PvpBackingStore bs : enabledBs) {
 								bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
 						}
@@ -240,35 +231,41 @@ public class PvpPersistenceInterface {
 				errorHappened = false;
 
 				for (PvpBackingStore bs : enabledBs) {
-						bs.clearTransientData();
-						switch (bs.getChattyLevel()) {
-								case unlimited:
-								case localLevel:
-								case remoteHeavy:
-										if (saveTrig == SaveTrigger.quit) {
-												if (bs.isDirty()) {
+						PvpBackingStoreLTCB pvpBsLtCb = new PvpBackingStoreLTCB(bs);
+						try {
+								pvpBsLtCb.taskStarting(null);
+								bs.clearTransientData();
+								switch (bs.getChattyLevel()) {
+										case unlimited:
+										case localLevel:
+										case remoteHeavy:
+												if (saveTrig == SaveTrigger.quit) {
+														if (bs.isDirty()) {
+																saveOneBackingStore(dataInterface, bs);
+														}
+												}
+												else {
 														saveOneBackingStore(dataInterface, bs);
 												}
-										}
-										else {
-												saveOneBackingStore(dataInterface, bs);
-										}
-										break;
-								case remoteMedium:
-								case remoteLight:
-								case mostRestricted:
-										if (saveTrig == SaveTrigger.quit) {
-												if (bs.isDirty()) {
+												break;
+										case remoteMedium:
+										case remoteLight:
+										case mostRestricted:
+												if (saveTrig == SaveTrigger.quit) {
+														if (bs.isDirty()) {
+																saveOneBackingStore(dataInterface, bs);
+														}
+												}
+												else if (saveTrig == SaveTrigger.major) {
 														saveOneBackingStore(dataInterface, bs);
 												}
-										}
-										else if (saveTrig == SaveTrigger.major) {
-												saveOneBackingStore(dataInterface, bs);
-										}
-										else {
-												bs.setDirty(true);
-										}
-										break;
+												else {
+														bs.setDirty(true);
+												}
+												break;
+								}
+						} finally {
+								pvpBsLtCb.taskComplete(null);
 						}
 				}
 
@@ -327,11 +324,7 @@ public class PvpPersistenceInterface {
 						context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
 						return;
 				}
-				/*try {
-						Thread.sleep(7000); // for testing
-				} catch (InterruptedException e) {
-						e.printStackTrace();
-				}*/
+
 				LTManager.nextStep("Saving data to: " + bs.getShortName());
 				try {
 						if (bs.supportsFileUpload()) {

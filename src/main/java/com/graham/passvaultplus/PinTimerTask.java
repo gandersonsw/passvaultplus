@@ -26,7 +26,6 @@ public class PinTimerTask extends TimerTask {
 	}
 
 	private void doUI() {
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0201");
 		context.uiMain.getMainFrame().setVisible(false);
 
 		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.isPasswordSaved()) {
@@ -46,11 +45,8 @@ public class PinTimerTask extends TimerTask {
 				} else { // user pressed Okay
 					final String pin = pd.getPin();
 					if (pin.equals(pinAtCreate)) {
-							System.out.println("at 4001");
 						context.uiMain.getMainFrame().setVisible(true);
-							System.out.println("at 4002");
 						context.uiMain.schedulePinTimerTask();
-							System.out.println("at 4003");
 						return;
 					} else {
 						if (tryCount >= context.prefs.getPinMaxTry()) {
@@ -62,12 +58,10 @@ public class PinTimerTask extends TimerTask {
 						}
 					}
 				}
-
 			}
 		} else {
 			askUserForPassword(false);
 		}
-
 	}
 
 	private void askUserForPassword(final boolean pinTryMaxed) {

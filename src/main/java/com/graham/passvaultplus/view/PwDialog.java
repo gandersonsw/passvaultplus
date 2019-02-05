@@ -124,6 +124,7 @@ public class PwDialog {
 		d.pack();
 		BCUtil.center(d);
 		d.setResizable(false);
+		// TODO do a test where the cancel dialog for LongTask shows after this
 		d.setVisible(true); // this is the line that causes the dialog to Block
 		return actionHit;
 	}

@@ -16,6 +16,7 @@ import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
 public class DiagnosticsManager implements OtherTabBuilder, Runnable {
+	private static final boolean LOG_TO_SYSOUT = true;
 	private static DiagnosticsManager activeManager = new DiagnosticsManager();
 
 	private JTextArea ta;
@@ -67,26 +68,32 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 	public synchronized void warning(final String s, final Exception e) {
-			System.out.println("warning:" + Thread.currentThread().getName() + "| " + s);
-		appendTimeStamp();
-		log.append(s);
+		StringBuilder sb = getTimeStamp();
+		sb.append(s);
 		if (e != null) {
-			log.append("::");
-			log.append(e);
-			log.append("::");
-			log.append(e.getMessage());
-			log.append("\n");
-			log.append(BCUtil.getExceptionTrace(e));
+			sb.append("::");
+			sb.append(e);
+			sb.append("::");
+			sb.append(e.getMessage());
+			sb.append("\n");
+			sb.append(BCUtil.getExceptionTrace(e));
 		}
-		log.append("\n");
+		if (LOG_TO_SYSOUT) {
+			System.out.println(sb);
+		}
+		sb.append("\n");
+		log.append(sb);
 		logUpdated();
 	}
 
 	public synchronized void info(String s) {
-			System.out.println("info:" + Thread.currentThread().getName() + "| " + s);
-		appendTimeStamp();
-		log.append(s);
-		log.append("\n");
+		StringBuilder sb = getTimeStamp();
+		sb.append(s);
+		if (LOG_TO_SYSOUT) {
+			System.out.println(sb);
+		}
+		sb.append("\n");
+		log.append(sb);
 		logUpdated();
 	}
 
@@ -131,41 +138,48 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 		}
 	}
 
-		class CommandExeCallBack extends AbstractAction implements LTCallback {
-			private LTRunner currentLt;
-			public CommandExeCallBack() {
+	class CommandExeCallBack extends AbstractAction implements LTCallback {
+		private LTRunner currentLt;
+		public CommandExeCallBack() {
 					super("Cancel");
 			}
-			Action oldAction;
-				@Override
-				public void taskStarting(LTRunner lt) {
-						currentLt = lt;
-						System.out.println("- - - CECB - - - taskStarting - - -");
-						oldAction = doIt.getAction();
-						doIt.setAction(this);
-				}
-				@Override
-				public void taskComplete(LTRunner lt) {
-						System.out.println("- - - CECB - - - taskComplete - - -");
-						doIt.setAction(oldAction);
-				}
-				@Override
-				public void handleException(LTRunner lt, Exception e) {
-						System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
-				}
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-						currentLt.cancel();
-
-				}
+		Action oldAction;
+		@Override
+		public void taskStarting(LTRunner lt) {
+			currentLt = lt;
+			System.out.println("- - - CECB - - - taskStarting - - -");
+			oldAction = doIt.getAction();
+			doIt.setAction(this);
 		}
-
-		private void appendTimeStamp() {
-			log.append(AppUtil.getMillisecondTimeStamp());
-			log.append("|");
-			log.append(Thread.currentThread().getName());
-			log.append("| ");
+		@Override
+		public void taskComplete(LTRunner lt) {
+			System.out.println("- - - CECB - - - taskComplete - - -");
+			doIt.setAction(oldAction);
 		}
+		@Override
+		public void handleException(LTRunner lt, Exception e) {
+			System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			currentLt.cancel();
+		}
+	}
+
+	private StringBuilder getTimeStamp() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(AppUtil.getMillisecondTimeStamp());
+		sb.append("|");
+		sb.append(Thread.currentThread().getName());
+		sb.append("| ");
+		return sb;
+	}
+
+		//private void appendTimeStamp() {
+		//	log.append(AppUtil.getMillisecondTimeStamp());
+	//		log.append("|");
+		//	log.append(Thread.currentThread().getName());
+	//		log.append("| ");
+	//	}
 
 }

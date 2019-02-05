@@ -30,7 +30,6 @@ import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.longtask.LTRunner;
-import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
 public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
@@ -45,8 +44,6 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		public Exception excep;
 		public boolean wasCanceled;
 		void addFileFormat(String fname) {
-			//String newFormat = BCUtil.getFileExtension(fname, true);
-			//newFormat = newFormat + ":" + PvpPersistenceInterface.convertFileExtensionToEnglish("." + newFormat);
 			String newFormat = PvpPersistenceInterface.convertFileExtensionToEnglish(fname);
 			if (existingFileFormats == null) {
 				existingFileFormats = newFormat;

@@ -8,14 +8,12 @@ import java.security.NoSuchAlgorithmException;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.DatabaseReader;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.JceDialog;
-import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class SavePrefsAction extends AbstractAction {
@@ -30,7 +28,6 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		//boolean completed;
 		if (prefsContext.configAction == ConfigAction.Create) {
 			doCreate();
 		} else if (prefsContext.configAction == ConfigAction.Open) {
@@ -40,9 +37,6 @@ public class SavePrefsAction extends AbstractAction {
 		} else {
 			throw new RuntimeException("unexpected action: " + prefsContext.configAction);
 		}
-		//if (completed) {
-		//	prefsContext.remoteBS.cleanup();
-		//}
 	}
 
 	private void doCreate() {
@@ -79,21 +73,19 @@ public class SavePrefsAction extends AbstractAction {
 			}
 		}
 
-		// TODO Maybe start new thread here? instead of in ToLocalCopier
-			LTManager.run(() -> {
-					if (!prefsContext.remoteBS.presave(true)) {
-							return;
-					}
-					try {
-							createFiles();
-					} catch (Exception ex) {
-							// TODO need to make a method in PvpConextUI for this
-							System.out.println("RemoteBSPrefHandler.doCreate.A");
-							JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
-							return;
-					}
-					conn.doOpen(prefsContext);
-			});
+		LTManager.runWithProgress(() -> {
+			if (!prefsContext.remoteBS.presave(true)) {
+				return;
+			}
+			try {
+				createFiles();
+			} catch (Exception ex) {
+				// TODO need to make a method in PvpConextUI for this
+				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
+				return;
+			}
+			conn.doOpen(prefsContext);
+		}, "Creating Database");
 	}
 
 	private void doOpen() {
@@ -115,13 +107,13 @@ public class SavePrefsAction extends AbstractAction {
 			return;
 		}
 
-			LTManager.run(() -> {
-					if (!prefsContext.remoteBS.presave(false)) {
-							return;
-					}
-					setContextPrefsValues();
-					conn.doOpen(prefsContext);
-			});
+		LTManager.runWithProgress(() -> {
+			if (!prefsContext.remoteBS.presave(false)) {
+				return;
+			}
+			setContextPrefsValues();
+			conn.doOpen(prefsContext);
+		}, "Loading");
 	}
 
 	private void doChange() {
@@ -167,12 +159,11 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		final boolean saveFlagCopy = saveFlag;
-	//		LTManager.run(() -> {
-			LTManager.runWithProgress(() -> {
-					if (prefsContext.remoteBS.presave(false)) {
-							conn.doSave(saveFlagCopy, prefsContext);
-					}
-			}, "Updating Settings");
+		LTManager.runWithProgress(() -> {
+			if (prefsContext.remoteBS.presave(false)) {
+				conn.doSave(saveFlagCopy, prefsContext);
+			}
+		}, "Updating Settings");
 	}
 
 	private boolean validatePin() {
@@ -247,8 +238,6 @@ public class SavePrefsAction extends AbstractAction {
 			PvpDataInterface newDataInterface = DatabaseReader.read(tempContext, sourceStream);
 			PvpPersistenceInterface pi = new PvpPersistenceInterface(tempContext);
 			pi.save(newDataInterface, PvpPersistenceInterface.SaveTrigger.init); // TODO test these lines
-
-
 			//BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
 		} finally {
 			if (sourceStream != null) {

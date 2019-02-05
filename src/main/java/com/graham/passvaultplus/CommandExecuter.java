@@ -96,17 +96,7 @@ public class CommandExecuter {
 	}
 
 	private void testLongTask(int bakeTime) {
-			System.out.println("testLongTask testLongTask testLongTask testLongTask testLongTask testLongTask");
-
-			LTManager.runWithProgress(new LongTaskTest(bakeTime), "Making a pizza");
-
-	//	try {
-	//		if (LTManager.runSync(new LongTaskTest(bakeTime), "Making a pizza")) {
-	//			context.ui.notifyInfo("Cancel was pressed!");
-	//		}
-	//	} catch (Exception e) {
-	//		context.ui.notifyWarning("TestLongTask Exception", e);
-//		}
+		LTManager.runWithProgress(new LongTaskTest(bakeTime), "Making a pizza");
 	}
 
 	private void testJceDialog(int maxKeySize) {
@@ -199,11 +189,6 @@ public class CommandExecuter {
 					}
 					context.ui.notifyInfo("- - - - Completed Searching. " + count + " records found. - - - -");
 			}
-		//	@Override
-		//	public boolean cancel() {
-		//			doCancel = true;
-		//			return true;
-		//	}
 	}
 
 	private void openBackupRecord(String fileName, int id) {
@@ -229,39 +214,26 @@ public class CommandExecuter {
 	}
 
 	public void normalMethodThatCanTakeLong(int bakeTime) throws Exception {
-			Runnable cc = () -> context.ui.notifyInfo("CommandExecuter.normalMethodThatCanTakeLong :: canceled");
-			LTManager.registerCancelFunc(cc);
-			// Cancel of this task is handled by the fact that nextStep will throw an exception if it has been cancled. Which is a fine way to handle it in this case
-			System.out.println("normalMethodThatCanTakeLong.A");
+		Runnable cc = () -> context.ui.notifyInfo("CommandExecuter.normalMethodThatCanTakeLong :: canceled");
+		LTManager.registerCancelFunc(cc);
+		// Cancel of this task is handled by the fact that nextStep will throw an exception if it has been canceled. Which is a fine way to handle it in this case
 		LTManager.nextStep("Prepping dough");
-			System.out.println("normalMethodThatCanTakeLong.B");
 		Thread.sleep(3000);
-			System.out.println("normalMethodThatCanTakeLong.C");
-		//LTManager.stepDone("Prepping dough");
 		LTManager.nextStep("Rolling out dough");
 		Thread.sleep(5000);
-		//LTManager.stepDone("Rolling out dough");
 		LTManager.nextStep("Adding Sauce");
 		Thread.sleep(500);
-		//LTManager.stepDone("Adding Sauce");
 		LTManager.nextStep("Adding Cheese");
-			System.out.println("normalMethodThatCanTakeLong.G");
 		Thread.sleep(1000);
-		//LTManager.stepDone("Adding Cheese");
 		LTManager.nextStep("Adding Olives");
 		Thread.sleep(1000);
-		//LTManager.stepDone("Adding Olives");
-
-			LTManager.unregisterCancelFunc(cc);
+		LTManager.unregisterCancelFunc(cc); // test that cancel is disabled here
 		LTManager.nextStep("Baking (cannot cancel)");
 		Thread.sleep(1000 * bakeTime);
-			LTManager.registerCancelFunc(cc);
-		//LTManager.stepDone("Baking");
-			System.out.println("normalMethodThatCanTakeLong.M");
+		LTManager.registerCancelFunc(cc);
 		LTManager.nextStep("Cutting");
 		Thread.sleep(4000);
 		LTManager.stepDone("Cutting");
-		System.out.println("normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong normalMethodThatCanTakeLong");
 	}
 
 	class LongTaskTest implements LongTask {
@@ -271,16 +243,8 @@ public class CommandExecuter {
 		}
 		@Override
 		public void runLongTask() throws Exception {
-				System.out.println("LongTaskTest.A");
 			normalMethodThatCanTakeLong(bakeTime);
-				System.out.println("LongTaskTest.B");
 		}
-		//@Override
-		//public boolean cancel() {
-		//		context.ui.notifyInfo("Cancel was pressed!");
-		//		System.out.println("CommandExecuter.LongTaskTest.cancel.A");
-		//		return true;
-		//}
 	}
 
 }

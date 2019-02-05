@@ -33,7 +33,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 			// if changes made don't require file rewrite, don't do it
 			if (wasChanges) {
 				//context.setDataFilePath(dataFile.getAbsolutePath());
-				context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major);
+					LTManager.run(() -> context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major));
 				 // TODO if there is an exception here the changes from line 27 should not be applied
 			}
 			context.uiMain.hideTab(OtherTab.Prefs);
