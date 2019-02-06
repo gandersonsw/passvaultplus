@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.PvpContext;
@@ -45,7 +44,7 @@ public class ResetPrefsAction extends AbstractAction {
   }
 
   public void doConfirmDialog() {
-		d = new JDialog(context.ui.getFrame(), "Confirm Reset", Dialog.ModalityType.APPLICATION_MODAL);
+		d = context.ui.createDialog("Confirm Reset");
 		d.getContentPane().setLayout(new BorderLayout());
 
 		{
@@ -92,10 +91,8 @@ public class ResetPrefsAction extends AbstractAction {
 			centerPanel.add(p);
 		}
 
-		d.pack();
-		BCUtil.center(d, context.ui.getFrame());
 		d.setResizable(false);
-		d.setVisible(true); // this is the line that causes the dialog to Block
+		context.ui.showDialog(d); // this is the line that causes the dialog to Block
   }
 
   class OkAction extends AbstractAction {
@@ -104,7 +101,7 @@ public class ResetPrefsAction extends AbstractAction {
     }
     public void actionPerformed(ActionEvent e) {
       cancel = false;
-      d.setVisible(false);
+			context.ui.hideDialog(d);
     }
   }
 
@@ -114,7 +111,7 @@ public class ResetPrefsAction extends AbstractAction {
     }
     public void actionPerformed(ActionEvent e) {
       cancel = true;
-      d.setVisible(false);
+			context.ui.hideDialog(d);
     }
   }
 

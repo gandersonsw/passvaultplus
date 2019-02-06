@@ -27,7 +27,7 @@ public class QuitAction extends AbstractAction {
 		}
 
 		if (shouldQuit) {
-			// TODO show the dialog and test cancel
+			// TODO cancel not supported, maybe in future? test cancel
 			LTManager.runWithProgress(() -> {
 				if (context.data.getFileInterface().appQuiting()) {
 					System.exit(0);

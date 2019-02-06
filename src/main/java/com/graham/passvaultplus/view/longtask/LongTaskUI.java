@@ -13,12 +13,12 @@ import java.util.ArrayList;
 /**
  * Handle the UI of one LongTask
  */
-public class LongTaskUI  {
+public class LongTaskUI extends JDialog {
 
 		static long SHOW_DELAY = 600;
 		static long MIN_SHOW_TIME = 500;
 
-		private JDialog cancelDialog;
+		//private JDialog cancelDialog;
 		private JTextArea progressText;
 		private JLabel timerLabel;
 		private Thread timerThread;
@@ -26,10 +26,11 @@ public class LongTaskUI  {
 		private long startTime;
 
 		public LongTaskUI(String taskTitle, ArrayList<LTStep> steps, long startTimeParam, CancelAction cancelA) {
+				super(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (AM)", Dialog.ModalityType.APPLICATION_MODAL);
 				com.graham.passvaultplus.PvpContextUI.checkEvtThread("3901");
 				startTime = startTimeParam;
-				cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (AM)", Dialog.ModalityType.APPLICATION_MODAL);
-				cancelDialog.getContentPane().setLayout(new BorderLayout());
+				//cancelDialog = new JDialog(PvpContextUI.getActiveUI().getFrame(), "Pass Vault Plus (AM)", Dialog.ModalityType.APPLICATION_MODAL);
+				getContentPane().setLayout(new BorderLayout());
 
 				{
 						ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
@@ -37,12 +38,12 @@ public class LongTaskUI  {
 						icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
 						JPanel p = new JPanel(new BorderLayout());
 						p.add(icnLab, BorderLayout.NORTH);
-						cancelDialog.getContentPane().add(p, BorderLayout.WEST);
+						getContentPane().add(p, BorderLayout.WEST);
 				}
 
 				final JPanel centerPanel = new JPanel();
 				centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-				cancelDialog.getContentPane().add(centerPanel, BorderLayout.CENTER);
+				getContentPane().add(centerPanel, BorderLayout.CENTER);
 
 				{
 						JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -93,10 +94,10 @@ public class LongTaskUI  {
 				}, "tuit"); // task UI thread
 				timerThread.start();
 
-				cancelDialog.pack();
-				cancelDialog.setLocationRelativeTo(PvpContextUI.getActiveUI().getFrame());
-				cancelDialog.setResizable(false);
-				cancelDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+				pack();
+				setLocationRelativeTo(PvpContextUI.getActiveUI().getFrame());
+				setResizable(false);
+				setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		}
 
 		void stepsChanged(ArrayList<LTStep> steps) {
@@ -121,8 +122,8 @@ public class LongTaskUI  {
 								Thread.sleep(MIN_SHOW_TIME - showTime);
 						} catch (InterruptedException e) { }
 				}
-				cancelDialog.setVisible(false);
-				cancelDialog = null;
+				setVisible(false);
+				//cancelDialog = null;
 		}
 
 		void setCanCancel(boolean cc) {
@@ -133,7 +134,7 @@ public class LongTaskUI  {
 
 		void showCancelDialog() {
 				com.graham.passvaultplus.PvpContextUI.checkEvtThread("3902");
-				cancelDialog.setVisible(true); // this is the line that causes the dialog to Block
+				setVisible(true); // this is the line that causes the dialog to Block
 		}
 
 		private void updateTimerDisplay() {

@@ -221,8 +221,6 @@ public class PvpPersistenceInterface {
 	 * return true to Quit. Return false to cancel Quit, and keep app running
 	 */
 	public boolean appQuiting() {
-		// TODO test when cancel is pressed
-			// "Saving...");
 		save(context.data.getDataInterface(), SaveTrigger.quit);
 		return !errorHappened;
 	}
@@ -234,7 +232,7 @@ public class PvpPersistenceInterface {
 						PvpBackingStoreLTCB pvpBsLtCb = new PvpBackingStoreLTCB(bs);
 						try {
 								pvpBsLtCb.taskStarting(null);
-								bs.clearTransientData();
+							//	bs.clearTransientData();
 								switch (bs.getChattyLevel()) {
 										case unlimited:
 										case localLevel:
@@ -326,7 +324,9 @@ public class PvpPersistenceInterface {
 				}
 
 				LTManager.nextStep("Saving data to: " + bs.getShortName());
+				bs.clearTransientData();
 				try {
+
 						if (bs.supportsFileUpload()) {
 								bs.doFileUpload();
 						} else {

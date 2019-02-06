@@ -3,6 +3,8 @@ package com.graham.passvaultplus.view.longtask;
 
 import com.graham.passvaultplus.PvpContextUI;
 
+import java.awt.*;
+
 public class LTManager {
 
 		private static ThreadLocal<LTRunner> tlr = new ThreadLocal<>();
@@ -13,7 +15,7 @@ public class LTManager {
 		private static volatile int waitingUserInputId = 0;
 
 		static public boolean isLTThread() {
-			return Thread.currentThread().getName().equals("pvplt"); // TODO make const
+			return Thread.currentThread().getName().equals(LTThread.THREAD_NAME);
 		}
 
 		static private LTRunner getLTThreadRunner() {
@@ -60,7 +62,7 @@ public class LTManager {
 				if (ltr == null) {
 						System.out.println("LTManager.run.A isLTThread=false");
 						LTRunnerAsync r = new LTRunnerAsync(lt, cb);
-						Thread ltThread = new Thread(r, "pvplt"); // // Pvp Long Task // TODO make const
+						Thread ltThread = new Thread(r, LTThread.THREAD_NAME);
 						ltThread.start();
 				} else {
 						System.out.println("LTManager.run.A isLTThread=true");
@@ -139,8 +141,8 @@ public class LTManager {
 				}
 		}
 
-		static public void waitingUserInputStart() {
-				waitingUserInputStart(1);
+		static public Window waitingUserInputStart() {
+				return waitingUserInputStart(1);
 		}
 
 		static public void waitingUserInputEnd() {
@@ -148,14 +150,29 @@ public class LTManager {
 		}
 
 
-		static public void waitingUserInputStart(int id) {
-				System.out.println("LTManager.waitingUserInputStart: " + id + " > " + waitingUserInputId);
-				if (id > waitingUserInputId) {
+		static public Window waitingUserInputStart(int id) {
+				PvpContextUI.checkEvtThread("3425");
+				Window cancelW = null;
+			//	System.out.println("LTManager.waitingUserInputStart: " + id + " > " + waitingUserInputId);
+				if (waitingUserInputId == 0) {
 						waitingUserInputId = id;
+						for (Window w : Frame.getWindows()) {
+								if (w instanceof LongTaskUI) {
+										if (cancelW != null) {
+												PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: more than one LongTaskUI. This in not handled correctly");
+										}
+										cancelW = w;
+										System.out.println("waitingUserInputStart: " + ((LongTaskUI) w).getTitle());
+								}
+						}
+				} else if (id >= waitingUserInputId) {
+						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: " + id + " >= " + waitingUserInputId + " :: This should not happen. It means that a higher priority UI is nested in a lower priority one., or forgot to call waitingUserInputEnd", new Exception());
 				}
+				return cancelW;
 		}
 
 		static public void waitingUserInputEnd(int id) {
+				PvpContextUI.checkEvtThread("3426");
 				System.out.println("LTManager.waitingUserInputEnd: " + id + " == " + waitingUserInputId);
 				if (id == waitingUserInputId) {
 						waitingUserInputId = 0;

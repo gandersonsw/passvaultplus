@@ -104,28 +104,104 @@ public class PvpContextUI {
 	}
 
 	public void showMessageDialog(String title, String message) {
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0230");
-		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
-		JOptionPane.showMessageDialog(getFrame(), message, title, JOptionPane.INFORMATION_MESSAGE, icn);
+			//com.graham.passvaultplus.PvpContextUI.checkEvtThread("0230");
+			RunMd md = new RunMd(title, message);
+			if (SwingUtilities.isEventDispatchThread()) {
+					md.run();
+			} else {
+					try {
+							SwingUtilities.invokeAndWait(() -> md.run());
+					} catch (InterruptedException | InvocationTargetException e) {
+							activeUI.notifyWarning("PvpContextUI.showMessageDialog", e);
+					}
+			}
 	}
 
 	public void showErrorDialog(String title, String message) {
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0231");
-		ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-		JOptionPane.showMessageDialog(getFrame(), message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
+			//com.graham.passvaultplus.PvpContextUI.checkEvtThread("0231");
+			RunEd ed = new RunEd(title, message);
+			if (SwingUtilities.isEventDispatchThread()) {
+					ed.run();
+			} else {
+					try {
+							SwingUtilities.invokeAndWait(() -> ed.run());
+					} catch (InterruptedException | InvocationTargetException e) {
+							activeUI.notifyWarning("PvpContextUI.showErrorDialog", e);
+					}
+			}
 	}
 
 	public boolean showConfirmDialog(String title, String message) {
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0232");
-		ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
-		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(getFrame(), message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
+			//com.graham.passvaultplus.PvpContextUI.checkEvtThread("0232");
+			RunScd scd = new RunScd(title, message);
+			if (SwingUtilities.isEventDispatchThread()) {
+					scd.run();
+			} else {
+					try {
+							SwingUtilities.invokeAndWait(() -> scd.run());
+					} catch (InterruptedException | InvocationTargetException e) {
+							activeUI.notifyWarning("PvpContextUI.showConfirmDialog", e);
+					}
+			}
+			return scd.getResult() == JOptionPane.OK_OPTION;
+	}
+
+	class RunMd implements Runnable {
+			// Run Message Dialog
+			final String title;
+			final String message;
+			RunMd(String t, String m) {
+					title = t;
+					message = m;
+			}
+			@Override
+			public void run() {
+					ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+					JOptionPane.showMessageDialog(getFrame(), message, title, JOptionPane.INFORMATION_MESSAGE, icn);
+			}
+	}
+
+		class RunEd implements Runnable {
+				// Run Error Dialog
+				final String title;
+				final String message;
+				RunEd(String t, String m) {
+						title = t;
+						message = m;
+				}
+				@Override
+				public void run() {
+						ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
+						JOptionPane.showMessageDialog(getFrame(), message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
+				}
+		}
+
+	class RunScd implements Runnable {
+			// Run Show Confirm Dialod
+			final String title;
+			final String message;
+			volatile int result;
+			RunScd(String t, String m) {
+					title = t;
+					message = m;
+			}
+			@Override
+			public void run() {
+					final Window w = LTManager.waitingUserInputStart();
+					final ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+					result = JOptionPane.showConfirmDialog(w == null ? getFrame() : w, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
+					LTManager.waitingUserInputEnd();
+			}
+			public int getResult() {
+					return result;
+			}
 	}
 
 	/**
 	 * @param title Can be null, default to "Pass Vault Plus"
 	 */
 	public static JDialog createDialog(String title) {
-		com.graham.passvaultplus.PvpContextUI.checkEvtThread("2301");
+		//com.graham.passvaultplus.PvpContextUI.checkEvtThread("2301");
 		return new JDialog(activeUI.uiFrame, title == null ? "Pass Vault Plus" : title, Dialog.ModalityType.APPLICATION_MODAL);
 	}
 
@@ -137,18 +213,17 @@ public class PvpContextUI {
 		} else {
 			d.setLocationRelativeTo(activeUI.uiFrame);
 		}
+		Runnable r = () -> {
+				SwingUtilities.invokeLater(() -> d.toFront());
+				LTManager.waitingUserInputStart();
+				d.setVisible(true); // this is the line that causes the dialog to Block
+		};
 		try {
 				if (SwingUtilities.isEventDispatchThread()) {
-						SwingUtilities.invokeLater(() -> d.toFront());
-						LTManager.waitingUserInputStart();
-						d.setVisible(true); // this is the line that causes the dialog to Block
+						r.run();
 				} else {
-						SwingUtilities.invokeAndWait(() -> {
-								SwingUtilities.invokeLater(() -> d.toFront());
-								LTManager.waitingUserInputStart();
-								d.setVisible(true); // this is the line that causes the dialog to Block
-						});
-						activeUI.notifyWarning("PvpContextUI.showDialog SwingUtilities.isEventDispatchThread() = false");
+						SwingUtilities.invokeAndWait(r);
+						//activeUI.notifyWarning("PvpContextUI.showDialog SwingUtilities.isEventDispatchThread() = false");
 				}
 		} catch (InterruptedException | InvocationTargetException e) {
 			activeUI.notifyWarning("PvpContextUI.showDialog", e);
@@ -157,8 +232,15 @@ public class PvpContextUI {
 
 	public static void hideDialog(JDialog d) {
 		com.graham.passvaultplus.PvpContextUI.checkEvtThread("0236");
-		d.setVisible(false);
-		LTManager.waitingUserInputEnd();
+			if (SwingUtilities.isEventDispatchThread()) {
+					d.setVisible(false);
+					LTManager.waitingUserInputEnd();
+			} else {
+					SwingUtilities.invokeLater(() -> {
+							d.setVisible(false);
+							LTManager.waitingUserInputEnd();
+					});
+			}
 	}
 
 	public static void checkEvtThread(String id) {
@@ -166,7 +248,5 @@ public class PvpContextUI {
 			com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyWarning("checkEvtThread failed :: " + id);
 		}
 	}
-
-
 
 }

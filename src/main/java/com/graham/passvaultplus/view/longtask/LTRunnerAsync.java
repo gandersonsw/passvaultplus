@@ -14,10 +14,6 @@ public class LTRunnerAsync extends LTRunner {
 		private final LongTask lt;
 		private final LTCallback cb;
 
-		public LTRunnerAsync(LongTask ltParam) {
-				this(ltParam, null);
-		}
-
 		public LTRunnerAsync(LongTask ltParam, LTCallback cbParam) {
 				lt = Objects.requireNonNull(ltParam, "LongTask must not be null");
 				cb = cbParam == null ? new LTCallbackDefaultImpl() : cbParam;
@@ -48,16 +44,5 @@ public class LTRunnerAsync extends LTRunner {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
-		}
-
-	//	@Override
-	//	public void cancel() {
-	//			if (lt instanceof CancelableLongTask) {
-	//					wasCanceled = ((CancelableLongTask)lt).cancel();
-	//			}
-	//	}
-
-		public boolean wasCanceled() {
-				return wasCanceled;
 		}
 }

@@ -17,7 +17,7 @@ public class StatusBox extends JComponent {
 	private static final Dimension MIN_SIZE = new Dimension(6,6);
 	
 	private Color statusColor;
-	private SBAnimation sba;
+	private volatile SBAnimation sba;
 	
 	public StatusBox(Color c) {
 		statusColor = c;
@@ -95,7 +95,7 @@ public class StatusBox extends JComponent {
 		}
 
 		@Override
-		protected void	process(List<Color> chunks) {
+		protected void process(List<Color> chunks) {
 			statusColor = chunks.get(0);
 			repaint();
 		}

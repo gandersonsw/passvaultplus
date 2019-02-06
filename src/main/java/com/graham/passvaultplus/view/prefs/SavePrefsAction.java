@@ -81,7 +81,8 @@ public class SavePrefsAction extends AbstractAction {
 				createFiles();
 			} catch (Exception ex) {
 				// TODO need to make a method in PvpConextUI for this
-				JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
+				conn.context.ui.showErrorDialog("Error Creating Database", "Could not create default file: " + ex.getMessage());
+				//JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
 				return;
 			}
 			conn.doOpen(prefsContext);
@@ -107,11 +108,11 @@ public class SavePrefsAction extends AbstractAction {
 			return;
 		}
 
+		setContextPrefsValues();
 		LTManager.runWithProgress(() -> {
 			if (!prefsContext.remoteBS.presave(false)) {
 				return;
 			}
-			setContextPrefsValues();
 			conn.doOpen(prefsContext);
 		}, "Loading");
 	}

@@ -13,7 +13,6 @@ import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunner;
-import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
 
 public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	private static final boolean LOG_TO_SYSOUT = true;

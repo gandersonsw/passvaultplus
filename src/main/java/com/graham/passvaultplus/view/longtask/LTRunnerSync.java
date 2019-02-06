@@ -18,7 +18,6 @@ public class LTRunnerSync extends LTRunner {
 		private Thread parentThread;
 		private long startTime;
 		private LTSyncManager syncManager;
-
 		private LongTaskUI ltUi;
 
 		public LTRunnerSync(LongTask t, String title, LTCallback cb) {
@@ -29,15 +28,11 @@ public class LTRunnerSync extends LTRunner {
 
 		public void runLongTask() {
 				syncManager = new LTSyncManager(this);
-				//smThread = new Thread(syncManager, "ltsm"); // LongTask Sync Manager
-
 
 				Thread ltaskThread = new LTThread(this); // Pvp Long Task
 				startTime = System.currentTimeMillis();
 				ltaskThread.start(); // This is the task that takes a long time
-				//smThread.start(); // this is the thread that manages the UI and other stuff
 
-				// TEST - run this on the current thread
 				parentThread = Thread.currentThread(); // in this case, this is the Swing Event Thread
 				syncManager.run(); // run it on the event thread
 		}
@@ -55,7 +50,7 @@ public class LTRunnerSync extends LTRunner {
 						System.out.println("LTRunnerSync.run.D - Exception");
 						ltCb.handleException(this, e);
 				} finally {
-						killStuff(); // TODO should this be in finally ???
+						killStuff();
 						LTManager.clearLTThread();
 				}
 		}
@@ -63,7 +58,6 @@ public class LTRunnerSync extends LTRunner {
 		@Override
 		synchronized void killStuff() {
 				syncManager.setShouldShowCancelDialog(false);
-			//	shouldShowCancelDialog = false;
 				System.out.println("LTRunnerSync.killStuff.A");
 				if (parentThread != null) {
 						System.out.println("LTRunnerSync.killStuff.B - interruptMainThread");
@@ -158,7 +152,7 @@ class LTSyncManager implements Runnable {
 				return shouldShowCancelDialog;
 		}
 
-		 void setShouldShowCancelDialog(boolean b) {
+		void setShouldShowCancelDialog(boolean b) {
 				shouldShowCancelDialog = b;
 		}
 
@@ -175,8 +169,6 @@ class LTSyncManager implements Runnable {
 								waitUiDone();
 						} else if (getShouldShowCancelDialog()) {
 							ltr.showCancelDialog();
-						} else {
-								System.out.println("- - - - - LTSyncManager.run.I - should never be here 6482");// TODO we get here sometimes
 						}
 				}
 				System.out.println("- - - - - LTSyncManager.run.Z");
@@ -185,7 +177,7 @@ class LTSyncManager implements Runnable {
 		private void waitUiDone() {
 				while (LTManager.isWaitingUserInput()) {
 						try {
-								Thread.sleep(30000);
+								Thread.sleep(10000);
 								System.out.println("LTRunnerSync.waitUiDone.A");
 						} catch (InterruptedException e1) {
 								System.out.println("LTRunnerSync.waitUiDone.B - InterruptedException");

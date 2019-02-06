@@ -109,11 +109,7 @@ public class RemoteBSPrefHandler {
 				} else {
 					message = "No existing file was found on Google drive, your local database will be copied there.";
 				}
-				ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
-				// TODO need to make a method in PvpConextUI for this
-					System.out.println("RemoteBSPrefHandler.presave.B");
-				int b = JOptionPane.showConfirmDialog(prefsContext.conn.getSuperFrame(), message, "New Remote File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
-				return b == JOptionPane.OK_OPTION;
+				return prefsContext.conn.context.ui.showConfirmDialog("New Remote File", message);
 			}
 		}
 		return true;
@@ -208,16 +204,12 @@ public class RemoteBSPrefHandler {
 		if (useGoogleDrive.isSelected()) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 				// TODO verify mainUI is not used by this context
-			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.copyFileToLocal(tempContext);
 			PvpBackingStoreGoogleDocs.NewChecks nc = ToLocalCopier.doIt(tempContext);
 				com.graham.passvaultplus.PvpContextUI.checkEvtThread("0041");
 			if (nc.excep != null) {
-				ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-
 				this.prefsContext.conn.context.ui.enableQuitFromError(false);
 				this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);
 				this.prefsContext.conn.context.ui.enableQuitFromError(true);
-				//JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn);
 			} else if (nc.sameFormatExists) {
 				return true;
 			}

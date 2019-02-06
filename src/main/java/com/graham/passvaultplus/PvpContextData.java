@@ -4,10 +4,7 @@ package com.graham.passvaultplus;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.model.core.PvpRecord;
-import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
-import com.graham.passvaultplus.view.longtask.LTRunnerAsync;
-import com.graham.passvaultplus.view.longtask.LongTask;
 
 import java.util.Collection;
 

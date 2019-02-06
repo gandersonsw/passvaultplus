@@ -2,9 +2,10 @@
 package com.graham.passvaultplus.view.longtask;
 
 public class LTThread extends Thread {
+		public static final String THREAD_NAME = "pvplt";
 		public final LTRunner rnr;
 		public LTThread(LTRunner r) {
-				super(r, "pvplt");
+				super(r, THREAD_NAME);
 				rnr = r;
 		}
 }
