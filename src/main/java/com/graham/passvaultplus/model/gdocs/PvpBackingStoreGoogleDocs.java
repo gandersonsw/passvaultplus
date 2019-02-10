@@ -102,6 +102,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			if (trans == BsStateTrans.StartSaving || trans == BsStateTrans.initSave) {
 					if (getException() != null && getException().getCause() instanceof FileNotFoundException) {
 							bsState = BsState.Saving;
+							this.setDirty(true); // The file is not there, force a save
 							return;
 					}
 			}

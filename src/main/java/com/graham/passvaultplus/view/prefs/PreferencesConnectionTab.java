@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import com.graham.framework.BCUtil;
+import com.graham.passvaultplus.PinTimerTask;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpContextPrefs;
@@ -27,6 +28,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	public void doSave(final boolean wasChanges, final PreferencesContext pc) {
 			// TODO support cancel "Saving..."
 			copyPrefsToReal();
+			PinTimerTask.update(context);
 			// if changes made don't require file rewrite, don't do it
 			if (wasChanges) {
 					LTManager.run(() -> context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.init));

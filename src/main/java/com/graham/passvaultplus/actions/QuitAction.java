@@ -19,7 +19,7 @@ public class QuitAction extends AbstractAction {
 
 	public void actionPerformed(ActionEvent e) {
 		boolean shouldQuit = true;
-		if (hasUnsavedChanges()) {
+		if (context.hasUnsavedChanges(false)) {
 			boolean b = context.ui.showConfirmDialog("Delete", "There are some records that have been edited but not saved. \nAre you sure you want to quit?");
 			if (!b) {
 				shouldQuit = false;
@@ -34,15 +34,6 @@ public class QuitAction extends AbstractAction {
 				}
 			}, "Saving");
 		}
-	}
-
-	private boolean hasUnsavedChanges() {
-		for (RecordEditContext editor : context.uiMain.getRecordEditors()) {
-			if (editor.hasUnsavedChanged()) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

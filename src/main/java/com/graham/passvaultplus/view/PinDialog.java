@@ -1,25 +1,16 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class PinDialog {
 	private JDialog d;
@@ -40,7 +31,7 @@ public class PinDialog {
 		showConfigButton = scb;
 	}
 	
-	public PinAction askForPin(final int pinWasBadCount) {
+	public PinAction askForPin(final int pinWasBadCount, boolean hasUnsavedChanges) {
 			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0157");
 		d = PvpContextUI.createDialog("Pass Vault Plus");
 		//d = new JDialog(null, "Pass Vault Plus", Dialog.ModalityType.APPLICATION_MODAL);
@@ -101,7 +92,7 @@ public class PinDialog {
 	
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			p.add(new JButton(new QuitAction()));
+			p.add(new JButton(new QuitAction(hasUnsavedChanges)));
 			p.add(new JButton(new GoToPasswordAction()));
 			if (showConfigButton) {
 				p.add(new JButton(new GoToSetupAction()));
@@ -125,12 +116,21 @@ public class PinDialog {
 		}
 	}
 	
-	static class QuitAction extends AbstractAction {
-		QuitAction() {
+	class QuitAction extends AbstractAction {
+		final boolean hasUnsavedChanges;
+		QuitAction(boolean b) {
 			super("Quit");
+				hasUnsavedChanges = b;
 		}
 		public void actionPerformed(ActionEvent e) {
-			System.exit(0);
+			int result = JOptionPane.OK_OPTION;
+			if (hasUnsavedChanges) {
+				final ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+				result = JOptionPane.showConfirmDialog(d, "There are unsaved changes. If you quit now, they will not be saved.", "Quit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
+			}
+			if (result == JOptionPane.OK_OPTION) {
+				System.exit(0);
+			}
 		}
 	}
 	

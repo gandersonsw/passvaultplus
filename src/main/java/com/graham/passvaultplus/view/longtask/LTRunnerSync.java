@@ -38,7 +38,7 @@ public class LTRunnerSync extends LTRunner {
 				ltaskThread.start(); // This is the task that takes a long time
 
 				if (SwingUtilities.isEventDispatchThread()) {
-						PvpContextUI.getActiveUI().notifyWarning("LTRunnerSync.runLongTask.A :: WARNING - starting new thread", new Exception());
+					//	PvpContextUI.getActiveUI().notifyWarning("LTRunnerSync.runLongTask.A :: WARNING - starting new thread", new Exception());
 						parentThread = new Thread(syncManager, "ltsm");
 						parentThread.start();
 						//SwingUtilities.invokeLater(syncManager);

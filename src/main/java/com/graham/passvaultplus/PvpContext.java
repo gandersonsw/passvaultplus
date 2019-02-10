@@ -14,10 +14,12 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
 import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.longtask.*;
+import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 /**
  * This is the global context for the entire application.
@@ -28,7 +30,6 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
-	//static final public String USR_CANCELED = "operation canceled by user";
 
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
@@ -108,15 +109,12 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	}
 
 	public void dataFileSelectedForStartup() throws Exception {
-		//LTManager.setTitle("Loading...");
-	//		Thread.sleep(3000);
 		data.getFileInterface().load(data.getDataInterface());
 		SwingUtilities.invokeLater(() -> {
 			uiMain = new PvpContextUIMainFrame(this);
 			uiMain.mainFrame = new MainFrame(this);
 			ui.setFrame(uiMain.getMainFrame());
-
-			//	ui.schedulePinTimerTask();
+			PinTimerTask.update(this);
 			if (prefs.pinWasReset) {
 				ui.showMessageDialog("PIN Reset", "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
 			}
@@ -200,22 +198,38 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 
 
 	public void updateUIForPrefsChange() {
-			if (uiMain != null) {
-					if (SwingUtilities.isEventDispatchThread()) {
-							updateUIForPrefsChangeInternal();
-					} else {
-							try {
-									SwingUtilities.invokeAndWait(() -> updateUIForPrefsChangeInternal());
-							} catch (Exception e) { }
-					}
+		if (uiMain != null) {
+			if (SwingUtilities.isEventDispatchThread()) {
+				updateUIForPrefsChangeInternal();
+			} else {
+				try {
+					SwingUtilities.invokeAndWait(() -> updateUIForPrefsChangeInternal());
+				} catch (Exception e) { }
 			}
+		}
 	}
 
 	private void updateUIForPrefsChangeInternal() {
-			if (uiMain.getMainFrame() != null) { // TODO is there a way to get rid of these checks?
-					uiMain.getMainFrame().refreshInfoLabelText(this);
+		if (uiMain.getMainFrame() != null) {
+			uiMain.getMainFrame().refreshInfoLabelText(this);
+		}
+		uiMain.checkOtherTabs();
+	}
+
+	public boolean hasUnsavedChanges(boolean checkBackingStores) {
+		for (RecordEditContext editor : uiMain.getRecordEditors()) {
+			if (editor.hasUnsavedChanged()) {
+				return true;
 			}
-			uiMain.checkOtherTabs();
+		}
+		if (checkBackingStores) {
+			for (PvpBackingStore bs : data.getFileInterface().getEnabledBackingStores(true)) {
+				if (bs.isDirty()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

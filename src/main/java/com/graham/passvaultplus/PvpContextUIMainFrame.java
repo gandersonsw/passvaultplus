@@ -8,31 +8,39 @@ import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * Interface to Main UI. This is only available when app is initialized.
  */
-public class PvpContextUIMainFrame {
+public class PvpContextUIMainFrame implements ChangeListener {
 	private final MyUndoManager undoManager;
 	private final PvpContext context;
 	MainFrame mainFrame;
 
-	private Timer pinTimer;
 	private PvpViewListContext viewListContext = new PvpViewListContext();
 	private Map<OtherTab, Component> otherTabComps = new HashMap<>();
 
 	private JTabbedPane mainTabPane = new JTabbedPane();
 	private List<RecordEditContext> recordEditors = new ArrayList<>();
 
+	private Component lastSelectedComp1;
+	private Component lastSelectedComp2;
+
 	PvpContextUIMainFrame(PvpContext c) {
 		undoManager = new MyUndoManager(c);
 		context = c;
-		//	mainFrame = new MainFrame(c);
-		schedulePinTimerTask();
+		mainTabPane.addChangeListener(this);
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		lastSelectedComp2 = lastSelectedComp1;
+		lastSelectedComp1 = mainTabPane.getSelectedComponent();
 	}
 
 	public void showTab(OtherTab t) {
@@ -80,20 +88,6 @@ public class PvpContextUIMainFrame {
 		return undoManager;
 	}
 
-	public void schedulePinTimerTask() {
-		cancelPinTimerTask();
-		if (context.prefs.getUsePin() && context.prefs.getPinTimeout() > 0) {
-			pinTimer = new Timer();
-			pinTimer.schedule(new PinTimerTask(context), context.prefs.getPinTimeout() * 60 * 1000);
-		}
-	}
-
-	private void cancelPinTimerTask() {
-		if (pinTimer != null) {
-			pinTimer.cancel();
-		}
-	}
-
 	/**
 	 * These are the tabs set be the preferences.
 	 */
@@ -121,6 +115,7 @@ public class PvpContextUIMainFrame {
 	}
 
 	public void removeRecordEditor(final RecordEditContext r) {
+		setLastTabSelected();
 		mainTabPane.remove(r.getPanelInTabPane());
 		recordEditors.remove(r);
 		context.uiMain.getUndoManager().notifyCloseTab(r.getPanelInTabPane());
@@ -158,6 +153,13 @@ public class PvpContextUIMainFrame {
 	 */
 	public JTabbedPane getMainTabPane() {
 		return mainTabPane;
+	}
+
+	private void setLastTabSelected() {
+		if (lastSelectedComp2 != null) {
+			mainTabPane.setSelectedComponent(lastSelectedComp2);
+			lastSelectedComp2 = null;
+		}
 	}
 
 }

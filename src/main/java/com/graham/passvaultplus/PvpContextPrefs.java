@@ -173,7 +173,7 @@ public class PvpContextPrefs {
 					boolean tryToGetPassword = true;
 					if (usePin && pin.length() == 0) {
 						final PinDialog pd = new PinDialog();
-						final PinDialog.PinAction action = pd.askForPin(pinTryCount);
+						final PinDialog.PinAction action = pd.askForPin(pinTryCount, false);
 						if (action == PinDialog.PinAction.Configure) {
 							throw new UserAskToChangeFileException();
 						}
