@@ -51,21 +51,22 @@ public class LTManager {
 		 * Run a LongTask asynchronous. Don't show a progress window.
 		 */
 		static public void run(LongTask lt) {
-				run(lt, null);
+				run(lt, new LTCallbackDefaultImpl());
 		}
 
 		/**
 		 * Run a LongTask asynchronous. Don't show a progress window.
 		 */
 		static public void run(LongTask lt, LTCallback cb) {
+				if (cb == null) {
+						throw new NullPointerException("LTCallback cb param cannot be null");
+				}
 				LTRunner ltr = getLTThreadRunner();
 				if (ltr == null) {
-						System.out.println("LTManager.run.A isLTThread=false");
 						LTRunnerAsync r = new LTRunnerAsync(lt, cb);
 						Thread ltThread = new Thread(r, LTThread.THREAD_NAME);
 						ltThread.start();
 				} else {
-						System.out.println("LTManager.run.A isLTThread=true");
 						try {
 								cb.taskStarting(ltr);
 								lt.runLongTask();
@@ -77,19 +78,18 @@ public class LTManager {
 		}
 
 		/**
-		 * Run a LongTask asynchronous. Show a progress window after 0.6 seconds.
+		 * Run a LongTask asynchronous. Will return immediately if on the event thread. Show a progress window after 0.6 seconds.
 		 */
 		static public void runWithProgress(LongTask lt, String progressTitle) {
 				runWithProgress(lt, progressTitle, null);
 		}
 
 		/**
-		 * Run a LongTask asynchronous. Show a progress window after 0.6 seconds.
+		 * Run a LongTask asynchronous.  Will return immediately if on the event thread. Show a progress window after 0.6 seconds.
 		 */
 		static public void runWithProgress(LongTask lt, String progressTitle, LTCallback cb) {
 				LTRunner ltr = getLTThreadRunner();
 				if (ltr != null) {
-						System.out.println("LTManager.runWithProgress.A isLTThread=true");
 						try {
 								lt.runLongTask();
 						} catch (Exception e) {
@@ -151,9 +151,7 @@ public class LTManager {
 
 
 		static public Window waitingUserInputStart(int id) {
-				PvpContextUI.checkEvtThread("3425");
 				Window cancelW = null;
-			//	System.out.println("LTManager.waitingUserInputStart: " + id + " > " + waitingUserInputId);
 				if (waitingUserInputId == 0) {
 						waitingUserInputId = id;
 						for (Window w : Frame.getWindows()) {
@@ -162,7 +160,7 @@ public class LTManager {
 												PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: more than one LongTaskUI. This in not handled correctly");
 										}
 										cancelW = w;
-										System.out.println("waitingUserInputStart: " + ((LongTaskUI) w).getTitle());
+										//System.out.println("waitingUserInputStart: " + ((LongTaskUI) w).getTitle());
 								}
 						}
 				} else if (id >= waitingUserInputId) {
@@ -172,8 +170,6 @@ public class LTManager {
 		}
 
 		static public void waitingUserInputEnd(int id) {
-				PvpContextUI.checkEvtThread("3426");
-				System.out.println("LTManager.waitingUserInputEnd: " + id + " == " + waitingUserInputId);
 				if (id == waitingUserInputId) {
 						waitingUserInputId = 0;
 						if (tlr.get() != null) { // TODO should this be called on all LTRunners?

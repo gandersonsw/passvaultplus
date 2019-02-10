@@ -9,6 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.DatabaseReader;
 import com.graham.passvaultplus.model.core.MyCipherFactory;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
@@ -80,9 +81,7 @@ public class SavePrefsAction extends AbstractAction {
 			try {
 				createFiles();
 			} catch (Exception ex) {
-				// TODO need to make a method in PvpConextUI for this
-				conn.context.ui.showErrorDialog("Error Creating Database", "Could not create default file: " + ex.getMessage());
-				//JOptionPane.showMessageDialog(conn.getSuperFrame(), "Could not create default file: " + ex.getMessage());
+					conn.context.ui.notifyBadException(ex, true, false, PvpException.GeneralErrCode.CantMakeNewDataFile);
 				return;
 			}
 			conn.doOpen(prefsContext);

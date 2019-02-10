@@ -84,6 +84,8 @@ public class MainFrame extends JFrame {
 		ipanel.add(initStatusPanel(context), BorderLayout.SOUTH);
 		footer.remove(1);
 		footer.add(ipanel, BorderLayout.EAST);
+		footer.repaint();
+		footer.revalidate();
 	}
 
 	private JPanel initStatusPanel(final PvpContext context) {

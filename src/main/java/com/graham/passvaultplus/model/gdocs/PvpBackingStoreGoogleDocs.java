@@ -98,8 +98,14 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean shouldBeSaved() {
-		return super.shouldBeSaved() || (getException() != null && getException().getCause() instanceof FileNotFoundException);
+	public void stateTrans(BsStateTrans trans) {
+			if (trans == BsStateTrans.StartSaving || trans == BsStateTrans.initSave) {
+					if (getException() != null && getException().getCause() instanceof FileNotFoundException) {
+							bsState = BsState.Saving;
+							return;
+					}
+			}
+			super.stateTrans(trans);
 	}
 
 	@Override
@@ -255,6 +261,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			LocalServerReceiver lsr = new LocalServerReceiver();
 			Runnable cancelCB = () -> {
 					try {
+							nchecks.wasCanceled = true;
 							lsr.stop();
 					} catch (IOException ioe) {
 							context.ui.notifyWarning("LocalServerReceiver.stop :: failed", ioe);
@@ -340,16 +347,16 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	@Override
 	public void clearTransientData() {
 		if (isEnabled()) {
-			if (getException() != null) {
-				Throwable t = getException().getCause();
-				if (t instanceof FileNotFoundException) {
+		//	if (getException() != null) {
+		//		Throwable t = getException().getCause();
+		//		if (t instanceof FileNotFoundException) {
 					// In this case, we want to treat it as if it was loaded, because there is no file we need to be careful of overwriting
-					setDirty(true);
-					this.stateTrans(BsStateTrans.StartLoading);
-					this.stateTrans(BsStateTrans.EndLoading);
+		//			setDirty(true);
+		//			this.stateTrans(BsStateTrans.StartLoading);
+		//			this.stateTrans(BsStateTrans.EndLoading);
 					//setLoadState(PvpBackingStore.LoadState.loaded);
-				}
-			}
+	//			}
+	//		}
 			driveService = null;
 			lastUpdatedDate = null;
 			remoteFileName = null;
@@ -422,7 +429,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		//	setLoadState(LoadState.skipped); // set this in case we did not actually load from this, so that it is treated like it was loaded, so that it saves it
 		}
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.allStoresAreUpToDate :: setGoogleDriveDocUpdateDate:" + lastUpdatedDate);
-		context.prefs.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());
+		if (!ERRORED_FILE_NAME.equals(remoteFileName)) {
+			context.prefs.setGoogleDriveDocUpdateDate(lastUpdatedDate.getValue());
+		}
 	}
 
 	@Override

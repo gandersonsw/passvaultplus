@@ -60,7 +60,8 @@ public class RemoteBSPrefHandler {
 			// TODO uiMain this might bomb on first start
 			prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("RemoteBSPrefHandler.cleanup:" + (prefsContext.conn.getPvpContextOriginal().uiMain != null));
 			if (prefsContext.conn.getPvpContextOriginal().uiMain != null && prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame() != null) {
-				prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame().reinitStatusPanel(prefsContext.conn.getPvpContextOriginal());
+				SwingUtilities.invokeLater(() ->
+					prefsContext.conn.getPvpContextOriginal().uiMain.getMainFrame().reinitStatusPanel(prefsContext.conn.getPvpContextOriginal()));
 			}
 		}
 	}
@@ -76,19 +77,15 @@ public class RemoteBSPrefHandler {
 			// TODO verify mainUI is not used by this context
 			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext);
 			PvpBackingStoreGoogleDocs.NewChecks nc = ChecksForNewFile.doIt(tempContext);
+			if (nc.wasCanceled) {
+					return false;
+			}
 			if (nc.excep != null) {
-			//	if (!nc.wasCanceled) {
-					ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
-					// TODO need tell LT not to show cancel dialog
-					try {
-							// TODO need to make a method in PvpConextUI for this
-							System.out.println("RemoteBSPrefHandler.presave.A");
-							this.prefsContext.conn.context.ui.enableQuitFromError(false);
-							this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);
-							this.prefsContext.conn.context.ui.enableQuitFromError(true);
-							//SwingUtilities.invokeAndWait(() -> JOptionPane.showMessageDialog(prefsContext.conn.getSuperFrame(), "There was an error with Google Drive: \n" + nc.error, "Error", JOptionPane.ERROR_MESSAGE, icn));
-					} catch (Exception e) {}
-			//	}
+				try {
+					this.prefsContext.conn.context.ui.enableQuitFromError(false);
+					this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);
+					this.prefsContext.conn.context.ui.enableQuitFromError(true);
+				} catch (Exception e) {}
 				return false;
 			}
 			if (nc.sameFormatExists) {

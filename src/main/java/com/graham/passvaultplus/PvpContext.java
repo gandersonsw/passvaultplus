@@ -28,7 +28,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 	static final public boolean JAR_BUILD = true;
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
-	static final public String USR_CANCELED = "operation canceled by user";
+	//static final public String USR_CANCELED = "operation canceled by user";
 
 	public final PvpContextData data;
 	public final PvpContextPrefs prefs;
@@ -109,6 +109,7 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 
 	public void dataFileSelectedForStartup() throws Exception {
 		//LTManager.setTitle("Loading...");
+	//		Thread.sleep(3000);
 		data.getFileInterface().load(data.getDataInterface());
 		SwingUtilities.invokeLater(() -> {
 			uiMain = new PvpContextUIMainFrame(this);
@@ -195,6 +196,26 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 				try { sourceStream.close(); } catch (Exception e) { }
 			}
 		}
+	}
+
+
+	public void updateUIForPrefsChange() {
+			if (uiMain != null) {
+					if (SwingUtilities.isEventDispatchThread()) {
+							updateUIForPrefsChangeInternal();
+					} else {
+							try {
+									SwingUtilities.invokeAndWait(() -> updateUIForPrefsChangeInternal());
+							} catch (Exception e) { }
+					}
+			}
+	}
+
+	private void updateUIForPrefsChangeInternal() {
+			if (uiMain.getMainFrame() != null) { // TODO is there a way to get rid of these checks?
+					uiMain.getMainFrame().refreshInfoLabelText(this);
+			}
+			uiMain.checkOtherTabs();
 	}
 
 }

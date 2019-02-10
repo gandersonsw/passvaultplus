@@ -123,7 +123,7 @@ public class CommandExecuter {
 	}
 
 	private void testExportXml() {
-		PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
+		PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context);
 		ExportXmlFile e = new ExportXmlFile(context, bsFileMain);
 		e.actionPerformed(null);
 	}
@@ -159,7 +159,7 @@ public class CommandExecuter {
 			@Override
 			public void runLongTask() {
 					LTManager.registerCancelFunc(() -> doCancel = true);
-					PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context.prefs.getDataFile());
+					PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context);
 					File[] fArr = bsFileMain.getAllFiles(true);
 					int count = 0;
 					for (File f : fArr) {

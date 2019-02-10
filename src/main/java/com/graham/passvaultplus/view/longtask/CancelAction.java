@@ -14,8 +14,6 @@ public class CancelAction extends AbstractAction {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-				System.out.println("CancelAction.actionPerformed.A");
-
 				runner.cancel();
 				if (runner.wasCanceled) {
 						runner.killStuff();

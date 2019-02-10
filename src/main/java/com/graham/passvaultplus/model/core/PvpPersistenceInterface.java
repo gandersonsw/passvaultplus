@@ -89,7 +89,7 @@ public class PvpPersistenceInterface {
 	public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
 		if (backingStores == null) {
 			backingStores = new ArrayList<>();
-			backingStores.add(new PvpBackingStoreFile(context.prefs.getDataFile())); // File needs to be the first Backing Store in the list
+			backingStores.add(new PvpBackingStoreFile(context)); // File needs to be the first Backing Store in the list
 			backingStores.add(new PvpBackingStoreGoogleDocs(context));
 		}
 		List<PvpBackingStore> bsList = new ArrayList<>();
@@ -282,23 +282,36 @@ public class PvpPersistenceInterface {
 		}
 
 		public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
-			// TODO clean this up
-		//	new LongTaskSave(dataInterface, saveTrig).runLongTask();
 
 				if (!LTManager.isLTThread()) {
 						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.save :: LTManager.isLTThread() = false");
 				}
 
 				final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
+				List<PvpBackingStore> cantSaveNowBs = null;
 
+				PvpBackingStore.BsStateTrans stateTrans;
 				if (saveTrig == SaveTrigger.init) {
 						saveTrig = SaveTrigger.major;
-						for (PvpBackingStore bs : enabledBs) {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.initSave);
-						}
+						stateTrans = PvpBackingStore.BsStateTrans.initSave;
 				} else {
-						for (PvpBackingStore bs : enabledBs) {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
+						stateTrans = PvpBackingStore.BsStateTrans.StartSaving;
+				}
+				for (PvpBackingStore bs : enabledBs) {
+						try {
+								bs.stateTrans(stateTrans);
+						} catch (Exception e) {
+								if (cantSaveNowBs == null) {
+										cantSaveNowBs = new ArrayList<>();
+								}
+								this.context.ui.notifyWarning("Cant save BS now: " + bs.getClass().getName());
+								cantSaveNowBs.add(bs);
+						}
+				}
+				if (cantSaveNowBs != null) {
+						enabledBs.removeAll(cantSaveNowBs);
+						if (enabledBs.size() == 0) {
+								throw new RuntimeException("No Backing Stores can be saved right now");
 						}
 				}
 
@@ -318,10 +331,10 @@ public class PvpPersistenceInterface {
 				}
 
 				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
-				if (!bs.shouldBeSaved()) {
-						context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
-						return;
-				}
+			//	if (!bs.shouldBeSaved()) {
+			//			context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
+			//			return;
+			//	}
 
 				LTManager.nextStep("Saving data to: " + bs.getShortName());
 				bs.clearTransientData();
@@ -369,8 +382,6 @@ public class PvpPersistenceInterface {
 								bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
 						}
 				}
-				//	public void cancel() {
-				//	}
 		}
 
 }

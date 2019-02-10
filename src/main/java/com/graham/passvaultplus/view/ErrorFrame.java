@@ -95,6 +95,7 @@ public class ErrorFrame {
 		//eFrame.setResizable(false);
 		BCUtil.center(eFrame);
 		eFrame.setVisible(true);
+		eFrame.toFront();
 	}
 	
 	private JPanel buildTopPanel(String errTitle, String errDesc, String errHelpId) {

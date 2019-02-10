@@ -47,6 +47,7 @@ public class PvpException extends Exception {
 		FallBackErr("There was an error", "No more information is available. This message should never be displayed"),
 		OtherErr("There was an error", "This is an error that does not have a specific description. See details or website for possible fixes."),
 		CantOpenDataFile("There was an error that prevented the data from loading", "Cant open the data file stream"), // trying to open the data file
+		CantMakeNewDataFile("Could not create default data file", null),
 		CantParseXml("There was an error that prevented the data from loading", "Can't parse the XML format"), // trying to parse the xml for the database
 		CantWriteDataFile("There was an error that prevented the data from saving", null), // any error when writing the database to the file
 		InvalidKey("There was an error with the encryption", null) { 

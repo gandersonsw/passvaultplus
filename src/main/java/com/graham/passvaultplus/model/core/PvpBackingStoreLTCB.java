@@ -18,12 +18,16 @@ public class PvpBackingStoreLTCB implements LTCallback {
 
 		@Override
 		public void taskStarting(LTRunner lt) {
-				bs.getStatusBox().startAnimation();
+				if (bs.getStatusBox() != null) {
+						bs.getStatusBox().startAnimation();
+				}
 		}
 
 		@Override
 		public void taskComplete(LTRunner lt) {
-				bs.getStatusBox().stopAnimation();
+				if (bs.getStatusBox() != null) {
+						bs.getStatusBox().stopAnimation();
+				}
 		}
 
 		@Override

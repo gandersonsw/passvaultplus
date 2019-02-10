@@ -57,12 +57,8 @@ public class PvpContextPrefs {
 		target.setGoogleDriveDocUpdateDate(source.getGoogleDriveDocUpdateDate());
 		target.setShowDiagnostics(source.getShowDiagnostics());
 
-			PvpContextUI.checkEvtThread("3100");
-		if (context != null && context.uiMain != null) {
-			if (context.uiMain.getMainFrame() != null) { // TODO is there a way to get rid of these checks?
-				context.uiMain.getMainFrame().refreshInfoLabelText(context);
-			}
-			context.uiMain.checkOtherTabs();
+		if (context != null) {
+			context.updateUIForPrefsChange();
 		}
 
 		return target;
@@ -221,7 +217,6 @@ public class PvpContextPrefs {
 		if (password != null && password.trim().length() > 0 && !passwordWasBad) {
 			return password;
 		}
-
 		final PwDialog pd = new PwDialog();
 		final PwDialog.PwAction action = pd.askForPw(passwordWasBad, resourseLocation);
 

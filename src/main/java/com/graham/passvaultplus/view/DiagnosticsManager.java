@@ -11,6 +11,7 @@ import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunner;
 
@@ -37,7 +38,6 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	}
 
 	public Component build(PvpContext context) {
-			// com.graham.passvaultplus.PvpContextUI.getActiveUI().notifyInfo("check thread 131");
 		executer = new CommandExecuter(context, new CommandExeCallBack());
 		JPanel mainP = new JPanel(new BorderLayout());
 		ta = new JTextArea(log.toString());
@@ -140,24 +140,22 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	class CommandExeCallBack extends AbstractAction implements LTCallback {
 		private LTRunner currentLt;
 		public CommandExeCallBack() {
-					super("Cancel");
-			}
+			super("Cancel");
+		}
 		Action oldAction;
 		@Override
 		public void taskStarting(LTRunner lt) {
 			currentLt = lt;
-			System.out.println("- - - CECB - - - taskStarting - - -");
 			oldAction = doIt.getAction();
 			doIt.setAction(this);
 		}
 		@Override
 		public void taskComplete(LTRunner lt) {
-			System.out.println("- - - CECB - - - taskComplete - - -");
 			doIt.setAction(oldAction);
 		}
 		@Override
 		public void handleException(LTRunner lt, Exception e) {
-			System.out.println("- - - CECB - - - handleException - - -" + e.getMessage());
+			PvpContextUI.getActiveUI().notifyWarning("CommandExeCallBack.handleException", e);
 		}
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -173,12 +171,5 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 		sb.append("| ");
 		return sb;
 	}
-
-		//private void appendTimeStamp() {
-		//	log.append(AppUtil.getMillisecondTimeStamp());
-	//		log.append("|");
-		//	log.append(Thread.currentThread().getName());
-	//		log.append("| ");
-	//	}
 
 }

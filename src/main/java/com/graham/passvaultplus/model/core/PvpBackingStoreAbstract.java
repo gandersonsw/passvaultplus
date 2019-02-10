@@ -11,7 +11,7 @@ import javax.swing.*;
 
 public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	private boolean dirty;
-	private volatile BsState bsState = BsState.StartState;
+	protected volatile BsState bsState = BsState.StartState;
 	private PvpException exception;
 	private StatusBox statusBox;
 
@@ -81,6 +81,9 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 							newState = exception == null ? BsState.AllGood : BsState.ErrorSaving;
 							break;
 					case initSave:
+							if (bsState == BsState.Loading || bsState == BsState.Saving) {
+									badStateTran = true;
+							}
 							newState = BsState.Saving;
 							break;
 					default:
@@ -88,18 +91,13 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 			}
 
 			if (badStateTran) {
-					throw new IllegalArgumentException("cannot go from " + bsState + " to " + newState);
+					throw new IllegalArgumentException("cannot go from " + bsState + " to " + newState + " :: " + this.getClass().getName());
 			}
-			System.out.println(this.getClass().getName() +  " :STATE TRAN: "+ bsState + " to " + newState);
+			//System.out.println(this.getClass().getName() +  " :STATE TRAN: "+ bsState + " to " + newState);
 			bsState = newState;
 			if (trans == BsStateTrans.EndLoading || trans == BsStateTrans.EndSaving) {
 					updateStatusBox();
 			}
-	}
-
-	@Override
-	public boolean shouldBeSaved() {
-		return bsState != BsState.ErrorLoading;
 	}
 
 	@Override
@@ -153,9 +151,7 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	protected String getErrorMessageForDisplay() {
-		//exception.printStackTrace();
 		return exception.getMessage();
-
 	}
 
 	public void allStoresAreUpToDate() {

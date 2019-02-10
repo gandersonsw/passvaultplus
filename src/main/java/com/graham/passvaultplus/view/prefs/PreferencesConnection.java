@@ -5,6 +5,7 @@ import javax.swing.Action;
 import javax.swing.JFrame;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextData;
 import com.graham.passvaultplus.PvpContextPrefs;
 
 /**

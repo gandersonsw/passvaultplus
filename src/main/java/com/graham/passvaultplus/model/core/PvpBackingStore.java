@@ -83,7 +83,7 @@ public interface PvpBackingStore {
 		StartSaving,
 		EndLoading,
 		EndSaving,
-			initSave // TODO maybe delete this
+		initSave // TODO maybe delete this
 	}
 
 	ChattyLevel getChattyLevel();
@@ -103,7 +103,6 @@ public interface PvpBackingStore {
 
 	BsState getBsState();
 	void stateTrans(BsStateTrans trans);
-	boolean shouldBeSaved();
 
 	boolean isCompressed(boolean inFlag);
 

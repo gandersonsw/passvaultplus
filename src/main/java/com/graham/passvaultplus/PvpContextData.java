@@ -13,11 +13,16 @@ public class PvpContextData {
 	private PvpDataInterface rtDataInterface;
 	private PvpContext context;
 
-	PvpContextData(PvpContext c) {
+	public PvpContextData(PvpContext c) {
 		context = c;
 		rtFileInterface = new PvpPersistenceInterface(c);
 		rtDataInterface = new PvpDataInterface(c);
 	}
+
+//	public void prefsChanged(PvpContext c) {
+	//		context.prefs.getDataFile()
+	//		rtFileInterface = new PvpPersistenceInterface(c);
+//	}
 
 	public PvpPersistenceInterface getFileInterface() {
 		return rtFileInterface;

@@ -90,7 +90,6 @@ public class LongTaskUI extends JDialog {
 										updateTimerDisplay();
 								}
 						} catch (InterruptedException ie) { }
-						//System.out.println("LongTaskUI.LongTaskUI.B - at 99 Timer Thread done");
 				}, "tuit"); // task UI thread
 				timerThread.start();
 
@@ -98,6 +97,7 @@ public class LongTaskUI extends JDialog {
 				setLocationRelativeTo(PvpContextUI.getActiveUI().getFrame());
 				setResizable(false);
 				setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+				//setVisible(true); // this is the line that causes the dialog to Block
 		}
 
 		void stepsChanged(ArrayList<LTStep> steps) {
@@ -112,24 +112,27 @@ public class LongTaskUI extends JDialog {
 		}
 
 		synchronized void killStuff() {
+				com.graham.passvaultplus.PvpContextUI.checkEvtThread("4385");
 				timerThread.interrupt();
-				long showTime = System.currentTimeMillis() - startTime - SHOW_DELAY;
-				if (showTime < MIN_SHOW_TIME) {
+			//	long showTime = System.currentTimeMillis() - startTime - SHOW_DELAY;
+			//	if (showTime < MIN_SHOW_TIME) {
 						// TODO test this
-						try {
-								cancelButton.setEnabled(false);
-								cancelButton.setText("Done");
-								Thread.sleep(MIN_SHOW_TIME - showTime);
-						} catch (InterruptedException e) { }
-				}
+			//			try {
+			//					cancelButton.setEnabled(false);
+			//					cancelButton.setText("Done");
+			//					Thread.sleep(MIN_SHOW_TIME - showTime);
+			//			} catch (InterruptedException e) { }
+			//	}
 				setVisible(false);
 				//cancelDialog = null;
 		}
 
 		void setCanCancel(boolean cc) {
-				PvpContextUI.checkEvtThread("5473");
-				cancelButton.setEnabled(cc);
-				cancelButton.setText(cc ? "Cancel" : "Can't Cancel");
+			//	PvpContextUI.checkEvtThread("5473");
+				SwingUtilities.invokeLater(() -> {
+						cancelButton.setEnabled(cc);
+						cancelButton.setText(cc ? "Cancel" : "Can't Cancel");
+				});
 		}
 
 		void showCancelDialog() {

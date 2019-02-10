@@ -3,9 +3,7 @@ package com.graham.passvaultplus.view.prefs;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
@@ -28,17 +26,15 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	@Override
 	public void doSave(final boolean wasChanges, final PreferencesContext pc) {
 			// TODO support cancel "Saving..."
-		//LTManager.run(() -> {
 			copyPrefsToReal();
 			// if changes made don't require file rewrite, don't do it
 			if (wasChanges) {
-				//context.setDataFilePath(dataFile.getAbsolutePath());
-					LTManager.run(() -> context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.major));
+					LTManager.run(() -> context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.init));
 				 // TODO if there is an exception here the changes from line 27 should not be applied
 			}
-			context.uiMain.hideTab(OtherTab.Prefs);
+			SwingUtilities.invokeLater(() -> context.uiMain.hideTab(OtherTab.Prefs));
+			//context.uiMain.hideTab(OtherTab.Prefs);
 			pc.cleanup();
-		//});
 	}
 
 	@Override

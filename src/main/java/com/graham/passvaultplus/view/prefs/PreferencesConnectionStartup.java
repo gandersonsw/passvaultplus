@@ -43,7 +43,7 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	@Override
 	public void doOpen(PreferencesContext pc) {
 
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("3524");
+		//	com.graham.passvaultplus.PvpContextUI.checkEvtThread("3524");
 			copyPrefsToReal();
 			try { SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false)); } catch (Exception e) { PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A"); }
 			//startupOptionsFrame.setVisible(false);

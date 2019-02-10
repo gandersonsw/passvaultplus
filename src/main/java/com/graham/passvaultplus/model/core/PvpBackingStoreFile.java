@@ -12,13 +12,29 @@ import java.util.Arrays;
 import java.util.Date;
 
 import com.graham.passvaultplus.AppUtil;
+import com.graham.passvaultplus.PvpContext;
 
 public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
-	private File theF;
+	private final File theF;
+	private final PvpContext context;
+
+	public PvpBackingStoreFile(PvpContext c) {
+		context = c;
+		theF = null;
+	}
 
 	public PvpBackingStoreFile(File f) {
+		context = null;
 		theF = f;
+	}
+
+	private File getFile() {
+			if (theF == null) {
+					return context.prefs.getDataFile();
+			} else {
+					return theF;
+			}
 	}
 
 	@Override
@@ -33,40 +49,42 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		return new FileInputStream(theF);
+		return new FileInputStream(getFile());
 	}
 
 	@Override
 	public OutputStream openOutputStream() throws IOException {
-		checkBackupFileHourly(theF); // TODO - is this correct? if this called and save does not happen - bad things will happen
-		return new FileOutputStream(theF);
+		checkBackupFileHourly(); // TODO - is this correct? if this called and save does not happen - bad things will happen
+		return new FileOutputStream(getFile());
 	}
 
 	@Override
 	public boolean isCompressed(boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(theF.getName());
+		return PvpPersistenceInterface.isCompressed(getFile().getName());
 	}
 
 	@Override
 	public boolean isEncrypted(boolean inFlag) {
-		return PvpPersistenceInterface.isEncrypted(theF.getName());
+		return PvpPersistenceInterface.isEncrypted(getFile().getName());
 	}
 
 	/**
 	 * Check to see if a backup file has been created in the last hour. If it has not, rename the given file to the backup file name.
 	 */
-	private void checkBackupFileHourly(final File f) {
-		String filenameParts[] = AppUtil.getFileNameParts(f.getName());
+	private void checkBackupFileHourly() {
+		File df = getFile();
+		String filenameParts[] = AppUtil.getFileNameParts(df.getName());
 		String timeStamp = AppUtil.getHourlyTimeStamp();
-		File backupFile = new File(f.getParentFile(), filenameParts[0] + timeStamp + "." + filenameParts[1]);
+		File backupFile = new File(df.getParentFile(), filenameParts[0] + timeStamp + "." + filenameParts[1]);
 		// don't backup if a backup has been done within the last hour
 		if (!backupFile.exists()) {
-			f.renameTo(backupFile);
+			df.renameTo(backupFile);
 		}
 	}
 
 	public File[] getAllFiles(boolean sortByDate) {
-		File[] files = theF.getParentFile().listFiles(new MyFF(theF));
+		File df = getFile();
+		File[] files = df.getParentFile().listFiles(new MyFF(df));
 		if (sortByDate) {
 			Arrays.sort(files, (f1, f2) -> {
 				Date d1 = AppUtil.parseHourlyTimeStamp(f1.getName());
@@ -80,7 +98,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	public void deleteAll() {
 		File[] fArr = getAllFiles(false);
 		for (File f : fArr) {
-			System.out.println("PvpBackingStoreFile.deleteAll - deleteing:" + f);
+			context.ui.notifyInfo("PvpBackingStoreFile.deleteAll - deleteing:" + f);
 			f.delete();
 		}
 	}
@@ -98,12 +116,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
 	@Override
 	public long getLastUpdatedDate() {
-		return theF.lastModified();
+		return getFile().lastModified();
 	}
 
 	@Override
 	public String getDisplayableResourceLocation() {
-		return "File: " + theF;
+		return "File: " + getFile();
 	}
 
 	@Override
