@@ -35,6 +35,7 @@ public class PvpPersistenceInterface {
 	public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
 
 	final private PvpContext context;
+	private PvpBackingStoreFile backingStoreFile;
 	private List<PvpBackingStore> backingStores;
 	private boolean errorHappened;
 
@@ -89,7 +90,7 @@ public class PvpPersistenceInterface {
 	public List<PvpBackingStore> getEnabledBackingStores(boolean includeUnmodifiedRemotes) {
 		if (backingStores == null) {
 			backingStores = new ArrayList<>();
-			backingStores.add(new PvpBackingStoreFile(context)); // File needs to be the first Backing Store in the list
+			backingStores.add(getBackingStoreFile()); // Very important - File needs to be the first Backing Store in the list
 			backingStores.add(new PvpBackingStoreGoogleDocs(context));
 		}
 		List<PvpBackingStore> bsList = new ArrayList<>();
@@ -99,6 +100,13 @@ public class PvpPersistenceInterface {
 			}
 		}
 		return bsList;
+	}
+
+	private PvpBackingStore getBackingStoreFile() {
+		if (backingStoreFile == null) {
+			backingStoreFile = new PvpBackingStoreFile(context);
+		}
+		return backingStoreFile;
 	}
 
 		private void loadInternal(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
@@ -341,6 +349,19 @@ public class PvpPersistenceInterface {
 				try {
 
 						if (bs.supportsFileUpload()) {
+								context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.FILE_UPLOAD");
+								bs.clearTransientData();
+								if (!bs.isUnmodifiedRemote()) {
+										LTManager.nextStep("Loading new changes from remote");
+										context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.load :: remote file has updated - reloading...");
+										loadInternal(dataInterface, this.getEnabledBackingStores(false));
+								}
+								if (getBackingStoreFile().isDirty()) {
+										LTManager.nextStep("Saving local file");
+										context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.save :: saving local file");
+										saveOneBackingStore(dataInterface, getBackingStoreFile());
+								}
+								LTManager.nextStep("Uploading file to remote");
 								bs.doFileUpload();
 						} else {
 								PvpOutStreamer fileWriter = null;

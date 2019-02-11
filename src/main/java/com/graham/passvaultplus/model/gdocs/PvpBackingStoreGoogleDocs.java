@@ -26,6 +26,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.longtask.LTManager;
@@ -471,10 +472,13 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	public static void deleteLocalCredentials() {
+
 		if (DATA_STORE_DIR.isDirectory()) {
+				PvpContextUI.getActiveUI().notifyInfo("PvpBackingStoreGoogleDocs.deleteLocalCredentials");
 			String[] entries = DATA_STORE_DIR.list();
 			for(String s: entries){
 				java.io.File currentFile = new java.io.File(DATA_STORE_DIR.getPath(),s);
+					PvpContextUI.getActiveUI().notifyInfo("PvpBackingStoreGoogleDocs.deleteLocalCredentials File:" + currentFile);
 				currentFile.delete();
 			}
 			DATA_STORE_DIR.delete();

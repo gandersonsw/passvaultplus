@@ -75,6 +75,7 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		LTManager.runWithProgress(() -> {
+			prefsContext.remoteBS.deleteCredentials(); // creating a new database, so assume they might want to use a different remote
 			if (!prefsContext.remoteBS.presave(true)) {
 				return;
 			}
@@ -109,6 +110,7 @@ public class SavePrefsAction extends AbstractAction {
 
 		setContextPrefsValues();
 		LTManager.runWithProgress(() -> {
+			prefsContext.remoteBS.deleteCredentials(); // opening a different database, so assume they might want to use a different remote
 			if (!prefsContext.remoteBS.presave(false)) {
 				return;
 			}
