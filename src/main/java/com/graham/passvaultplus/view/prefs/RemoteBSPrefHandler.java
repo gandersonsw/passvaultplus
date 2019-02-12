@@ -52,6 +52,7 @@ public class RemoteBSPrefHandler {
 	}
 
 	public void deleteCredentials() {
+		// TODO this doesnt really work. If we delete the file, it still connects. Need to clear out something in the Google API maybe ?
 		//	if (!useGoogleDrive.isSelected() && useGoogleDriveFlag) {
 		prefsContext.conn.getPvpContextOriginal().ui.notifyInfo("deleteing Google Credientials if present");
 		PvpBackingStoreGoogleDocs.deleteLocalCredentials();

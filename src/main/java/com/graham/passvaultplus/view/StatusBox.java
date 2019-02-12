@@ -16,7 +16,7 @@ public class StatusBox extends JComponent {
 	private static final Dimension SIZE = new Dimension(12,16);
 	private static final Dimension MIN_SIZE = new Dimension(6,6);
 	
-	private Color statusColor;
+	private volatile Color statusColor;
 	private volatile SBAnimation sba;
 	
 	public StatusBox(Color c) {
@@ -24,11 +24,17 @@ public class StatusBox extends JComponent {
 	}
 	
 	public void setColor(Color c) {
-		if (sba != null) {
-			sba.originalColor = c;
+		synchronized(this) {
+			if (sba != null) {
+				sba.originalColor = c;
+			}
+			statusColor = c;
 		}
+		repaint();
+	}
+
+	synchronized void setColorOnly(Color c) {
 		statusColor = c;
-		this.repaint();
 	}
 	
 	@Override
@@ -56,20 +62,19 @@ public class StatusBox extends JComponent {
 		return MIN_SIZE;
 	}
 
-	public void startAnimation() {
+	synchronized public void startAnimation() {
 		sba = new SBAnimation();
 		sba.execute();
 	}
 
-	public void stopAnimation() {
+	synchronized public void stopAnimation() {
 		sba.cancel(true);
-		sba = null;
 	}
 
 	class SBAnimation extends SwingWorker<Void, Color> {
 		int kf = 0;
 		Color[] colors;
-		Color originalColor;
+		volatile Color originalColor;
 		public SBAnimation() {
 			colors = new Color[10];
 			originalColor = statusColor;
@@ -96,14 +101,15 @@ public class StatusBox extends JComponent {
 
 		@Override
 		protected void process(List<Color> chunks) {
-			statusColor = chunks.get(0);
+			setColorOnly(chunks.get(0));
 			repaint();
 		}
 
 		@Override
 		protected void done() {
-			statusColor = originalColor;
+			setColorOnly(originalColor);
 			repaint();
+			sba = null;
 		}
 	}
 

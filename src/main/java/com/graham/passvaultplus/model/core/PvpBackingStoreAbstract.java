@@ -32,8 +32,10 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 
 	@Override
 	public void setDirty(final boolean dirtyParam) {
-		dirty = dirtyParam;
-		updateStatusBox();
+		if (dirty != dirtyParam) {
+			dirty = dirtyParam;
+			updateStatusBox();
+		}
 	}
 
 	@Override
@@ -105,7 +107,6 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		exception = null;
 		// dirty should not be cleared. When loading, dirty is set to true if the BackingStores
 		// are out of sync, and the flag will signal that they should be saved
-		updateStatusBox();
 	}
 
 	@Override
@@ -140,11 +141,11 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 					statusBox.setColor(Color.ORANGE);
 					statusBox.setToolTipText("Error:" + getErrorMessageForDisplay());
 				} else if (dirty) {
-					statusBox.setColor(Color.BLUE.brighter());
+					statusBox.setColor(new Color(79, 138, 255));
 					statusBox.setToolTipText("Not stored yet. Click to store now.");
 				} else {
 					statusBox.setColor(Color.GREEN);
-					statusBox.setToolTipText("All data stored"); // TODO click to download data ?
+					statusBox.setToolTipText("All data stored" + (this.getChattyLevel().isRemote() ? ". Click to check for changes." : ""));
 				}
 			}
 		});

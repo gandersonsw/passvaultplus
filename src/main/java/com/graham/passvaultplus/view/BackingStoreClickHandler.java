@@ -27,7 +27,11 @@ public class BackingStoreClickHandler extends MouseAdapter {
 		} else if (backingStore.isDirty()) {
 			LTManager.run(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));
 		} else {
-			context.ui.notifyInfo("BackingStoreClickHandler clicked : other");
+			if (backingStore.getChattyLevel().isRemote()) {
+				LTManager.run(context.data.getFileInterface().loadcheckOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));
+			} else {
+				context.ui.notifyInfo("BackingStoreClickHandler clicked : other");
+			}
 		}
 	}
 

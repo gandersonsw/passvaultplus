@@ -25,7 +25,7 @@ public interface PvpBackingStore {
 		 * they move to a different field or enter a large amount of
 		 * text, a save may be triggered. or every ~30 seconds if there are changes)
 		 */
-		unlimited,
+		unlimited(0),
 
 		/**
 		 * This level would be used for something like a local file system.
@@ -35,28 +35,28 @@ public interface PvpBackingStore {
 		 * Saves happen when a record is saved. Or if a record is deleted.
 		 * Very similar to a REST type where CRUD requests cause a data save.
 		 */
-		localLevel,
+		localLevel(10),
 
 		/**
 		 * A fast remote storage, where user does not need to worry about data usage limits/charges.
 		 *
 		 * Currently behaves the same as "localLevel"
 		 */
-		remoteHeavy,
+		remoteHeavy(100),
 
 		/**
 		 * A fast/fairly fast remote storage, where user does not need to worry about data usage limits/charges.
 		 *
 		 * Writes will be done in bulk to some extent.
 		 */
-		remoteMedium,
+		remoteMedium(200),
 
 		/**
 		 * A medium or slow remote storage, where there may be light usage data limits/charges.
 		 *
 		 * Writes are often done in bulk. Maybe the most frequent would be once every ~30 minutes
 		 */
-		remoteLight,
+		remoteLight(300),
 
 		/**
 		 * A slow remote storage or where there may be usage data limits/charges.
@@ -64,7 +64,17 @@ public interface PvpBackingStore {
 		 * A read is done once when starting app. Write is done once when quitting
 		 * (or once every 24 hours if there have been changes), only if changes have been made.
 		 */
-		mostRestricted
+		mostRestricted(1000);
+
+		final int index;
+
+		ChattyLevel(int i) {
+			index = i;
+		}
+
+		public boolean isRemote() {
+			return index > 99;
+		}
 	}
 
 	// Backing Store State

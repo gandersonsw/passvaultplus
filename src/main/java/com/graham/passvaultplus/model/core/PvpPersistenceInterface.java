@@ -109,121 +109,111 @@ public class PvpPersistenceInterface {
 		return backingStoreFile;
 	}
 
-		private void loadInternal(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
-				context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
+	private void loadInternal(PvpDataInterface dataInterface, List<PvpBackingStore> enabledBs) throws UserAskToChangeFileException, PvpException {
+		context.ui.notifyInfo("PvpPersistenceInterface.load :: START");
 
-				for (PvpBackingStore bs : enabledBs) {
-						bs.clearTransientData();
-				}
-
-				// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
-				PvpBackingStore[] sortedBSArr = new PvpBackingStore[enabledBs.size()];
-				sortedBSArr = enabledBs.toArray(sortedBSArr);
-				Arrays.sort(sortedBSArr, (bs1, bs2) -> Long.compare(bs2.getLastUpdatedDate(), bs1.getLastUpdatedDate()));
-
-				boolean doMerge = false;
-				boolean wasChanged = false; // TODO way to write out if it was changed?
-				for (PvpBackingStore bs : sortedBSArr) {
-						LTManager.nextStep("Loading data from: " + bs.getShortName());
-						context.ui.notifyInfo("loading bs : " + bs.getClass().getName());
-						context.ui.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
-						final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
-
-						BufferedInputStream inStream = null;
-						try {
-								inStream = fileReader.getStream();
-						}
-						catch (UserAskToChangeFileException ucf) {
-								throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
-						}
-						catch (InvalidKeyException e) {
-								context.ui.notifyInfo("at InvalidKeyException");
-								bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
-								continue;
-								//throw new PvpException(PvpException.GeneralErrCode.InvalidKey, e);
-						}
-						catch (Exception e) {
-								context.ui.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
-								bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
-								continue;
-								//throw new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(getFileDesc(bs));
-						}
-
-						// TODO does fileReader.close(); need to be called if we dont get here?
-
-						try {
-								PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-								if (doMerge) {
-										if (dataInterface.mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
-												wasChanged = true;
-										}
-								}
-								else {
-										dataInterface.setData(newDataInterface);
-										doMerge = true;
-								}
-								context.prefs.setEncryptionStrengthBits(fileReader.getAesBits());
-						}
-						catch (UserAskToChangeFileException ucf) {
-								throw ucf;
-						}
-						catch (Exception e) {
-								context.ui.notifyInfo("at 37 Exception: " + e.getMessage());
-								e.printStackTrace();
-								bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
-						}
-						finally {
-								// note that close is called 2 times when an error happens
-								fileReader.close();
-						}
-				}
-
-				if (!doMerge) { // if this is false, nothing was loaded -> we have a problem
-						throw enabledBs.get(0).getException();
-				}
-
-				if (wasChanged) {
-						// set them as dirty, so they will eventually save
-						for (PvpBackingStore bs : getEnabledBackingStores(true)) {
-								bs.setDirty(true);
-						}
-
-						context.ui.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
-				}
-				else {
-						boolean wasErrA = false;
-						for (PvpBackingStore bs : sortedBSArr) {
-								if (bs.getException() != null) {
-										wasErrA = true;
-								}
-						}
-						context.ui.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate. wasErrA: " + wasErrA);
-						if (!wasErrA) {
-								for (PvpBackingStore bs : getEnabledBackingStores(true)) {
-										bs.allStoresAreUpToDate();
-								}
-						}
-				}
+		for (PvpBackingStore bs : enabledBs) {
+			bs.clearTransientData();
 		}
 
-		public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
-				if (!LTManager.isLTThread()) {
-						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.load :: LTManager.isLTThread() = false");
-				}
+		// sort with newest first. When the merge is done, it will know that the newest data is loaded, and it it merging in older data
+		PvpBackingStore[] sortedBSArr = new PvpBackingStore[enabledBs.size()];
+		sortedBSArr = enabledBs.toArray(sortedBSArr);
+		Arrays.sort(sortedBSArr, (bs1, bs2) -> Long.compare(bs2.getLastUpdatedDate(), bs1.getLastUpdatedDate()));
 
-				// TODO cleanup
-				List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
-				try {
-						for (PvpBackingStore bs : enabledBs) {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
-						}
-						loadInternal(dataInterface, enabledBs);
-				} finally {
-						for (PvpBackingStore bs : enabledBs) {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
-						}
+		boolean doMerge = false;
+		boolean wasChanged = false; // TODO way to write out if it was changed?
+		for (PvpBackingStore bs : sortedBSArr) {
+			LTManager.nextStep("Loading data from: " + bs.getShortName());
+			context.ui.notifyInfo("loading bs : " + bs.getClass().getName());
+			context.ui.notifyInfo("update date: " + new Date(bs.getLastUpdatedDate()));
+			final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
+
+			BufferedInputStream inStream = null;
+			try {
+				inStream = fileReader.getStream();
+			} catch (UserAskToChangeFileException ucf) {
+				throw ucf; // this is not a real exception, just a signal that we should go back to configuration options
+			} catch (InvalidKeyException e) {
+				context.ui.notifyInfo("at InvalidKeyException");
+				bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
+				continue;
+			} catch (Exception e) {
+				context.ui.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
+				bs.setException(new PvpException(PvpException.GeneralErrCode.CantOpenDataFile, e).setAdditionalDescription(bs.getDisplayableResourceLocation()));
+				continue;
+			}
+
+			// TODO does fileReader.close(); need to be called if we dont get here?
+
+			try {
+				PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+				if (doMerge) {
+					if (dataInterface.mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
+						wasChanged = true;
+					}
+				} else {
+					dataInterface.setData(newDataInterface);
+					doMerge = true;
 				}
+				context.prefs.setEncryptionStrengthBits(fileReader.getAesBits());
+			} catch (UserAskToChangeFileException ucf) {
+				throw ucf;
+			} catch (Exception e) {
+				context.ui.notifyInfo("at 37 Exception: " + e.getMessage());
+				e.printStackTrace();
+				bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation()));
+			} finally {
+				// note that close is called 2 times when an error happens
+				fileReader.close();
+			}
 		}
+
+		if (!doMerge) { // if this is false, nothing was loaded -> we have a problem
+			throw enabledBs.get(0).getException();
+		}
+
+		if (wasChanged) {
+			// set them as dirty, so they will eventually save
+			for (PvpBackingStore bs : getEnabledBackingStores(true)) {
+				bs.setDirty(true);
+			}
+
+			context.ui.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
+		} else {
+			boolean wasErrA = false;
+			for (PvpBackingStore bs : sortedBSArr) {
+				if (bs.getException() != null) {
+					wasErrA = true;
+				}
+			}
+			context.ui.notifyInfo("PvpPersistenceInterface.load :: ready to call allStoresAreUpToDate. wasErrA: " + wasErrA);
+			if (!wasErrA) {
+				for (PvpBackingStore bs : getEnabledBackingStores(true)) {
+					bs.allStoresAreUpToDate();
+				}
+			}
+		}
+	}
+
+	public void load(PvpDataInterface dataInterface) throws UserAskToChangeFileException, PvpException {
+		if (!LTManager.isLTThread()) {
+			PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.load :: LTManager.isLTThread() = false");
+		}
+
+		// TODO cleanup
+		List<PvpBackingStore> enabledBs = getEnabledBackingStores(false);
+		try {
+			for (PvpBackingStore bs : enabledBs) {
+				bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
+			}
+			loadInternal(dataInterface, enabledBs);
+		} finally {
+			for (PvpBackingStore bs : enabledBs) {
+				bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
+			}
+		}
+	}
 
 	/**
 	 * return true to Quit. Return false to cancel Quit, and keep app running
@@ -233,176 +223,215 @@ public class PvpPersistenceInterface {
 		return !errorHappened;
 	}
 
-		private void saveInternal(PvpDataInterface dataInterface, SaveTrigger saveTrig, List<PvpBackingStore> enabledBs) {
-				errorHappened = false;
+	private void saveInternal(PvpDataInterface dataInterface, SaveTrigger saveTrig, List<PvpBackingStore> enabledBs) {
+		errorHappened = false;
 
-				for (PvpBackingStore bs : enabledBs) {
-						PvpBackingStoreLTCB pvpBsLtCb = new PvpBackingStoreLTCB(bs);
-						try {
-								pvpBsLtCb.taskStarting(null);
-							//	bs.clearTransientData();
-								switch (bs.getChattyLevel()) {
-										case unlimited:
-										case localLevel:
-										case remoteHeavy:
-												if (saveTrig == SaveTrigger.quit) {
-														if (bs.isDirty()) {
-																saveOneBackingStore(dataInterface, bs);
-														}
-												}
-												else {
-														saveOneBackingStore(dataInterface, bs);
-												}
-												break;
-										case remoteMedium:
-										case remoteLight:
-										case mostRestricted:
-												if (saveTrig == SaveTrigger.quit) {
-														if (bs.isDirty()) {
-																saveOneBackingStore(dataInterface, bs);
-														}
-												}
-												else if (saveTrig == SaveTrigger.major) {
-														saveOneBackingStore(dataInterface, bs);
-												}
-												else {
-														bs.setDirty(true);
-												}
-												break;
-								}
-						} finally {
-								pvpBsLtCb.taskComplete(null);
-						}
-				}
-
-				boolean allSaved = true;
-				for (PvpBackingStore bs : enabledBs) {
-						if (bs.isDirty()) {
-								allSaved = false;
-						}
-				}
-				context.ui.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. allSaved:" + allSaved);
-				if (allSaved) {
-						for (PvpBackingStore bs : enabledBs) {
-								bs.allStoresAreUpToDate();
-						}
-				}
-		}
-
-		public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
-
-				if (!LTManager.isLTThread()) {
-						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.save :: LTManager.isLTThread() = false");
-				}
-
-				final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
-				List<PvpBackingStore> cantSaveNowBs = null;
-
-				PvpBackingStore.BsStateTrans stateTrans;
-				if (saveTrig == SaveTrigger.init) {
-						saveTrig = SaveTrigger.major;
-						stateTrans = PvpBackingStore.BsStateTrans.initSave;
-				} else {
-						stateTrans = PvpBackingStore.BsStateTrans.StartSaving;
-				}
-				for (PvpBackingStore bs : enabledBs) {
-						try {
-								bs.stateTrans(stateTrans);
-						} catch (Exception e) {
-								if (cantSaveNowBs == null) {
-										cantSaveNowBs = new ArrayList<>();
-								}
-								this.context.ui.notifyWarning("Cant save BS now: " + bs.getClass().getName());
-								cantSaveNowBs.add(bs);
-						}
-				}
-				if (cantSaveNowBs != null) {
-						enabledBs.removeAll(cantSaveNowBs);
-						if (enabledBs.size() == 0) {
-								throw new RuntimeException("No Backing Stores can be saved right now");
-						}
-				}
-
-				try {
-						saveInternal(dataInterface, saveTrig, enabledBs);
-				} finally {
-						for (PvpBackingStore bs : enabledBs) {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
-						}
-				}
-		}
-
-
-		public void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
-				if (!LTManager.isLTThread()) {
-						PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.saveOneBackingStore :: LTManager.isLTThread() = false");
-				}
-
-				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
-			//	if (!bs.shouldBeSaved()) {
-			//			context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
-			//			return;
-			//	}
-
-				LTManager.nextStep("Saving data to: " + bs.getShortName());
-				bs.clearTransientData();
-				try {
-
-						if (bs.supportsFileUpload()) {
-								context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.FILE_UPLOAD");
-								bs.clearTransientData();
-								if (!bs.isUnmodifiedRemote()) {
-										LTManager.nextStep("Loading new changes from remote");
-										context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.load :: remote file has updated - reloading...");
-										loadInternal(dataInterface, this.getEnabledBackingStores(false));
-								}
-								if (getBackingStoreFile().isDirty()) {
-										LTManager.nextStep("Saving local file");
-										context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.save :: saving local file");
-										saveOneBackingStore(dataInterface, getBackingStoreFile());
-								}
-								LTManager.nextStep("Uploading file to remote");
-								bs.doFileUpload();
-						} else {
-								PvpOutStreamer fileWriter = null;
-								try {
-										fileWriter = new PvpOutStreamer(bs, context.prefs);
-										DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
-								} finally {
-										// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
-										if (fileWriter != null) {
-												fileWriter.close();
-										}
-								}
-						}
-						bs.setDirty(false);
-				} catch (Exception e) {
-						errorHappened = true;
-						bs.setException(new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e));
-						context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
-				}
-				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.END");
-		}
-
-		public LongTaskNoException saveOneBackingStoreLT(PvpDataInterface dataInterface, PvpBackingStore bs) {
-				return new LongTaskSaveOneBS(dataInterface, bs);
-		}
-
-		class LongTaskSaveOneBS implements LongTaskNoException {
-				private PvpDataInterface dataInterface;
-				private PvpBackingStore bs;
-				public LongTaskSaveOneBS(PvpDataInterface dataInterfaceParam, PvpBackingStore bsParam) {
-						dataInterface = dataInterfaceParam;
-						bs = bsParam;
-						bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
-				}
-				public void runLongTask() {
-						try {
+		for (PvpBackingStore bs : enabledBs) {
+			PvpBackingStoreLTCB pvpBsLtCb = new PvpBackingStoreLTCB(bs);
+			try {
+				pvpBsLtCb.taskStarting(null);
+				//	bs.clearTransientData();
+				switch (bs.getChattyLevel()) {
+					case unlimited:
+					case localLevel:
+					case remoteHeavy:
+						if (saveTrig == SaveTrigger.quit) {
+							if (bs.isDirty()) {
 								saveOneBackingStore(dataInterface, bs);
-						} finally {
-								bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
+							}
+						} else {
+							saveOneBackingStore(dataInterface, bs);
 						}
+						break;
+					case remoteMedium:
+					case remoteLight:
+					case mostRestricted:
+						if (saveTrig == SaveTrigger.quit) {
+							if (bs.isDirty()) {
+								saveOneBackingStore(dataInterface, bs);
+							}
+						} else if (saveTrig == SaveTrigger.major) {
+							saveOneBackingStore(dataInterface, bs);
+						} else {
+							bs.setDirty(true);
+						}
+						break;
 				}
+			} finally {
+				pvpBsLtCb.taskComplete(null);
+			}
 		}
+
+		boolean allSaved = true;
+		for (PvpBackingStore bs : enabledBs) {
+			if (bs.isDirty()) {
+				allSaved = false;
+			}
+		}
+		context.ui.notifyInfo("PvpPersistenceInterface.save :: ready to call allStoresAreUpToDate. allSaved:" + allSaved);
+		if (allSaved) {
+			for (PvpBackingStore bs : enabledBs) {
+				bs.allStoresAreUpToDate();
+			}
+		}
+	}
+
+	public void save(PvpDataInterface dataInterface, SaveTrigger saveTrig) {
+		if (!LTManager.isLTThread()) {
+			PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.save :: LTManager.isLTThread() = false");
+		}
+
+		final List<PvpBackingStore> enabledBs = getEnabledBackingStores(true);
+		List<PvpBackingStore> cantSaveNowBs = null;
+
+		PvpBackingStore.BsStateTrans stateTrans;
+		if (saveTrig == SaveTrigger.init) {
+			saveTrig = SaveTrigger.major;
+			stateTrans = PvpBackingStore.BsStateTrans.initSave;
+		} else {
+			stateTrans = PvpBackingStore.BsStateTrans.StartSaving;
+		}
+		for (PvpBackingStore bs : enabledBs) {
+			try {
+				bs.stateTrans(stateTrans);
+			} catch (Exception e) {
+				if (cantSaveNowBs == null) {
+					cantSaveNowBs = new ArrayList<>();
+				}
+				this.context.ui.notifyWarning("Cant save BS now: " + bs.getClass().getName());
+				cantSaveNowBs.add(bs);
+			}
+		}
+		if (cantSaveNowBs != null) {
+			enabledBs.removeAll(cantSaveNowBs);
+			if (enabledBs.size() == 0) {
+				throw new RuntimeException("No Backing Stores can be saved right now");
+			}
+		}
+
+		try {
+			saveInternal(dataInterface, saveTrig, enabledBs);
+		} finally {
+			for (PvpBackingStore bs : enabledBs) {
+				bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
+			}
+		}
+	}
+
+	private void saveOneBackingStore(PvpDataInterface dataInterface, PvpBackingStore bs) {
+		if (!LTManager.isLTThread()) {
+			PvpContextUI.getActiveUI().notifyWarning("PvpPersistenceInterface.saveOneBackingStore :: LTManager.isLTThread() = false");
+		}
+
+		context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
+		//	if (!bs.shouldBeSaved()) {
+		//			context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
+		//			return;
+		//	}
+
+		LTManager.nextStep("Saving data to: " + bs.getShortName());
+		bs.clearTransientData();
+		try {
+			if (bs.supportsFileUpload()) {
+				context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.FILE_UPLOAD");
+				bs.clearTransientData();
+				if (!bs.isUnmodifiedRemote()) {
+					LTManager.nextStep("Loading new changes from remote");
+					context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.load :: remote file has updated - reloading...");
+					loadInternal(dataInterface, this.getEnabledBackingStores(false));
+				}
+				if (getBackingStoreFile().isDirty()) {
+					LTManager.nextStep("Saving local file");
+					context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.save :: saving local file");
+					saveOneBackingStore(dataInterface, getBackingStoreFile());
+				}
+				LTManager.nextStep("Uploading file to remote");
+				bs.doFileUpload();
+			} else {
+				PvpOutStreamer fileWriter = null;
+				try {
+					fileWriter = new PvpOutStreamer(bs, context.prefs);
+					DatabaseWriter.write(context, fileWriter.getWriter(), dataInterface);
+				} finally {
+					// note that close is called 2 times if Exception thrown from fileWriter.getWriter()
+					if (fileWriter != null) {
+						fileWriter.close();
+					}
+				}
+			}
+			bs.setDirty(false);
+		} catch (Exception e) {
+			errorHappened = true;
+			bs.setException(new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e));
+			context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
+		}
+		context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.END");
+	}
+
+	public LongTaskNoException saveOneBackingStoreLT(PvpDataInterface dataInterface, PvpBackingStore bs) {
+		return new LongTaskSaveOneBS(dataInterface, bs);
+	}
+
+	class LongTaskSaveOneBS implements LongTaskNoException {
+		private PvpDataInterface dataInterface;
+		private PvpBackingStore bs;
+		public LongTaskSaveOneBS(PvpDataInterface dataInterfaceParam, PvpBackingStore bsParam) {
+			dataInterface = dataInterfaceParam;
+			bs = bsParam;
+			bs.stateTrans(PvpBackingStore.BsStateTrans.StartSaving);
+		}
+		public void runLongTask() {
+			try {
+				saveOneBackingStore(dataInterface, bs);
+			} finally {
+				bs.stateTrans(PvpBackingStore.BsStateTrans.EndSaving);
+			}
+		}
+	}
+
+	public LongTaskNoException loadcheckOneBackingStoreLT(PvpDataInterface dataInterface, PvpBackingStore bs) {
+		return new LongTaskLoadcheckOneBS(dataInterface, bs);
+	}
+
+	class LongTaskLoadcheckOneBS implements LongTaskNoException {
+		private PvpDataInterface dataInterface;
+		private PvpBackingStore bs;
+		public LongTaskLoadcheckOneBS(PvpDataInterface dataInterfaceParam, PvpBackingStore bsParam) {
+			dataInterface = dataInterfaceParam;
+			bs = bsParam;
+			bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
+		}
+		public void runLongTask() {
+			PvpInStreamer fileReader = null;
+			try {
+				fileReader = new PvpInStreamer(bs, context);
+				final BufferedInputStream inStream = fileReader.getStream();
+				PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
+				if (dataInterface.mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
+					context.ui.showMessageDialog("Loaded Data", "There were changes that have been loaded");
+					List<PvpBackingStore> bsList = getEnabledBackingStores(true);
+					for (PvpBackingStore bsi : bsList) {
+						if (bsi != bs) {
+							context.ui.notifyInfo("LongTaskLoadcheckOneBS :: setting dirty :: " + bsi.getClass().getName());
+							bsi.setDirty(true);
+						}
+					}
+					if (context.uiMain != null) {
+						context.uiMain.getViewListContext().filterUIChanged();
+					}
+				} else {
+					context.ui.showMessageDialog("No Changes", "There were no changes. No new data was loaded.");
+				}
+			} catch (Exception e) {
+				context.ui.notifyWarning("Error in LongTaskLoadcheckOneBS", e);
+				context.ui.showMessageDialog("Error", "There was an error. " + e.getMessage());
+			} finally {
+				bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
+				if (fileReader != null) {
+					fileReader.close();
+				}
+			}
+		}
+	}
 
 }
