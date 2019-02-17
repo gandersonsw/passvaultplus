@@ -29,7 +29,11 @@ public class BCTableModelHeter implements BCTableModel {
 	public int getRowCount() {
 		return filter.getRecordCount() * 4;
 	}
-	
+
+	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
+		return getValueAt(rowIndex, columnIndex);
+	}
+
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		int fieldIndex = rowIndex % 4;
 		if (columnIndex == 0) {

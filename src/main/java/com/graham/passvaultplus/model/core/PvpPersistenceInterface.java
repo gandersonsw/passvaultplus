@@ -305,6 +305,7 @@ public class PvpPersistenceInterface {
 		if (cantSaveNowBs != null) {
 			enabledBs.removeAll(cantSaveNowBs);
 			if (enabledBs.size() == 0) {
+				PvpContextUI.getActiveUI().showMessageDialog("In Progress", "Saving is already in progress. Please try again a bit later.");
 				throw new RuntimeException("No Backing Stores can be saved right now");
 			}
 		}
@@ -324,10 +325,6 @@ public class PvpPersistenceInterface {
 		}
 
 		context.ui.notifyInfo("PvpPersistenceInterface.saveOneBackingStore.START:" + bs.getClass().getName());
-		//	if (!bs.shouldBeSaved()) {
-		//			context.ui.notifyInfo("this backing store will not be saved (probably because load failed):" + bs.getClass().getName());
-		//			return;
-		//	}
 
 		LTManager.nextStep("Saving data to: " + bs.getShortName());
 		bs.clearTransientData();

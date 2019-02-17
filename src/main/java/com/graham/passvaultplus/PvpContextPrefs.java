@@ -128,12 +128,12 @@ public class PvpContextPrefs {
 	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
 		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation);
 		try {
-			LTManager.waitingUserInputStart(99);
+			LTManager.waitingUserInputStart();
 			SwingUtilities.invokeAndWait(pw);
 		} catch (Exception e) {
 			PvpContextUI.getActiveUI().notifyWarning("getPasswordOrAskUser error", e);
 		} finally {
-			LTManager.waitingUserInputEnd(99);
+			LTManager.waitingUserInputEnd();
 		}
 		if (pw.resultException != null) {
 			throw pw.resultException;

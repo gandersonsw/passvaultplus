@@ -157,7 +157,9 @@ public class PvpContextUIMainFrame implements ChangeListener {
 
 	private void setLastTabSelected() {
 		if (lastSelectedComp2 != null) {
-			mainTabPane.setSelectedComponent(lastSelectedComp2);
+			if (mainTabPane.indexOfComponent(lastSelectedComp2) >= 0) {
+				mainTabPane.setSelectedComponent(lastSelectedComp2);
+			}
 			lastSelectedComp2 = null;
 		}
 	}

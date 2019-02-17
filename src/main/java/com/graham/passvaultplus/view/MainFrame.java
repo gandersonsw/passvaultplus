@@ -3,6 +3,8 @@ package com.graham.passvaultplus.view;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -126,7 +128,8 @@ public class MainFrame extends JFrame {
 	}
 
 	private JPanel initToolBar(final PvpContext context) {
-		JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		OverflowLayout ofLayout = new OverflowLayout();
+		JPanel toolBar = new JPanel(ofLayout);
 
 		JButton jbQuit = createImageButton(new QuitAction(context), KeyEvent.VK_Q);
 		jbQuit.setToolTipText("[Q]uit");
@@ -180,11 +183,17 @@ public class MainFrame extends JFrame {
 		jbSelectAll.setToolTipText("Select [A]ll");
 		toolBar.add(jbSelectAll);
 
-		toolBar.add(Box.createHorizontalStrut(30));
+		//	toolBar.add(Box.createHorizontalStrut(30));
 
+		// Since this is the last regular item (not the overflow button), it will be aligned to the right by OverflowLayout
 		JButton jbHelp = createImageButton(new HelpAction(context), KeyEvent.VK_H);
 		jbHelp.setToolTipText("[H]elp");
 		toolBar.add(jbHelp);
+
+		// Since this the the last item, OverflowLayout assumes it is the overflow action, so it will be hidden unless everything before does not fit in layout
+		JButton jbOverflow = createImageButton(new OverflowMenuAction(ofLayout), 0);
+		jbOverflow.setToolTipText("overflow tool tip");
+		toolBar.add(jbOverflow);
 
 		return toolBar;
 	}

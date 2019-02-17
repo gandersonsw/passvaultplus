@@ -12,7 +12,7 @@ public class LTManager {
 		/**
 		 * This is non-zero if some user input UI is showing now. So that means don't make the cancel dialog visible - because we are waiting for user input.
 		 */
-		private static volatile int waitingUserInputId = 0;
+		private static volatile int waitingUserInputCount = 0;
 
 		static public boolean isLTThread() {
 			return Thread.currentThread().getName().equals(LTThread.THREAD_NAME);
@@ -142,36 +142,28 @@ public class LTManager {
 		}
 
 		static public Window waitingUserInputStart() {
-				return waitingUserInputStart(1);
-		}
-
-		static public void waitingUserInputEnd() {
-				waitingUserInputEnd(1);
-		}
-
-
-		static public Window waitingUserInputStart(int id) {
 				Window cancelW = null;
-				if (waitingUserInputId == 0) {
-						waitingUserInputId = id;
+				if (waitingUserInputCount == 0) {
+						//waitingUserInputId = id;
 						for (Window w : Frame.getWindows()) {
 								if (w instanceof LongTaskUI) {
 										if (cancelW != null) {
 												PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: more than one LongTaskUI. This in not handled correctly");
 										}
 										cancelW = w;
-										//System.out.println("waitingUserInputStart: " + ((LongTaskUI) w).getTitle());
 								}
 						}
-				} else if (id >= waitingUserInputId) {
-						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: " + id + " >= " + waitingUserInputId + " :: This should not happen. It means that a higher priority UI is nested in a lower priority one., or forgot to call waitingUserInputEnd", new Exception());
 				}
+				waitingUserInputCount++;
 				return cancelW;
 		}
 
-		static public void waitingUserInputEnd(int id) {
-				if (id == waitingUserInputId) {
-						waitingUserInputId = 0;
+		static public void waitingUserInputEnd() {
+				if (waitingUserInputCount == 0) {
+						PvpContextUI.getActiveUI().notifyWarning("LTManager.waitingUserInputStart :: waitingUserInputCount is already 0. This should not happen. waitingUserInputEnd was called too many times?", new Exception());
+				}
+				waitingUserInputCount--;
+				if (waitingUserInputCount == 0) {
 						if (tlr.get() != null) { // TODO should this be called on all LTRunners?
 								tlr.get().interruptForUserInputEnd();
 						}
@@ -179,7 +171,7 @@ public class LTManager {
 		}
 
 		static public boolean isWaitingUserInput() {
-				return waitingUserInputId != 0;
+				return waitingUserInputCount != 0;
 		}
 
 }

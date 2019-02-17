@@ -1,19 +1,11 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.recordedit;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
@@ -81,7 +73,7 @@ public class RecordEditBuilder {
         editorConstraints.fill = GridBagConstraints.HORIZONTAL;
         editorConstraints.weightx = 1.0;
 
-		JPanel p = new JPanel(new GridBagLayout());
+		JPanel p = new ScrollableRecordEdit(new GridBagLayout());
 
 		for (int i = 0; i < fieldNamesToDisplay.size(); i++) {
 			RecordEditFieldBuilder fieldBuilder = new RecordEditFieldBuilder(fieldNamesToDisplay.get(i), this);
@@ -101,6 +93,7 @@ public class RecordEditBuilder {
 		}
 
 		JScrollPane scroll = new JScrollPane(p);
+		scroll.getViewport().setBackground(p.getBackground());
 		editContext.centerPaneWithFields = scroll;
 		return scroll;
 	}

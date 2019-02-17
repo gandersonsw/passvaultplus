@@ -67,8 +67,12 @@ public class BCTableModelHomog2 implements BCTableModel {
 	public int getRowCount() {
 		return getCacheData().size();
 	}
-	
+
 	public Object getValueAt(int rowIndex, int columnIndex) {
+		return getValueAt(rowIndex, columnIndex, false);
+	}
+
+	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
 		final FieldAndRecord fr = (FieldAndRecord)getCacheData().get(rowIndex);
 		
 		if (columnIndex == 0) {
@@ -77,7 +81,7 @@ public class BCTableModelHomog2 implements BCTableModel {
 			if (fr.record == null) {
 				return "";
 			}
-			if (fr.field.isClassificationSecret()) {
+			if (!returnSecretRealValue && fr.field.isClassificationSecret()) {
 				return "******";
 			}
 			return fr.record.getCustomField(fr.field.getName());

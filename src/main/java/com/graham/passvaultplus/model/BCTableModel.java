@@ -8,7 +8,9 @@ public interface BCTableModel {
 	int getColumnCount();
 	
 	int getRowCount();
-	
+
+	Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue);
+
 	Object getValueAt(int rowIndex, int columnIndex);
 	
 	PvpRecord getRecordAtRow(final int rowIndex);

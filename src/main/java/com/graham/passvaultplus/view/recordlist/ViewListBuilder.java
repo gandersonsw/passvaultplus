@@ -2,16 +2,12 @@
 package com.graham.passvaultplus.view.recordlist;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import com.graham.framework.CreateSortedTree;
 import com.graham.passvaultplus.PvpContext;
@@ -126,6 +122,7 @@ public class ViewListBuilder implements OtherTabBuilder {
 		RecordFilter filter = new RecordFilter(context);
 		ListTableModel model = new ListTableModel(filter);
 		JTable table = new JTable(model);
+		table.getActionMap().put("copy", new RecordListCopyAction(table));
 		table.addMouseListener(new RecordListTableMouseAdpater(erAction));
 		context.uiMain.getViewListContext().setListTable(table, model);
 		JScrollPane scroll = new JScrollPane(table);

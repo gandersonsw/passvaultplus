@@ -22,6 +22,10 @@ public class ListTableModel extends AbstractTableModel {
 	public int getRowCount() {
 		return filter.getCurrentModel().getRowCount();
 	}
+
+	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
+		return filter.getCurrentModel().getValueAt(rowIndex, columnIndex, returnSecretRealValue);
+	}
 	
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		return filter.getCurrentModel().getValueAt(rowIndex, columnIndex);
