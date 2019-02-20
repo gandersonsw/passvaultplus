@@ -99,6 +99,15 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		data = null;
 		ui = mainContext.ui;
 	}
+	
+	/**
+	 * For testing only
+	 */
+	public PvpContext(PvpContextPrefs prefsParam, PvpContextData dataParam, PvpContextUI uiParam) {
+		prefs = prefsParam;
+		data = dataParam;
+		ui = uiParam;
+	}
 
 	public void uncaughtException(Thread t, Throwable e) {
 		if (e instanceof Exception) {

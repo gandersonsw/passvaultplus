@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
@@ -33,7 +34,7 @@ public class PvpDataMergerTest {
 
 	@Before
 	public void setUpStuff() {
-		context = mock(PvpContext.class);
+		context = new PvpContext(null, null, mock(PvpContextUI.class));
 
 		type1 = new PvpType();
 		type1.setName("Account");
@@ -93,9 +94,15 @@ public class PvpDataMergerTest {
 		int maxId = 12;
 		boolean addRec1 = true;
 		boolean addRec2 = true;
+		boolean addRec3 = false; // this is of type2
 		boolean addType2 = false;
 		void doAddType2() {
 			addType2 = true;
+			//maxId =13;
+		}
+		void doAddRec3() {
+			addType2 = true;
+			addRec3 = true;
 			maxId =13;
 		}
 	}
@@ -115,8 +122,9 @@ public class PvpDataMergerTest {
 			if (p.di1.addRec2) { di1rec2 = r2; records1.add(di1rec2); }
 			if (p.di1.addType2) {
 				types1.add(type2);
-				records1.add(r3);
-				di1rec3 = r3;
+				if (p.di1.addRec3) { di1rec3 = r3; records1.add(di1rec3); }
+				//records1.add(r3);
+				//di1rec3 = r3;
 			}
 			di1 = new PvpDataInterface(context, types1, records1, p.di1.maxId);
 		}
@@ -137,11 +145,13 @@ public class PvpDataMergerTest {
 			}
 			if (p.di2.addType2) {
 				types2.add(type2);
-				di2rec3 = new PvpRecord(type2);
-				r3.copyTo(di2rec3);
-				di2rec3.setId(r3.getId());
-				records2.add(di2rec3);
-				di1rec3 = r3;
+				if (p.di2.addRec3) {
+					di2rec3 = new PvpRecord(type2);
+					r3.copyTo(di2rec3);
+					di2rec3.setId(r3.getId());
+					records2.add(di2rec3);
+					//di1rec3 = r3;
+				}
 			}
 			di2 = new PvpDataInterface(context, types2, records2, p.di2.maxId);
 		}
@@ -543,16 +553,17 @@ public class PvpDataMergerTest {
 		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
 		//printContextInfo();
 
-		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
+		// TODO what about the case were they create a type in the older datafile? Should be rare, but not handled right now
+		assertEquals(PvpDataMerger.MergeResultState.NO_CHANGE, result);
 		assertEquals(2, di1.getTypes().size());
-		assertEquals(13, di1.getMaxId());
-		assertEquals(3, di1.getRecordCount());
-		{
-			PvpRecord r = di1.getRecord(13);
-			assertEquals("Sara", r.getCustomField("Name"));
-			assertEquals("4637 Park Ave", r.getCustomField("Street"));
-			assertEquals("New York", r.getCustomField("City"));
-		}
+		assertEquals(12, di1.getMaxId());
+		assertEquals(2, di1.getRecordCount());
+//		{
+//			PvpRecord r = di1.getRecord(13);
+//			assertEquals("Sara", r.getCustomField("Name"));
+//			assertEquals("4637 Park Ave", r.getCustomField("Street"));
+//			assertEquals("New York", r.getCustomField("City"));
+//		}
 	}
 	
 	/**
@@ -567,17 +578,17 @@ public class PvpDataMergerTest {
 		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
 		//printContextInfo();
 
-		// TODO should be TO_CHANGED
-		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result);
+		
+		assertEquals(PvpDataMerger.MergeResultState.TO_CHANGED, result);
 		assertEquals(2, di1.getTypes().size());
-		assertEquals(13, di1.getMaxId());
-		assertEquals(3, di1.getRecordCount());
-		{
-			PvpRecord r = di1.getRecord(13);
-			assertEquals("Sara", r.getCustomField("Name"));
-			assertEquals("4637 Park Ave", r.getCustomField("Street"));
-			assertEquals("New York", r.getCustomField("City"));
-		}
+		assertEquals(12, di1.getMaxId());
+		assertEquals(2, di1.getRecordCount());
+//		{
+//			PvpRecord r = di1.getRecord(13);
+//			assertEquals("Sara", r.getCustomField("Name"));
+//			assertEquals("4637 Park Ave", r.getCustomField("Street"));
+//			assertEquals("New York", r.getCustomField("City"));
+//		}
 	}
 
 }

@@ -6,13 +6,13 @@ import java.util.List;
 import com.graham.passvaultplus.PvpContext;
 
 /**
- * Merge 2 datasets. The "TO" dataset is considered the master.
- * NO_CHANGE    -> means no serilized of datasets needed
- * FROM_CHANGED -> means the FROM dataset should be overwitten with the new "TO" dataset
+ * Merge 2 datasets. The TO dataset is considered the master.
+ * NO_CHANGE    -> means no serialized of datasets needed
+ * FROM_CHANGED -> means the FROM dataset should be overwritten with the new TO dataset
  * TO_CHANGED   -> means the TO dataset should be written
- * BOTH_CHANGED -> means both datasets shold be serilized using the TO dataset.
+ * BOTH_CHANGED -> means both datasets should be serialized using the TO dataset.
  *
- * Both datasets should be identical, so the TO and FROM should be the same at the end (after serilization)
+ * Both datasets should be identical, so the TO and FROM should be the same at the end (after serialization)
  */
 public class PvpDataMerger {
 
@@ -62,6 +62,8 @@ public class PvpDataMerger {
 	 */
 	private void dirtyFrom(boolean b) {
 		if (b) {
+			System.out.println("at dirtyFrom");
+			new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.FROM_CHANGED.bits);
 		}
 	}
@@ -72,6 +74,8 @@ public class PvpDataMerger {
 	 */
 	private void dirtyTo(boolean b) {
 		if (b) {
+			System.out.println("at dirtyTo");
+			new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.TO_CHANGED.bits);
 		}
 	}
@@ -79,7 +83,7 @@ public class PvpDataMerger {
 	private void logRecInfo(String s) {
 		if (fromRec.getId() != curLogInofId) {
 			curLogInofId = fromRec.getId();
-			context.ui.notifyInfo("--------- Record Index:" + i + " Id:" + fromRec.getId() + ":" + fromRec + " ----------");
+			context.ui.notifyInfo("> Record Index:" + i + " Id:" + fromRec.getId() + ":" + fromRec + " ----------");
 		}
 		context.ui.notifyInfo(s);
 	}
@@ -111,7 +115,7 @@ public class PvpDataMerger {
 	 */
 	public MergeResultState mergeData(PvpDataInterface dataToMergeTo, PvpDataInterface dataToMergeFrom) {
 
-		context.ui.notifyInfo(">>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
+		context.ui.notifyInfo(">>>>>>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
@@ -119,32 +123,33 @@ public class PvpDataMerger {
 		// IDs of records in the main database that have a corresponding record in the mergeFrom database
 		boolean[] matchedRecords = new boolean[dataToMergeTo.getMaxId() + 1];
 		int typesMatched = 0;
-		// if (dataToMergeTo.getMaxId() != dataToMergeFrom.getMaxId()) {
-		// wasChanged = true;
-		// if (dataTocMergeFrom.maxID > maxID) {
-		// maxID = dataTocMergeFrom.maxID;
-		// }
-		// }
+		int toTypeCount = dataToMergeTo.getTypes().size();
 
 		for (PvpType fromType : dataToMergeFrom.getTypes()) {
 			PvpType toType = dataToMergeTo.getType(fromType.getName());
-			// TODO handle case where TO has type but FROM doesnt
 			if (toType == null) {
-				context.ui.notifyInfo("adding type:" + fromType.getName());
+				context.ui.notifyInfo("> adding type (FROM):" + fromType.getName());
 				dataToMergeTo.getTypes().add(fromType);
-				dirtyTo(true); // TODO verify this
+				dirtyTo(true);
 			} else {
 				// TODO compare and modify
+				// If the user has modified a type in the older dataset, it will be overwritten by the type from the newer dataset. 
+				// Since we don't track the modification date for types, there is not a way to hadnle this for now.
 				typesMatched++;
 			}
 		}
+		// Since we do not track modified date for types, assume this was a type delete
+		//		if (typesMatched < toTypeCount) {
+		//			context.ui.notifyInfo("> typesMatched < dataToMergeTo.getTypes().size()");
+		//			dirtyFrom(true);
+		//		}
 
 		int indexNotMatching = 0;
 
 		int recordsMatched = 0;
 		for (i = dataToMergeFrom.getRecordCount() - 1; i >= 0; i--) {
 			fromRec = dataToMergeFrom.getRecordAtIndex(i);
-			//context.ui.notifyInfo("--------- Trying to match Record:" + fromRec + " ----------");
+			//context.ui.notifyInfo("> Trying to match Record:" + fromRec + " ----------");
 			PvpRecord toRec = null;
 			if (i < dataToMergeTo.getRecordCount()) {
 				final PvpRecord recAtIndex = dataToMergeTo.getRecordAtIndex(i);
@@ -198,12 +203,12 @@ public class PvpDataMerger {
 		for (int i2 = dataToMergeTo.getRecordCount() - 1; i2 >= 0; i2--) {
 			PvpRecord r = dataToMergeTo.getRecordAtIndex(i2);
 			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-				context.ui.notifyInfo("deleting a record Id:" + r.getId() + ":" + r);
+				context.ui.notifyInfo("> deleting a record Id:" + r.getId() + ":" + r);
 				dataToMergeTo.getRecords().remove(i2);
 				r.setId(0);
 				dirtyTo(true);
 			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
-				context.ui.notifyInfo("adding record to FROM Id:" + r.getId() + ":" + r);
+				context.ui.notifyInfo("> adding record to FROM Id:" + r.getId() + ":" + r);
 				dirtyFrom(true);
 			}
 		}
@@ -216,7 +221,7 @@ public class PvpDataMerger {
 		context.ui.notifyInfo("> records not matched by index:" + indexNotMatching);
 		context.ui.notifyInfo("> sameModDateCount:" + sameModDateCount);
 		context.ui.notifyInfo("> resultState:" + resultState);
-		context.ui.notifyInfo(">>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
+		context.ui.notifyInfo(">>>>>>>>>> end merge. Matched types:" + typesMatched + "  Matched Records:" + recordsMatched);
 		return resultState;
 	}
 

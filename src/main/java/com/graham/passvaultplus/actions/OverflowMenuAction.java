@@ -13,7 +13,7 @@ public class OverflowMenuAction extends AbstractAction {
 		final private OverflowLayout ofLayout;
 
 		public OverflowMenuAction(OverflowLayout ofLayoutParam) {
-				super(null, PvpContext.getIcon("selall")); // TODO
+				super(null, PvpContext.getIcon("down-arrow")); // TODO
 				ofLayout = ofLayoutParam;
 		}
 
