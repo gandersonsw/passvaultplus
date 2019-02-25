@@ -2,7 +2,6 @@
 package com.graham.passvaultplus.view.recordlist;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,17 +37,12 @@ public class ViewListBuilder implements OtherTabBuilder {
 	public void dispose() {
 	}
 
-	//static public Component buildViewList(final PvpContext context) {
-	//	JPanel viewList = new JPanel(new BorderLayout());
-	//	viewList.add(buildTopPanel(context), BorderLayout.NORTH);
-	//	viewList.add(buildCenterPanel(context), BorderLayout.CENTER);
-	//	return viewList;
-//	}
-
 	static private Component buildTopPanel(final PvpContext context) {
 		final ListFilterChangedAction filterChangeAction = new ListFilterChangedAction(context);
 
-		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		FlowLayout2 fl2 = new FlowLayout2(FlowLayout.LEADING, context);
+		final JPanel panel = new JPanel(fl2);
+		//final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
 		panel.add(new JLabel("Filter:"));
 		panel.add(buildFilterTextField(context, filterChangeAction));

@@ -90,7 +90,5 @@ public class PvpType {
 		}
 		return t1.getName().equals(t2);
 	}
-	
-	
-	
+
 }
