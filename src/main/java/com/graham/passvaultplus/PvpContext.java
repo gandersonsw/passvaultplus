@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -239,6 +240,18 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 			}
 		}
 		return false;
+	}
+
+		// TODO delete this after tested better
+	public java.util.List<java.util.List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec>> mergeDelRecs = new ArrayList<>();
+	public void registerMergeDeletes(java.util.List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> dr) {
+			if (dr == null || dr.size() == 0) {
+					return;
+			}
+			mergeDelRecs.add(dr);
+			if (uiMain != null) {
+					uiMain.createDelRecTab(dr);
+			}
 	}
 
 }

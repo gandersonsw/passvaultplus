@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,19 +18,6 @@ public class EulaDialog {
 
 	private JDialog d;
 	private JCheckBox agreeCheckBox;
-/*
-	public static void showAndWait() {
-			try {
-					SwingUtilities.invokeAndWait(() -> new EulaDialog().showEula());
-			} catch (InterruptedException e) {
-					// TODO
-					e.printStackTrace();
-			} catch (InvocationTargetException e) {
-					// TODO
-					e.printStackTrace();
-			}
-	}
-	*/
 
 	public void showEula() {
 			com.graham.passvaultplus.PvpContextUI.checkEvtThread("8000");

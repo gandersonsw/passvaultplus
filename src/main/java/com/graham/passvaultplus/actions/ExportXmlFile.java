@@ -4,18 +4,14 @@ package com.graham.passvaultplus.actions;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.model.core.PvpInStreamer;
 
-public class ExportXmlFile extends AbstractAction {
+public class ExportXmlFile extends AbstractAction implements Runnable {
 	private static final long serialVersionUID = 1L;
 	final private PvpContext context;
 	final private PvpBackingStore backingStore;
@@ -28,42 +24,34 @@ public class ExportXmlFile extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		new Thread(this).start();
+	}
+
+	@Override
+	public void run() {
 		final PvpInStreamer fileReader = new PvpInStreamer(backingStore, context);
-		String rawXML = "";
 		try {
-			rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
-			System.out.println("ExportXmlFile.actionPerformed - xml size" + rawXML.length()); // don't use Diagnostics because this is error handle code
+			String rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
+			System.out.println("ExportXmlFile.actionPerformed - xml size:" + rawXML.length()); // don't use Diagnostics because this is error handle code
+
+			SwingUtilities.invokeAndWait(() -> {
+				JTextArea te = new JTextArea();
+				te.setText(rawXML);
+				JScrollPane sp = new JScrollPane(te);
+				JFrame f = new JFrame("XML");
+				f.getContentPane().setLayout(new BorderLayout());
+				f.getContentPane().add(sp, BorderLayout.CENTER);
+				f.pack();
+				BCUtil.setFrameSizeAndCenter(f, 700, 400);
+
+				f.setVisible(true);
+			});
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(null, "Could not get XML: " + ex.getMessage());
+			context.ui.showErrorDialog("Error", "Could not get XML: " + ex.getMessage());
 			return;
 		} finally {
 			fileReader.close();
 		}
 
-		JTextArea te = new JTextArea();
-		te.setText(rawXML);
-		JScrollPane sp = new JScrollPane(te);
-		JFrame f = new JFrame("XML");
-		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(sp, BorderLayout.CENTER);
-		f.pack();
-		BCUtil.setFrameSizeAndCenter(f, 700, 400);
-		
-		f.setVisible(true);
-
-		/*
-		 * DONT SAVE THE FILE - IT IS SECURE DATA !!!!!!
-		final JFileChooser fc = new JFileChooser();
-		int retVal = fc.showSaveDialog(null);
-		if (retVal == JFileChooser.CANCEL_OPTION) {
-			return;
-		}
-		final File f = fc.getSelectedFile();
-		try {
-			BCUtil.dumpStringToFile(rawXML, f);
-		} catch (FileNotFoundException fnfe) {
-			JOptionPane.showMessageDialog(null, "Could not save XML: " + fnfe.getMessage());
-		}
-		*/
 	}
 }

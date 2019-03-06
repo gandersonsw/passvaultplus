@@ -54,9 +54,9 @@ public class LTRunnerSync extends LTRunner {
 						LTManager.registerLTThread(this);
 						ltask.runLongTask();
 				} catch (LTCanceledException ltce) {
-						System.out.println("LTRunnerSync.run.C - LTCanceledException");
+						//System.out.println("LTRunnerSync.run.C - LTCanceledException");
 				} catch (Exception e) {
-						System.out.println("LTRunnerSync.run.D - Exception");
+						//System.out.println("LTRunnerSync.run.D - Exception");
 						ltCb.handleException(this, e);
 				} finally {
 						killStuff();
@@ -68,7 +68,7 @@ public class LTRunnerSync extends LTRunner {
 		synchronized void killStuff() {
 				syncManager.setShouldShowCancelDialog(false);
 				if (parentThread != null) {
-						System.out.println("LTRunnerSync.killStuff.B - interruptMainThread");
+						//System.out.println("LTRunnerSync.killStuff.B - interruptMainThread");
 						parentThread.interrupt();
 				}
 				if (ltUi != null) {
@@ -169,7 +169,7 @@ class LTSyncManager implements Runnable {
 						try {
 								Thread.sleep(LongTaskUI.SHOW_DELAY);
 						} catch (InterruptedException e1) {
-								System.out.println("- - - - - LTSyncManager.run.D - InterruptedException");
+								//System.out.println("- - - - - LTSyncManager.run.D - InterruptedException");
 						}
 						if (LTManager.isWaitingUserInput()) {
 								waitUiDone();
@@ -184,9 +184,9 @@ class LTSyncManager implements Runnable {
 				while (LTManager.isWaitingUserInput()) {
 						try {
 								Thread.sleep(10000);
-								System.out.println("LTRunnerSync.waitUiDone.A");
+								//System.out.println("LTRunnerSync.waitUiDone.A");
 						} catch (InterruptedException e1) {
-								System.out.println("LTRunnerSync.waitUiDone.B - InterruptedException");
+								//System.out.println("LTRunnerSync.waitUiDone.B - InterruptedException");
 						}
 				}
 		}

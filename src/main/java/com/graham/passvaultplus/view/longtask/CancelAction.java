@@ -18,7 +18,7 @@ public class CancelAction extends AbstractAction {
 				if (runner.wasCanceled) {
 						runner.killStuff();
 				} else {
-						System.out.println("CancelAction.actionPerformed.B should not get here because button should be disabled");
+						//System.out.println("CancelAction.actionPerformed.B should not get here because button should be disabled");
 				}
 		}
 }

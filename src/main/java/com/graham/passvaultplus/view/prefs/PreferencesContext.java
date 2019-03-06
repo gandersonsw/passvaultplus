@@ -48,7 +48,7 @@ public class PreferencesContext {
 	private String dataFileString;
 	private File dataFile;
 
-	PreferencesContext(final PreferencesConnection connParam) {
+	public PreferencesContext(final PreferencesConnection connParam) {
 		conn = connParam;
 		dataFileString = connParam.getContextPrefs().getDataFilePath();
 		oCompressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);

@@ -13,10 +13,14 @@ import com.graham.passvaultplus.view.JceDialog;
 import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.prefs.PreferencesConnectionTab;
+import com.graham.passvaultplus.view.prefs.PreferencesContext;
 import com.graham.passvaultplus.view.prefs.RemoteBSPrefHandler;
 import com.graham.passvaultplus.view.prefs.ResetPrefsAction;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
+
+import javax.swing.*;
 
 public class CommandExecuter {
 	
@@ -39,7 +43,7 @@ public class CommandExecuter {
 			return df.format(new Date());
 		}
 		if (command.equals("TestLongTask") ) {
-			return "18";
+			return "3";
 		}
 		if (command.equals("TestJce") ) {
 			return "256";
@@ -86,12 +90,12 @@ public class CommandExecuter {
 				searchBackups(args);
 			} else if (command.equals("OpenBackupRecord")) {
 				String[] sa = args.split(",");
-				openBackupRecord(sa[0], Integer.parseInt(sa[1]));
+				new Thread(() -> openBackupRecord(sa[0], Integer.parseInt(sa[1]))).start();
 			} else {
 				context.ui.notifyInfo("Unkown Command:" + command);
 			}
 		} catch (Exception e) {
-			context.ui.notifyInfo("Error:" + e);
+			context.ui.notifyWarning("Error executing task", e);
 		}
 	}
 
@@ -109,7 +113,7 @@ public class CommandExecuter {
 	}
 
 	private void testRemoteAsk(boolean passwordWorks, boolean isNewDB) {
-		RemoteBSPrefHandler handler = new RemoteBSPrefHandler();
+		RemoteBSPrefHandler handler = new RemoteBSPrefHandler(new PreferencesContext(new PreferencesConnectionTab(context)));
 		handler.askAboutExistingFile(context.ui.getFrame(), passwordWorks, isNewDB);
 	}
 
@@ -201,9 +205,11 @@ public class CommandExecuter {
 					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
 					PvpRecord r = newDataInterface.getRecord(id);
 					r.clearId();
-					final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
-					context.uiMain.addRecordEditor(fileName + ":" + id, editor);
-					context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
+					SwingUtilities.invokeLater(() -> {
+							final RecordEditContext editor = RecordEditBuilder.buildEditor(context, r, true);
+							context.uiMain.addRecordEditor(fileName + ":" + id, editor);
+							context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
+					});
 			} catch (Exception e) {
 					context.ui.notifyWarning("Failed to Open Record: " + f.getName(), e);
 			} finally {

@@ -31,11 +31,12 @@ public class PinTimerTask extends TimerTask {
 
 	final private PvpContext context;
 	final private String pinAtCreate;
+	private Long timeoutTime;
 	static private Timer pinTimer;
 	static private PtAel evtListener;
 
 	public static void update(final PvpContext c) {
-		System.out.println(">>>>>> PinTimerTask.update.A :: " + c.prefs.getUsePin() + " :: " + c.prefs.getPinTimeout());
+		//System.out.println(">>>>>> PinTimerTask.update.A :: " + c.prefs.getUsePin() + " :: " + c.prefs.getPinTimeout());
 		if (pinTimer != null) {
 			pinTimer.cancel();
 		}
@@ -45,24 +46,34 @@ public class PinTimerTask extends TimerTask {
 				Toolkit.getDefaultToolkit().addAWTEventListener(evtListener, AWTEvent.KEY_EVENT_MASK + AWTEvent.MOUSE_EVENT_MASK);
 			}
 			pinTimer = new Timer();
-			pinTimer.schedule(new PinTimerTask(c), c.prefs.getPinTimeout() * 60 * 1000);
+			pinTimer.schedule(new PinTimerTask(c), 2000, 2000);
 		}
 	}
 
 	private PinTimerTask(final PvpContext contextParam) {
 		context = contextParam;
 		pinAtCreate = context.prefs.getPin();
+		setTimeoutTime(0);
+	}
+
+	private void setTimeoutTime(long evtOffset) {
+		timeoutTime = System.currentTimeMillis() + (context.prefs.getPinTimeout() * 60 * 1000) - evtOffset;
 	}
 
 	@Override
 	public void run() {
-		long timeLeft = context.prefs.getPinTimeout() * 60 * 1000 - (System.currentTimeMillis() - evtListener.lastEventTime);
-		if (timeLeft > 5000) {
-			pinTimer = new Timer();
-			pinTimer.schedule(new PinTimerTask(context), timeLeft);
-		} else {
-			SwingUtilities.invokeLater(() -> doUI());
+		if (System.currentTimeMillis() < timeoutTime) {
+			return; // not timeout out yet
 		}
+		long timeLeftFromInput = context.prefs.getPinTimeout() * 60 * 1000 - (System.currentTimeMillis() - evtListener.lastEventTime);
+		if (timeLeftFromInput > 2000){
+				setTimeoutTime(System.currentTimeMillis() - evtListener.lastEventTime);
+				return;
+		}
+
+		pinTimer.cancel();
+		pinTimer = null;
+		SwingUtilities.invokeLater(() -> doUI());
 	}
 
 	private void doUI() {

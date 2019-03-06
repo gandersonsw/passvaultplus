@@ -16,7 +16,7 @@ import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunner;
 
 public class DiagnosticsManager implements OtherTabBuilder, Runnable {
-	private static final boolean LOG_TO_SYSOUT = true;
+	private static final boolean LOG_TO_SYSOUT = false;
 	private static DiagnosticsManager activeManager = new DiagnosticsManager();
 
 	private JTextArea ta;

@@ -1,6 +1,7 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.graham.passvaultplus.PvpContext;
@@ -15,6 +16,17 @@ import com.graham.passvaultplus.PvpContext;
  * Both datasets should be identical, so the TO and FROM should be the same at the end (after serialization)
  */
 public class PvpDataMerger {
+
+	public static class DelRec {
+		final public int id;
+		final public String txt;
+		final public boolean inFromDb;
+		public DelRec(PvpRecord r, boolean inFromDbParam) {
+			id = r.getId();
+			txt = r.getFullText(false);
+			inFromDb = inFromDbParam;
+		}
+	}
 
 	public enum MergeResultState {
 		NO_CHANGE(0),    // the 2 datasets are syncronized already
@@ -44,6 +56,7 @@ public class PvpDataMerger {
 	}
 
 	private static final Date ZERO_DATE = new Date(0);
+	private static final boolean USE_DELETE_UI = true; // this is temporary until the delete is working perfectly
 
 	private final PvpContext context;
 	private MergeResultState resultState = MergeResultState.NO_CHANGE;
@@ -62,7 +75,6 @@ public class PvpDataMerger {
 	 */
 	private void dirtyFrom(boolean b) {
 		if (b) {
-			System.out.println("at dirtyFrom");
 			new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.FROM_CHANGED.bits);
 		}
@@ -74,7 +86,6 @@ public class PvpDataMerger {
 	 */
 	private void dirtyTo(boolean b) {
 		if (b) {
-			System.out.println("at dirtyTo");
 			new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.TO_CHANGED.bits);
 		}
@@ -119,6 +130,7 @@ public class PvpDataMerger {
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
+		List<DelRec> delRecs = new ArrayList<>();
 
 		// IDs of records in the main database that have a corresponding record in the mergeFrom database
 		boolean[] matchedRecords = new boolean[dataToMergeTo.getMaxId() + 1];
@@ -149,6 +161,9 @@ public class PvpDataMerger {
 		int recordsMatched = 0;
 		for (i = dataToMergeFrom.getRecordCount() - 1; i >= 0; i--) {
 			fromRec = dataToMergeFrom.getRecordAtIndex(i);
+			//if ( i < 3) {
+			//		delRecs.add(new DelRec(fromRec, false));
+			//}
 			//context.ui.notifyInfo("> Trying to match Record:" + fromRec + " ----------");
 			PvpRecord toRec = null;
 			if (i < dataToMergeTo.getRecordCount()) {
@@ -186,13 +201,16 @@ public class PvpDataMerger {
 				}
 				makeIdentical(toRec);
 			} else {
-				if (fromRec.getId() > maxIdMatching) {
+				if (fromRec.getId() > maxIdMatching || USE_DELETE_UI) {
 					// this is a new record, because its ID is bigger than we know about
 					int nextID = dataToMergeTo.getNextMaxId();
 					logRecInfo("adding a record Id:" + nextID);
 					fromRec.setId(nextID);
 					dataToMergeTo.getRecords().add(fromRec);
 					dirtyTo(true);
+					if (USE_DELETE_UI) {
+						delRecs.add(new DelRec(fromRec, true));
+					}
 				} else {
 					// this record was deleted, because we didn't match on one we know about
 					logRecInfo("NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching);
@@ -203,10 +221,14 @@ public class PvpDataMerger {
 		for (int i2 = dataToMergeTo.getRecordCount() - 1; i2 >= 0; i2--) {
 			PvpRecord r = dataToMergeTo.getRecordAtIndex(i2);
 			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-				context.ui.notifyInfo("> deleting a record Id:" + r.getId() + ":" + r);
-				dataToMergeTo.getRecords().remove(i2);
-				r.setId(0);
-				dirtyTo(true);
+					if (USE_DELETE_UI) {
+							delRecs.add(new DelRec(r, false));
+					} else {
+							context.ui.notifyInfo("> deleting a record Id:" + r.getId() + ":" + r);
+							dataToMergeTo.getRecords().remove(i2);
+							r.setId(0);
+							dirtyTo(true);
+					}
 			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
 				context.ui.notifyInfo("> adding record to FROM Id:" + r.getId() + ":" + r);
 				dirtyFrom(true);
@@ -216,6 +238,10 @@ public class PvpDataMerger {
 		if (thisStartingRecordCount != dataToMergeFrom.getRecordCount()) {
 			context.ui.notifyInfo("> different record counts:" + thisStartingRecordCount + ":" + dataToMergeFrom.getRecordCount());
 			dirtyFrom(true); // TODO not sure about this
+		}
+
+		if (USE_DELETE_UI) {
+			context.registerMergeDeletes(delRecs);
 		}
 
 		context.ui.notifyInfo("> records not matched by index:" + indexNotMatching);

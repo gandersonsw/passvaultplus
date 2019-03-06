@@ -59,7 +59,7 @@ public class DeleteRecord extends AbstractAction {
 		}
 
 		if (message != null) {
-			boolean b = context.ui.showConfirmDialog("Delete", message); //  JOptionPane.showConfirmDialog(context.ui.getMainFrame(), message, "Delete", JOptionPane.OK_CANCEL_OPTION);
+			boolean b = context.ui.showConfirmDialog("Delete", message);
 			if (!b) {
 				return;
 			}

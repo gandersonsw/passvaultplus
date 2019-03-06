@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class PvpContextUIMainFrame implements ChangeListener {
 		undoManager = new MyUndoManager(c);
 		context = c;
 		mainTabPane.addChangeListener(this);
+		checkmergeDelRecs();
 	}
 
 	@Override
@@ -162,6 +164,49 @@ public class PvpContextUIMainFrame implements ChangeListener {
 			}
 			lastSelectedComp2 = null;
 		}
+	}
+
+	// TODO delete this after tested better
+	private void checkmergeDelRecs() {
+			for (List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a : context.mergeDelRecs) {
+					createDelRecTab(a);
+			}
+
+			//List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a2 = new ArrayList<>();
+			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(103), false));
+			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(104), false));
+			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(105), false));
+			//createDelRecTab(a2);
+	}
+
+		// TODO delete this after tested better
+	public void createDelRecTab(List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a) {
+			JPanel p = new JPanel(new GridLayout(a.size(), 1));
+			for (com.graham.passvaultplus.model.core.PvpDataMerger.DelRec b : a) {
+					JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+					p2.add(new JButton(new DelAction(b.id)));
+					p2.add(new JLabel(b.inFromDb ? "X" : "_"));
+					p2.add(new JLabel(String.valueOf(b.id)));
+					p2.add(new JLabel(b.txt));
+					p.add(p2);
+			}
+			JScrollPane sp = new JScrollPane(p);
+			mainTabPane.add("Del Recs", sp);
+	}
+
+	class DelAction extends AbstractAction {
+			int id;
+			DelAction(int idPAram) {
+					super("Delete");
+					id = idPAram;
+			}
+			@Override
+			public void actionPerformed(ActionEvent e) {
+					PvpRecord r = context.data.getDataInterface().getRecord(id);
+					context.data.getDataInterface().deleteRecord(r);
+					JButton b = (JButton)e.getSource();
+					b.setEnabled(false);
+			}
 	}
 
 }
