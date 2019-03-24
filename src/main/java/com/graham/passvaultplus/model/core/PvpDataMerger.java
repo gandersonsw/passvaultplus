@@ -128,6 +128,7 @@ public class PvpDataMerger {
 
 		context.ui.notifyInfo(">>>>>>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
 
+		int matchRating;
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
 		int maxIdMatching = 0; // the largest ID that existed in both databases that match
 		List<DelRec> delRecs = new ArrayList<>();
@@ -161,6 +162,7 @@ public class PvpDataMerger {
 		int recordsMatched = 0;
 		for (i = dataToMergeFrom.getRecordCount() - 1; i >= 0; i--) {
 			fromRec = dataToMergeFrom.getRecordAtIndex(i);
+			matchRating = -1;
 			//if ( i < 3) {
 			//		delRecs.add(new DelRec(fromRec, false));
 			//}
@@ -168,7 +170,8 @@ public class PvpDataMerger {
 			PvpRecord toRec = null;
 			if (i < dataToMergeTo.getRecordCount()) {
 				final PvpRecord recAtIndex = dataToMergeTo.getRecordAtIndex(i);
-				if (fromRec.getId() == recAtIndex.getId()) { // && isMatchingRecord(recWithId, fromRec) ???
+				matchRating = fromRec.matchRating(recAtIndex);
+				if (fromRec.getId() == recAtIndex.getId() && matchRating > 30) {
 					toRec = recAtIndex;
 				} else {
 					indexNotMatching++;
@@ -176,8 +179,9 @@ public class PvpDataMerger {
 			}
 			if (toRec == null) {
 				final PvpRecord recWithId = dataToMergeTo.getRecord(fromRec.getId());
-				logRecInfo("> Matching By Id. matchRating:" + fromRec.matchRating(recWithId));
-				if (fromRec.matchRating(recWithId) > 30) {
+				matchRating = fromRec.matchRating(recWithId);
+				logRecInfo("> Matching By Id. matchRating:" + matchRating);
+				if (matchRating > 30) {
 					toRec = recWithId;
 				}
 			}
