@@ -193,7 +193,7 @@ public class PvpDataMergerTest {
 	public void testMerge_same() {
 		setUpBothDI(new SetupParams());
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		defaultValidate(result);
 	}
@@ -206,7 +206,7 @@ public class PvpDataMergerTest {
 		setUpBothDI(new SetupParams());
 		di2rec1.setCreationDate(new Date(new Date().getTime() + 60000));
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		defaultValidate(result);
 	}
@@ -221,7 +221,7 @@ public class PvpDataMergerTest {
 		di1rec1.setModificationDate(new Date(new Date().getTime() + 60000));
 		di2rec1.setCustomField("Account Name", "Email 2");
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
@@ -251,7 +251,7 @@ public class PvpDataMergerTest {
 		di2rec1.setModificationDate(new Date(new Date().getTime() + 60000));
 		di2rec1.setCustomField("Account Name", "Email 2");
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.TO_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
@@ -279,7 +279,7 @@ public class PvpDataMergerTest {
 		setUpBothDI(new SetupParams());
 		di2rec1.setId(3);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		defaultValidate(result);
 	}
@@ -313,7 +313,7 @@ public class PvpDataMergerTest {
 		p.di1.maxId = 18;
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.NO_CHANGE, result);
 		assertEquals(1, di1.getTypes().size());
@@ -332,7 +332,7 @@ public class PvpDataMergerTest {
 		p.di2.maxId = 11;
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
@@ -362,7 +362,7 @@ public class PvpDataMergerTest {
 		p.di2.addRec2 = false;
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result); // this is true, because the di2 needs to updated with rec2
 		assertEquals(1, di1.getTypes().size());
@@ -379,7 +379,7 @@ public class PvpDataMergerTest {
 		p.di2.addRec2 = false;
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
 		assertEquals(1, di1.getTypes().size());
@@ -396,7 +396,7 @@ public class PvpDataMergerTest {
 		p.di2.addRec1 = false;
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		// TODO should not be BOTH_CHANGED
 		assertEquals(PvpDataMerger.MergeResultState.BOTH_CHANGED, result);
@@ -421,7 +421,7 @@ public class PvpDataMergerTest {
 		di1rec1.setModificationDate(new Date(new Date().getTime() + 1000)); // make the modification 1 second later
 		di1rec1.setCustomField("Password", "newsecret99"); // updated password
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result); // the "FROM"" dataset is updated already, just need to update the "TO" dataset
 		assertEquals(1, di1.getTypes().size());
@@ -445,7 +445,7 @@ public class PvpDataMergerTest {
 		di2rec1.setModificationDate(new Date(new Date().getTime() + 1000)); // make the modification 1 second later
 		di2rec1.setCustomField("Password", "newsecret99"); // updated password
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 
 		assertEquals(PvpDataMerger.MergeResultState.TO_CHANGED, result); // the "FROM"" dataset is updated already, just need to update the "TO" dataset
 		assertEquals(1, di1.getTypes().size());
@@ -471,7 +471,7 @@ public class PvpDataMergerTest {
 		di2rec2.setCustomField("Username", "joe-work 2");
 		di2rec2.setCustomField("Password", "password123_2");
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 
 		// TODO not sure this should be BOTH_CHANGED
@@ -500,7 +500,7 @@ public class PvpDataMergerTest {
 		di2rec2.setCustomField("Password", "password123_2");
 		di2rec2.setModificationDate(new Date(new Date().getTime() + 1000)); // make the modification 1 second later
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 
 		// TODO not sure this should be BOTH_CHANGED
@@ -528,7 +528,7 @@ public class PvpDataMergerTest {
 		di1rec2.setCustomField("Username", "joe-work 2");
 		di1rec2.setCustomField("Password", "password123_2");
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 
 		assertEquals(PvpDataMerger.MergeResultState.FROM_CHANGED, result);
@@ -552,7 +552,7 @@ public class PvpDataMergerTest {
 		p.di1.doAddType2();
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 
 		// TODO what about the case were they create a type in the older datafile? Should be rare, but not handled right now
@@ -577,7 +577,7 @@ public class PvpDataMergerTest {
 		p.di2.doAddType2();
 		setUpBothDI(p);
 
-		PvpDataMerger.MergeResultState result = new PvpDataMerger(context).mergeData(di1, di2);
+		PvpDataMerger.MergeResultState result = new PvpDataMerger(context, di1, di2).mergeData();
 		//printContextInfo();
 
 		

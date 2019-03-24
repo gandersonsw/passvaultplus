@@ -50,8 +50,8 @@ public class PvpDataInterface {
 	 * return true if the original data has been appended or updated, so it should be written out to the file
 	 */
 	PvpDataMerger.MergeResultState mergeData(PvpDataInterface dataToMergeFrom) {
-		PvpDataMerger m = new PvpDataMerger(context);
-		return m.mergeData(this, dataToMergeFrom);
+		PvpDataMerger m = new PvpDataMerger(context, this, dataToMergeFrom);
+		return m.mergeData();
 	}
 
 	/**
