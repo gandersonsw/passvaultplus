@@ -172,6 +172,9 @@ public class PvpDataMerger {
 				final PvpRecord recAtIndex = dataToMergeTo.getRecordAtIndex(i);
 				matchRating = fromRec.matchRating(recAtIndex);
 				if (fromRec.getId() == recAtIndex.getId() && matchRating > 30) {
+					if (matchRating < 100) {
+						logRecInfo("> Matching By Index. matchRating:" + matchRating);
+					}
 					toRec = recAtIndex;
 				} else {
 					indexNotMatching++;

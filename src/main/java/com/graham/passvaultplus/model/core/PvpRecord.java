@@ -255,9 +255,12 @@ public class PvpRecord {
 			if (v2 == null) {
 				v2 = "";
 			}
-			fieldCount++;
-			if (v1.equals(v2)) {
-				matchCount++;
+			// if both fields are "", pretend it doesn't exist. It doesn't count for or against the match rating
+			if (v1.length() > 0 || v2.length() > 0) {
+				fieldCount++;
+				if (v1.equals(v2)) {
+					matchCount++;
+				}
 			}
 		}
 
