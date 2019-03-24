@@ -5,8 +5,7 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 
-import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
@@ -82,10 +81,10 @@ public class SavePrefsAction extends AbstractAction {
 			try {
 				createFiles();
 			} catch (Exception ex) {
-					conn.context.ui.notifyBadException(ex, true, false, PvpException.GeneralErrCode.CantMakeNewDataFile);
+				conn.context.ui.notifyBadException(ex, true, false, PvpException.GeneralErrCode.CantMakeNewDataFile);
 				return;
 			}
-			conn.doOpen(prefsContext);
+			SwingUtilities.invokeLater(() -> conn.doOpen(prefsContext));
 		}, "Creating Database");
 	}
 
@@ -114,7 +113,7 @@ public class SavePrefsAction extends AbstractAction {
 			if (!prefsContext.remoteBS.presave(false)) {
 				return;
 			}
-			conn.doOpen(prefsContext);
+			SwingUtilities.invokeLater(() -> conn.doOpen(prefsContext));
 		}, "Loading");
 	}
 

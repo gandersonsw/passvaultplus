@@ -56,7 +56,7 @@ public class PvpDataMerger {
 	}
 
 	private static final Date ZERO_DATE = new Date(0);
-	private static final boolean USE_DELETE_UI = true; // this is temporary until the delete is working perfectly
+	static boolean USE_DELETE_UI = true; // this is temporary until the delete is working perfectly
 
 	private final PvpContext context;
 	private MergeResultState resultState = MergeResultState.NO_CHANGE;
@@ -75,7 +75,7 @@ public class PvpDataMerger {
 	 */
 	private void dirtyFrom(boolean b) {
 		if (b) {
-			new Exception().printStackTrace();
+			//new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.FROM_CHANGED.bits);
 		}
 	}
@@ -86,7 +86,7 @@ public class PvpDataMerger {
 	 */
 	private void dirtyTo(boolean b) {
 		if (b) {
-			new Exception().printStackTrace();
+			//new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.TO_CHANGED.bits);
 		}
 	}
@@ -109,14 +109,14 @@ public class PvpDataMerger {
 			boolean b = fromRec.copyTo(toRec);
 			dirtyTo(b);
 			if (b) {
-				logRecInfo("makeIdentical - dirtyTo");
+				logRecInfo("> makeIdentical - dirtyTo");
 			}
 		} else {
 			// we don't care about the copiedData, only what is returned
 			boolean b = toRec.copyTo(fromRec);
 			dirtyFrom(b);
 			if (b) {
-				logRecInfo("makeIdentical - dirtyFrom");
+				logRecInfo("> makeIdentical - dirtyFrom");
 			}
 		}
 	}
@@ -176,17 +176,17 @@ public class PvpDataMerger {
 			}
 			if (toRec == null) {
 				final PvpRecord recWithId = dataToMergeTo.getRecord(fromRec.getId());
-				logRecInfo("Matching By Id. matchRating:" + fromRec.matchRating(recWithId));
+				logRecInfo("> Matching By Id. matchRating:" + fromRec.matchRating(recWithId));
 				if (fromRec.matchRating(recWithId) > 30) {
 					toRec = recWithId;
 				}
 			}
 			if (toRec == null) {
-				logRecInfo("looking for matching by toString");
+				logRecInfo("> looking for matching by toString");
 				List<PvpRecord> recordsTS = dataToMergeTo.getRecordsByToString(fromRec.getType(), fromRec.toString());
 				for (final PvpRecord rTS : recordsTS) {
 					if (fromRec.matchRating(rTS) > 50) {
-						logRecInfo("found matching ToString");
+						logRecInfo("> found matching ToString");
 						toRec = rTS;
 						break;
 					}
@@ -194,26 +194,35 @@ public class PvpDataMerger {
 			}
 			if (toRec != null) {
 				recordsMatched++;
+				if (toRec.getId() >= matchedRecords.length) {
+					logRecInfo("> before indexOutOfRange length: " + matchedRecords.length + " :: " + toRec.getFullText(false));
+				}
 				matchedRecords[toRec.getId()] = true;
 				if (toRec.getId() == fromRec.getId() && toRec.getId() > maxIdMatching) {
 					maxIdMatching = toRec.getId();
-					logRecInfo("maxIdMatching:" + maxIdMatching);
+					logRecInfo("> maxIdMatching:" + maxIdMatching);
 				}
 				makeIdentical(toRec);
 			} else {
-				if (fromRec.getId() > maxIdMatching || USE_DELETE_UI) {
+				if (fromRec.getId() > maxIdMatching) {
 					// this is a new record, because its ID is bigger than we know about
 					int nextID = dataToMergeTo.getNextMaxId();
-					logRecInfo("adding a record Id:" + nextID);
+					logRecInfo("> adding a record Id:" + nextID);
 					fromRec.setId(nextID);
 					dataToMergeTo.getRecords().add(fromRec);
 					dirtyTo(true);
+				} else {
 					if (USE_DELETE_UI) {
+						// TEMP FOR DELETE UI : this is a new record, because its ID is bigger than we know about
+						int nextID = dataToMergeTo.getNextMaxId();
+						logRecInfo("> adding a record Id (for DELETE UI):" + nextID);
+						fromRec.setId(nextID);
+						dataToMergeTo.getRecords().add(fromRec);
+						dirtyTo(true);
 						delRecs.add(new DelRec(fromRec, true));
 					}
-				} else {
 					// this record was deleted, because we didn't match on one we know about
-					logRecInfo("NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching);
+					logRecInfo("> NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching);
 				}
 			}
 		}

@@ -49,6 +49,8 @@ public class PvpDataMergerTest {
 		type2.addField(new PvpField("Street", PvpField.TYPE_STRING));
 		type2.addField(new PvpField("City", PvpField.TYPE_STRING));
 		type2.setToStringCode("Name");
+
+		PvpDataMerger.USE_DELETE_UI = false;
 	}
 
 	private List<PvpType> createTestTypes() {

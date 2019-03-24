@@ -18,6 +18,8 @@ import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 
+import javax.swing.*;
+
 /**
  * All methods to load data into RtDataInterface from the file
  */
@@ -414,7 +416,7 @@ public class PvpPersistenceInterface {
 						}
 					}
 					if (context.uiMain != null) {
-						context.uiMain.getViewListContext().filterUIChanged();
+						SwingUtilities.invokeLater(() -> context.uiMain.getViewListContext().filterUIChanged());
 					}
 				} else {
 					context.ui.showMessageDialog("No Changes", "There were no changes. No new data was loaded.");
