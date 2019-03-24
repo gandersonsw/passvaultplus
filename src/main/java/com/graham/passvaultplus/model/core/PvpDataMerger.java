@@ -18,12 +18,10 @@ import com.graham.passvaultplus.PvpContext;
 public class PvpDataMerger {
 
 	public static class DelRec {
-		final public int id;
-		final public String txt;
 		final public boolean inFromDb;
+		final public PvpRecord rec;
 		public DelRec(PvpRecord r, boolean inFromDbParam) {
-			id = r.getId();
-			txt = r.getFullText(false);
+			rec = r;
 			inFromDb = inFromDbParam;
 		}
 	}
@@ -84,7 +82,6 @@ public class PvpDataMerger {
 	 */
 	private void dirtyFrom(boolean b) {
 		if (b) {
-			//new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.FROM_CHANGED.bits);
 		}
 	}
@@ -95,7 +92,6 @@ public class PvpDataMerger {
 	 */
 	private void dirtyTo(boolean b) {
 		if (b) {
-			//new Exception().printStackTrace();
 			resultState = MergeResultState.getByBits(resultState.bits | MergeResultState.TO_CHANGED.bits);
 		}
 	}
@@ -135,7 +131,7 @@ public class PvpDataMerger {
 			} else {
 				// TODO compare and modify
 				// If the user has modified a type in the older dataset, it will be overwritten by the type from the newer dataset. 
-				// Since we don't track the modification date for types, there is not a way to hadnle this for now.
+				// Since we don't track the modification date for types, there is not a way to handle this for now.
 				typesMatched++;
 			}
 		}
@@ -169,15 +165,10 @@ public class PvpDataMerger {
 				} else {
 					if (USE_DELETE_UI) {
 						// TEMP FOR DELETE UI : this is a new record, because its ID is bigger than we know about
-						int nextID = dataToMergeTo.getNextMaxId();
-						logRecInfo("> adding a record Id (for DELETE UI):" + nextID);
-						fromRec.setId(nextID);
-						dataToMergeTo.getRecords().add(fromRec);
-						dirtyTo(true);
 						delRecs.add(new DelRec(fromRec, true));
 					}
 					// this record was deleted, because we didn't match on one we know about
-					logRecInfo("> NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching);
+					logRecInfo("> NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching + " :: " + fromRec.getFullText(false));
 				}
 			}
 		}
@@ -185,14 +176,13 @@ public class PvpDataMerger {
 		for (int i2 = dataToMergeTo.getRecordCount() - 1; i2 >= 0; i2--) {
 			PvpRecord r = dataToMergeTo.getRecordAtIndex(i2);
 			if (r.getId() <= maxIdMatching && !matchedRecords[r.getId()]) {
-					if (USE_DELETE_UI) {
-							delRecs.add(new DelRec(r, false));
-					} else {
-							context.ui.notifyInfo("> deleting a record Id:" + r.getId() + ":" + r);
-							dataToMergeTo.getRecords().remove(i2);
-							r.setId(0);
-							dirtyTo(true);
-					}
+				if (USE_DELETE_UI) {
+					delRecs.add(new DelRec(r, false));
+				}
+				context.ui.notifyInfo("> deleting a record Id:" + r.getId() + " :: " + r.getFullText(false));
+				dataToMergeTo.getRecords().remove(i2);
+				r.setId(0);
+				dirtyTo(true);
 			} else if (r.getId() > dataToMergeFrom.getMaxId()) { // TODO test this some
 				context.ui.notifyInfo("> adding record to FROM Id:" + r.getId() + ":" + r);
 				dirtyFrom(true);
@@ -283,7 +273,7 @@ public class PvpDataMerger {
 	 */
 	private void processCopyNew() {
 		int nextID = dataToMergeTo.getNextMaxId();
-		logRecInfo("> adding a record Id:" + nextID);
+		logRecInfo("> adding a record Id:" + nextID + ":" + fromRec);
 		fromRec.setId(nextID);
 		dataToMergeTo.getRecords().add(fromRec);
 		dirtyTo(true);

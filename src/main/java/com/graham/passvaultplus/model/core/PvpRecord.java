@@ -159,6 +159,7 @@ public class PvpRecord {
 		}
 	}
 
+	@Override
 	public String toString() {
 		if (rtType.getToStringCode() == null) {
 			return super.toString();

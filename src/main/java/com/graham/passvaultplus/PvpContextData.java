@@ -53,7 +53,9 @@ public class PvpContextData {
 		}
 		boolean changed = false;
 		for (PvpRecord r : rCol) {
-			changed = changed || rtDataInterface.deleteRecord(r);
+			if (rtDataInterface.deleteRecord(r)) {
+				changed = true;
+			}
 		}
 		if (changed) {
 			dataChanged(PvpPersistenceInterface.SaveTrigger.cud);

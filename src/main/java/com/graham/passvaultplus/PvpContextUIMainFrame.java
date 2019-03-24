@@ -171,23 +171,17 @@ public class PvpContextUIMainFrame implements ChangeListener {
 			for (List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a : context.mergeDelRecs) {
 					createDelRecTab(a);
 			}
-
-			//List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a2 = new ArrayList<>();
-			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(103), false));
-			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(104), false));
-			//a2.add(new com.graham.passvaultplus.model.core.PvpDataMerger.DelRec(context.data.getDataInterface().getRecordAtIndex(105), false));
-			//createDelRecTab(a2);
 	}
 
-		// TODO delete this after tested better
+	// TODO delete this after tested better
 	public void createDelRecTab(List<com.graham.passvaultplus.model.core.PvpDataMerger.DelRec> a) {
 			JPanel p = new JPanel(new GridLayout(a.size(), 1));
 			for (com.graham.passvaultplus.model.core.PvpDataMerger.DelRec b : a) {
 					JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-					p2.add(new JButton(new DelAction(b.id)));
+					p2.add(new JButton(new DelAction(b.rec)));
 					p2.add(new JLabel(b.inFromDb ? "X" : "_"));
-					p2.add(new JLabel(String.valueOf(b.id)));
-					p2.add(new JLabel(b.txt));
+					p2.add(new JLabel(String.valueOf(b.rec.getId())));
+					p2.add(new JLabel(b.rec.getFullText(false)));
 					p.add(p2);
 			}
 			JScrollPane sp = new JScrollPane(p);
@@ -195,15 +189,15 @@ public class PvpContextUIMainFrame implements ChangeListener {
 	}
 
 	class DelAction extends AbstractAction {
-			int id;
-			DelAction(int idPAram) {
-					super("Delete");
-					id = idPAram;
+			PvpRecord rec;
+			DelAction(PvpRecord r) {
+					super("Add Back");
+					rec = r;
 			}
 			@Override
 			public void actionPerformed(ActionEvent e) {
-					PvpRecord r = context.data.getDataInterface().getRecord(id);
-					context.data.getDataInterface().deleteRecord(r);
+					rec.clearId();
+					context.data.getDataInterface().saveRecord(rec);
 					JButton b = (JButton)e.getSource();
 					b.setEnabled(false);
 			}
