@@ -176,7 +176,7 @@ public class CommandExecuter {
 									PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
 									PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
 									for (PvpRecord r : fr.records) {
-											context.ui.notifyInfo(r.getFullText(false));
+											context.ui.notifyInfo(r.getDebugText(false));
 									}
 									count += fr.records.size();
 							} catch (Exception e) {

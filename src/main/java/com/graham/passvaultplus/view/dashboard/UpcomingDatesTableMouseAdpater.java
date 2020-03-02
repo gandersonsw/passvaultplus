@@ -6,11 +6,8 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
 
-import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
-import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
-import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 public class UpcomingDatesTableMouseAdpater extends MouseAdapter {
 	final private PvpContext context;
@@ -29,15 +26,7 @@ public class UpcomingDatesTableMouseAdpater extends MouseAdapter {
 			}
 			UpcomingDatesTableModel tm = (UpcomingDatesTableModel)table.getModel();
 			PvpRecord r = tm.getRecordAtRow(row);
-
-			if (r != null) {
-				RecordEditContext editor = context.uiMain.getRecordEditor(r);
-				if (editor == null) {
-					editor = RecordEditBuilder.buildEditor(context, r, false);
-					context.uiMain.addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
-				}
-				context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
-			}
+			context.uiMain.addRecordEditorIfNeeded(r);
 		}
 	}
 

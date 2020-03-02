@@ -77,6 +77,10 @@ public class PinTimerTask extends TimerTask {
 	}
 
 	private void doUI() {
+		if (!context.uiMain.getMainFrame().isVisible()) {
+			context.ui.notifyInfo("PinTimerTask not executed because MainFrame is already hidden");
+			return;
+		}
 		context.uiMain.getMainFrame().setVisible(false);
 
 		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.isPasswordSaved()) {

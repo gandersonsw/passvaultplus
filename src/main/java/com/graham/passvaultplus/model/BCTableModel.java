@@ -6,6 +6,8 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 public interface BCTableModel {
 
 	int getColumnCount();
+
+	String getColumnName(int columnIndex);
 	
 	int getRowCount();
 

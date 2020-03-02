@@ -168,7 +168,7 @@ public class PvpDataMerger {
 						delRecs.add(new DelRec(fromRec, true));
 					}
 					// this record was deleted, because we didn't match on one we know about
-					logRecInfo("> NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching + " :: " + fromRec.getFullText(false));
+					logRecInfo("> NOT adding a record Id:" + fromRec.getId() + ":" + maxIdMatching + " :: " + fromRec.getDebugText(false));
 				}
 			}
 		}
@@ -179,7 +179,7 @@ public class PvpDataMerger {
 				if (USE_DELETE_UI) {
 					delRecs.add(new DelRec(r, false));
 				}
-				context.ui.notifyInfo("> deleting a record Id:" + r.getId() + " :: " + r.getFullText(false));
+				context.ui.notifyInfo("> deleting a record Id:" + r.getId() + " :: " + r.getDebugText(false));
 				dataToMergeTo.getRecords().remove(i2);
 				r.setId(0);
 				dirtyTo(true);
@@ -258,7 +258,7 @@ public class PvpDataMerger {
 	private void processMatching(PvpRecord toRec) {
 		recordsMatched++;
 		//if (toRec.getId() >= matchedRecords.length) {
-		//	logRecInfo("> before indexOutOfRange length: " + matchedRecords.length + " :: " + toRec.getFullText(false));
+		//	logRecInfo("> before indexOutOfRange length: " + matchedRecords.length + " :: " + toRec.getDebugText(false));
 		//}
 		matchedRecords[toRec.getId()] = true;
 		if (toRec.getId() == fromRec.getId() && toRec.getId() > maxIdMatching) {

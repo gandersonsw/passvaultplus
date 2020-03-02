@@ -15,6 +15,10 @@ public class ListTableModel extends AbstractTableModel {
 		filter = filterParam;
 	}
 
+	public String getColumnName(int columnIndex) {
+		return filter.getCurrentModel().getColumnName(columnIndex);
+	}
+
 	public int getColumnCount() {
 		return filter.getCurrentModel().getColumnCount();
 	}

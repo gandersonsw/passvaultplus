@@ -52,14 +52,14 @@ public class RecordEditBuilder {
 		for (int i = 0; i < typeFields.size(); i++) {
 			PvpField f = typeFields.get(i);
 
-			if (!f.getName().equals(PvpField.USR_NOTES) &&
-					!f.getName().equals(PvpField.USR_CREATION_DATE) &&
-					!f.getName().equals(PvpField.USR_MODIFICATION_DATE)) {
+			if (!f.equals(PvpField.CF_NOTES) &&
+					!f.equals(PvpField.CF_CREATION_DATE) &&
+					!f.equals(PvpField.CF_MODIFICATION_DATE)) {
 				fieldNamesToDisplay.add(f.getName());
 			}
 		}
 
-		fieldNamesToDisplay.add(PvpField.USR_NOTES);
+		fieldNamesToDisplay.add(PvpField.CF_NOTES.getName());
 
         GridBagConstraints labelConstraints = new GridBagConstraints();
         labelConstraints.anchor = GridBagConstraints.EAST ;
@@ -81,14 +81,14 @@ public class RecordEditBuilder {
 			p.add(fieldBuilder.getRightComponent(), editorConstraints);
 		}
 
-		p.add(new JLabel(PvpField.USR_CATEGORY + ":", JLabel.RIGHT), labelConstraints);
+		p.add(new JLabel(PvpField.CF_CATEGORY.getName() + ":", JLabel.RIGHT), labelConstraints);
 		p.add(buildCategoryComponent(), editorConstraints);
 
 		if (!isNewRecord) {
-			p.add(new JLabel(PvpField.USR_CREATION_DATE + ":", JLabel.RIGHT), labelConstraints);
+			p.add(new JLabel(PvpField.CF_CREATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
 			p.add(new JLabel(AppUtil.formatDate1(record.getCreationDate())), editorConstraints);
 
-			p.add(new JLabel(PvpField.USR_MODIFICATION_DATE + ":", JLabel.RIGHT), labelConstraints);
+			p.add(new JLabel(PvpField.CF_MODIFICATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
 			p.add(new JLabel(AppUtil.formatDate1(record.getModificationDate())), editorConstraints);
 		}
 
@@ -130,7 +130,7 @@ public class RecordEditBuilder {
 		JComboBox catCombo = new JComboBox(comboItems);
 		catCombo.setMaximumRowCount(20);
 		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo);
-		editContext.editFields.put(PvpField.USR_CATEGORY, refc);
+		editContext.editFields.put(PvpField.CF_CATEGORY.getName(), refc);
 		catCombo.setSelectedIndex(selectedIndex);
 
 		catCombo.addActionListener(new AnyFieldChangedAction(editContext, refc));

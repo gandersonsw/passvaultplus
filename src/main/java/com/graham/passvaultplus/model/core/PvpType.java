@@ -12,7 +12,7 @@ public class PvpType {
 	private String toStringCode; // what field(s) the toString method should use
 	private String fullFormat; // what this record should look like when formatted. May be null
 	private PvpRecordFormatter fullFormatter;
-	private List<PvpField> fields = new ArrayList<PvpField>();
+	private List<PvpField> fields = new ArrayList<>();
 	
 	public String getName() {
 		return name;
@@ -32,9 +32,9 @@ public class PvpType {
 				return f;
 			}
 		}
-		if (PvpField.USR_NOTES.equals(fieldName)) {
+		if (PvpField.CF_NOTES.getName().equals(fieldName)) {
 			// The notes field is different because it is always present.
-			return new PvpField(PvpField.USR_NOTES, PvpField.TYPE_STRING);
+			return PvpField.CF_NOTES;
 		}
 		return null;
 	}

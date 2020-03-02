@@ -12,8 +12,9 @@ import java.util.Locale;
 public class AppUtil {
 
 	// Format like: "May 2, 2010 4:41 PM"
-	private static DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
-	private static DateFormat dfNoTime = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
+	private static final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
+	private static final DateFormat dfNoTime = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
+	private static final long TEN_DAYS = 10L * 24L * 60L * 60L * 1000L;
 	
 	public static String formatDate1(final Date d) {
 		if (d == null) {
@@ -36,7 +37,8 @@ public class AppUtil {
 	}
 	
 	/**
-	 * Parse a date String. Then set the year so that it is the next one in the future starting from today. Return null if it wasn't parseable
+	 * Parse a date String. Then set the year so that it is the next one in the future
+	 * starting from (today-10 days). Return null if it wasn't parseable.
 	 */
 	public static Date parseUpcomingDate(final String s) {
 		Date d = null;
@@ -46,7 +48,7 @@ public class AppUtil {
 			int curYear = cal2.get(Calendar.YEAR);
 			cal2.setTime(d);
 			cal2.set(Calendar.YEAR, curYear);
-			if (!cal2.getTime().after(new Date())) {
+			if (!cal2.getTime().after(new Date(System.currentTimeMillis() - TEN_DAYS))) {
 				cal2.add(Calendar.YEAR, 1);
 			}
 			return cal2.getTime();
@@ -74,7 +76,7 @@ public class AppUtil {
 			cal.set(Calendar.MONTH, calMonth);
 			cal.set(Calendar.DAY_OF_MONTH, day);
 			
-			if (cal.getTime().after(new Date())) {
+			if (cal.getTime().after(new Date(System.currentTimeMillis() - TEN_DAYS))) {
 				return cal.getTime();
 			} else {
 				cal.add(Calendar.YEAR, 1);
@@ -99,7 +101,7 @@ public class AppUtil {
 	
 	private static int getCalMonth(final String monthRaw) {
 		
-		if (monthRaw == null || monthRaw.length() < 2) {
+		if (monthRaw == null || monthRaw.length() < 3) {
 			return -99;
 		}
 		
@@ -247,6 +249,10 @@ public class AppUtil {
 			return false;
 		}
 		return obj1.equals(obj2);
+	}
+
+	public static boolean stringNotEmpty(String s) {
+		return s != null && s.length() > 0;
 	}
 
 }

@@ -21,7 +21,7 @@ public class PvpRecord {
 	private PvpRecord category;
 	private Date creationDate;
 	private Date modificationDate;
-	private Map<String, String> fields = new HashMap<String, String>();
+	private Map<String, String> fields = new HashMap<>();
 	private PvpType rtType;
 
 	private String typeForValidate;
@@ -52,6 +52,10 @@ public class PvpRecord {
 	public void clearId() {
 		id = 0;
 	}
+
+	public boolean isPersisted() {
+				return this.id > 0;
+		}
 
 	public PvpRecord getCategory() {
 		return category;
@@ -85,10 +89,10 @@ public class PvpRecord {
 	}
 
 	public String getCustomField(final String fieldName) {
-		if (fieldName.equals(PvpField.USR_CATEGORY) ||
-				fieldName.equals(PvpField.USR_CREATION_DATE) ||
-				fieldName.equals(PvpField.USR_MODIFICATION_DATE) ||
-				fieldName.equals(PvpField.USR_TYPE)) {
+		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||
+				fieldName.equals(PvpField.CF_CREATION_DATE.getName()) ||
+				fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName()) ||
+				fieldName.equals(PvpField.CF_TYPE.getName())) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 /*
@@ -108,10 +112,10 @@ public class PvpRecord {
 	}
 
 	public void setCustomField(final String fieldName, final String fieldValue) {
-		if (fieldName.equals(PvpField.USR_CATEGORY) ||
-				fieldName.equals(PvpField.USR_CREATION_DATE) ||
-				fieldName.equals(PvpField.USR_MODIFICATION_DATE) ||
-				fieldName.equals(PvpField.USR_TYPE)) {
+		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||
+				fieldName.equals(PvpField.CF_CREATION_DATE.getName()) ||
+				fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName()) ||
+				fieldName.equals(PvpField.CF_TYPE.getName())) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 
@@ -126,33 +130,58 @@ public class PvpRecord {
 	 * Also include category, creation_date, modification_date, type
 	 */
 	Map<String, String> getAllFields() {
-		Map<String, String> allFields = new HashMap<String, String>();
+		Map<String, String> allFields = new HashMap<>();
 		allFields.putAll(fields);
 
-		allFields.put(PvpField.USR_CATEGORY, category == null ? "" : String.valueOf(category.getId()));
-		allFields.put(PvpField.USR_CREATION_DATE, AppUtil.formatDate1(creationDate));
-		allFields.put(PvpField.USR_MODIFICATION_DATE, AppUtil.formatDate1(modificationDate));
-		allFields.put(PvpField.USR_TYPE, rtType.getName());
+		allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
+		allFields.put(PvpField.CF_CREATION_DATE.getName(), AppUtil.formatDate1(creationDate));
+		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), AppUtil.formatDate1(modificationDate));
+		allFields.put(PvpField.CF_TYPE.getName(), rtType.getName());
 
 		return allFields;
 	}
 
+	public String getAnyField(final PvpField field) {
+		switch (field.getCoreFieldId()) {
+			case PvpField.CFID_CATEGORY:
+				return category == null ? "" : category.getCustomField(PvpField.USR_CATEGORY_TITLE);
+			case PvpField.CFID_CREATION_DATE:
+				return AppUtil.formatDate1(creationDate);
+			case PvpField.CFID_MODIFICATION_DATE:
+				return AppUtil.formatDate1(modificationDate);
+			case PvpField.CFID_NOTES:
+				return fields.get(field.getName());
+			case PvpField.CFID_SUMMARY:
+				return toString();
+			case PvpField.CFID_FULL:
+				return getFullText();
+			case PvpField.CFID_TYPE:
+				return rtType.getName();
+			case PvpField.CFID_PLACE_HOLDER:
+				return "";
+			case PvpField.CFID_UNDEF:
+				return fields.get(field.getName());
+		}
+		PvpContextUI.getActiveUI().notifyWarning("PvpRecord.getAnyField: Invalid CoreTypeId: " + field.getCoreFieldId());
+		return null;
+	}
+
 	void setAnyField(final String fieldName, final String fieldValue) throws ParseException {
-		if (fieldName.equals(PvpField.USR_CATEGORY)) {
+		if (fieldName.equals(PvpField.CF_CATEGORY.getName())) {
 			categoryIdForValidate = fieldValue;
-		} else if (fieldName.equals(PvpField.USR_CREATION_DATE)) {
+		} else if (fieldName.equals(PvpField.CF_CREATION_DATE.getName())) {
 			try {
 				creationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
-		} else if (fieldName.equals(PvpField.USR_MODIFICATION_DATE)) {
+		} else if (fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName())) {
 			try {
 				modificationDate = AppUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
-		} else if (fieldName.equals(PvpField.USR_TYPE)) {
+		} else if (fieldName.equals(PvpField.CF_TYPE.getName())) {
 			typeForValidate = fieldValue;
 		} else {
 			fields.put(fieldName, fieldValue);
@@ -171,12 +200,23 @@ public class PvpRecord {
 		return rtType.getFullFormatter().format(this);
 	}
 
-	public String getFullText(boolean includeEmptyFields) {
+	public String getFullText() {
+		StringBuilder sb = new StringBuilder();
+		appendFields(sb, fields, false);
+		return sb.toString();
+	}
+
+	public String getDebugText(boolean includeEmptyFields) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ID=");
 		sb.append(this.getId());
 		sb.append("; ");
-		for (Map.Entry<String, String> entry : getAllFields().entrySet()) {
+		appendFields(sb, getAllFields(), includeEmptyFields);
+		return sb.toString();
+	}
+
+	private void appendFields(StringBuilder sb, Map<String, String> fieldsToAppend, boolean includeEmptyFields) {
+		for (Map.Entry<String, String> entry : fieldsToAppend.entrySet()) {
 			if (!includeEmptyFields && entry.getValue().trim().length() > 0) {
 				sb.append(entry.getKey());
 				sb.append("=");
@@ -189,7 +229,6 @@ public class PvpRecord {
 				sb.append("; ");
 			}
 		}
-		return sb.toString();
 	}
 
 	/**
@@ -310,10 +349,6 @@ public class PvpRecord {
 			}
 		}
 		return changed;
-	}
-
-	public boolean isPersisted() {
-		return this.id > 0;
 	}
 
 }

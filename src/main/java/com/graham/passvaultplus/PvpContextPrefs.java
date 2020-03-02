@@ -3,6 +3,7 @@ package com.graham.passvaultplus;
 
 import java.io.File;
 
+import com.graham.passvaultplus.model.RecordListViewOptions;
 import com.graham.passvaultplus.model.core.StringEncrypt;
 import com.graham.passvaultplus.view.PinDialog;
 import com.graham.passvaultplus.view.PwDialog;
@@ -36,6 +37,9 @@ public class PvpContextPrefs {
   private String googleDriveDocId;
   private long googleDriveDocUpdateDate;
   boolean pinWasReset = false;
+
+  // TODO this is not persisted yet
+	private RecordListViewOptions recordListViewOptions = new RecordListViewOptions();
 
 	public PvpContextPrefs() {
 		this(new PvpPrefFacade());
@@ -129,7 +133,11 @@ public class PvpContextPrefs {
 		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation);
 		try {
 			LTManager.waitingUserInputStart();
-			SwingUtilities.invokeAndWait(pw);
+			if (SwingUtilities.isEventDispatchThread()) {
+				pw.run();
+			} else {
+				SwingUtilities.invokeAndWait(pw);
+			}
 		} catch (Exception e) {
 			PvpContextUI.getActiveUI().notifyWarning("getPasswordOrAskUser error", e);
 		} finally {
@@ -382,5 +390,9 @@ public class PvpContextPrefs {
 	public void setShowDiagnostics(final boolean s) {
 		showDiagnostics = s;
 		userPrefs.putBoolean("showDiagnostics", showDiagnostics);
+	}
+
+	public RecordListViewOptions getRecordListViewOptions() {
+		return this.recordListViewOptions;
 	}
 }

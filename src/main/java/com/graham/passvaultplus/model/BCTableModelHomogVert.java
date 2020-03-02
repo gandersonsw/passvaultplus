@@ -7,22 +7,26 @@ import java.util.List;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
-import com.graham.passvaultplus.model.core.PvpType;
 
 /**
- * All the same type.
+ * All the same PvpType. Example:
+ *
+ * Field       Value
+ * Name        Joe
+ * Email       joe@email.com
+ *
+ * Name        Jane
+ * Email       jane@email.com
+ *
  */
-public class BCTableModelHomog2 implements BCTableModel {
+public class BCTableModelHomogVert implements BCTableModel {
 
 	final RecordFilter filter;
-	PvpContext context;
-	PvpType currentType;
-	//int currentTypeRowCount;
+	final PvpContext context;
 	List<PvpField> fieldsToDisplay;
-	
 	List<FieldAndRecord> cacheData = null;
 	
-	public BCTableModelHomog2(final RecordFilter f, final PvpContext c) {
+	public BCTableModelHomogVert(final RecordFilter f, final PvpContext c) {
 		filter = f;
 		context = c;
 	}
@@ -36,9 +40,9 @@ public class BCTableModelHomog2 implements BCTableModel {
 			return cacheData;
 		}
 		
-		cacheData = new ArrayList<FieldAndRecord>();
+		cacheData = new ArrayList<>();
 		
-		getSingleTypeRows();
+		computeFieldsToDisplay();
 		
 		int max = filter.getRecordCount();
 		
@@ -46,10 +50,8 @@ public class BCTableModelHomog2 implements BCTableModel {
 		
 		for (int i = 0; i < max; i++) {
 			final PvpRecord r = filter.getRecordAtIndex(i);
-			//final Iterator iter = fieldNamesToDisplay.iterator();
 			for (final PvpField field: fieldsToDisplay) {
-				//final String name = (String)iter.next();
-				final String val = r.getCustomField(field.getName());
+				final String val = r.getAnyField(field);
 				if (val != null && val.length() > 0) {
 					cacheData.add(new FieldAndRecord(r, field));
 				}
@@ -68,12 +70,16 @@ public class BCTableModelHomog2 implements BCTableModel {
 		return getCacheData().size();
 	}
 
+	public String getColumnName(int columnIndex) {
+		return columnIndex == 0 ? "Field" : "Value";
+	}
+
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		return getValueAt(rowIndex, columnIndex, false);
 	}
 
 	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
-		final FieldAndRecord fr = (FieldAndRecord)getCacheData().get(rowIndex);
+		final FieldAndRecord fr = getCacheData().get(rowIndex);
 		
 		if (columnIndex == 0) {
 			return fr.getName();
@@ -84,46 +90,34 @@ public class BCTableModelHomog2 implements BCTableModel {
 			if (!returnSecretRealValue && fr.field.isClassificationSecret()) {
 				return "******";
 			}
-			return fr.record.getCustomField(fr.field.getName());
+			return fr.record.getAnyField(fr.field);
 		}
 
 		return null;
 	}
 	
 	public PvpRecord getRecordAtRow(final int rowIndex) {
-		final FieldAndRecord fr = (FieldAndRecord)getCacheData().get(rowIndex);
+		final FieldAndRecord fr = getCacheData().get(rowIndex);
 		return fr.record;
 	}
 	
-	public void getSingleTypeRows() {
+	private void computeFieldsToDisplay() {
 		if (filter.getRecordCount() == 0) {
 			return;
 		}
 		
 		PvpRecord r = filter.getRecordAtIndex(0);
-		
-		if (PvpType.sameType(r.getType(), currentType)) {
-			return;// currentTypeRowCount;
-		}
-		currentType = r.getType();
 
 		List<PvpField> typeFields = r.getType().getFields();
 		fieldsToDisplay = new ArrayList<>();
-		//currentTypeRowCount = 0;
 		
 		for (final PvpField f : typeFields) {
-			//RtField f = (RtField)typeFields.get(i);
-			if (f.getName().equals(PvpField.USR_CREATION_DATE)) {
-				
-			} else if (f.getName().equals(PvpField.USR_MODIFICATION_DATE)) {
-				
-			} else {
+			if (context.prefs.getRecordListViewOptions().shouldShowField(f)) {
 				fieldsToDisplay.add(f);
-				//currentTypeRowCount++;
 			}
 		}
-		
-		//return currentTypeRowCount;
+
+		context.prefs.getRecordListViewOptions().addCommonFields(fieldsToDisplay);
 	}
 	
 }

@@ -4,6 +4,7 @@ package com.graham.passvaultplus;
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.OtherTab;
+import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
 
@@ -116,6 +117,17 @@ public class PvpContextUIMainFrame implements ChangeListener {
 		mainTabPane.add(tabLabel, r.getPanelInTabPane());
 	}
 
+	public void addRecordEditorIfNeeded(PvpRecord rec) {
+		if (rec != null) {
+			RecordEditContext editor = getRecordEditor(rec);
+			if (editor == null) {
+				editor = RecordEditBuilder.buildEditor(context, rec, false);
+				addRecordEditor(AppUtil.limitStrLen(rec.toString(), 30), editor);
+			}
+			setSelectedComponent(editor.getPanelInTabPane());
+		}
+	}
+
 	public void removeRecordEditor(final RecordEditContext r) {
 		setLastTabSelected();
 		mainTabPane.remove(r.getPanelInTabPane());
@@ -181,7 +193,7 @@ public class PvpContextUIMainFrame implements ChangeListener {
 					p2.add(new JButton(new DelAction(b.rec)));
 					p2.add(new JLabel(b.inFromDb ? "X" : "_"));
 					p2.add(new JLabel(String.valueOf(b.rec.getId())));
-					p2.add(new JLabel(b.rec.getFullText(false)));
+					p2.add(new JLabel(b.rec.getDebugText(false)));
 					p.add(p2);
 			}
 			JScrollPane sp = new JScrollPane(p);

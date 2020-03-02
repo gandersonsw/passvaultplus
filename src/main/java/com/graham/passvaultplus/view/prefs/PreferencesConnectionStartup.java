@@ -45,7 +45,11 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 
 		//	com.graham.passvaultplus.PvpContextUI.checkEvtThread("3524");
 			copyPrefsToReal();
-			try { SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false)); } catch (Exception e) { PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A"); }
+			if (SwingUtilities.isEventDispatchThread()) {
+					startupOptionsFrame.setVisible(false);
+			} else {
+					try { SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false)); } catch (Exception e) { PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A"); }
+			}
 			//startupOptionsFrame.setVisible(false);
 			try {
 				context.dataFileSelectedForStartup();

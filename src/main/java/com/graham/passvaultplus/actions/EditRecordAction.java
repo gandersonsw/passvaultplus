@@ -5,11 +5,8 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
-import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
-import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
 public class EditRecordAction extends AbstractAction {
 	private final PvpContext context;
@@ -21,15 +18,7 @@ public class EditRecordAction extends AbstractAction {
 
 	public void actionPerformed(ActionEvent e) {
 		PvpRecord r = context.uiMain.getViewListContext().getFirstSelectedRecord();
-		if (r != null) {
-			RecordEditContext editor = context.uiMain.getRecordEditor(r);
-			if (editor == null) {
-				editor = RecordEditBuilder.buildEditor(context, r, false);
-				context.uiMain.addRecordEditor(AppUtil.limitStrLen(r.toString(), 30), editor);
-				
-			}
-			context.uiMain.setSelectedComponent(editor.getPanelInTabPane());
-		}
+		context.uiMain.addRecordEditorIfNeeded(r);
 	}
 
 }

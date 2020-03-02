@@ -42,7 +42,6 @@ public class ViewListBuilder implements OtherTabBuilder {
 
 		FlowLayout2 fl2 = new FlowLayout2(FlowLayout.LEADING, context);
 		final JPanel panel = new JPanel(fl2);
-		//final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
 		panel.add(new JLabel("Filter:"));
 		panel.add(buildFilterTextField(context, filterChangeAction));
@@ -117,7 +116,7 @@ public class ViewListBuilder implements OtherTabBuilder {
 		ListTableModel model = new ListTableModel(filter);
 		JTable table = new JTable(model);
 		table.getActionMap().put("copy", new RecordListCopyAction(table));
-		table.addMouseListener(new RecordListTableMouseAdpater(erAction));
+		table.addMouseListener(new RecordListTableMouseAdpater(context, erAction, filter));
 		context.uiMain.getViewListContext().setListTable(table, model);
 		JScrollPane scroll = new JScrollPane(table);
 		return scroll;
