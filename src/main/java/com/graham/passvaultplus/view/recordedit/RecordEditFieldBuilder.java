@@ -56,7 +56,7 @@ class RecordEditFieldBuilder {
 		JTextComponent tf;
 		JComponent textComponent;
 		JComponent rightWidget = null;
-		if (PvpField.TYPE_LONG_STRING.equals(field.getType())) {
+		if (field.isTypeLongString()) {
 			JTextArea textArea = new JTextArea(reb.record.getCustomField(name));
 			textArea.setLineWrap(true);
 			textArea.setWrapStyleWord(true);
@@ -108,7 +108,7 @@ class RecordEditFieldBuilder {
 		CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"), ref);
 		JButton copyButton = new JButton(copyAction);
 		copyButton.setFocusable(false);
-		if (PvpField.TYPE_LONG_STRING.equals(field.getType())) {
+		if (field.isTypeLongString()) {
 			JPanel leftButtons = new JPanel(new BorderLayout());
 			leftButtons.add(copyButton, BorderLayout.SOUTH);
 			JButton max = new JButton(new MaximizeTextArea(PvpContext.getIcon("panel-maximize-small"), reb.editContext, (JTextArea)tf)); // TODO

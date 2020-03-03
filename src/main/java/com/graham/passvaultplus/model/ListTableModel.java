@@ -44,4 +44,8 @@ public class ListTableModel extends AbstractTableModel {
 		fireTableStructureChanged();
 	}
 
+	public boolean isVertModel() {
+		return filter.getCurrentModel().isVertModel();
+	}
+
 }

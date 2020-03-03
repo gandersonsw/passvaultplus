@@ -4,6 +4,7 @@ package com.graham.passvaultplus.model.core;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.graham.framework.BCUtil;
@@ -29,6 +30,7 @@ public class DatabaseWriter {
 		writeStart();
 		writeTypes(dataInterface.getTypes());
 		writeRecords(dataInterface.getRecords(), dataInterface.getMaxId());
+		writeMetadata(dataInterface.getMetadataMap());
 		writeEnd();
 	}
 	
@@ -128,6 +130,23 @@ public class DatabaseWriter {
 			bw.write(">");
 			bw.newLine();
 		}
+	}
+
+	private void writeMetadata(final Map<String, String> data) throws IOException {
+		if (data == null || data.isEmpty()) {
+			return;
+		}
+		bw.write("	<metadata>");
+		for (Entry<String, String> entry : data.entrySet()) {
+			bw.write("		<entry name=\"");
+			final String name = BCUtil.makeXMLName((String) entry.getKey());
+			bw.write(name);
+			bw.write("\">");
+			bw.write(BCUtil.makeXMLSafe(entry.getValue()));
+			bw.write("</entry>");
+			bw.newLine();
+		}
+		bw.write("	</metadata>");
 	}
 
 	private void writeEnd() throws IOException {

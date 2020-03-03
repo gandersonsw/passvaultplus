@@ -23,7 +23,8 @@ public class RecordListCopyAction extends AbstractAction {
 			originalCopyAction.actionPerformed(e);
 		} else {
 			ListTableModel tm = (ListTableModel)t.getModel();
-			Object o = tm.getValueAt(t.getSelectedRow(), 1, true);
+			int col = tm.isVertModel() ? 1 : t.getSelectedColumn();
+			Object o = tm.getValueAt(t.getSelectedRow(), col, true);
 			if (o != null) {
 				String s = o.toString();
 				if (s.trim().length() > 0) {

@@ -6,8 +6,10 @@ import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -112,6 +114,7 @@ public class DatabaseReader {
 		PvpDataInterface dataInterface;
 		List<PvpType> types = null;
 		List<PvpRecord> records = null;
+		Map<String,String> metadata = null;
 		final Document jdomDoc = getJDom(inStream);
 		final Element root = jdomDoc.getRootElement();
 		if (!root.getName().equals("mydb")) {
@@ -124,6 +127,8 @@ public class DatabaseReader {
 				types = loadTypes(e);
 			} else if (e.getName().equals("records")) {
 				records = loadRecords(e);
+			} else if (e.getName().equals("metadata")) {
+				metadata = loadMetadata(e);
 			} else {
 				context.ui.notifyWarning("WARN102 unexpected element:" + e.getName());
 			}
@@ -137,7 +142,7 @@ public class DatabaseReader {
 			throw new Exception("records XML element not found");
 		}
 
-		dataInterface = new PvpDataInterface(context, types, records, maxID);
+		dataInterface = new PvpDataInterface(context, types, records, maxID, metadata);
 
 		// do any initialization after all the data is loaded
 		for (PvpRecord r : records) {
@@ -230,7 +235,7 @@ public class DatabaseReader {
 			context.ui.notifyWarning("maxID attribute not found");
 		}
 		List children = recordsElement.getChildren();
-		List<PvpRecord> records = new ArrayList<PvpRecord>();
+		List<PvpRecord> records = new ArrayList<>();
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (!e.getName().equals("record")) {
@@ -272,5 +277,24 @@ public class DatabaseReader {
 		}
 
 		return record;
+	}
+
+	private Map<String,String> loadMetadata(final Element metadataElement) {
+		Map<String,String> data = new HashMap<>();
+		List children = metadataElement.getChildren();
+		for (int i = 0; i < children.size(); i++) {
+			Element e = (Element) children.get(i);
+			if (!e.getName().equals("entry")) {
+				context.ui.notifyWarning("WARN120 unexpected element:" + e.getName());
+			}
+			try {
+				String name = e.getAttribute("name").getValue();
+				String value = e.getValue();
+				data.put(name, value);
+			} catch (Exception ex) {
+				context.ui.notifyWarning("WARN121", ex);
+			}
+		}
+		return data;
 	}
 }

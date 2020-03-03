@@ -18,5 +18,7 @@ public interface BCTableModel {
 	PvpRecord getRecordAtRow(final int rowIndex);
 	
 	void flushCache();
+
+	boolean isVertModel();
 	
 }

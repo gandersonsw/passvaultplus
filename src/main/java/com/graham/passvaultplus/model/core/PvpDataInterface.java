@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 
 /**
@@ -27,23 +28,26 @@ public class PvpDataInterface {
 	private final PvpContext context;
 	private List<PvpType> types;
 	private List<PvpRecord> records;
+	private Map<String,String> metadata;
 	private int maxID;
 
 	public PvpDataInterface(final PvpContext contextParam) {
 		context = contextParam;
 	}
 
-	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, List<PvpRecord> recordsParam, int maxIDParam) {
+	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, List<PvpRecord> recordsParam, int maxIDParam, Map<String,String> metadataParam) {
 		context = contextParam;
 		types = typesParam;
 		records = recordsParam;
 		maxID = maxIDParam;
+		metadata = metadataParam;
 	}
 
 	void setData(PvpDataInterface dataTocCopyFrom) {
 		types = dataTocCopyFrom.types;
 		records = dataTocCopyFrom.records;
 		maxID = dataTocCopyFrom.maxID;
+		metadata = dataTocCopyFrom.metadata;
 	}
 
 	/**
@@ -97,8 +101,6 @@ public class PvpDataInterface {
 			int nextID = getNextMaxId();
 			r.setId(nextID);
 			records.add(r);
-		} else {
-			context.ui.notifyWarning("called saveRecord with ID not 0:" + r);
 		}
 	}
 
@@ -253,4 +255,37 @@ public class PvpDataInterface {
 		return maxID;
 	}
 
+	public Map<String,String> getMetadataMap() {
+		return metadata;
+	}
+
+	/**
+	 * @return True if data was changed.
+	 */
+	public boolean setMetadata(String name, String value) {
+		if (name.length() > 100 || name.length() == 0) {
+			throw new RuntimeException("metadata name cannot be longer than 100 chars or less than 1: " + name);
+		}
+		String oldVal = null;
+		if (metadata == null) {
+			metadata = new HashMap<>();
+		}
+		if (AppUtil.stringEmpty(value)) {
+			metadata.remove(name);
+		} else {
+			if (value.length() > 1000) {
+				throw new RuntimeException("metadata value cannot be longer than 1000");
+			}
+			oldVal = metadata.get(name);
+			metadata.put(name, value);
+		}
+		return AppUtil.equalsWithEmpty(value, oldVal);
+	}
+
+	public String getMetadata(String name) {
+		if (metadata == null) {
+			return null;
+		}
+		return metadata.get(name);
+	}
 }

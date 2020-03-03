@@ -88,5 +88,9 @@ public class BCTableModelHeterVert implements BCTableModel {
 		fieldsToDisplay.add(PvpField.CF_VIRTUAL_PLACE_HOLDER);
 		return fieldsToDisplay;
 	}
+
+	public boolean isVertModel() {
+		return true;
+	}
 	
 }

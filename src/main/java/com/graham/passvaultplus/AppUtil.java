@@ -35,6 +35,18 @@ public class AppUtil {
 			return dfNoTime.parse(d);
 		}
 	}
+
+	public static Date parseDate2(final String d) throws ParseException {
+		if (d == null || d.length() == 0) {
+			return null;
+		}
+
+		try {
+			return dfNoTime.parse(d);
+		} catch (Exception e) {
+			return df.parse(d);
+		}
+	}
 	
 	/**
 	 * Parse a date String. Then set the year so that it is the next one in the future
@@ -249,6 +261,17 @@ public class AppUtil {
 			return false;
 		}
 		return obj1.equals(obj2);
+	}
+
+	public static boolean equalsWithEmpty(final String s1, final String s2) {
+		if (stringEmpty(s1)) {
+			return stringEmpty(s2);
+		}
+		return s1.equals(s2);
+	}
+
+	public static boolean stringEmpty(String s) {
+		return s == null || s.length() == 0;
 	}
 
 	public static boolean stringNotEmpty(String s) {

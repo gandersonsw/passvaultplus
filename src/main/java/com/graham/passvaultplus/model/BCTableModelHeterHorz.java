@@ -79,4 +79,8 @@ public class BCTableModelHeterHorz implements BCTableModel {
 
 		return fieldsToDisplay;
 	}
+
+	public boolean isVertModel() {
+		return false;
+	}
 }

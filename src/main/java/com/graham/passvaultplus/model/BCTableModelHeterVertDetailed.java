@@ -122,4 +122,8 @@ public class BCTableModelHeterVertDetailed implements BCTableModel {
 		return fieldsToDisplay;
 	}
 
+	public boolean isVertModel() {
+		return true;
+	}
+
 }

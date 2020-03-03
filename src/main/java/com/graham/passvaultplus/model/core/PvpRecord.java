@@ -87,6 +87,11 @@ public class PvpRecord {
 	Map<String, String> getCustomFields() {
 		return fields;
 	}
+/*
+  // Throws parse exception if can't parse field
+	public Date getCustomFieldAsDate(PvpField field) {
+		return AppUtil.parseDate2(getCustomField(field.getName()));
+	} */
 
 	public String getCustomField(final String fieldName) {
 		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||

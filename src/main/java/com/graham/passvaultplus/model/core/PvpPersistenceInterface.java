@@ -28,7 +28,8 @@ public class PvpPersistenceInterface {
 		quit, // the application is quiting
 		cud,  // there was a Create, Update or Delete
 		major, // some major change
-		init // TODO maybe delete this
+		init, // TODO maybe delete this
+		metadata // there was a change to the metadata
 	}
 
 	public static final String EXT_COMPRESS = "zip";

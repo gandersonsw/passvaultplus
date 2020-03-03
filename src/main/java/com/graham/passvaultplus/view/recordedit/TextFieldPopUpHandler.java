@@ -74,7 +74,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 			return;
 		}
 		
-		if (field == null || field.getType() == null) {
+		if (field == null) {
 			return;
 		}
 		
@@ -82,7 +82,7 @@ public class TextFieldPopUpHandler implements FocusListener {
 			return;
 		}
 		
-		if (field.getType().equals(PvpField.TYPE_DATE)) {
+		if (field.isTypeDate()) {
 			popup = new DatePicker(mainFrame, textField, false, undoManager);
 			return;
 		}

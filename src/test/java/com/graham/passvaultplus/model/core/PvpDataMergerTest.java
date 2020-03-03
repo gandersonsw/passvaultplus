@@ -128,7 +128,7 @@ public class PvpDataMergerTest {
 				//records1.add(r3);
 				//di1rec3 = r3;
 			}
-			di1 = new PvpDataInterface(context, types1, records1, p.di1.maxId);
+			di1 = new PvpDataInterface(context, types1, records1, p.di1.maxId, null);
 		}
 		{
 			List<PvpType> types2 = createTestTypes();
@@ -155,7 +155,7 @@ public class PvpDataMergerTest {
 					//di1rec3 = r3;
 				}
 			}
-			di2 = new PvpDataInterface(context, types2, records2, p.di2.maxId);
+			di2 = new PvpDataInterface(context, types2, records2, p.di2.maxId, null);
 		}
 	}
 

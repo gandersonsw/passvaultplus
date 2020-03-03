@@ -4,6 +4,8 @@ package com.graham.passvaultplus.model.core;
 import java.util.Comparator;
 import java.util.Date;
 
+import com.graham.passvaultplus.AppUtil;
+
 public class PvpRecordComparator implements Comparator<PvpRecord> {
 
 	private final PvpField sortField;
@@ -44,9 +46,11 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 				retVal = Integer.compare(r1.getId(), r2.getId());
 				break;
 			case PvpField.CFID_UNDEF:
-				String v1 = r1.getCustomField(sortField.getName());
-				String v2 = r2.getCustomField(sortField.getName());
-				retVal = compareStrings(v1, v2);
+				if (sortField.isTypeDate()) {
+					retVal = compareDates(r1.getCustomField(sortField.getName()), r2.getCustomField(sortField.getName()));
+				} else {
+					retVal = compareStrings(r1.getCustomField(sortField.getName()), r2.getCustomField(sortField.getName()));
+				}
 				break;
 		}
 
@@ -57,7 +61,20 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 		return retVal;
 	}
 
-	private int compareDates(Date d1, Date d2) {
+	int compareDates(String s1, String s2) {
+		Date d1 = null;
+		Date d2 = null;
+		try { d1 = AppUtil.parseDate2(s1); } catch (Exception e) { }
+		try { d2 = AppUtil.parseDate2(s2); } catch (Exception e) { }
+
+		if (d1 == null && d2 == null) {
+			return compareStrings(s1, s2);
+		} else {
+			return compareDates(d1, d2);
+		}
+	}
+
+	int compareDates(Date d1, Date d2) {
 		if (d1 == null && d1 == null) {
 			return 0;
 		} else if (d1 == null) {
@@ -69,7 +86,7 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 		}
 	}
 
-	private int compareStrings(String s1, String s2) {
+	int compareStrings(String s1, String s2) {
 		if (s1 == null || s1.length() == 0) {
 			if (s2 == null || s2.length() == 0) {
 				return 0;

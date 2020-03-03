@@ -119,5 +119,9 @@ public class BCTableModelHomogVert implements BCTableModel {
 
 		context.prefs.getRecordListViewOptions().addCommonFields(fieldsToDisplay);
 	}
-	
+
+	public boolean isVertModel() {
+		return false;
+	}
+
 }

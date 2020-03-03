@@ -1,6 +1,8 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
+import com.graham.passvaultplus.AppUtil;
+
 public class PvpField {
 
 	// for category type only
@@ -92,6 +94,18 @@ public class PvpField {
 	public String getType() {
 		return type;
 	}
+
+	public boolean isTypeDate() {
+		return type.equals(TYPE_DATE);
+	}
+
+	public boolean isTypeString() {
+		return type.equals(TYPE_STRING);
+	}
+
+	public boolean isTypeLongString() {
+		return type.equals(TYPE_LONG_STRING);
+	}
 	
 	public String getClassification() {
 		return classification;
@@ -107,6 +121,9 @@ public class PvpField {
 	
 	public void setType(String t) {
 		type = t;
+		if (AppUtil.stringEmpty(t)) {
+			type = TYPE_STRING;
+		}
 	}
 	
 	public void setClassification(String c) {

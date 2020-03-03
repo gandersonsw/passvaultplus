@@ -32,6 +32,15 @@ public class PvpContextData {
 		return rtDataInterface;
 	}
 
+	/**
+	 * Call with null value to delete.
+	 */
+	public void setMetaData(String name, String value) {
+		if (rtDataInterface.setMetadata(name, value)) {
+			dataChanged(PvpPersistenceInterface.SaveTrigger.metadata);
+		}
+	}
+
 	public void saveRecord(final PvpRecord r) {
 		rtDataInterface.saveRecord(r);
 		dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
