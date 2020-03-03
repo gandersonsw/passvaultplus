@@ -2,7 +2,7 @@ PassVaultPlus is a secure personal password manager. It can be extended for othe
 
 http://passvaultplus.com/
 
-- - -Gradle Build - - -
+- - - Gradle Build - - -
 gradle -q run
 
 gradle -q jar

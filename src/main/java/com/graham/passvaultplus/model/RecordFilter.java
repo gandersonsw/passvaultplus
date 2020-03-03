@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpField;
@@ -24,6 +23,7 @@ public class RecordFilter {
 	private BCTableModelHeterHorz modelHeterHorz;
 	private BCTableModelHomogVert modelHomogVert;
 	private BCTableModelHomogHorz modelHomogHorz;
+	private BCTableModelHeterVertDetailed modelHeterVertDetailed;
 
 	private BCTableModel currentModel;
 
@@ -48,6 +48,9 @@ public class RecordFilter {
 		}
 		if (modelHomogHorz != null) {
 			modelHomogHorz.flushCache();
+		}
+		if (modelHeterVertDetailed != null) {
+			modelHeterVertDetailed.flushCache();
 		}
 	}
 
@@ -92,10 +95,18 @@ public class RecordFilter {
 			}
 		} else {
 			if (isVert) {
-				if (modelHeterVert == null) {
-					modelHeterVert = new BCTableModelHeterVert(this, context);
+				if (getRecordCount() < 26) {
+					// show more details if there are a limited number of records
+					if (modelHeterVertDetailed == null) {
+						modelHeterVertDetailed = new BCTableModelHeterVertDetailed(this, context);
+					}
+					currentModel = modelHeterVertDetailed;
+				} else {
+					if (modelHeterVert == null) {
+						modelHeterVert = new BCTableModelHeterVert(this, context);
+					}
+					currentModel = modelHeterVert;
 				}
-				currentModel = modelHeterVert;
 			} else {
 				if (modelHeterHorz == null) {
 					modelHeterHorz = new BCTableModelHeterHorz(this, context);
@@ -139,7 +150,7 @@ public class RecordFilter {
 		if (data == null) {
 			doWork();
 		}
-		return (PvpRecord)data.get(index);
+		return data.get(index);
 	}
 
 	public boolean isAllTheSameType() {

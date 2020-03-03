@@ -40,7 +40,7 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 			case PvpField.CFID_TYPE:
 				retVal = compareStrings(r1.getType().getName(), r2.getType().getName());
 				break;
-			case PvpField.CFID_INDENTITY:
+			case PvpField.CFID_IDENTITY:
 				retVal = Integer.compare(r1.getId(), r2.getId());
 				break;
 			case PvpField.CFID_UNDEF:

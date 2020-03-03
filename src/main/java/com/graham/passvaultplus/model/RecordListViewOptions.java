@@ -69,19 +69,21 @@ public class RecordListViewOptions {
 	}
 
 	public void addCommonFields(List<PvpField> typeFields) {
-		for (int i = 0; i < fieldVisible.length; i++) {
-			if (fieldVisible[i]) {
-				typeFields.add(PvpField.getCoreField(mapIndexToCfid(i)));
-			}
-		}
+		addCommonFields(typeFields, null);
 	}
 
 	public void addCommonFields(List<PvpField> typeFields, Set<Integer> excludeCfids) {
 		for (int i = 0; i < fieldVisible.length; i++) {
 			if (fieldVisible[i]) {
 				PvpField f = PvpField.getCoreField(mapIndexToCfid(i));
-				if (!excludeCfids.contains(f.getCoreFieldId())) {
-					typeFields.add(f);
+				if (excludeCfids == null || !excludeCfids.contains(f.getCoreFieldId())) {
+					if (f.getCoreFieldId() == PvpField.CFID_TYPE) {
+						typeFields.add(0, f);
+					} else if (f.getCoreFieldId() == PvpField.CFID_CATEGORY) {
+						typeFields.add(0, f);
+					} else {
+						typeFields.add(f);
+					}
 				}
 			}
 		}

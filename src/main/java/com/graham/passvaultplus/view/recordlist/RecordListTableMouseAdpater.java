@@ -81,7 +81,7 @@ public class RecordListTableMouseAdpater extends MouseAdapter {
 		popup.add(vertOpts);
 
 		sortMenu = new JMenu("Sorting");
-		sortMenu.add(new SortAction(PvpField.CF_INDENTITY).createMI());
+		sortMenu.add(new SortAction(PvpField.CF_IDENTITY).createMI());
 		sortMenu.add(new SortAction(PvpField.CF_CATEGORY).createMI());
 		sortMenu.add(new SortAction(PvpField.CF_TYPE).createMI());
 		sortMenu.add(new SortAction(PvpField.CF_CREATION_DATE).createMI());

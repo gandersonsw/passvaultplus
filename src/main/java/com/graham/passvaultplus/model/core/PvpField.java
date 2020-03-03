@@ -25,7 +25,7 @@ public class PvpField {
 	final static public int CFID_SUMMARY = 906;
 	final static public int CFID_FULL = 907;
 	final static public int CFID_PLACE_HOLDER = 908;
-	final static public int CFID_INDENTITY = 998;
+	final static public int CFID_IDENTITY = 998;
 	final static public int CFID_UNDEF = 999;
 
 	// Core Fields
@@ -37,7 +37,7 @@ public class PvpField {
 	final static public PvpField CF_VIRTUAL_SUMMARY = new PvpField(CFID_SUMMARY, "Summary", null);
 	final static public PvpField CF_VIRTUAL_FULL = new PvpField(CFID_FULL, "Full", null);
 	final static public PvpField CF_VIRTUAL_PLACE_HOLDER = new PvpField(CFID_PLACE_HOLDER, "", null);
-	final static public PvpField CF_INDENTITY = new PvpField(CFID_INDENTITY, "ID", null);
+	final static public PvpField CF_IDENTITY = new PvpField(CFID_IDENTITY, "ID", null);
 
 	private final int coreFieldId;
 	private String name;
