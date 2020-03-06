@@ -1,0 +1,148 @@
+# The pound sign starts a commented line
+# The dash indicates a link. It must have a space after the dash. (can use tabs to have a hierarchy)
+#    If no link is found in the document, the topic will not be linked
+# A topic section uses 4 dashes and spaces. example: "- - - - Test - - - -"
+# A sub-topic section uses 2 dashes and spaces. example: "- - Test - -"
+# The first section is the starting section
+# "-N" to create a new line break (can use -N 123 for any number of newlines)
+# "-N ON" - to start not ignoring new line breaks (turn this off with "-N OFF")
+## "-F 9BIU" F: font, 9=size (can have 1-9), B=Bold, I = italic, U = underline
+## "-L http://www.passvaultplus.com" starts a link
+## "-E" to end previous control
+## "-E ALL" to end all controls
+## A comment is only a comment if the first non-whitespace char in the line is "#"
+## A topic or link or control is only valid if the first non-whitespace char in the line is "-". It will be treated as normal text otherwise
+## Whitespace before a control will be ignored on following lines until that control ends
+- - - - Help Topics - - - -
+	- Getting Started
+		- Settings
+		- Basics and Hints
+	- Records
+	- Dashboard
+	- Diagnostics
+	- Settings
+	- Schema Editor
+	- 5 Year
+
+- - - - Getting Started: Settings - - - -
+What most describes how you want to do right now?
+	- I want to get going quick and try it out
+	- I have fairly sensitive data, I want it to be easy to access
+	- I have very sensitive data and I want to make sure it is secure
+
+- - - - I want to get going quick and try it out - - - -
+
+In this case, you may want to to leave the encryption turned off. You can turn it on later at any time. This will allow
+you to test out the features without having to remember a password.
+
+- - - - I have fairly sensitive data, I want it to be easy to access - - - -
+
+In that case you want to get a password that has a "good" amount of entropy.
+You can use the save password option along with a PIN so that you don't need to
+enter the entire password every time. It is very important that you don't forget your
+password. Perhaps write it down and put it in a very secure place. Ideally, you would
+just want to commit it to memory. If you forget your PIN, you can always use the password
+to reset the PIN. The timeout is the time in minutes until you have to re-enter the PIN.
+This is a way to lock out people if you are away from your computer. You data file will
+be very secure if you upload it to the cloud or have it on physical backup disk. If your
+computer was stolen or hard-drive copied, it would be possible to get access to you data,
+but it would still have a good level of security even in that case.
+
+
+- - - - I have very sensitive data and I want to make sure it is secure - - - -
+
+In that case, you should check the "Encrypted" checkbox, and use a password that is 22 characters long.
+In general 128 bit encryption is good enough. You can use the 256 bit encryption if you have very sensitive
+data. This is the solution that has the tightest security and it would be very difficult for some else to get
+access to your data even if your computer was stolen. You can use the same PIN as the password you used.
+
+- - - - Getting Started : Basics and Hints - - - -
+Right clicking in the records table area brings up some options to show additional fields, change the layout, and sort.
+Right clicking in an text field editor allows you to generate passwords
+
+- - - - Records - - - -
+
+When first starting, the Records tab is shown. Is shows all the records you have saved. You can narrow the displayed records by typing text into the “Filter” field. It is not case sensitive and all fields will be searched. You can also limit to a certain type of record or to a certain category. Double-clicking on the list will open up the detailed editor for that record.
+
+- - - - Dashboard - - - -
+The dashboard provides summary about all the data. In the future, more things may be added here.
+
+- - Upcoming Dates - -
+The "Todo" data type has a date field, if it is in the past, or upcoming within the "Number of days shown", it will be included here.
+The "Important Date" data type has a date field. The year of the date is ignored when determining if it should be included here.
+
+- - - - Diagnostics - - - -
+In general, you should ignore this area.
+-N 2
+One exception is if you want to recover a deleted or changed record. The previous databases will exist in the same
+directory as the main data, with a date stamp. You can search those by selecting "SearchBackups". After you click
+search, it will search all the old databases for that text and output the file name and ID or the records. You can
+then use that to re-open the record. Select "OpenBackupRecord", enter the file it was found in, and then ":" and
+then the ID of the record. You can then save the record if you want to add it back to the database.
+-N 2
+You can use "SetAllModDate" to set the modification date on every record in the database.
+You can use "SetAllCreateDate" to set the creation date on every record in the database.
+You can use "Exit" if you want to exit immediately without saving.
+-N 2
+If you are troubleshooting, this may provide some additional information. But in general, if you are that deep into troubleshooting, it may be best to contact the author, so the issue you are dealing with can be documented or fixed.
+
+- - - - Settings - - - -
+
+- - - - Schema Editor - - - -
+This allows you to change existing datatypes or create new ones. To edit an existing type, choose it from the type menu and press "Edit". Press add field to add a new field. Check the delete field checkbox to remove one. It will be deleted when you press the "Save Changes" button. The values of the fields will be deleted also. The "to string (short)" must be one of the fields in the type. The value of "formatted" can be any text. Values from the type will be inserted into the string when the name is inside the square brackets. For example, if you have an address type with a "City" and "State" fields, and you set it to "[City] , [State]", and the address was for Chicago Illinois, the formatted sting would be "Chicago , Illinois". You can use "\n" to indicate a newline should be added. When deleting a type, all the records of that type will be deleted also.
+
+
+- - - - Examples - - - -
+
+Hello world
+-L http://www.passvaultplus.com
+Pass Vault Plus
+-E
+
+Normal Text
+	-F B
+	Bold Text
+		-F I
+		Bold Italic Text
+	-E ALL
+Back to normal
+
+- - - - 5 Year - - - -
+
+-N ON
+Being a sociopath - see people as ways to get what you want, ways to more power.
+If my goal is to have kids, I need to be with someone I don’t really love.
+If I am with someone I love, I don’t have control. Its really hard to walk away, its really hard to accept it if they don’t want kids,
+In my past, I did not walk away from people that I loved that did not love me back.
+	I did not walk away from people that loved me that I did not love back.
+	I did not walk away from people that I thought someday could have their shit together.
+	    do the hard thing now and walk away. I hold on too hard. Some people don’t hold on hard enough.
+Do the ends justify the means?
+love - love : no one controls the other.
+animals - you have complete control over them
+
+Things I look positively at:
+	Graduated at 22, worked and did well in real world.
+	Bought a good house, was a good investment
+	went to Europe for 3 months, went to france for 2 weeks, went to kenya for 2 weeks, went to costa rica, did several road trips
+	have a good friends
+	don’t have any debts
+	create fun projects (frisky golf, dock, furniture)
+
+Things that are mediocre:
+	have some money saved in 401K
+	have a nice place to live
+
+Things I look negatively at:
+	sold house and bought condo - lost equity, scared of condo market
+	m to Asia - regret doing that
+	started drinking too much
+	never developed confidence, ability to meet people, feel un-athletic,
+	(?) never got married to the right person
+	dont get rid of bad people, boundary issues: LM, CJ, JH,
+	failed with: AT, KK, LB, KM, AK
+	Burned out in career after about 29
+	Wish I would have fostered relationship with mom, dad, brother, and extended family
+
+-N OFF
+

@@ -278,4 +278,34 @@ public class AppUtil {
 		return s != null && s.length() > 0;
 	}
 
+	public static Integer tryParseInt(String s) {
+		if (stringEmpty(s)) {
+			return null;
+		}
+		try {
+			int i = Integer.parseInt(s);
+			return new Integer(i);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public static String repeatString(String s, Integer rc) {
+		if (rc == null) {
+			return s;
+		}
+		int irc = rc.intValue();
+		if (rc == 0) {
+			return "";
+		}
+		if (rc == 1) {
+			return s;
+		}
+		StringBuffer sb = new StringBuffer(s.length() * rc);
+		for (int i = 0; i < rc; i++) {
+			sb.append(s);
+		}
+		return sb.toString();
+	}
+
 }

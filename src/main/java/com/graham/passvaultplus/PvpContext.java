@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -165,7 +166,12 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		}
 	}
 
-	public static String getResourceText(final String rname) {
+	@FunctionalInterface
+	public interface IOFunction<R> {
+		R apply(java.io.BufferedReader t) throws IOException;
+	}
+
+	public static <T> T processResourceTextStream(final String rname, IOFunction<T> func) {
 		InputStream sourceStream = null;
 		InputStreamReader isr = null;
 		BufferedReader bufR = null;
@@ -182,17 +188,10 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 
 			bufR = new BufferedReader(isr);
 
-			StringBuilder sb = new StringBuilder();
-			String line;
-			while ((line = bufR.readLine()) != null) {
-				sb.append(line);
-				sb.append("\n");
-			}
-			return sb.toString();
-
+			return func.apply(bufR);
 		} catch (Exception e) {
 			PvpContextUI.getActiveUI().notifyWarning("WARN118 cant load resource text:" + rname, e);
-			return "";
+			return null; // "";
 		} finally {
 			if (bufR != null) {
 				try { bufR.close(); } catch (Exception e) { }
@@ -206,6 +205,21 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		}
 	}
 
+	public static String getResourceText(final String rname) {
+		String ret = processResourceTextStream(rname, bufR -> {
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = bufR.readLine()) != null) {
+				sb.append(line);
+				sb.append("\n");
+			}
+			return sb.toString();
+		});
+		if (ret == null) {
+			return "";
+		}
+		return ret;
+	}
 
 	public void updateUIForPrefsChange() {
 		if (uiMain != null) {
