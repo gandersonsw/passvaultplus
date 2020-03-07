@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 
 public class EulaDialog {

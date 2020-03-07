@@ -20,11 +20,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.GoToUrlAction;
 import com.graham.dashdoc.DdParser;
-import com.graham.dashdoc.DdUiBuilder;
+import com.graham.dashdoc.DdSwingUiBuilder;
 import com.graham.dashdoc.model.DashDoc;
 import com.graham.dashdoc.model.DdSection;
 
@@ -32,7 +32,7 @@ public class HelpBuilder implements OtherTabBuilder {
 
 	final public static String EMAIL = "gandersonsw@gmail.com";
 
-	private DdUiBuilder ddBuilder;
+	private DdSwingUiBuilder ddBuilder;
 	private DashDoc ddHelp;
 	private HelpHome helpHome;
 	private JPanel mainPanel;
@@ -48,7 +48,7 @@ public class HelpBuilder implements OtherTabBuilder {
 		com.graham.passvaultplus.PvpContextUI.checkEvtThread("00151");
 
 		ddHelp = PvpContext.processResourceTextStream("help", new DdParser(context));
-		ddBuilder = new DdUiBuilder(ddHelp, new DdLinkClickAdaptor());
+		ddBuilder = new DdSwingUiBuilder(ddHelp, new DdLinkClickAdaptor());
 		mainPanel = new JPanel(new BorderLayout());
 
 		{

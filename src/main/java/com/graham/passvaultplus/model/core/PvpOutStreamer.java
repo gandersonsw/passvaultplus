@@ -11,7 +11,7 @@ import java.util.zip.ZipOutputStream;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 

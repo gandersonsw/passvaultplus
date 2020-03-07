@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.actions.GoToUrlAction;
 import com.graham.passvaultplus.PvpException;
 

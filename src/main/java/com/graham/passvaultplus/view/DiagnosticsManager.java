@@ -7,8 +7,8 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.BCUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;

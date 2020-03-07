@@ -4,7 +4,7 @@ package com.graham.dashdoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.dashdoc.model.DashDoc;
 import com.graham.dashdoc.model.DdLink;

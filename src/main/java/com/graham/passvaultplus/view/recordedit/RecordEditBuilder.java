@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.swing.*;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;

@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.framework;
+package com.graham.util;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

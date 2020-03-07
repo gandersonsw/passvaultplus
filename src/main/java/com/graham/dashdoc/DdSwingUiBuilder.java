@@ -20,13 +20,13 @@ import com.graham.dashdoc.model.DdPart;
 import com.graham.dashdoc.model.DdSection;
 import com.graham.dashdoc.model.DdText;
 
-public class DdUiBuilder {
+public class DdSwingUiBuilder {
 
 	private final DashDoc ddoc;
 	private final MouseListener linkClickListener;
 	private boolean optionDdSectionLabelCentered = true;
 
-	public DdUiBuilder(DashDoc d, MouseListener linkClickListenerParam) {
+	public DdSwingUiBuilder(DashDoc d, MouseListener linkClickListenerParam) {
 		linkClickListener = linkClickListenerParam;
 		ddoc = d;
 	}

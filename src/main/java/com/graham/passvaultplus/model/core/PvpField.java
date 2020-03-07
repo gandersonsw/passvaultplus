@@ -1,7 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 
 public class PvpField {
 

@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 
 public class PasswordChangedAction extends AbstractAction {
 

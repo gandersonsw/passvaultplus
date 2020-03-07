@@ -1,5 +1,5 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.passvaultplus;
+package com.graham.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

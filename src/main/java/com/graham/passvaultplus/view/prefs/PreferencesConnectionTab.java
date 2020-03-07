@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PinTimerTask;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;

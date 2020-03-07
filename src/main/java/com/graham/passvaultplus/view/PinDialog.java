@@ -7,10 +7,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
-import com.graham.passvaultplus.view.longtask.LTManager;
 
 public class PinDialog {
 	private JDialog d;

@@ -3,20 +3,18 @@ package com.graham.passvaultplus.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
-import java.net.URI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.BCUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;

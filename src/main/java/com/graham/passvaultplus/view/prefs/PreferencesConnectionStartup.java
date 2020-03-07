@@ -5,12 +5,11 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
-import com.graham.passvaultplus.view.longtask.LTManager;
 
 /**
  * When the app is first starting and the just the preferences are displayed.

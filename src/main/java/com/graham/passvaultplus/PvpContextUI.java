@@ -1,7 +1,7 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.longtask.LTManager;

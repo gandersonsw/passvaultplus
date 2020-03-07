@@ -4,7 +4,7 @@ package com.graham.passvaultplus.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;

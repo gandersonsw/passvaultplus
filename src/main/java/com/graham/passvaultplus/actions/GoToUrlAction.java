@@ -1,8 +1,7 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.actions;
 
-import com.graham.framework.BCUtil;
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextUI;
 
 import javax.swing.*;

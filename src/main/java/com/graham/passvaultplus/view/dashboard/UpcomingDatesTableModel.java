@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
 

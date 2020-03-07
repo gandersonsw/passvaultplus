@@ -7,6 +7,7 @@ import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
+import com.graham.util.AppUtil;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

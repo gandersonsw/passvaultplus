@@ -3,7 +3,7 @@ package com.graham.passvaultplus.model.core;
 
 import java.util.ArrayList;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextUI;
 
 /**

@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.framework.BCUtil;
+import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.model.core.PvpInStreamer;

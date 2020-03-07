@@ -4,7 +4,7 @@ package com.graham.passvaultplus.model.core;
 import java.util.Comparator;
 import java.util.Date;
 
-import com.graham.passvaultplus.AppUtil;
+import com.graham.util.AppUtil;
 
 public class PvpRecordComparator implements Comparator<PvpRecord> {
 
