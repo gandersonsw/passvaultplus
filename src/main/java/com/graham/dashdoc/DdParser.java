@@ -1,17 +1,17 @@
 /* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.dashdoc;
+package com.graham.dashdoc;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
 import com.graham.passvaultplus.AppUtil;
 import com.graham.passvaultplus.PvpContext;
-import com.graham.swingui.dashdoc.model.DashDoc;
-import com.graham.swingui.dashdoc.model.DdLink;
-import com.graham.swingui.dashdoc.model.DdPart;
-import com.graham.swingui.dashdoc.model.DdSection;
-import com.graham.swingui.dashdoc.model.DdSubsection;
-import com.graham.swingui.dashdoc.model.DdText;
+import com.graham.dashdoc.model.DashDoc;
+import com.graham.dashdoc.model.DdLink;
+import com.graham.dashdoc.model.DdPart;
+import com.graham.dashdoc.model.DdSection;
+import com.graham.dashdoc.model.DdSubsection;
+import com.graham.dashdoc.model.DdText;
 
 /**
  * Dash Doc Parser

@@ -1,5 +1,5 @@
 /* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.dashdoc;
+package com.graham.dashdoc;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,12 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
-import com.graham.swingui.dashdoc.model.DashDoc;
-import com.graham.swingui.dashdoc.model.DdContainer;
-import com.graham.swingui.dashdoc.model.DdLink;
-import com.graham.swingui.dashdoc.model.DdPart;
-import com.graham.swingui.dashdoc.model.DdSection;
-import com.graham.swingui.dashdoc.model.DdText;
+import com.graham.dashdoc.model.DashDoc;
+import com.graham.dashdoc.model.DdContainer;
+import com.graham.dashdoc.model.DdLink;
+import com.graham.dashdoc.model.DdPart;
+import com.graham.dashdoc.model.DdSection;
+import com.graham.dashdoc.model.DdText;
 
 public class DdUiBuilder {
 

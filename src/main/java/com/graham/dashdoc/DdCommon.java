@@ -1,5 +1,5 @@
 /* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.dashdoc;
+package com.graham.dashdoc;
 
 public class DdCommon {
 

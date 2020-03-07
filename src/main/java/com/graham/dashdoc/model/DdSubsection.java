@@ -1,7 +1,7 @@
 /* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.swingui.dashdoc.model;
+package com.graham.dashdoc.model;
 
-import com.graham.swingui.dashdoc.DdCommon;
+import com.graham.dashdoc.DdCommon;
 
 public class DdSubsection extends DdContainer {
 	String title;

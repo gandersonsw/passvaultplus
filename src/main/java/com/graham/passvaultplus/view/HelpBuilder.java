@@ -23,10 +23,10 @@ import javax.swing.border.EmptyBorder;
 import com.graham.framework.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.GoToUrlAction;
-import com.graham.swingui.dashdoc.DdParser;
-import com.graham.swingui.dashdoc.DdUiBuilder;
-import com.graham.swingui.dashdoc.model.DashDoc;
-import com.graham.swingui.dashdoc.model.DdSection;
+import com.graham.dashdoc.DdParser;
+import com.graham.dashdoc.DdUiBuilder;
+import com.graham.dashdoc.model.DashDoc;
+import com.graham.dashdoc.model.DdSection;
 
 public class HelpBuilder implements OtherTabBuilder {
 
