@@ -15,9 +15,6 @@ import java.util.function.BiConsumer;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.PvpContextUI;
-
 public class ResourceUtil {
 	static final public boolean JAR_BUILD = true; // TODO i think this can be removed
 
@@ -50,7 +47,7 @@ public class ResourceUtil {
 			if (JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
-				sourceStream = PvpContext.class.getResourceAsStream("/" + rname + ".txt");
+				sourceStream = ResourceUtil.class.getResourceAsStream("/" + rname + ".txt");
 				isr = new InputStreamReader(sourceStream);
 			} else {
 				File sourceFile = new File("src/main/resources/" + rname + ".txt");
@@ -62,7 +59,6 @@ public class ResourceUtil {
 			return func.apply(bufR);
 		} catch (Exception e) {
 			getExceptionHandler().accept(e, rname);
-			//PvpContextUI.getActiveUI().notifyWarning("WARN118 cant load resource text:" + rname, e);
 			return null; // "";
 		} finally {
 			if (bufR != null) {
@@ -93,7 +89,6 @@ public class ResourceUtil {
 		return ret;
 	}
 
-
 	private static final Map<String, ImageIcon> cachedIcons = new HashMap<>();
 
 	public static ImageIcon getIcon(final String imageName) {
@@ -109,7 +104,7 @@ public class ResourceUtil {
 			Image img;
 			if (JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar, instead of the location of the class.
-				InputStream imageStream = PvpContext.class.getResourceAsStream("/images/" + imageName + ".png");
+				InputStream imageStream = ResourceUtil.class.getResourceAsStream("/images/" + imageName + ".png");
 				img = ImageIO.read(imageStream);
 			} else {
 				img = ImageIO.read(new File("src/main/resources/images/" + imageName + ".png"));
@@ -123,7 +118,7 @@ public class ResourceUtil {
 			cachedIcons.put(cachedName, i);
 			return i;
 		} catch (Exception e) {
-			PvpContextUI.getActiveUI().notifyWarning("PvpContext.getIcon :: " + imageName, e);
+			getExceptionHandler().accept(e, "image:" + imageName);
 			return null;
 		}
 	}
