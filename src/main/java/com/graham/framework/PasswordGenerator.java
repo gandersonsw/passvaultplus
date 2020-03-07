@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 public class PasswordGenerator {
 
-  static public enum CharCategory {
+  public enum CharCategory {
     digit(48, 57),
     lower(97, 122),
     upper(65, 90),

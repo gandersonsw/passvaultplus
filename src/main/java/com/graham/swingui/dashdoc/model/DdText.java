@@ -1,3 +1,4 @@
+/* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.swingui.dashdoc.model;
 
 public class DdText implements DdPart {

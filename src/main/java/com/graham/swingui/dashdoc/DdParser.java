@@ -1,3 +1,4 @@
+/* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.swingui.dashdoc;
 
 import java.io.BufferedReader;
@@ -30,10 +31,10 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 		section,
 		subsection,
 		link,
-		control,
+		newline,
 		error,
 		nothing,
-		newline
+		naturalNewline
 	}
 
 	PvpContext context;
@@ -66,16 +67,16 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 				case link:
 					part = parseLink(line);
 					break;
-				case control:
-					part = parseControl(line);
+				case newline:
+					part = parseNewline(line);
 					break;
 				case error:
 					context.ui.notifyWarning("DdParser: line is in error: " + line);
 					break;
 				case nothing:
-					// this is a blank line. these cna be ignored
+					// this is a blank line. these can be ignored
 					break;
-				case newline:
+				case naturalNewline:
 					part = new DdText("\n");
 					break;
 			}
@@ -93,7 +94,7 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 		String t = line.trim();
 		if (t.length() == 0) {
 			if (keepNewlines) {
-				return LineType.newline;
+				return LineType.naturalNewline;
 			} else {
 				return LineType.nothing;
 			}
@@ -106,7 +107,7 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 				return LineType.subsection;
 			}
 			if (t.startsWith(Control_Newline)) {
-				return LineType.control;
+				return LineType.newline;
 			}
 			if (t.startsWith(Control_Link)) {
 				return LineType.link;
@@ -146,18 +147,16 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 		return new DdLink(line, tCount);
 	}
 
-	private DdPart parseControl(String line) {
+	private DdPart parseNewline(String line) {
 		line = line.trim();
-		if (line.startsWith(Control_Newline)) {
-			String option = getControlOption(line);
-			if (option.equals("ON")) {
-				keepNewlines = true;
-			} else if (option.equals("OFF")) {
-				keepNewlines = false;
-			} else {
-				Integer i = AppUtil.tryParseInt(option);
-				return new DdText(AppUtil.repeatString("\n", i));
-			}
+		String option = getControlOption(line);
+		if (option.equals("ON")) {
+			keepNewlines = true;
+		} else if (option.equals("OFF")) {
+			keepNewlines = false;
+		} else {
+			Integer i = AppUtil.tryParseInt(option);
+			return new DdText(AppUtil.repeatString("\n", i));
 		}
 		return null;
 	}

@@ -1,63 +1,173 @@
-Getting Started
+# Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved
+# The pound sign starts a commented line
+# The dash character is used for control and formatting. If a non-whitespace char is before the dash, the dash will be treated s normal text
+# A single dash indicates a link. It must have a space after the dash. (use tabs to have a hierarchy)
+#    If no section is found in the document, the link will just be text
+# A section uses 4 dashes and spaces. example: "- - - - Test - - - -"
+# A sub-section uses 2 dashes and spaces. example: "- - Test - -"
+# The first section is the starting section
+# "-N" to create a new line break (can use -N 123 for any number of newlines)
+# "-N ON" - to start not ignoring new line breaks (turn this off with "-N OFF")
+# Ideas for future functionality: "-F" for font, "-L" for http link
+# A comment is only a comment if the first non-whitespace char in the line is "#"
+# A topic or link or control is only valid if the first non-whitespace char in the line is "-". It will be treated as normal text otherwise
+- - - - Help Topics - - - -
+	- Getting Started
+		- Settings
+		- Basics and Hints
+	- Records
+	- Editing Records
+	- Dashboard
+	- Diagnostics
+	- Settings
+	- Schema Editor
+	- Upgrade from pre version 1.2
 
-What most describes how you want to do right now:
+- - - - Getting Started - - - -
+PassVaultPlus is designed as a password a manager. But it can organize, secure and
+backup any important or private data you want. For example, you may find it useful to store birthdays or
+anniversary's as "Important Date"s. You may want to save "Address"s here so they are backed up and secure.
+-N ON
 
 
-I want to get going quick and try it out
-	
-In that case, you may want to to leave the encryption turned off. You can turn it on later at any time. This will allow you to test out the features without having to remember a password.
+To save a password:
+1. Click on the new button. (or use control-n)
+2. Select "Account" from the type menu.
+3. Enter a Title and whatever other information you want to include.
+4. Click "Save"
+
+-N OFF
+In the documentation the word "Record" is used to define the things you are creating. So an "Account" is a record. An "Address" is a record.
+Its kind of like a little document. Each record has certain "fields" it has. For example, an "Account" record has a "Password" field,
+and a "Username" field, and other fields. An "Address" record has other fields, like "First Name", "Phone Number".
 
 
-I have fairly sensitive data, I want it to be easy to access
 
-In that case you want to get a password that has a "good" amount of entropy. You can use the save password option along with a PIN so that you don't need to enter the entire password every time. It is very important that you don't forget your password. Perhaps write it down and put it in a very secure place. Ideally, you would just want to commit it to memory. If you forget your PIN, you can always use the password to reset the PIN. The timeout is the time in minutes until you have to re-enter the PIN. This is a way to lock out people if you are away from your computer. You data file will be very secure if you upload it to the cloud or have it on physical backup disk. If your computer was stolen or hard-drive copied, it would be possible to get access to you data, but it would still have a good level of security even in that case.
+- - - - Getting Started: Settings - - - -
+If you are looking to just look around and try things out, you may want to leave encryption off for now.
+You can turn it on at anytime later.
 
-
-I have very sensitive data and I want to make sure it is secure.
-	
-In that case, you should check the "Encrypted" checkbox, and use a password that is 22 characters long. In general 128 bit encryption is good enough. You can use the 256 bit encryption if you have very sensitive data. This is the solution that has the tightest security and it would be very difficult for some else to get access to your data even if your computer was stolen. You can use the same PIN as the password you used.
-
-
-My hard-drive is encrypted
-	
-In that case you have a little more security. It would be safer to choose the "Save Password" option. And if you wish to backup your data on the cloud or other physical device, or email it, you can do so without worry about the data being accessible.
+In the "Settings" panel
+1. Check "Encrypted"
+2. Enter a password. You want the password strength to be "Average" or preferably "Good".
 
 
-Automatic cloud backup
+- - I have fairly sensitive data, I want it to be easy to access - -
 
-There are several options such as Google Drive or iCloud that will automatically back you data up to the cloud. To use PassVaultPlus with those services save the data file to a directory that is automatically backed up with the cloud service
+In that case you want to get a password that has a "good" amount of entropy.
+You can use the save password option along with a PIN so that you don't need to
+enter the entire password every time. It is very important that you don't forget your
+password. Perhaps write it down and put it in a very secure place. Ideally, you would
+just want to commit it to memory. If you forget your PIN, you can always use the password
+to reset the PIN. The timeout is the time in minutes until you have to re-enter the PIN.
+This is a way to lock out people if you are away from your computer. You data file will
+be very secure if you upload it to the cloud or have it on physical backup disk. If your
+computer was stolen or hard-drive copied, it would be possible to get access to you data,
+but it would still have a good level of security even in that case.
 
+- - I have very sensitive data, I want to make sure it is secure - -
 
-Detailed Help
+In that case, you should check the "Encrypted" checkbox, and use a password that is 22 characters long.
+In general 128 bit encryption is good enough. You can use the 256 bit encryption if you have very sensitive
+data. This is the solution that has the tightest security and it would be very difficult for some else to get
+access to your data even if your computer was stolen. You can use the same PIN as the password you used.
 
-The “Records” tab
+- - - - Getting Started : Basics and Hints - - - -
+Right clicking in the records table area brings up some options to show additional fields, change the layout, and sort.
+-N 2
 
-When first starting, the Records tab is shown. Is shows all the records you have saved. You can narrow the displayed records by typing text into the “Filter” field. It is not case sensitive and all fields will be searched. You can also limit to a certain type of record or by a certain category. Double-clicking on the list will open up the detailed editor for that record.
+Right clicking in an text field editor allows you to generate passwords
 
-The buttons	
-Quit - Quits the application. Checks if there is unsaved data first.
+- - - - Records - - - -
+When first starting, the Records tab is shown. Is shows all the records you have saved. You can narrow the displayed records by
+typing text into the “Filter” field. It is not case sensitive and will match against any of the fields of the record.
+You can also limit to a certain
+type of record or to a certain category. Double-clicking on the list will open up the detailed editor for that record.
 
-Settings - Opens the setting panel. The data file format can be changed here. The data file can be compressed and/or encrypted. If it is encrypted, you can enter the password here, and the password can be saved independently of the file.
+- - Views - -
+A vertical view is when there are two columns, the "Field" and "Value" columns. When displayed this way, when you click anywhere
+in the row, you can use "Copy" to copy the value of the field.
+-N 2
 
-Schema Editor - This allows you to change existing datatypes or create new ones. To edit an existing type, choose it from the type menu and press "Edit". Press add field to add a new field. Check the delete field checkbox to remove one. It will be deleted when you press the "Save Changes" button. The values of the fields will be deleted also. The "to string (short)" must be one of the fields in the type. The value of "formatted" can be any text. Values from the type will be inserted into the string when the name is inside the square brackets. For example, if you have an address type with a "City" and "State" fields, and you set it to "[City] , [State]", and the address was for Chicago Illinois, the formatted sting would be "Chicago , Illinois". You can use "\n" to indicate a newline should be added. When deleting a type, all the records of that type will be deleted also.
-	
-New Record - Create a new record. When creating a new record, you can change the type.
+A horizontal view is when each record is displayed on one row, with a column for each value. When displayed this way,
+when you click somewhere, the field that you clicked on is what will be copied (even the entire row is highlighted).
+-N 2
 
-Edit Record - Edit the selected record in the record list. If many are selected, only the first editor will be opened. In the record editor panel, there are buttons on the left to copy the entire field. If it is a hidden field, it will still be copied. If a field has values that are reused 3 or more times, a drop down menu will appear on the right of that field to auto-fill the value. If the field is a secure field, its value will be shown as “******” and an unlock button will show up on the right that will allow you to see the field and edit it. On the bottom there is a button to revert all the field. A button to cancel - closing the tab and disregarding any edits you made. And a save button to save all the values and close the tab. The first time you save a record, the creation date will be set. Whenever you edit a record and save it, the modification date will be updated.
-	
-Delete Record - Delete the selected records in the list or if a record editor is open, delete the record for that editor. The data file is immediately updated.
-	
-Undo - Undo the last action. Up to 50 undos are saved.
+Selecting view
+-N
+Right click in the record list to pop-up options to change the view (Vertical Table Layout).
 
-Redo - Redo the last action.
+- - Data - -
+-N ON
+The list behaves different if there are different data types displayed.
 
-Cut - Cut the selected text
+If all the records display are the same type:
+1. Sorting by any field, not just he ones that are common to all types.
+2. When the horizontal view is used, it will display all the fields.
+-N OFF
+- - Sorting - -
+Right click in the record list to pop-up options to change the view (Sorting).
 
-Copy - Copy the selected Text.
+- - Other Fields - -
+By default, these fields are not displayed: Creation Date, Modification Date, Type, Category, Notes.
+These fields by be shown by selecting them from the pop-up menu.
 
-Paste - Paste text
-	
-Select All - Select all the items or text.
+- - - - Editing Records - - - -
+In the record editor
+panel, there are buttons on the left to copy the entire field. If it is a hidden field, it will still be copied. If a field
+has values that are reused 3 or more times, a drop down menu will appear on the right of that field to auto-fill the value.
+If the field is a secure field, its value will be shown as “******” and an unlock button will show up on the right that will
+allow you to see the field and edit it. On the bottom there is a button to revert all the field. A button to cancel -
+closing the tab and disregarding any edits you made. And a save button to save all the values and close the tab. The first time
+you save a record, the creation date will be set. Whenever you edit a record and save it, the modification date will be updated.
 
-Help - Bring up help screen
+- - - - Dashboard - - - -
+The dashboard provides summary about all the data. In the future, more things may be added here.
 
+- - Upcoming Dates - -
+The "Todo" data type has a date field, if it is in the past, or upcoming within the "Number of days shown", it will be included here.
+The "Important Date" data type has a date field. The year of the date is ignored when determining if it should be included here.
+
+- - - - Diagnostics - - - -
+In general, you should ignore this area.
+-N 2
+One exception is if you want to recover a deleted or changed record. The previous databases will exist in the same
+directory as the main data, with a date stamp. You can search those by selecting "SearchBackups". After you click
+search, it will search all the old databases for that text and display the file name and ID or the records. You can
+then use that to re-open the record. Select "OpenBackupRecord", enter the file it was found in, and then ":" and
+then the ID of the record. You can then save the record if you want to add it back to the database.
+-N 2
+You can use "SetAllModDate" to set the modification date on every record in the database.
+You can use "SetAllCreateDate" to set the creation date on every record in the database.
+You can use "Exit" if you want to exit immediately without saving.
+-N 2
+If you are troubleshooting, this may provide some additional information. But in general, if you are that deep into troubleshooting, it may be best to contact the author, so the issue you are dealing with can be documented or fixed.
+
+- - - - Settings - - - -
+
+- - - - Schema Editor - - - -
+This allows you to change existing datatypes or create new ones. To edit an existing type, choose it from the type menu and
+press "Edit". Press add field to add a new field. Check the delete field checkbox to remove one. It will be deleted when
+you press the "Save Changes" button. The values of the fields will be deleted also. The "to string (short)" must be one of
+the fields in the type. The value of "formatted" can be any text. Values from the type will be inserted into the string
+when the name is inside the square brackets. For example, if you have an address type with a "City" and "State" fields,
+and you set it to "[City] , [State]", and the address was for Chicago Illinois, the formatted sting would be "Chicago ,
+Illinois". You can use "\n" to indicate a newline should be added. When deleting a type, all the records of that
+type will be deleted also.
+
+- - - - Upgrade from pre version 1.2 - - - -
+-N ON
+If you are upgrading from a earlier version of Pass Vault Plus, you need to manually convert the file format.
+
+Steps to upgrade file format:
+1. If you are using an unencrypted and uncompressed file format, there is nothing you need to do.
+2. If you are using a compressed and encrypted file format, skip to step 5.
+3. Open your existing version of Pass Vault Plus.
+4. Open the Settings and check "Compressed", save and quit.
+5. Find the Pass Vault Plus Database file on your system, and change the file name extension from ".zip.bmn" to ".pvp"
+
+How to know where the Pass Vault data file is:
+1. Open Pass Vault Plus, open the Settings screen.
+2. The data file location is displayed at the top.
+
+-N OFF

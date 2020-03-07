@@ -295,14 +295,14 @@ public class AppUtil {
 			return s;
 		}
 		int irc = rc.intValue();
-		if (rc == 0) {
+		if (irc == 0) {
 			return "";
 		}
-		if (rc == 1) {
+		if (irc == 1) {
 			return s;
 		}
-		StringBuffer sb = new StringBuffer(s.length() * rc);
-		for (int i = 0; i < rc; i++) {
+		StringBuffer sb = new StringBuffer(s.length() * irc);
+		for (int i = 0; i < irc; i++) {
 			sb.append(s);
 		}
 		return sb.toString();

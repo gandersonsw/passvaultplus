@@ -1,3 +1,4 @@
+/* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.swingui.dashdoc.model;
 
 import java.util.ArrayList;
@@ -47,8 +48,6 @@ public abstract class DdContainer implements DdPart {
 		}
 	}
 
-	public String getTitle() {
-		return null;
-	}
+	public abstract String getTitle();
 }
 
