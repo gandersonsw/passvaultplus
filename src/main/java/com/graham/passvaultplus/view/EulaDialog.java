@@ -11,8 +11,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 public class EulaDialog {
 
@@ -33,7 +33,7 @@ public class EulaDialog {
 		eulaText.setBorder(new EmptyBorder(4,4,4,4));
 		eulaText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		eulaText.setEditable(false);
-		eulaText.setText(PvpContext.getResourceText("eula-english"));
+		eulaText.setText(ResourceUtil.getResourceText("eula-english"));
 		eulaText.setLineWrap(true);
 		eulaText.setWrapStyleWord(true);
 		JScrollPane textScroll = new JScrollPane(eulaText);
@@ -52,7 +52,7 @@ public class EulaDialog {
 		d.setMinimumSize(new Dimension(340, 240));
 		d.setPreferredSize(new Dimension(600, 400));
 		d.setSize(new Dimension(600, 400));
-		BCUtil.center(d);
+		SwingUtil.center(d);
 		d.setVisible(true); // this is the line that causes the dialog to Block
 	}
 

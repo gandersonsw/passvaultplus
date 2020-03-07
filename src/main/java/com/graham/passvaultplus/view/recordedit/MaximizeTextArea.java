@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
 
 public class MaximizeTextArea extends AbstractAction {
 
@@ -37,7 +37,7 @@ public class MaximizeTextArea extends AbstractAction {
 		JScrollPane sp = new JScrollPane(smallTextArea);
 		editContext.maximizedTextAreaPanel.add(sp, BorderLayout.CENTER);
 		
-		JButton minButton = new JButton(new MinimizeTextArea(PvpContext.getIcon("panel-minimize-small"), editContext, smallTextArea, taParent));
+		JButton minButton = new JButton(new MinimizeTextArea(ResourceUtil.getIcon("panel-minimize-small"), editContext, smallTextArea, taParent));
 		minButton.setFocusable(false);
 		minButton.setToolTipText("return text to normal size");
 		JPanel westPanel = new JPanel(new BorderLayout());

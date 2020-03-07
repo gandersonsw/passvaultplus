@@ -11,6 +11,7 @@ import com.graham.passvaultplus.model.core.PvpBackingStoreFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpPrefFacade;
+import com.graham.util.ResourceUtil;
 
 public class ResetPrefsAction extends AbstractAction {
 
@@ -47,7 +48,7 @@ public class ResetPrefsAction extends AbstractAction {
 		d.getContentPane().setLayout(new BorderLayout());
 
 		{
-			ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+			ImageIcon icn = ResourceUtil.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
 			JLabel icnLab = new JLabel(icn);
 			icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
 			JPanel p = new JPanel(new BorderLayout());

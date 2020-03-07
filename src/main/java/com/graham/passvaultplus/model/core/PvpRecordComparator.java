@@ -4,7 +4,7 @@ package com.graham.passvaultplus.model.core;
 import java.util.Comparator;
 import java.util.Date;
 
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 
 public class PvpRecordComparator implements Comparator<PvpRecord> {
 
@@ -64,8 +64,8 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 	int compareDates(String s1, String s2) {
 		Date d1 = null;
 		Date d2 = null;
-		try { d1 = AppUtil.parseDate2(s1); } catch (Exception e) { }
-		try { d2 = AppUtil.parseDate2(s2); } catch (Exception e) { }
+		try { d1 = DateUtil.parseDate2(s1); } catch (Exception e) { }
+		try { d2 = DateUtil.parseDate2(s2); } catch (Exception e) { }
 
 		if (d1 == null && d2 == null) {
 			return compareStrings(s1, s2);

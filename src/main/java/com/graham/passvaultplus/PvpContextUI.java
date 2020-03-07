@@ -1,10 +1,11 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.view.DiagnosticsManager;
 import com.graham.passvaultplus.view.ErrorFrame;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -150,7 +151,7 @@ public class PvpContextUI {
 			}
 			@Override
 			public void run() {
-					ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+					ImageIcon icn = ResourceUtil.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
 					final Window w = LTManager.waitingUserInputStart();
 					JOptionPane.showMessageDialog(w == null ? getFrame() : w, message, title, JOptionPane.INFORMATION_MESSAGE, icn);
 					LTManager.waitingUserInputEnd();
@@ -167,7 +168,7 @@ public class PvpContextUI {
 				}
 				@Override
 				public void run() {
-						ImageIcon icn = PvpContext.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
+						ImageIcon icn = ResourceUtil.getIcon("option-pane-bang", PvpContext.OPT_ICN_SCALE);
 						final Window w = LTManager.waitingUserInputStart();
 						JOptionPane.showMessageDialog(w == null ? getFrame() : w, message, title == null ? "Error" : title, JOptionPane.INFORMATION_MESSAGE, icn);
 						LTManager.waitingUserInputEnd();
@@ -185,7 +186,7 @@ public class PvpContextUI {
 			}
 			@Override
 			public void run() {
-					final ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+					final ImageIcon icn = ResourceUtil.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
 					final Window w = LTManager.waitingUserInputStart();
 					result = JOptionPane.showConfirmDialog(w == null ? getFrame() : w, message, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 					LTManager.waitingUserInputEnd();
@@ -205,7 +206,7 @@ public class PvpContextUI {
 	public static void showDialog(JDialog d) {
 		d.pack();
 		if (activeUI.uiFrame == null) {
-			BCUtil.center(d);
+			SwingUtil.center(d);
 		} else {
 			d.setLocationRelativeTo(activeUI.uiFrame);
 		}

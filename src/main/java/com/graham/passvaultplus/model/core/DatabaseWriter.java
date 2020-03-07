@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.util.XmlUtil;
 
 /**
  * Write the database out to a stream
@@ -49,16 +49,16 @@ public class DatabaseWriter {
 			bw.write("		<type>");
 			bw.newLine();
 			bw.write("			<name>");
-			bw.write(BCUtil.makeXMLSafe(t.getName()));
+			bw.write(XmlUtil.makeXMLSafe(t.getName()));
 			bw.write("</name>");
 			bw.newLine();
 			bw.write("			<to-string>");
-			bw.write(BCUtil.makeXMLSafe(t.getToStringCode()));
+			bw.write(XmlUtil.makeXMLSafe(t.getToStringCode()));
 			bw.write("</to-string>");
 			bw.newLine();
 			if (t.getFullFormat() != null && t.getFullFormat().length() > 0) {
 				bw.write("			<full-format>");
-				bw.write(BCUtil.makeXMLSafe(t.getFullFormat()));
+				bw.write(XmlUtil.makeXMLSafe(t.getFullFormat()));
 				bw.write("</full-format>");
 				bw.newLine();
 			}
@@ -77,17 +77,17 @@ public class DatabaseWriter {
 			bw.write("			<field");
 			if (f.getClassification() != null) {
 				bw.write(" classification=\"");
-				bw.write(BCUtil.makeXMLSafe(f.getClassification()));
+				bw.write(XmlUtil.makeXMLSafe(f.getClassification()));
 				bw.write("\"");
 			}
 			bw.write(">");
 			bw.newLine();
 			bw.write("				<name>");
-			bw.write(BCUtil.makeXMLSafe(f.getName()));
+			bw.write(XmlUtil.makeXMLSafe(f.getName()));
 			bw.write("</name>");
 			bw.newLine();
 			bw.write("				<type>");
-			bw.write(BCUtil.makeXMLSafe(f.getType()));
+			bw.write(XmlUtil.makeXMLSafe(f.getType()));
 			bw.write("</type>");
 			bw.newLine();
 			bw.write("			</field>");
@@ -121,10 +121,10 @@ public class DatabaseWriter {
 
 		for (Entry<String, String> entry : r.getAllFields().entrySet()) {
 			bw.write("			<");
-			final String name = BCUtil.makeXMLName((String) entry.getKey());
+			final String name = XmlUtil.makeXMLName((String) entry.getKey());
 			bw.write(name);
 			bw.write(">");
-			bw.write(BCUtil.makeXMLSafe(entry.getValue()));
+			bw.write(XmlUtil.makeXMLSafe(entry.getValue()));
 			bw.write("</");
 			bw.write(name);
 			bw.write(">");
@@ -139,10 +139,10 @@ public class DatabaseWriter {
 		bw.write("	<metadata>");
 		for (Entry<String, String> entry : data.entrySet()) {
 			bw.write("		<entry name=\"");
-			final String name = BCUtil.makeXMLName((String) entry.getKey());
+			final String name = XmlUtil.makeXMLName((String) entry.getKey());
 			bw.write(name);
 			bw.write("\">");
-			bw.write(BCUtil.makeXMLSafe(entry.getValue()));
+			bw.write(XmlUtil.makeXMLSafe(entry.getValue()));
 			bw.write("</entry>");
 			bw.newLine();
 		}

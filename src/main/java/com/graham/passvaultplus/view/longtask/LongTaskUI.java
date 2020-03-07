@@ -1,9 +1,10 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.longtask;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,7 +19,6 @@ public class LongTaskUI extends JDialog {
 		static long SHOW_DELAY = 600;
 		static long MIN_SHOW_TIME = 500;
 
-		//private JDialog cancelDialog;
 		private JTextArea progressText;
 		private JLabel timerLabel;
 		private Thread timerThread;
@@ -33,7 +33,7 @@ public class LongTaskUI extends JDialog {
 				getContentPane().setLayout(new BorderLayout());
 
 				{
-						ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+						ImageIcon icn = ResourceUtil.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
 						JLabel icnLab = new JLabel(icn);
 						icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
 						JPanel p = new JPanel(new BorderLayout());
@@ -60,7 +60,7 @@ public class LongTaskUI extends JDialog {
 
 						progressText.setPreferredSize(new Dimension(300, 68));
 						progressText.setEditable(false);
-						progressText.setFont(BCUtil.getBodyFont());
+						progressText.setFont(SwingUtil.getBodyFont());
 						progressText.setBackground(p.getBackground());
 
 						stepsChanged(steps);

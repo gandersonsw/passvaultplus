@@ -7,12 +7,13 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.OtherTab;
+import com.graham.util.ResourceUtil;
 
 public class ShowPrefsAction extends AbstractAction {
 	final private PvpContext context;
 
 	public ShowPrefsAction(final PvpContext contextParam) {
-		super(null, PvpContext.getIcon("settings"));
+		super(null, ResourceUtil.getIcon("settings"));
 		context = contextParam;
 	}
 

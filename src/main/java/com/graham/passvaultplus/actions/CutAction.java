@@ -9,12 +9,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
 
 public class CutAction extends AbstractAction {
 
 	public CutAction() {
-		super(null, PvpContext.getIcon("cut"));
+		super(null, ResourceUtil.getIcon("cut"));
 	}
 
 	public void actionPerformed(ActionEvent e) {

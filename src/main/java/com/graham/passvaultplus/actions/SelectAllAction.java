@@ -9,12 +9,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
 
 public class SelectAllAction extends AbstractAction {
 
 	public SelectAllAction() {
-		super(null, PvpContext.getIcon("selall"));
+		super(null, ResourceUtil.getIcon("selall"));
 	}
 
 	public void actionPerformed(ActionEvent e) {

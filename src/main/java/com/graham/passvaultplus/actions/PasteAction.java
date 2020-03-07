@@ -9,12 +9,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
 
 public class PasteAction extends AbstractAction {
 
 	public PasteAction() {
-		super(null, PvpContext.getIcon("paste"));
+		super(null, ResourceUtil.getIcon("paste"));
 	}
 
 	public void actionPerformed(ActionEvent e) {

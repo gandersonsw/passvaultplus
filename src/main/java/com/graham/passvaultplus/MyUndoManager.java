@@ -13,6 +13,8 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.UndoableEdit;
 
+import com.graham.util.ResourceUtil;
+
 /**
  * There is an UndoManager provided by Swing, but we need additional functionality to handle the TabPane, and to coalesce events
  */
@@ -106,7 +108,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	class UndoAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		public UndoAction() {
-			super(null, PvpContext.getIcon("undo"));
+			super(null, ResourceUtil.getIcon("undo"));
 			setEnabled(false);
 		}
 		public void actionPerformed(ActionEvent e) {
@@ -123,7 +125,7 @@ public class MyUndoManager implements UndoableEditListener, CaretListener {
 	class RedoAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		public RedoAction() {
-			super(null, PvpContext.getIcon("redo"));
+			super(null, ResourceUtil.getIcon("redo"));
 			setEnabled(false);
 		}
 		public void actionPerformed(ActionEvent e) {

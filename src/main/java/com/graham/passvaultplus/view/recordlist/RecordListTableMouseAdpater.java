@@ -11,12 +11,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.RecordFilter;
 import com.graham.passvaultplus.model.RecordListViewOptions;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpType;
+import com.graham.util.GenUtil;
 
 public class RecordListTableMouseAdpater extends MouseAdapter {
 	final PvpContext context;
@@ -95,7 +95,7 @@ public class RecordListTableMouseAdpater extends MouseAdapter {
 	}
 
 	private void checkSortMenuType() {
-		if (AppUtil.equalsWithNull(filter.getTypeIfAllSame(), sortMenuType)) {
+		if (GenUtil.equalsWithNull(filter.getTypeIfAllSame(), sortMenuType)) {
 			return;
 		}
 

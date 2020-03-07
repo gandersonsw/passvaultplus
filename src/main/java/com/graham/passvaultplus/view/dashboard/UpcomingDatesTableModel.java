@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
 
@@ -79,7 +79,7 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 				Date d = null;
 				String completeDate = r.getCustomField("Complete Date");
 				try {
-					d = AppUtil.parseDate1(completeDate);
+					d = DateUtil.parseDate1(completeDate);
 				} catch (ParseException e) {
 					//e.printStackTrace();
 				}
@@ -92,7 +92,7 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 				}
 			} else if (t.equals("Important Date")) {
 				String dateString = r.getCustomField("Date");
-				Date d = AppUtil.parseUpcomingDate(dateString);
+				Date d = DateUtil.parseUpcomingDate(dateString);
 				if (d != null) {
 					if (d.before(cutoffDate)) {
 						records.add(new UpcomingDate(r, d, dateString));

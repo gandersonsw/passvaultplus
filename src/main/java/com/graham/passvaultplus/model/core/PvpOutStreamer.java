@@ -11,9 +11,9 @@ import java.util.zip.ZipOutputStream;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.UserAskToChangeFileException;
+import com.graham.util.FileUtil;
 
 /**
  * Get a Writer for the database file. Take care of encryption and compression.
@@ -48,7 +48,7 @@ public class PvpOutStreamer {
 	 * When writing, encryption happens first, then compression.
 	 */
 	public BufferedWriter getWriter() throws Exception {
-		//AppUtil.checkBackupFileHourly(fileToWrite);
+		//DateUtil.checkBackupFileHourly(fileToWrite);
 
 		try {
 			if (backingStore.isEncrypted(false)) {
@@ -68,7 +68,7 @@ public class PvpOutStreamer {
 
 			if (backingStore.isCompressed(false)) {
 				zipStream = new ZipOutputStream(outStream);
-				String zippedFileName = BCUtil.setFileExt("PvpData",
+				String zippedFileName = FileUtil.setFileExt("PvpData",
 						backingStore.isEncrypted(false) ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;

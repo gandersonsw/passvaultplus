@@ -9,11 +9,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.view.prefs.PreferencesBuilder;
 import com.graham.passvaultplus.view.prefs.PreferencesConnectionStartup;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 public class StartupOptionsFrame extends JFrame {
 
@@ -28,7 +29,7 @@ public class StartupOptionsFrame extends JFrame {
 		this.getContentPane().setLayout(new BorderLayout());
 		this.getContentPane().add(c, BorderLayout.CENTER);
 		
-		final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt90deg"));
+		final JLabel logo = new JLabel(ResourceUtil.getIcon("pvplogo24pt90deg"));
 		logo.setBorder(new EmptyBorder(5,3,0,1));
 		final JPanel westLayout = new JPanel(new BorderLayout());
 		westLayout.add(logo, BorderLayout.NORTH);
@@ -36,7 +37,7 @@ public class StartupOptionsFrame extends JFrame {
 		
 		addWindowListener(new ExitOnCloseAdapter());
 		pack();
-		BCUtil.center(this);
+		SwingUtil.center(this);
 		setResizable(false);
 		PvpContextUI.getActiveUI().setFrame(this);
 		setVisible(true);

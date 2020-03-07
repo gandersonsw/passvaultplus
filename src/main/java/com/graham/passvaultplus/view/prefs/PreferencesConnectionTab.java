@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PinTimerTask;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
@@ -14,6 +13,7 @@ import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
+import com.graham.util.FileUtil;
 
 /**
  * When the preferences are displayed as a tab in the main panel.
@@ -79,8 +79,8 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	@Override
 	public boolean isDefaultPath(final String path) {
 		// return true if the path did not change from what it was before
-		String pathNoExt = BCUtil.getFileNameNoExt(path, true);
-		String defaultNoExt = BCUtil.getFileNameNoExt(context.prefs.getDataFilePath(), true);
+		String pathNoExt = FileUtil.getFileNameNoExt(path, true);
+		String defaultNoExt = FileUtil.getFileNameNoExt(context.prefs.getDataFilePath(), true);
 		return defaultNoExt.equals(pathNoExt);
 	}
 

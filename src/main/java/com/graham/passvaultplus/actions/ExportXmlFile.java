@@ -6,10 +6,11 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.model.core.PvpInStreamer;
+import com.graham.util.GenUtil;
+import com.graham.util.SwingUtil;
 
 public class ExportXmlFile extends AbstractAction implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -31,7 +32,7 @@ public class ExportXmlFile extends AbstractAction implements Runnable {
 	public void run() {
 		final PvpInStreamer fileReader = new PvpInStreamer(backingStore, context);
 		try {
-			String rawXML = BCUtil.dumpInputStreamToString(fileReader.getStream());
+			String rawXML = GenUtil.dumpInputStreamToString(fileReader.getStream());
 			System.out.println("ExportXmlFile.actionPerformed - xml size:" + rawXML.length()); // don't use Diagnostics because this is error handle code
 
 			SwingUtilities.invokeAndWait(() -> {
@@ -42,7 +43,7 @@ public class ExportXmlFile extends AbstractAction implements Runnable {
 				f.getContentPane().setLayout(new BorderLayout());
 				f.getContentPane().add(sp, BorderLayout.CENTER);
 				f.pack();
-				BCUtil.setFrameSizeAndCenter(f, 700, 400);
+				SwingUtil.setFrameSizeAndCenter(f, 700, 400);
 
 				f.setVisible(true);
 			});

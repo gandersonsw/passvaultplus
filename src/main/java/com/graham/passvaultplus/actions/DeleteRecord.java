@@ -14,12 +14,13 @@ import javax.swing.undo.UndoableEdit;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
+import com.graham.util.ResourceUtil;
 
 public class DeleteRecord extends AbstractAction {
 	final private PvpContext context;
 
 	public DeleteRecord(final PvpContext contextParam) {
-		super(null, PvpContext.getIcon("delete"));
+		super(null, ResourceUtil.getIcon("delete"));
 		context = contextParam;
 	}
 

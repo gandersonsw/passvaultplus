@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
@@ -17,6 +16,7 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.view.longtask.LTManager;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
+import com.graham.util.FileUtil;
 
 import javax.swing.*;
 
@@ -61,7 +61,7 @@ public class PvpPersistenceInterface {
 		}
 
 	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
-		String fname = BCUtil.getFileNameNoExt(fnameWithExt, true);
+		String fname = FileUtil.getFileNameNoExt(fnameWithExt, true);
 		if (compressed) {
 			fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
 		}

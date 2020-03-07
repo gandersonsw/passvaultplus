@@ -3,8 +3,8 @@ package com.graham.passvaultplus.model.core;
 
 import java.util.ArrayList;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.util.StringUtil;
 
 /**
  * Format the record in its default human readable plain-text format.
@@ -13,14 +13,14 @@ public class PvpRecordFormatter {
 
 	ArrayList<FormatPart> formatParts;
 
-	static interface FormatPart {
+	interface FormatPart {
 		String format(final PvpRecord r);
 	}
 
 	static class ConstantPart implements FormatPart {
 		private String text;
 		public ConstantPart(final String textParam) {
-			text = BCUtil.replaceAll(textParam, "\\n", "\n");
+			text = StringUtil.replaceAll(textParam, "\\n", "\n");
 		}
 		public String format(final PvpRecord r) {
 			return text;

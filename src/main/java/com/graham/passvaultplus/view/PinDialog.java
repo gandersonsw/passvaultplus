@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.util.ResourceUtil;
 
 public class PinDialog {
 	private JDialog d;
@@ -40,7 +41,7 @@ public class PinDialog {
 		d.getContentPane().add(centerPanel, BorderLayout.CENTER);
 		
 		{
-			final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt90deg"));
+			final JLabel logo = new JLabel(ResourceUtil.getIcon("pvplogo24pt90deg"));
 			logo.setBorder(new EmptyBorder(5,3,0,6));
 			final JPanel westLayout = new JPanel(new BorderLayout());
 			westLayout.add(logo, BorderLayout.NORTH);
@@ -123,7 +124,7 @@ public class PinDialog {
 		public void actionPerformed(ActionEvent e) {
 			int result = JOptionPane.OK_OPTION;
 			if (hasUnsavedChanges) {
-				final ImageIcon icn = PvpContext.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
+				final ImageIcon icn = ResourceUtil.getIcon("option-pane-confirm", PvpContext.OPT_ICN_SCALE);
 				result = JOptionPane.showConfirmDialog(d, "There are unsaved changes. If you quit now, they will not be saved.", "Quit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, icn);
 			}
 			if (result == JOptionPane.OK_OPTION) {

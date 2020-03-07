@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.util.ResourceUtil;
 
 public class ErrUIGoogleDocFileNotFound {
 
@@ -75,7 +76,7 @@ public class ErrUIGoogleDocFileNotFound {
 	}
 
 	private JPanel buildWest() {
-		ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+		ImageIcon icn = ResourceUtil.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
 		JLabel icnLab = new JLabel(icn);
 		icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
 		JPanel p = new JPanel(new BorderLayout());

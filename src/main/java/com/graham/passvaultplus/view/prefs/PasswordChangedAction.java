@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import com.graham.util.BCUtil;
+import com.graham.util.StringUtil;
 
 public class PasswordChangedAction extends AbstractAction {
 
@@ -17,7 +17,7 @@ public class PasswordChangedAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		final int bits = BCUtil.dataInString(context.getPasswordText());
+		final int bits = StringUtil.dataInString(context.getPasswordText());
 		String rating;
 		if (bits > 128) {
 			rating = "Excellent";

@@ -1,5 +1,5 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.passvaultplus.view;
+package com.graham.swingui;
 
 import java.awt.*;
 import java.util.ArrayList;

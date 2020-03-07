@@ -1,15 +1,13 @@
-/* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
+/* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.util;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class AppUtil {
+public class DateUtil {
 
 	// Format like: "May 2, 2010 4:41 PM"
 	private static final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
@@ -55,7 +53,7 @@ public class AppUtil {
 	public static Date parseUpcomingDate(final String s) {
 		Date d = null;
 		try {
-			d = AppUtil.parseDate1(s);
+			d = DateUtil.parseDate1(s);
 			Calendar cal2 = Calendar.getInstance();
 			int curYear = cal2.get(Calendar.YEAR);
 			cal2.setTime(d);
@@ -150,31 +148,6 @@ public class AppUtil {
 		return calMonth;
 	}
 
-	public static String limitStrLen(final String s, final int maxLen) {
-		if (s.length() <= maxLen) {
-			return s;
-		}
-
-		return s.substring(0, maxLen - 3) + "...";
-	}
-
-	/**
-	 * Get the file name without a suffix, and the file suffix.
-	 * Will always return an array length 2. 1st item is name, 2nd item is file-suffix
-	 */
-	public static String[] getFileNameParts(final String fileName) {
-		int dotLoc = fileName.indexOf(".");
-		if (dotLoc == -1) {
-			String[] ret = { fileName, ""};
-			return ret;
-		}
-
-		String fileNameWithNoSuffix = fileName.substring(0, dotLoc);
-		String fileSuffix = fileName.substring(dotLoc + 1);
-		String[] ret = { fileNameWithNoSuffix, fileSuffix};
-		return ret;
-	}
-
 	/**
 	 * A format like 23:59:59.999
 	 * With HH:HH:SS.mmm
@@ -244,68 +217,6 @@ public class AppUtil {
 		}
 
 		return new Date(); // return now as a default
-	}
-
-	public static String getExceptionStackTrace(final Exception e) {
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		e.printStackTrace(pw);
-		return sw.toString();
-	}
-
-	public static boolean equalsWithNull(final Object obj1, final Object obj2) {
-		if (obj1 == null && obj2 == null) {
-			return true;
-		}
-		if (obj1 == null || obj2 == null) {
-			return false;
-		}
-		return obj1.equals(obj2);
-	}
-
-	public static boolean equalsWithEmpty(final String s1, final String s2) {
-		if (stringEmpty(s1)) {
-			return stringEmpty(s2);
-		}
-		return s1.equals(s2);
-	}
-
-	public static boolean stringEmpty(String s) {
-		return s == null || s.length() == 0;
-	}
-
-	public static boolean stringNotEmpty(String s) {
-		return s != null && s.length() > 0;
-	}
-
-	public static Integer tryParseInt(String s) {
-		if (stringEmpty(s)) {
-			return null;
-		}
-		try {
-			int i = Integer.parseInt(s);
-			return new Integer(i);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	public static String repeatString(String s, Integer rc) {
-		if (rc == null) {
-			return s;
-		}
-		int irc = rc.intValue();
-		if (irc == 0) {
-			return "";
-		}
-		if (irc == 1) {
-			return s;
-		}
-		StringBuffer sb = new StringBuffer(s.length() * irc);
-		for (int i = 0; i < irc; i++) {
-			sb.append(s);
-		}
-		return sb.toString();
 	}
 
 }

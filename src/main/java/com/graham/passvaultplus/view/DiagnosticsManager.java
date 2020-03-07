@@ -7,13 +7,13 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.graham.util.BCUtil;
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 import com.graham.passvaultplus.CommandExecuter;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTRunner;
+import com.graham.util.GenUtil;
 
 public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 	private static final boolean LOG_TO_SYSOUT = false;
@@ -75,7 +75,7 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 			sb.append("::");
 			sb.append(e.getMessage());
 			sb.append("\n");
-			sb.append(BCUtil.getExceptionTrace(e));
+			sb.append(GenUtil.getExceptionStackTrace(e));
 		}
 		if (LOG_TO_SYSOUT) {
 			System.out.println(sb);
@@ -165,7 +165,7 @@ public class DiagnosticsManager implements OtherTabBuilder, Runnable {
 
 	private StringBuilder getTimeStamp() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(AppUtil.getMillisecondTimeStamp());
+		sb.append(DateUtil.getMillisecondTimeStamp());
 		sb.append("|");
 		sb.append(Thread.currentThread().getName());
 		sb.append("| ");

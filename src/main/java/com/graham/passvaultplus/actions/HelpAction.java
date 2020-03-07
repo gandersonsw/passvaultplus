@@ -7,12 +7,13 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.OtherTab;
+import com.graham.util.ResourceUtil;
 
 public class HelpAction extends AbstractAction {
 	private final PvpContext context;
 
 	public HelpAction(PvpContext contextParam) {
-		super(null, PvpContext.getIcon("help"));
+		super(null, ResourceUtil.getIcon("help"));
 		context = contextParam;
 	}
 

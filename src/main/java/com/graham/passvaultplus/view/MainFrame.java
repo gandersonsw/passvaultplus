@@ -3,8 +3,6 @@ package com.graham.passvaultplus.view;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,6 +10,8 @@ import javax.swing.border.EmptyBorder;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.*;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
+import com.graham.swingui.OverflowLayout;
+import com.graham.util.ResourceUtil;
 
 public class MainFrame extends JFrame {
 
@@ -116,7 +116,7 @@ public class MainFrame extends JFrame {
 
 	private JPanel initFooter(final PvpContext context) {
 		final JPanel p = new JPanel(new BorderLayout());
-		final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt"));
+		final JLabel logo = new JLabel(ResourceUtil.getIcon("pvplogo24pt"));
 		logo.setBorder(new EmptyBorder(0,8,4,3));
 		p.add(logo, BorderLayout.WEST);
 

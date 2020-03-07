@@ -19,8 +19,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.util.XmlUtil;
 
 /**
  * Creates a database from a stream
@@ -176,11 +176,11 @@ public class DatabaseReader {
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (e.getName().equals("name")) {
-				rttype.setName(BCUtil.unmakeXMLSafe(e.getTextTrim()));
+				rttype.setName(XmlUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("to-string")) {
-				rttype.setToStringCode(BCUtil.unmakeXMLSafe(e.getTextTrim()));
+				rttype.setToStringCode(XmlUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("full-format")) {
-				rttype.setFullFormat(BCUtil.unmakeXMLSafe(e.getTextTrim()));
+				rttype.setFullFormat(XmlUtil.unmakeXMLSafe(e.getTextTrim()));
 			} else if (e.getName().equals("field")) {
 				rttype.addField(loadTypeField(e));
 			} else {
@@ -194,7 +194,7 @@ public class DatabaseReader {
 	private PvpField loadTypeField(final Element fieldElement) {
 		List children = fieldElement.getChildren();
 
-		String classification = BCUtil.unmakeXMLSafe(fieldElement.getAttributeValue("classification"));
+		String classification = XmlUtil.unmakeXMLSafe(fieldElement.getAttributeValue("classification"));
 		if (classification != null && classification.trim().length() == 0) {
 			classification = null;
 		}
@@ -204,9 +204,9 @@ public class DatabaseReader {
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (e.getName().equals("name")) {
-				name = BCUtil.unmakeXMLSafe(e.getTextTrim());
+				name = XmlUtil.unmakeXMLSafe(e.getTextTrim());
 			} else if (e.getName().equals("type")) {
-				type = BCUtil.unmakeXMLSafe(e.getTextTrim());
+				type = XmlUtil.unmakeXMLSafe(e.getTextTrim());
 			} else {
 				context.ui.notifyWarning("WARN106 unexpected element:" + e.getName());
 			}
@@ -263,7 +263,7 @@ public class DatabaseReader {
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			try {
-				record.setAnyField(BCUtil.unmakeXMLName(e.getName()), BCUtil.unmakeXMLSafe(e.getText()));
+				record.setAnyField(XmlUtil.unmakeXMLName(e.getName()), XmlUtil.unmakeXMLSafe(e.getText()));
 			} catch (final Exception ex) {
 				context.ui.notifyWarning("WARN110 loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
 			}

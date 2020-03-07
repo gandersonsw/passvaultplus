@@ -3,9 +3,9 @@ package com.graham.passvaultplus.view.recordedit;
 
 import javax.swing.JComboBox;
 
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.util.GenUtil;
 
 public class RecordEditFieldCategory extends RecordEditField {
 
@@ -17,7 +17,7 @@ public class RecordEditFieldCategory extends RecordEditField {
 
 	@Override
 	public boolean isEdited(PvpRecord r) {
-		return AppUtil.equalsWithNull(getSelectedCategory(), r.getCategory());
+		return GenUtil.equalsWithNull(getSelectedCategory(), r.getCategory());
 	}
 
 	private PvpRecord getSelectedCategory() {

@@ -1,8 +1,8 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.gdocs;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.util.FileUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class ToLocalCopier {
 						try {
 								inStream = new BufferedInputStream(bs.openInputStream());
 								//canCancel = false;
-								BCUtil.copyFile(inStream, context.prefs.getDataFile());
+								FileUtil.copyFile(inStream, context.prefs.getDataFile());
 						} catch (Exception e) {
 								bs.nchecks.excep = e;
 						} finally {

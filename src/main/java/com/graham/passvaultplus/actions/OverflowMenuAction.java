@@ -1,8 +1,8 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.actions;
 
-import com.graham.passvaultplus.PvpContext;
-import com.graham.passvaultplus.view.OverflowLayout;
+import com.graham.swingui.OverflowLayout;
+import com.graham.util.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +13,7 @@ public class OverflowMenuAction extends AbstractAction {
 		final private OverflowLayout ofLayout;
 
 		public OverflowMenuAction(OverflowLayout ofLayoutParam) {
-				super(null, PvpContext.getIcon("down-arrow"));
+				super(null, ResourceUtil.getIcon("down-arrow"));
 				ofLayout = ofLayoutParam;
 		}
 

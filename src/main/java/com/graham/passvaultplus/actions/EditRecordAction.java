@@ -7,12 +7,13 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.util.ResourceUtil;
 
 public class EditRecordAction extends AbstractAction {
 	private final PvpContext context;
 
 	public EditRecordAction(final PvpContext contextParam) {
-		super(null, PvpContext.getIcon("edit"));
+		super(null, ResourceUtil.getIcon("edit"));
 		context = contextParam;
 	}
 

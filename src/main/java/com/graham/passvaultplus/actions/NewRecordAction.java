@@ -10,12 +10,13 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
+import com.graham.util.ResourceUtil;
 
 public class NewRecordAction extends AbstractAction {
 	final private PvpContext context;
 
 	public NewRecordAction(final PvpContext contextParam) {
-		super(null, PvpContext.getIcon("new"));
+		super(null, ResourceUtil.getIcon("new"));
 		context = contextParam;
 	}
 

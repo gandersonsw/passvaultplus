@@ -16,9 +16,9 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.JTextComponent;
 
-import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.TextFieldChangeForwarder;
 import com.graham.passvaultplus.model.core.PvpField;
+import com.graham.util.ResourceUtil;
 
 /**
  * Builds the UI and the RecordEditField controller
@@ -76,7 +76,7 @@ class RecordEditFieldBuilder {
 		if (field.isClassificationSecret() && !reb.isNewRecord) {
 			final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name);
 			ref = refs;
-			JButton showSecretFieldButton = new JButton(new UnlockFieldAction(PvpContext.getIcon("unlock-small"), refs, reb.editContext));
+			JButton showSecretFieldButton = new JButton(new UnlockFieldAction(ResourceUtil.getIcon("unlock-small"), refs, reb.editContext));
 			showSecretFieldButton.setFocusable(false);
 			showSecretFieldButton.setToolTipText("show value");
 			rightWidget = showSecretFieldButton;
@@ -105,13 +105,13 @@ class RecordEditFieldBuilder {
 		// Build the Left Component ******************************
 		leftPanel = new JPanel(new FlowLayout());
 		leftPanel.add(new JLabel(name + ":", JLabel.RIGHT));
-		CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(PvpContext.getIcon("copy-small"), ref);
+		CopyFieldToClipboardAction copyAction = new CopyFieldToClipboardAction(ResourceUtil.getIcon("copy-small"), ref);
 		JButton copyButton = new JButton(copyAction);
 		copyButton.setFocusable(false);
 		if (field.isTypeLongString()) {
 			JPanel leftButtons = new JPanel(new BorderLayout());
 			leftButtons.add(copyButton, BorderLayout.SOUTH);
-			JButton max = new JButton(new MaximizeTextArea(PvpContext.getIcon("panel-maximize-small"), reb.editContext, (JTextArea)tf)); // TODO
+			JButton max = new JButton(new MaximizeTextArea(ResourceUtil.getIcon("panel-maximize-small"), reb.editContext, (JTextArea)tf)); // TODO
 			max.setFocusable(false);
 			max.setToolTipText("maximize this text");
 			leftButtons.add(max, BorderLayout.NORTH);

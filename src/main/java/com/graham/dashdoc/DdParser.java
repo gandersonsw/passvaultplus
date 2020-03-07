@@ -4,7 +4,6 @@ package com.graham.dashdoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.dashdoc.model.DashDoc;
 import com.graham.dashdoc.model.DdLink;
@@ -12,11 +11,13 @@ import com.graham.dashdoc.model.DdPart;
 import com.graham.dashdoc.model.DdSection;
 import com.graham.dashdoc.model.DdSubsection;
 import com.graham.dashdoc.model.DdText;
+import com.graham.util.ResourceUtil;
+import com.graham.util.StringUtil;
 
 /**
  * Dash Doc Parser
  */
-public class DdParser implements PvpContext.IOFunction<DashDoc> {
+public class DdParser implements ResourceUtil.IOFunction<DashDoc> {
 
 	static final char DASH = '-';
 	static final char COMMENT = '#';
@@ -37,7 +38,7 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 		naturalNewline
 	}
 
-	PvpContext context;
+	PvpContext context; // TODO remove this reference
 	boolean keepNewlines = false;
 
 	public DdParser(PvpContext c) {
@@ -155,8 +156,8 @@ public class DdParser implements PvpContext.IOFunction<DashDoc> {
 		} else if (option.equals("OFF")) {
 			keepNewlines = false;
 		} else {
-			Integer i = AppUtil.tryParseInt(option);
-			return new DdText(AppUtil.repeatString("\n", i));
+			Integer i = StringUtil.tryParseInt(option);
+			return new DdText(StringUtil.repeatString("\n", i));
 		}
 		return null;
 	}

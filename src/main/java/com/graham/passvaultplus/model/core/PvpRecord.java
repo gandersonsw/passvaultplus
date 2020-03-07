@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.util.GenUtil;
 
 public class PvpRecord {
 
@@ -90,7 +91,7 @@ public class PvpRecord {
 /*
   // Throws parse exception if can't parse field
 	public Date getCustomFieldAsDate(PvpField field) {
-		return AppUtil.parseDate2(getCustomField(field.getName()));
+		return DateUtil.parseDate2(getCustomField(field.getName()));
 	} */
 
 	public String getCustomField(final String fieldName) {
@@ -139,8 +140,8 @@ public class PvpRecord {
 		allFields.putAll(fields);
 
 		allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
-		allFields.put(PvpField.CF_CREATION_DATE.getName(), AppUtil.formatDate1(creationDate));
-		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), AppUtil.formatDate1(modificationDate));
+		allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDate1(creationDate));
+		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDate1(modificationDate));
 		allFields.put(PvpField.CF_TYPE.getName(), rtType.getName());
 
 		return allFields;
@@ -151,9 +152,9 @@ public class PvpRecord {
 			case PvpField.CFID_CATEGORY:
 				return category == null ? "" : category.getCustomField(PvpField.USR_CATEGORY_TITLE);
 			case PvpField.CFID_CREATION_DATE:
-				return AppUtil.formatDate1(creationDate);
+				return DateUtil.formatDate1(creationDate);
 			case PvpField.CFID_MODIFICATION_DATE:
-				return AppUtil.formatDate1(modificationDate);
+				return DateUtil.formatDate1(modificationDate);
 			case PvpField.CFID_NOTES:
 				return fields.get(field.getName());
 			case PvpField.CFID_SUMMARY:
@@ -176,13 +177,13 @@ public class PvpRecord {
 			categoryIdForValidate = fieldValue;
 		} else if (fieldName.equals(PvpField.CF_CREATION_DATE.getName())) {
 			try {
-				creationDate = AppUtil.parseDate1(fieldValue);
+				creationDate = DateUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName())) {
 			try {
-				modificationDate = AppUtil.parseDate1(fieldValue);
+				modificationDate = DateUtil.parseDate1(fieldValue);
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
@@ -275,10 +276,10 @@ public class PvpRecord {
 		}
 		int fieldCount = 5;
 		int matchCount = 0;
-		if (AppUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
+		if (GenUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
 			matchCount++;
 		}
-		if (AppUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
+		if (GenUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
 			matchCount += 4;
 		}
 
@@ -341,7 +342,7 @@ public class PvpRecord {
 		boolean changed = false;
 		for (String k : allKeys) {
 			if (keySet1.contains(k)) {
-				if (!AppUtil.equalsWithNull(fields1.get(k), fields2.get(k))) {
+				if (!GenUtil.equalsWithNull(fields1.get(k), fields2.get(k))) {
 					changed = true;
 					otherRec.setCustomField(k, fields1.get(k));
 				}

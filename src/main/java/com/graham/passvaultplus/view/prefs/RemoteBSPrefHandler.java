@@ -7,6 +7,7 @@ import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.gdocs.ChecksForNewFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.model.gdocs.ToLocalCopier;
+import com.graham.util.ResourceUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -127,7 +128,7 @@ public class RemoteBSPrefHandler {
 		d.getContentPane().setLayout(new BorderLayout());
 
 		{
-			ImageIcon icn = PvpContext.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
+			ImageIcon icn = ResourceUtil.getIcon("option-pane-info", PvpContext.OPT_ICN_SCALE);
 			JLabel icnLab = new JLabel(icn);
 			icnLab.setBorder(new EmptyBorder(16, 25, 16, 24));
 			JPanel p = new JPanel(new BorderLayout());

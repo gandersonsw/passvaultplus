@@ -19,9 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.actions.GoToUrlAction;
 import com.graham.passvaultplus.PvpException;
+import com.graham.util.SwingUtil;
 
 public class JceDialog {
 	private JDialog d;
@@ -112,7 +112,7 @@ public class JceDialog {
 		leftAlignPanel2.add(linkTE);
 		
 		final JButton copyButton = new JButton(new CopyUrlAction(linkTE));
-		BCUtil.makeButtonSmall(copyButton);
+		SwingUtil.makeButtonSmall(copyButton);
 		copyButton.setFocusable(false);
 		leftAlignPanel2.add(copyButton);
 		GoToUrlAction.checkAndAdd(leftAlignPanel2, linkStr);

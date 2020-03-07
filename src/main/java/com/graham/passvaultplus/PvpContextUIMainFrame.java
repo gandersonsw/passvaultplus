@@ -7,7 +7,7 @@ import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.recordlist.PvpViewListContext;
-import com.graham.util.AppUtil;
+import com.graham.util.StringUtil;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -123,7 +123,7 @@ public class PvpContextUIMainFrame implements ChangeListener {
 			RecordEditContext editor = getRecordEditor(rec);
 			if (editor == null) {
 				editor = RecordEditBuilder.buildEditor(context, rec, false);
-				addRecordEditor(AppUtil.limitStrLen(rec.toString(), 30), editor);
+				addRecordEditor(StringUtil.limitStrLen(rec.toString(), 30), editor);
 			}
 			setSelectedComponent(editor.getPanelInTabPane());
 		}

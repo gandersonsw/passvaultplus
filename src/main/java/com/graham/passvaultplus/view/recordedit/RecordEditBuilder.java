@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.swing.*;
 
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
@@ -86,10 +86,10 @@ public class RecordEditBuilder {
 
 		if (!isNewRecord) {
 			p.add(new JLabel(PvpField.CF_CREATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(AppUtil.formatDate1(record.getCreationDate())), editorConstraints);
+			p.add(new JLabel(DateUtil.formatDate1(record.getCreationDate())), editorConstraints);
 
 			p.add(new JLabel(PvpField.CF_MODIFICATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(AppUtil.formatDate1(record.getModificationDate())), editorConstraints);
+			p.add(new JLabel(DateUtil.formatDate1(record.getModificationDate())), editorConstraints);
 		}
 
 		JScrollPane scroll = new JScrollPane(p);

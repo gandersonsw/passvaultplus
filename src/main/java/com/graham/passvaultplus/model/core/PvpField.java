@@ -1,7 +1,7 @@
 /* Copyright (C) 2017 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.model.core;
 
-import com.graham.util.AppUtil;
+import com.graham.util.StringUtil;
 
 public class PvpField {
 
@@ -121,7 +121,7 @@ public class PvpField {
 	
 	public void setType(String t) {
 		type = t;
-		if (AppUtil.stringEmpty(t)) {
+		if (StringUtil.stringEmpty(t)) {
 			type = TYPE_STRING;
 		}
 	}

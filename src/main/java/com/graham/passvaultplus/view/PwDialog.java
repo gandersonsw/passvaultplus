@@ -18,8 +18,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
-import com.graham.passvaultplus.PvpContext;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 /**
  * Password Dialog
@@ -52,7 +52,7 @@ public class PwDialog {
 		d.getContentPane().add(centerPanel, BorderLayout.CENTER);
 		
 		{
-			final JLabel logo = new JLabel(PvpContext.getIcon("pvplogo24pt90deg"));
+			final JLabel logo = new JLabel(ResourceUtil.getIcon("pvplogo24pt90deg"));
 			logo.setBorder(new EmptyBorder(5,3,0,6));
 			final JPanel westLayout = new JPanel(new BorderLayout());
 			westLayout.add(logo, BorderLayout.NORTH);
@@ -122,7 +122,7 @@ public class PwDialog {
 		}
 		
 		d.pack();
-		BCUtil.center(d);
+		SwingUtil.center(d);
 		d.setResizable(false);
 		// TODO do a test where the cancel dialog for LongTask shows after this
 		d.setVisible(true); // this is the line that causes the dialog to Block

@@ -20,13 +20,14 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.actions.GoToUrlAction;
 import com.graham.dashdoc.DdParser;
 import com.graham.dashdoc.DdSwingUiBuilder;
 import com.graham.dashdoc.model.DashDoc;
 import com.graham.dashdoc.model.DdSection;
+import com.graham.util.ResourceUtil;
+import com.graham.util.SwingUtil;
 
 public class HelpBuilder implements OtherTabBuilder {
 
@@ -47,7 +48,7 @@ public class HelpBuilder implements OtherTabBuilder {
 	public Component build(PvpContext context) {
 		com.graham.passvaultplus.PvpContextUI.checkEvtThread("00151");
 
-		ddHelp = PvpContext.processResourceTextStream("help", new DdParser(context));
+		ddHelp = ResourceUtil.processResourceTextStream("help", new DdParser(context));
 		ddBuilder = new DdSwingUiBuilder(ddHelp, new DdLinkClickAdaptor());
 		mainPanel = new JPanel(new BorderLayout());
 
@@ -128,7 +129,7 @@ public class HelpBuilder implements OtherTabBuilder {
 				final JPanel emailPanel = new JPanel(new FlowLayout());
 				emailPanel.add(l);
 				final JButton ce = new JButton(new CopyEmail());
-				BCUtil.makeButtonSmall(ce);
+				SwingUtil.makeButtonSmall(ce);
 				emailPanel.add(ce);
 				cp.add(emailPanel, BorderLayout.CENTER);
 				p55.add(cp);
@@ -147,7 +148,7 @@ public class HelpBuilder implements OtherTabBuilder {
 				leftAlignPanel2.add(helpLink);
 
 				final JButton copyButton = new JButton(new CopyUrlAction(helpLink.getText()));
-				BCUtil.makeButtonSmall(copyButton);
+				SwingUtil.makeButtonSmall(copyButton);
 				copyButton.setFocusable(false);
 				leftAlignPanel2.add(copyButton);
 				GoToUrlAction.checkAndAdd(leftAlignPanel2, helpLink.getText());

@@ -227,14 +227,14 @@ public class SavePrefsAction extends AbstractAction {
 		}
 		InputStream sourceStream = null;
 		try {
-			if (PvpContext.JAR_BUILD) {
+		//	if (PvpContext.JAR_BUILD) {
 				// note path starts with "/" - that starts at the root of the jar,
 				// instead of the location of the class.
 				sourceStream = PvpContext.class.getResourceAsStream("/starter-pvp-data.xml");
-			} else {
-				File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
-				sourceStream = new FileInputStream(sourceFile);
-			}
+		//	} else {
+		//		File sourceFile = new File("src/main/resources/starter-pvp-data.xml");
+		//		sourceStream = new FileInputStream(sourceFile);
+		//	}
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 			PvpDataInterface newDataInterface = DatabaseReader.read(tempContext, sourceStream);
 			PvpPersistenceInterface pi = new PvpPersistenceInterface(tempContext);

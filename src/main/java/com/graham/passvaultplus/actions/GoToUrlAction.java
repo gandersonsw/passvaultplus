@@ -1,8 +1,8 @@
 /* Copyright (C) 2018 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.actions;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContextUI;
+import com.graham.util.SwingUtil;
 
 import javax.swing.*;
 import java.awt.Desktop;
@@ -15,7 +15,7 @@ public class GoToUrlAction extends AbstractAction {
 	public static void checkAndAdd(final JComponent c, final String linkParam) {
 		if (Desktop.isDesktopSupported()) {
 			final JButton gotoButton = new JButton(new GoToUrlAction(linkParam));
-			BCUtil.makeButtonSmall(gotoButton);
+			SwingUtil.makeButtonSmall(gotoButton);
 			gotoButton.setFocusable(false);
 			c.add(gotoButton);
 		}

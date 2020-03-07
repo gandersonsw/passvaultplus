@@ -7,13 +7,13 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.longtask.LTManager;
-import com.graham.passvaultplus.view.recordedit.RecordEditContext;
+import com.graham.util.ResourceUtil;
 
 public class QuitAction extends AbstractAction {
 	final PvpContext context;
 
 	public QuitAction(final PvpContext c) {
-		super(null, PvpContext.getIcon("exit"));
+		super(null, ResourceUtil.getIcon("exit"));
 		context = c;
 	}
 

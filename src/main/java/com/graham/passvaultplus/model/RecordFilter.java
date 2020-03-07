@@ -4,7 +4,6 @@ package com.graham.passvaultplus.model;
 import java.util.Collections;
 import java.util.List;
 
-import com.graham.util.BCUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpField;
@@ -12,6 +11,7 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpRecordComparator;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.CategoryMenuItem;
+import com.graham.util.StringUtil;
 
 public class RecordFilter {
 
@@ -127,7 +127,7 @@ public class RecordFilter {
 		PvpDataInterface.FilterResults results = context.data.getDataInterface().getFilteredRecords(filterByType, filterByText, filterByCategory.getCategory(), checkCategory);
 		data = results.records;
 		allTheSameTypeFlag = results.allTheSameTypeFlag;
-		context.uiMain.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + BCUtil.getPluralAppendix(data.size()));
+		context.uiMain.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + StringUtil.getPluralAppendix(data.size()));
 		doSort();
 	}
 

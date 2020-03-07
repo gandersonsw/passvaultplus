@@ -11,8 +11,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Date;
 
-import com.graham.util.AppUtil;
+import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.util.FileUtil;
 
 public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 
@@ -73,8 +74,8 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	 */
 	private void checkBackupFileHourly() {
 		File df = getFile();
-		String filenameParts[] = AppUtil.getFileNameParts(df.getName());
-		String timeStamp = AppUtil.getHourlyTimeStamp();
+		String filenameParts[] = FileUtil.getFileNameParts(df.getName());
+		String timeStamp = DateUtil.getHourlyTimeStamp();
 		File backupFile = new File(df.getParentFile(), filenameParts[0] + timeStamp + "." + filenameParts[1]);
 		// don't backup if a backup has been done within the last hour
 		if (!backupFile.exists()) {
@@ -87,8 +88,8 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 		File[] files = df.getParentFile().listFiles(new MyFF(df));
 		if (sortByDate) {
 			Arrays.sort(files, (f1, f2) -> {
-				Date d1 = AppUtil.parseHourlyTimeStamp(f1.getName());
-				Date d2 = AppUtil.parseHourlyTimeStamp(f2.getName());
+				Date d1 = DateUtil.parseHourlyTimeStamp(f1.getName());
+				Date d2 = DateUtil.parseHourlyTimeStamp(f2.getName());
 				return d1.compareTo(d2);
 			});
 		}
@@ -106,10 +107,10 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	class MyFF implements FilenameFilter {
 		String filenameParts[];
 		public MyFF(final File f) {
-			filenameParts = AppUtil.getFileNameParts(f.getName());
+			filenameParts = FileUtil.getFileNameParts(f.getName());
 		}
 		public boolean accept(File dir, String name) {
-			String testParts[] = AppUtil.getFileNameParts(name);
+			String testParts[] = FileUtil.getFileNameParts(name);
 			return testParts[0].startsWith(filenameParts[0]) && PvpPersistenceInterface.isPvpFileExt(testParts[1]);
 		}
 	}

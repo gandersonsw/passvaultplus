@@ -7,12 +7,13 @@ import javax.swing.AbstractAction;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.view.OtherTab;
+import com.graham.util.ResourceUtil;
 
 public class SchemaEditorAction extends AbstractAction {
 	final private PvpContext context;
 
 	public SchemaEditorAction(final PvpContext contextParam) {
-		super(null, PvpContext.getIcon("schema"));
+		super(null, ResourceUtil.getIcon("schema"));
 		context = contextParam;
 	}
 

@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
+import com.graham.util.StringUtil;
 
 /**
  * This is basically a database. It represents a set of types and data records that bundle together.
@@ -270,7 +270,7 @@ public class PvpDataInterface {
 		if (metadata == null) {
 			metadata = new HashMap<>();
 		}
-		if (AppUtil.stringEmpty(value)) {
+		if (StringUtil.stringEmpty(value)) {
 			metadata.remove(name);
 		} else {
 			if (value.length() > 1000) {
@@ -279,7 +279,7 @@ public class PvpDataInterface {
 			oldVal = metadata.get(name);
 			metadata.put(name, value);
 		}
-		return AppUtil.equalsWithEmpty(value, oldVal);
+		return StringUtil.equalsWithEmpty(value, oldVal);
 	}
 
 	public String getMetadata(String name) {

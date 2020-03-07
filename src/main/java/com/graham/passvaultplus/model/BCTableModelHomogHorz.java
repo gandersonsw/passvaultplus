@@ -4,11 +4,11 @@ package com.graham.passvaultplus.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
+import com.graham.util.StringUtil;
 
 /**
  * All the same PvpType. Example:
@@ -94,7 +94,7 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		for (int i = 0; i < count; i++) {
 			for (int fi = 0; fi < fieldsToDisplay.size(); fi++) {
 				String val = filter.getRecordAtIndex(i).getAnyField(fieldsToDisplay.get(fi));
-				if (AppUtil.stringNotEmpty(val)) {
+				if (StringUtil.stringNotEmpty(val)) {
 					valExists[fi] = true;
 				}
 			}

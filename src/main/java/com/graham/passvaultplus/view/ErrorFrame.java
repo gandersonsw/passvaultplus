@@ -13,12 +13,12 @@ import java.awt.event.WindowAdapter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.graham.util.BCUtil;
-import com.graham.util.AppUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.actions.GoToUrlAction;
+import com.graham.util.GenUtil;
+import com.graham.util.SwingUtil;
 
 public class ErrorFrame {
 	
@@ -52,7 +52,7 @@ public class ErrorFrame {
 			com.graham.passvaultplus.PvpContextUI.getActiveUI().checkEvtThread("3029");
 		if (detailsText != null) {
 			if (badExceptionMessageCount < 10) {
-				detailsText.append("\n\n" + e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
+				detailsText.append("\n\n" + e.getMessage() + "\n\n" + GenUtil.getExceptionStackTrace(e));
 			}
 			badExceptionMessageCount++;
 			return;
@@ -91,7 +91,7 @@ public class ErrorFrame {
 
 		eFrame.pack();
 		//eFrame.setResizable(false);
-		BCUtil.center(eFrame);
+		SwingUtil.center(eFrame);
 		eFrame.setVisible(true);
 		eFrame.toFront();
 	}
@@ -133,7 +133,7 @@ public class ErrorFrame {
 			leftAlignPanel2.add(helpLink);
 			
 			final JButton copyButton = new JButton(new CopyUrlAction());
-			BCUtil.makeButtonSmall(copyButton);
+			SwingUtil.makeButtonSmall(copyButton);
 			copyButton.setFocusable(false);
 			leftAlignPanel2.add(copyButton);
 			GoToUrlAction.checkAndAdd(leftAlignPanel2, helpLink.getText());
@@ -147,9 +147,9 @@ public class ErrorFrame {
 	private JScrollPane buildDetailsPanel(final Exception e, final StringBuilder warnings) {
 		detailsText = new JTextArea();
 		if (warnings.length() > 0) {
-			detailsText.setText(e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e) + "\n\nWarnings:\n" + warnings.toString());
+			detailsText.setText(e.getMessage() + "\n\n" + GenUtil.getExceptionStackTrace(e) + "\n\nWarnings:\n" + warnings.toString());
 		} else {
-			detailsText.setText(e.getMessage() + "\n\n" + AppUtil.getExceptionStackTrace(e));
+			detailsText.setText(e.getMessage() + "\n\n" + GenUtil.getExceptionStackTrace(e));
 		}
 		detailsText.setEditable(false);
 		detailsScroll = new JScrollPane(detailsText);
@@ -240,7 +240,7 @@ public class ErrorFrame {
 			//eFrame.setMaximumSize(new Dimension(400, 300));
 			eFrame.pack();
 			//	eFrame.setResizable(false);
-			BCUtil.center(eFrame);
+			SwingUtil.center(eFrame);
 		}
 	}
 
