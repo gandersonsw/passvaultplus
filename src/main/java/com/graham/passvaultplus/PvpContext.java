@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import com.graham.framework.AppContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.StartupOptionsFrame;
@@ -18,7 +19,7 @@ import com.graham.util.ResourceUtil;
  * This is not a singleton, although in general there should
  * be one instance of this active at any time.
  */
-public class PvpContext implements Thread.UncaughtExceptionHandler {
+public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 	static final public String VERSION = "1.2";
 	static final public int OPT_ICN_SCALE = 35;
 
@@ -62,6 +63,21 @@ public class PvpContext implements Thread.UncaughtExceptionHandler {
 		} catch (Exception e) {
 			cb.handleException(null, e);
 		}
+	}
+
+	@Override
+	public void notifyInfo(String message) {
+		ui.notifyInfo(message);
+	}
+
+	@Override
+	public void notifyWarning(String message, Exception e) {
+		ui.notifyWarning(message, e);
+	}
+
+	@Override
+	public void notifyError(Exception e, boolean canContinue) {
+		ui.notifyBadException(e, canContinue, PvpException.GeneralErrCode.OtherErr);
 	}
 
 	static class StartAppCB extends LTCallbackDefaultImpl {

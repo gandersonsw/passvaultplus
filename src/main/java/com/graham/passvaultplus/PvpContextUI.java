@@ -84,16 +84,16 @@ public class PvpContextUI {
 	}
 
 	public void notifyWarning(String s) {
-		diagnosticsManager.warning(s, null);
-		warnings.append(s);
-		warnings.append("\n");
+		notifyWarning(s, null);
 	}
 
 	public void notifyWarning(String s, Exception e) {
 		diagnosticsManager.warning(s, e);
 		warnings.append(s);
-		warnings.append("::");
-		warnings.append(e.getMessage());
+		if (e != null) {
+			warnings.append("::");
+			warnings.append(e.getMessage());
+		}
 		warnings.append("\n");
 	}
 

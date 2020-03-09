@@ -4,7 +4,7 @@ package com.graham.dashdoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import com.graham.passvaultplus.PvpContext;
+import com.graham.framework.AppContext;
 import com.graham.dashdoc.model.DashDoc;
 import com.graham.dashdoc.model.DdLink;
 import com.graham.dashdoc.model.DdPart;
@@ -38,10 +38,10 @@ public class DdParser implements ResourceUtil.IOFunction<DashDoc> {
 		naturalNewline
 	}
 
-	PvpContext context; // TODO remove this reference
+	AppContext context;
 	boolean keepNewlines = false;
 
-	public DdParser(PvpContext c) {
+	public DdParser(AppContext c) {
 		context = c;
 	}
 
@@ -72,7 +72,7 @@ public class DdParser implements ResourceUtil.IOFunction<DashDoc> {
 					part = parseNewline(line);
 					break;
 				case error:
-					context.ui.notifyWarning("DdParser: line is in error: " + line);
+					context.notifyWarning("DdParser: line is in error: " + line, null);
 					break;
 				case nothing:
 					// this is a blank line. these can be ignored
@@ -83,7 +83,7 @@ public class DdParser implements ResourceUtil.IOFunction<DashDoc> {
 			}
 			if (part != null) {
 				if (!dd.addPart(part)) {
-					context.ui.notifyWarning("DdParser: found line without a section: " + line);
+					context.notifyWarning("DdParser: found line without a section: " + line, null);
 				}
 			}
 		}
