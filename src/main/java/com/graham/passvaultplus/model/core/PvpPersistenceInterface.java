@@ -21,7 +21,7 @@ import com.graham.util.FileUtil;
 import javax.swing.*;
 
 /**
- * All methods to load data into RtDataInterface from the file
+ * All methods to load data into PvpDataInterface from the file
  */
 public class PvpPersistenceInterface {
 	public enum SaveTrigger {

@@ -1,3 +1,4 @@
+/* Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.framework;
 
 public class AppContextDefault implements AppContext {

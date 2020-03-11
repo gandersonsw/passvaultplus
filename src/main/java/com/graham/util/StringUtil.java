@@ -22,6 +22,13 @@ public class StringUtil {
 		return s == null || s.length() == 0;
 	}
 
+	public static int stringLength(String s) {
+		if (s == null) {
+			return 0;
+		}
+		return s.length();
+	}
+
 	public static boolean stringNotEmpty(String s) {
 		return s != null && s.length() > 0;
 	}

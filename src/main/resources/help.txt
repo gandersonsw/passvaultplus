@@ -101,7 +101,7 @@ Right click in the record list to pop-up options to change the view (Vertical Ta
 -N ON
 The list behaves different if there are different data types displayed.
 
-If all the records display are the same type:
+If all the records displayed are the same type:
 1. Sorting by any field, not just he ones that are common to all types.
 2. When the horizontal view is used, it will display all the fields.
 -N OFF
@@ -157,7 +157,7 @@ type will be deleted also.
 
 - - - - Upgrade from pre version 1.2 - - - -
 -N ON
-If you are upgrading from a earlier version of Pass Vault Plus, you need to manually convert the file format.
+If you are upgrading from an earlier version of Pass Vault Plus, you need to manually convert the file format.
 
 Steps to upgrade file format:
 1. If you are using an unencrypted and uncompressed file format, there is nothing you need to do.
