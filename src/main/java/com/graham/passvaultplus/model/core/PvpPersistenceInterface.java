@@ -105,6 +105,12 @@ public class PvpPersistenceInterface {
 		return bsList;
 	}
 
+	public void setAllDirty() {
+		for (PvpBackingStore bs : getEnabledBackingStores(true)) {
+			bs.setDirty(true);
+		}
+	}
+
 	private PvpBackingStore getBackingStoreFile() {
 		if (backingStoreFile == null) {
 			backingStoreFile = new PvpBackingStoreFile(context);
@@ -178,10 +184,7 @@ public class PvpPersistenceInterface {
 
 		if (wasChanged) {
 			// set them as dirty, so they will eventually save
-			for (PvpBackingStore bs : getEnabledBackingStores(true)) {
-				bs.setDirty(true);
-			}
-
+			setAllDirty();
 			context.ui.notifyInfo("PvpPersistenceInterface.load :: was changed is TRUE");
 		} else {
 			boolean wasErrA = false;

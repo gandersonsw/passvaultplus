@@ -32,14 +32,6 @@ public class PreferencesBuilder implements OtherTabBuilder {
 
 	public Component build(PvpContext context) {
 			return buildPrefs(new PreferencesConnectionTab(context));
-	//	conn = new PreferencesConnectionTab(context);
-	//	prefsContext = new PreferencesContext(conn);
-	//	PreferencesBuilder pb = new PreferencesBuilder();
-
-//		Component c = build();
-	//	conn = null;
-	//	prefsContext = null;
-	//	return c;
 	}
 
 	public void dispose() {
@@ -50,11 +42,11 @@ public class PreferencesBuilder implements OtherTabBuilder {
 			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0018");
 		final JPanel p = new JPanel(new BorderLayout());
 		p.add(buildTop(), BorderLayout.CENTER);
-		p.add(buildBottom(p), BorderLayout.SOUTH);
+		p.add(buildBottom(), BorderLayout.SOUTH);
 		return p;
 	}
 
-	private Component buildBottom(final JPanel panelToBeReturned) {
+	private Component buildBottom() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		if (conn instanceof PreferencesConnectionTab) {
 			p.add(new JButton(new ResetPrefsAction(conn.getPvpContextOriginal())));
@@ -90,8 +82,6 @@ public class PreferencesBuilder implements OtherTabBuilder {
 		bp.add(p, BorderLayout.NORTH);
 
 		return new JScrollPane(bp);
-
-		//return bp;
 	}
 
 	private JPanel buildActionCombo() {
@@ -161,12 +151,7 @@ public class PreferencesBuilder implements OtherTabBuilder {
 
 		final JTextField pwct = new JTextField(27);
 		pwct.setVisible(false);
-		JPasswordField pw;
-		if (conn.getContextPrefs().isPasswordSaved()) {
-			pw = new JPasswordField(conn.getContextPrefs().getPassword(), 27);
-		} else {
-			pw = new JPasswordField(27);
-		}
+		JPasswordField pw = new JPasswordField(conn.getContextPrefs().getPassword(), 27);
 		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
 		final TextFieldChangeForwarder tfcf = new TextFieldChangeForwarder(pca);
 		pw.getDocument().addDocumentListener(tfcf);
@@ -188,7 +173,6 @@ public class PreferencesBuilder implements OtherTabBuilder {
 		p.add(Box.createRigidArea(indentDim));
 		prefsContext.savePassword = new JCheckBox("Save Password", conn.getContextPrefs().isPasswordSaved());
 		prefsContext.savePassword.setToolTipText("If checked, the password will be saved. If not checked, you must enter the password when starting app.");
-		prefsContext.savePassword.addActionListener(e -> prefsContext.setPinEnabled());
 		p.add(prefsContext.savePassword);
 		p.add(Box.createRigidArea(indentDim));
 		p.add(new JLabel("Password Strength: "));
@@ -228,8 +212,6 @@ public class PreferencesBuilder implements OtherTabBuilder {
 
 	private JPanel buildPin() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		p.add(Box.createRigidArea(indentDim));
-		p.add(Box.createRigidArea(indentDim));
 		p.add(Box.createRigidArea(indentDim));
 		prefsContext.usePin = new JCheckBox("Use PIN:");
 		if (conn.getContextPrefs().getUsePin()) {

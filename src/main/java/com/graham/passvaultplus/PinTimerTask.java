@@ -83,7 +83,7 @@ public class PinTimerTask extends TimerTask {
 		}
 		context.uiMain.getMainFrame().setVisible(false);
 
-		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.isPasswordSaved()) {
+		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.getUsePin()) { // context.prefs.isPasswordSaved()) {
 			int tryCount = 0;
 			while (true) {
 				final PinDialog pd = new PinDialog();

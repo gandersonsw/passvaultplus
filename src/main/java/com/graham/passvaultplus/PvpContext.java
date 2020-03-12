@@ -13,6 +13,7 @@ import com.graham.passvaultplus.view.MainFrame;
 import com.graham.passvaultplus.view.longtask.*;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.util.ResourceUtil;
+import com.graham.util.StringUtil;
 
 /**
  * This is the global context for the entire application.
@@ -39,7 +40,7 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 	 *    Password entered and errors    -> show ErrorFrame
 	 *    user clicked cancel            -> Select data file
 	 */
-	static public void startApp(final boolean alwaysShowStartupOptions, final String pw) {
+	static public void startApp(final boolean alwaysShowStartupOptions, final String pw, final String pin) {
 		StartAppCB cb = new StartAppCB();
 		try {
 			final PvpContext context = new PvpContext();
@@ -49,6 +50,9 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 
 			if (pw != null) {
 				context.prefs.setPassword(pw, false);
+			}
+			if (pin != null) {
+				context.prefs.setPin(pin);
 			}
 
 			if (!context.prefs.isDataFilePresent()) {
@@ -131,8 +135,22 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 			uiMain = new PvpContextUIMainFrame(this);
 			uiMain.mainFrame = new MainFrame(this);
 			ui.setFrame(uiMain.getMainFrame());
+			if (prefs.getUsePin()) {
+				if (StringUtil.stringEmpty(prefs.getPin())) {
+					String p = data.getDataInterface().getMetadata("pin");
+					if (StringUtil.stringNotEmpty(p)) {
+						prefs.setPin(p);
+						prefs.pinWasReset = false;
+					}
+				} else {
+					if (data.getDataInterface().setMetadata("pin", prefs.getPin())) {
+						data.getFileInterface().setAllDirty();
+					}
+				}
+			}
 			PinTimerTask.update(this);
 			if (prefs.pinWasReset) {
+				prefs.setUsePin(false);
 				ui.showMessageDialog("PIN Reset", "The PIN was reset. To use a PIN again, go to the setting panel and enter a PIN.");
 			}
 		});

@@ -266,20 +266,19 @@ public class PvpDataInterface {
 		if (name.length() > 100 || name.length() == 0) {
 			throw new RuntimeException("metadata name cannot be longer than 100 chars or less than 1: " + name);
 		}
-		String oldVal = null;
 		if (metadata == null) {
 			metadata = new HashMap<>();
 		}
+		String oldVal = metadata.get(name);
 		if (StringUtil.stringEmpty(value)) {
 			metadata.remove(name);
 		} else {
 			if (value.length() > 1000) {
 				throw new RuntimeException("metadata value cannot be longer than 1000");
 			}
-			oldVal = metadata.get(name);
 			metadata.put(name, value);
 		}
-		return StringUtil.equalsWithEmpty(value, oldVal);
+		return !StringUtil.equalsWithEmpty(value, oldVal);
 	}
 
 	public String getMetadata(String name) {

@@ -5,38 +5,38 @@ import java.io.File;
 
 import com.graham.passvaultplus.model.RecordListViewOptions;
 import com.graham.passvaultplus.model.core.StringEncrypt;
-import com.graham.passvaultplus.view.PinDialog;
-import com.graham.passvaultplus.view.PwDialog;
 import com.graham.passvaultplus.view.longtask.LTManager;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class PvpContextPrefs {
-	static private final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
-	static private final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
-	static private final int PWS_NOT_SAVED = 2; // the user asked the password to not be saved in prefs
+	static final int PWS_NOT_KNOWN = 0; // dont know because we havent looked in prefs
+	static final int PWS_SAVED = 1;     // the user asked the password to be saved in prefs
+	static final int PWS_NOT_SAVED = 2; // the user asked the password to not be saved in prefs
 
 	final PvpPrefFacade userPrefs;
 
 	private String dataFilePath;
   private File dataFile;
-  private String password; // used for encryption of data file
 
+	private boolean pinPrefsLoaded = false;
 	private String pin = ""; // used for encryption of PIN, and UI timeout
 	private boolean usePin;
 	private int pinTimeout = -1;
 	private int pinMaxTry = -1;
+	boolean pinWasReset = false;
 
-  private int isPasswordSavedState = PWS_NOT_KNOWN;
+  int isPasswordSavedState = PWS_NOT_KNOWN;
+  String password; // used for encryption of data file
   private int encryptionStrengthBits;
-	private byte[] encryptedPassword;
+	byte[] encryptedPassword;
+
   private boolean userPrefsLoaded = false;
   private boolean showDashboard = true;
   private boolean useGoogleDrive = false;
   private boolean showDiagnostics = false;
   private String googleDriveDocId;
   private long googleDriveDocUpdateDate;
-  boolean pinWasReset = false;
 
   // TODO this is not persisted yet
 	private RecordListViewOptions recordListViewOptions = new RecordListViewOptions();
@@ -54,7 +54,9 @@ public class PvpContextPrefs {
 		target.setDataFilePath(source.getDataFilePath(),source.getEncryptionStrengthBits());
 		target.setPinTimeout(source.getPinTimeout());
 		target.setPinMaxTry(source.getPinMaxTry());
-		target.setPasswordAndPin(source.getPassword(), source.isPasswordSaved(), source.getPin(), source.getUsePin());
+		target.setPassword(source.getPassword(), source.isPasswordSaved());
+		target.setUsePin(source.getUsePin());
+		target.setPin(source.getPin());
 		target.setShowDashboard(source.getShowDashboard());
 		target.setUseGoogleDrive(source.getUseGoogleDrive());
 		target.setGoogleDriveDocId(source.getGoogleDriveDocId());
@@ -115,7 +117,6 @@ public class PvpContextPrefs {
 		if (isPasswordSavedState == PWS_NOT_KNOWN) {
 			boolean pws = userPrefs.getBoolean("pwsaved", false);
 			isPasswordSavedState = pws ? PWS_SAVED : PWS_NOT_SAVED;
-			usePin = userPrefs.getBoolean("usepin", false);
 		}
 		return isPasswordSavedState == PWS_SAVED;
 	}
@@ -130,7 +131,7 @@ public class PvpContextPrefs {
 	 * @return
 	 */
 	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
-		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation);
+		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation, this);
 		try {
 			LTManager.waitingUserInputStart();
 			if (SwingUtilities.isEventDispatchThread()) {
@@ -149,145 +150,63 @@ public class PvpContextPrefs {
 		return pw.resultString;
 	}
 
-	class GetPWOrAsk implements Runnable {
-		final boolean passwordWasBad;
-		final String resourseLocation;
-
-		String resultString;
-		UserAskToChangeFileException resultException;
-
-		public GetPWOrAsk(final boolean passwordWasBadParam, final String resourseLocationParam) {
-			passwordWasBad = passwordWasBadParam;
-			resourseLocation = resourseLocationParam;
-		}
-
-		@Override
-		public void run() {
-			try {
-				resultString = getPasswordOrAskUserInternal();
-			} catch (UserAskToChangeFileException e) {
-				resultException = e;
-			}
-		}
-
-	private String getPasswordOrAskUserInternal() throws UserAskToChangeFileException {
-		if (password == null && isPasswordSavedState == PWS_NOT_KNOWN) {
-			usePin = getUsePin();
-			encryptedPassword = userPrefs.getByteArray("ecp", null); // ecp = encrypted cipher password
-			if (!isBlankEncryptedPassword() && isPasswordSaved()) {
-				boolean tryingToGetValidPin = true;
-				int pinTryCount = 0;
-				while (tryingToGetValidPin) {
-					boolean tryToGetPassword = true;
-					if (usePin && pin.length() == 0) {
-						final PinDialog pd = new PinDialog();
-						final PinDialog.PinAction action = pd.askForPin(pinTryCount, false);
-						if (action == PinDialog.PinAction.Configure) {
-							throw new UserAskToChangeFileException();
-						}
-						pin = pd.getPin();
-						if (action == PinDialog.PinAction.UsePassword) {
-							tryToGetPassword = false;
-							tryingToGetValidPin = false;
-						}
-					} else {
-						tryingToGetValidPin = false;
-					}
-
-					pinTryCount++;
-
-					if (tryToGetPassword) {
-						try {
-							password = StringEncrypt.decryptString(encryptedPassword, pin, usePin);
-							if (password != null) {
-								tryingToGetValidPin = false;
-							} else {
-								if (pinTryCount >= getPinMaxTry()) {
-									PvpContextUI.getActiveUI().notifyInfo("PIN disabled after " + pinTryCount + " trys");
-									// too many tries - delete the password
-									tryingToGetValidPin = false;
-									clearPassword();
-									pinWasReset = true;
-								}
-								pin = "";
-							}
-						} catch (PvpException e) {
-							pin = "";
-							PvpContextUI.getActiveUI().notifyBadException(e, true, null);
-						}
-					}
-				}
-			} else if (usePin) {
-				pinWasReset = true;
-			}
-		}
-
-		if (password != null && password.trim().length() > 0 && !passwordWasBad) {
-			return password;
-		}
-		final PwDialog pd = new PwDialog();
-		final PwDialog.PwAction action = pd.askForPw(passwordWasBad, resourseLocation);
-
-		if (action == PwDialog.PwAction.Configure) {
-			throw new UserAskToChangeFileException();
-		}
-
-		// its possible the password was wrong and it was saved. if thats the case, dont save the new entered one here
-		password = pd.getPw();
-		return password;
-	}
-
-	}
-
 	public String getPin() {
 		return pin;
 	}
 
+	public void setPin(String pinParam) {
+		pin = pinParam; // the Pin is not saved in prefs, it is entered by user, or saved in database
+	}
+
+	private void loadPinPrefs() {
+		if (pinPrefsLoaded) {
+			return;
+		}
+		usePin = userPrefs.getBoolean("usepin", false);
+		pinTimeout = userPrefs.getInt("pintimeout", 30);
+		pinMaxTry = userPrefs.getInt("pinmaxtry", 5);
+		pinPrefsLoaded = true;
+	}
+
 	public boolean getUsePin() {
-		isPasswordSaved(); // call this to make sure usePin is set correctly
+		loadPinPrefs(); // call this to make sure usePin is set correctly
 		return usePin;
 	}
 
-	public int getPinTimeout() {
-		if (pinTimeout == -1) {
-			pinTimeout = userPrefs.getInt("pintimeout", 30);
+	public void setUsePin(boolean usePinParam) {
+		loadPinPrefs();
+		if (usePin != usePinParam) {
+			usePin = usePinParam;
+			userPrefs.putBoolean("usepin", usePin);
 		}
+	}
+
+	public int getPinTimeout() {
+		loadPinPrefs();
 		return pinTimeout;
 	}
 
 	public void setPinTimeout(final int t) {
+		loadPinPrefs();
 		pinTimeout = t;
 		userPrefs.putInt("pintimeout", pinTimeout);
 	}
 
 	public int getPinMaxTry() {
-		if (pinMaxTry == -1) {
-			pinMaxTry = userPrefs.getInt("pinmaxtry", 5);
-		}
+		loadPinPrefs();
 		return pinMaxTry;
 	}
 
 	public void setPinMaxTry(final int mt) {
+		loadPinPrefs();
 		pinMaxTry = mt;
 		userPrefs.putInt("pinmaxtry", pinMaxTry);
-	}
-
-	public void setPasswordAndPin(String passwordParam, boolean makePersistant, String pinParam, boolean usePinParam) {
-		pin = pinParam;
-		if (pinParam.length() == 0) {
-			usePinParam = false;
-		}
-		if (usePin != usePinParam) {
-			usePin = usePinParam;
-			userPrefs.putBoolean("usepin", usePin);
-		}
-		setPassword(passwordParam, makePersistant);
 	}
 
 	public void setPassword(String passwordParam, boolean makePersistant) {
 		password = passwordParam;
 		try {
-			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, usePin);
+			encryptedPassword = StringEncrypt.encryptString(passwordParam, pin, getUsePin());
 		} catch (PvpException e) {
 			PvpContextUI.getActiveUI().notifyBadException(e, true, null);
 		}

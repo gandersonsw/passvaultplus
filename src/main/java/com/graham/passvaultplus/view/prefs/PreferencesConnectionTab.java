@@ -53,7 +53,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		context.uiMain.getMainFrame().setVisible(false);
 		copyPrefsToReal();
 
-		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword()); // psp.pw TODO
+		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword(), contextPrefsForSettingsUI.getPin()); // psp.pw TODO
 		pc.cleanup(); // TODO this should be on same thread
 	}
 

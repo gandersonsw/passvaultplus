@@ -88,6 +88,7 @@ public class SavePrefsAction extends AbstractAction {
 		}, "Creating Database");
 	}
 
+	// TODO test this with no save password and PIN
 	private void doOpen() {
 			com.graham.passvaultplus.PvpContextUI.checkEvtThread("0049");
 		final String newPassword = prefsContext.getPasswordText();
@@ -141,10 +142,12 @@ public class SavePrefsAction extends AbstractAction {
 			if (checkEncryptionStrength()) {
 				return;
 			}
-		}
-
-		if (!validatePin()) {
-			return;
+			if (!validatePin()) {
+				return;
+			}
+			if (checkSavePinToDatabase(conn.context.data.getDataInterface())) {
+				saveFlag = true;
+			}
 		}
 
 		if (!conn.isDefaultPath(prefsContext.getDataFile().getAbsolutePath())) {
@@ -184,7 +187,9 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	private void setContextPrefsValues() {
-		conn.getContextPrefs().setPasswordAndPin(prefsContext.getPasswordText(), prefsContext.savePassword.isSelected(), prefsContext.getPinText(), prefsContext.usePin.isSelected());
+		conn.getContextPrefs().setPassword(prefsContext.getPasswordText(), prefsContext.savePassword.isSelected());
+		conn.getContextPrefs().setUsePin(prefsContext.usePin.isSelected());
+		conn.getContextPrefs().setPin(prefsContext.getPinText());
 		int encryptBits = 0;
 		if (this.prefsContext.encrypted.isSelected()) {
 			try { encryptBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { encryptBits = 128; }
@@ -238,6 +243,7 @@ public class SavePrefsAction extends AbstractAction {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 			PvpDataInterface newDataInterface = DatabaseReader.read(tempContext, sourceStream);
 			PvpPersistenceInterface pi = new PvpPersistenceInterface(tempContext);
+			checkSavePinToDatabase(newDataInterface);
 			pi.save(newDataInterface, PvpPersistenceInterface.SaveTrigger.init); // TODO test these lines
 			//BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
 		} finally {
@@ -245,6 +251,17 @@ public class SavePrefsAction extends AbstractAction {
 				try { sourceStream.close(); } catch (Exception e) { }
 			}
 		}
+	}
+
+	/**
+	 * @return True if the pin was changed.
+	 */
+	private boolean checkSavePinToDatabase(PvpDataInterface datai) {
+		String pinToSave = null;
+		if (!prefsContext.savePassword.isSelected() && prefsContext.usePin.isSelected()) {
+			pinToSave = prefsContext.getPinText();
+		}
+		return datai.setMetadata("pin", pinToSave);
 	}
 
 }

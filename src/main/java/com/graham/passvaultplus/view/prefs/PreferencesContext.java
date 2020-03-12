@@ -171,12 +171,13 @@ public class PreferencesContext {
 	}
 
 	void setPinEnabled() {
-		if (this.savePassword.isSelected()) {
+		if (encrypted.isSelected()) {
 			this.usePin.setEnabled(true);
 		} else {
 			this.usePin.setEnabled(false);
 			this.usePin.setSelected(false);
 		}
+		setPinItemsEnabled();
 	}
 
 	void setPinItemsEnabled() {

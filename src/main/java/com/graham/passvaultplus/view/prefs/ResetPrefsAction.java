@@ -40,7 +40,7 @@ public class ResetPrefsAction extends AbstractAction {
     }
     PvpBackingStoreGoogleDocs.deleteLocalCredentials();
     PvpPrefFacade.resetGlobalPrefs();
-    PvpContext.startApp(false, null);
+    PvpContext.startApp(false, null, null);
   }
 
   public void doConfirmDialog() {

@@ -33,6 +33,10 @@ public class StringUtil {
 		return s != null && s.length() > 0;
 	}
 
+	public static boolean stringNotEmptyTrim(String s) {
+		return s != null && s.trim().length() > 0;
+	}
+
 	public static Integer tryParseInt(String s) {
 		if (stringEmpty(s)) {
 			return null;

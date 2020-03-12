@@ -6,7 +6,7 @@ import javax.swing.*;
 public class PassVaultPlus {
 	
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> PvpContext.startApp(false, null));
+		SwingUtilities.invokeLater(() -> PvpContext.startApp(false, null, null));
 		//PvpContext.startApp(false, null);
 	}
 

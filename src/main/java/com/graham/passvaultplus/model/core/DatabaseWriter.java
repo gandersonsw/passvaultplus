@@ -137,6 +137,7 @@ public class DatabaseWriter {
 			return;
 		}
 		bw.write("	<metadata>");
+		bw.newLine();
 		for (Entry<String, String> entry : data.entrySet()) {
 			bw.write("		<entry name=\"");
 			final String name = XmlUtil.makeXMLName((String) entry.getKey());
@@ -147,6 +148,7 @@ public class DatabaseWriter {
 			bw.newLine();
 		}
 		bw.write("	</metadata>");
+		bw.newLine();
 	}
 
 	private void writeEnd() throws IOException {

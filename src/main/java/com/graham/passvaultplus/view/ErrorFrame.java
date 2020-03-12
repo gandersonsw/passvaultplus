@@ -196,7 +196,7 @@ public class ErrorFrame {
 		}
 		public void actionPerformed(ActionEvent e) {
 			new ContinueAction().actionPerformed(null);
-			PvpContext.startApp(true, null);
+			PvpContext.startApp(true, null, null);
 		}
 	}
 	
