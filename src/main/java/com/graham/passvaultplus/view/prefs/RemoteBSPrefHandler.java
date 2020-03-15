@@ -7,6 +7,7 @@ import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.model.gdocs.ChecksForNewFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.model.gdocs.ToLocalCopier;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.util.ResourceUtil;
 
 import javax.swing.*;
@@ -82,12 +83,12 @@ public class RemoteBSPrefHandler {
 	}
 
 	/** return true if continue */
-	public boolean presave(boolean isNewDB) {
+	public boolean presave(LTRunner ltr, boolean isNewDB) {
 		if (useGoogleDrive.isSelected() && !useGoogleDriveFlag) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
 			// TODO verify mainUI is not used by this context
 			//PvpBackingStoreGoogleDocs.NewChecks nc = PvpBackingStoreGoogleDocs.doChecksForNewFile(tempContext);
-			PvpBackingStoreGoogleDocs.NewChecks nc = ChecksForNewFile.doIt(tempContext);
+			PvpBackingStoreGoogleDocs.NewChecks nc = ChecksForNewFile.doIt(ltr, tempContext);
 			if (nc.wasCanceled) {
 					return false;
 			}
@@ -105,7 +106,7 @@ public class RemoteBSPrefHandler {
 					return false;
 				}
 				if (actionHit == FileAction.Overwrite) {
-					PvpBackingStoreGoogleDocs.deleteOfType(tempContext);
+					PvpBackingStoreGoogleDocs.deleteOfType(ltr, tempContext);
 				}
 				if (actionHit == FileAction.Merge) {
 				}
@@ -208,12 +209,11 @@ public class RemoteBSPrefHandler {
 		}
 	}
 
-	public boolean createFiles() {
+	public boolean createFiles(LTRunner ltr) {
 		if (useGoogleDrive.isSelected()) {
 			PvpContext tempContext = new PvpContext(prefsContext.conn.getPvpContextOriginal(), prefsContext.conn.getContextPrefs()); // TODO marker901
-				// TODO verify mainUI is not used by this context
-			PvpBackingStoreGoogleDocs.NewChecks nc = ToLocalCopier.doIt(tempContext);
-				com.graham.passvaultplus.PvpContextUI.checkEvtThread("0041");
+			// TODO verify mainUI is not used by this context
+			PvpBackingStoreGoogleDocs.NewChecks nc = ToLocalCopier.doIt(ltr, tempContext);
 			if (nc.excep != null) {
 				this.prefsContext.conn.context.ui.enableQuitFromError(false);
 				this.prefsContext.conn.context.ui.notifyBadException(nc.excep,true, PvpException.GeneralErrCode.GoogleDrive);

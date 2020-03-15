@@ -7,16 +7,14 @@ import java.awt.*;
 
 public class LTManager {
 
-		private static ThreadLocal<LTRunner> tlr = new ThreadLocal<>();
-
 		/**
 		 * This is non-zero if some user input UI is showing now. So that means don't make the cancel dialog visible - because we are waiting for user input.
 		 */
 		private static volatile int waitingUserInputCount = 0;
 
-		static public boolean isLTThread() {
-			return Thread.currentThread().getName().equals(LTThread.THREAD_NAME);
-		}
+	//	static public boolean isLTThread() {
+	//		return Thread.currentThread().getName().equals(LTThread.THREAD_NAME);
+	//	}
 
 		static private LTRunner getLTThreadRunner() {
 				Thread t = Thread.currentThread();
@@ -25,26 +23,6 @@ public class LTManager {
 						return ltt.rnr;
 				}
 				return null;
-		}
-
-		static public void registerCancelFunc(Runnable r) {
-				Thread t = Thread.currentThread();
-				if (t instanceof LTThread) {
-						LTThread ltt = (LTThread)t;
-						ltt.rnr.registerCancelCB(r);
-				} else {
-						PvpContextUI.getActiveUI().notifyWarning("LTManager.registerCancelFunc :: called on not LTThread");
-				}
-		}
-
-		static public void unregisterCancelFunc(Runnable r) {
-				Thread t = Thread.currentThread();
-				if (t instanceof LTThread) {
-						LTThread ltt = (LTThread)t;
-						ltt.rnr.unregisterCancelCB(r);
-				} else {
-						PvpContextUI.getActiveUI().notifyWarning("LTManager.unregisterCancelFunc :: called on not LTThread");
-				}
 		}
 
 		/**
@@ -69,7 +47,7 @@ public class LTManager {
 				} else {
 						try {
 								cb.taskStarting(ltr);
-								lt.runLongTask();
+								lt.runLongTask(ltr);
 								cb.taskComplete(ltr);
 						} catch (Exception e) {
 								cb.handleException(ltr, e);
@@ -91,7 +69,7 @@ public class LTManager {
 				LTRunner ltr = getLTThreadRunner();
 				if (ltr != null) {
 						try {
-								lt.runLongTask();
+								lt.runLongTask(ltr);
 						} catch (Exception e) {
 								if (cb != null) {
 										cb.handleException(ltr, e);
@@ -100,44 +78,6 @@ public class LTManager {
 				} else {
 						LTRunnerSync r = new LTRunnerSync(lt, progressTitle, cb);
 						r.runLongTask();
-				}
-		}
-
-		static void registerLTThread(LTRunner r) {
-				if (tlr.get() != null) {
-						// we should not be here, because run and runWithProgress check for a LTRunner thread
-						throw new RuntimeException("cannot start new LongTask when one is running on the current thread");
-				}
-				tlr.set(r);
-		}
-
-		static void clearLTThread() {
-				tlr.remove();
-		}
-
-		/**
-		 * Will throw a LTCanceledException if the Task was successfully canceled.
-		 * Will assume the last step is completed if stepDone was not called.
-		 */
-		static public void nextStep(String stepDesc) throws LTCanceledException {
-				LTRunner r = tlr.get();
-				if (r == null) {
-						PvpContextUI.getActiveUI().notifyWarning("Called nextStep when no LongTask active: " + stepDesc, new Exception());
-				} else {
-						r.nextStep(stepDesc);
-				}
-		}
-
-		/**
-		 * Will throw a LTCanceledException if the Task was successfully canceled.
-		 * This does not need to be called. can just use nextStep.
-		 */
-		static public void stepDone(String stepDesc) throws LTCanceledException {
-				LTRunner r = tlr.get();
-				if (r == null) {
-						PvpContextUI.getActiveUI().notifyWarning("Called stepDone when no LongTask active: " + stepDesc, new Exception());
-				} else {
-						r.stepDone(stepDesc);
 				}
 		}
 
@@ -164,8 +104,9 @@ public class LTManager {
 				}
 				waitingUserInputCount--;
 				if (waitingUserInputCount == 0) {
-						if (tlr.get() != null) { // TODO should this be called on all LTRunners?
-								tlr.get().interruptForUserInputEnd();
+						LTRunner ltr = getLTThreadRunner();
+						if (ltr != null) { // TODO should this be called on all LTRunners?
+							ltr.interruptForUserInputEnd();
 						}
 				}
 		}

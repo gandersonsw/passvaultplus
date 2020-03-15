@@ -20,6 +20,7 @@ import javax.crypto.NoSuchPaddingException;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 /**
  * Get a stream for the database file. Take care of encryption and compression.
@@ -41,17 +42,17 @@ public class PvpInStreamer {
 		context = contextParam;
 	}
 	
-	public BufferedInputStream getStream() throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public BufferedInputStream getStream(LTRunner ltr) throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
 			// 4 possible file extensions: .xml .zip .bmn.zip .bmn
-			if (backingStore.isEncrypted(true)) {
-				openCipherInputStream();
+			if (backingStore.isEncrypted(ltr, true)) {
+				openCipherInputStream(ltr);
 			} else {
-				bsInputStream = backingStore.openInputStream(); //  new FileInputStream(fileToRead);
+				bsInputStream = backingStore.openInputStream(ltr);
 				inStream = bsInputStream;
 			}
 			
-			if (backingStore.isCompressed(true)) {
+			if (backingStore.isCompressed(ltr, true)) {
 				zipfile = new ZipInputStream(inStream);
 				ZipEntry entry = zipfile.getNextEntry();
 				if (entry != null) {
@@ -79,14 +80,14 @@ public class PvpInStreamer {
 		return eHeader.aesStrengthBits;
 	}
 	
-	private void openCipherInputStream() throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	private void openCipherInputStream(LTRunner ltr) throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		boolean passwordIsGood = false;
 		boolean passwordTried = false;
 		while (!passwordIsGood) {
 			try {
-				bsInputStream = backingStore.openInputStream();
+				bsInputStream = backingStore.openInputStream(ltr);
 				
-				final String password = context.prefs.getPasswordOrAskUser(passwordTried, backingStore.getDisplayableResourceLocation());
+				final String password = context.prefs.getPasswordOrAskUser(passwordTried, backingStore.getDisplayableResourceLocation(ltr));
 				eHeader = getEncryptHeader(bsInputStream);
 				final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
 	

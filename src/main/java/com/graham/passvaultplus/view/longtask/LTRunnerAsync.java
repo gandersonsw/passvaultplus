@@ -21,26 +21,24 @@ public class LTRunnerAsync extends LTRunner {
 
 		@Override
 		public void run() {
-				LTManager.registerLTThread(this);
 				cb.taskStarting(this);
 				try {
-						lt.runLongTask();
+						lt.runLongTask(this);
 				} catch (Exception e) {
 						cb.handleException(this, e);
 				} finally {
-						LTManager.clearLTThread();
 						cb.taskComplete(this);
 				}
 		}
 
-		void nextStep(String stepDesc) throws LTCanceledException {
+		public void nextStep(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
 			// TODO for now, do nothing with this. eventually this could be added to UI somehow
 		}
 
-		void stepDone(String stepDesc) throws LTCanceledException {
+		public void stepDone(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}

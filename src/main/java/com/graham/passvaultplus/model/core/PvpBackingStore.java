@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.StatusBox;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 /**
  * Interface for anything we use to interface to a backing storage. Could be file system,
@@ -100,13 +101,13 @@ public interface PvpBackingStore {
 
 	boolean isEnabled();
 
-	InputStream openInputStream() throws IOException;
+	InputStream openInputStream(LTRunner ltr) throws IOException;
 
 	OutputStream openOutputStream() throws IOException;
 
 	boolean supportsFileUpload();
 
-	void doFileUpload() throws IOException;
+	void doFileUpload(LTRunner ltr) throws IOException;
 
 	boolean isDirty();
 	void setDirty(boolean dirty);
@@ -114,9 +115,9 @@ public interface PvpBackingStore {
 	BsState getBsState();
 	void stateTrans(BsStateTrans trans);
 
-	boolean isCompressed(boolean inFlag);
+	boolean isCompressed(LTRunner ltr, boolean inFlag);
 
-	boolean isEncrypted(boolean inFlag);
+	boolean isEncrypted(LTRunner ltr, boolean inFlag);
 
 	/**
 	 * Call this before doing a group of work.
@@ -130,29 +131,29 @@ public interface PvpBackingStore {
 	/**
 	 * @return If an error, return Long.MAX_VALUE
 	 */
-	long getLastUpdatedDate();
+	long getLastUpdatedDate(LTRunner ltr);
 
 	void setException(PvpException e);
 
 	PvpException getException();
 
-	String getDisplayableResourceLocation();
+	String getDisplayableResourceLocation(LTRunner ltr);
 
 	String getShortName();
 
 	void setStatusBox(StatusBox sb);
 	StatusBox getStatusBox();
 
-	void userAskedToHandleError();
+	void userAskedToHandleError(LTRunner ltr);
 
 	/**
 	 * todo
 	 */
-	void allStoresAreUpToDate();
+	void allStoresAreUpToDate(LTRunner ltr);
 
 	/**
 	 * todo
 	 */
-	boolean isUnmodifiedRemote();
+	boolean isUnmodifiedRemote(LTRunner ltr);
 
 }

@@ -1,8 +1,6 @@
 /* Copyright (C) 2019 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
 package com.graham.passvaultplus.view.longtask;
 
-import com.graham.passvaultplus.PvpContextUI;
-
 import javax.swing.*;
 import java.util.ArrayList;
 
@@ -51,16 +49,13 @@ public class LTRunnerSync extends LTRunner {
 		@Override
 		public void run() {
 				try {
-						LTManager.registerLTThread(this);
-						ltask.runLongTask();
+						ltask.runLongTask(this);
 				} catch (LTCanceledException ltce) {
 						//System.out.println("LTRunnerSync.run.C - LTCanceledException");
 				} catch (Exception e) {
-						//System.out.println("LTRunnerSync.run.D - Exception");
 						ltCb.handleException(this, e);
 				} finally {
 						killStuff();
-						LTManager.clearLTThread();
 				}
 		}
 
@@ -78,7 +73,7 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-		synchronized void nextStep(String stepDesc) throws LTCanceledException {
+		synchronized public void nextStep(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
@@ -93,7 +88,7 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-		synchronized void stepDone(String stepDesc) throws LTCanceledException {
+		synchronized public void stepDone(String stepDesc) throws LTCanceledException {
 				if (wasCanceled) {
 						throw new LTCanceledException();
 				}
@@ -109,14 +104,14 @@ public class LTRunnerSync extends LTRunner {
 				}
 		}
 
-		void registerCancelCB(Runnable r) {
+		public void registerCancelCB(Runnable r) {
 				super.registerCancelCB(r);
 				if (ltUi != null) {
 						ltUi.setCanCancel(canCancelNow());
 				}
 		}
 
-		void unregisterCancelCB(Runnable r) {
+		public void unregisterCancelCB(Runnable r) {
 				super.unregisterCancelCB(r);
 				if (ltUi != null) {
 						ltUi.setCanCancel(canCancelNow());

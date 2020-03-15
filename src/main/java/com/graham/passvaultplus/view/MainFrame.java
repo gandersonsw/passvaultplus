@@ -98,7 +98,7 @@ public class MainFrame extends JFrame {
 		info.setBorder(new EmptyBorder(3,3,7,10));
 		p.add(info);
 
-		for (PvpBackingStore bs : context.data.getFileInterface().getEnabledBackingStores(true)) {
+		for (PvpBackingStore bs : context.data.getFileInterface().getEnabledBackingStoresWithUnmodifiedRemotes()) {
 			final JLabel bsSN = new JLabel(bs.getShortName());
 			bsSN.setFont(info.getFont());
 			bsSN.setBorder(new EmptyBorder(3,8,7,3));

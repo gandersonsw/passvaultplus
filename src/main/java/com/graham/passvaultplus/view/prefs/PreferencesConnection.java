@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextData;
 import com.graham.passvaultplus.PvpContextPrefs;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 /**
  * Way to give the preferences stuff a connection to the outside world.
@@ -24,9 +25,9 @@ public abstract class PreferencesConnection {
 
 	public abstract Action getCancelAction();
 
-	public abstract void doSave(boolean wasChanges, PreferencesContext pc);
+	public abstract void doSave(LTRunner ltr, boolean wasChanges, PreferencesContext pc);
 
-	public abstract void doOpen(PreferencesContext pc);
+	public abstract void doOpen(LTRunner ltr, PreferencesContext pc);
 
 	public abstract JFrame getSuperFrame();
 

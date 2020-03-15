@@ -49,18 +49,18 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 			ResourceUtil.setExceptionHandler((e,rname) -> PvpContextUI.getActiveUI().notifyWarning("WARN118 cant load resource:" + rname, e));
 
 			if (pw != null) {
-				context.prefs.setPassword(pw, false);
+				context.prefs.setPasswordAndPin(pw, context.prefs.isPasswordSaved(), pin, context.prefs.getUsePin());
 			}
-			if (pin != null) {
-				context.prefs.setPin(pin);
-			}
+			//if (pin != null) {
+			//	context.prefs.setPin(pin);
+			//}
 
 			if (!context.prefs.isDataFilePresent()) {
 				new EulaDialog().showEula();
 			}
 
 			if (!alwaysShowStartupOptions && context.prefs.isDataFilePresent()) {
-				LTManager.runWithProgress(() -> context.dataFileSelectedForStartup(), "Loading", cb);
+				LTManager.runWithProgress((ltr) -> context.dataFileSelectedForStartup(ltr), "Loading", cb);
 			} else {
 				StartupOptionsFrame.showAndContinue(context);
 			}
@@ -129,8 +129,8 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 		}
 	}
 
-	public void dataFileSelectedForStartup() throws Exception {
-		data.getFileInterface().load(data.getDataInterface());
+	public void dataFileSelectedForStartup(LTRunner ltr) throws Exception {
+		data.getFileInterface().load(ltr, data.getDataInterface());
 		SwingUtilities.invokeLater(() -> {
 			uiMain = new PvpContextUIMainFrame(this);
 			uiMain.mainFrame = new MainFrame(this);
@@ -142,7 +142,8 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 						prefs.setPin(p);
 						prefs.pinWasReset = false;
 					}
-				} else {
+				} else if (!prefs.isPasswordSaved()) {
+					// if the password is not saved, when the app starts up, the user enters the password and does not enter the PIN, so we need to save the PIN in that case
 					if (data.getDataInterface().setMetadata("pin", prefs.getPin())) {
 						data.getFileInterface().setAllDirty();
 					}
@@ -182,7 +183,7 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 			}
 		}
 		if (checkBackingStores) {
-			for (PvpBackingStore bs : data.getFileInterface().getEnabledBackingStores(true)) {
+			for (PvpBackingStore bs : data.getFileInterface().getEnabledBackingStoresWithUnmodifiedRemotes()) {
 				if (bs.isDirty()) {
 					return true;
 				}

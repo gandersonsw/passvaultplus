@@ -22,7 +22,7 @@ public class BackingStoreClickHandler extends MouseAdapter {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (backingStore.getException() != null) {
-			backingStore.userAskedToHandleError();
+			LTManager.runWithProgress((ltr) -> backingStore.userAskedToHandleError(ltr), "Working on error");
 			context.ui.notifyInfo("BackingStoreClickHandler clicked : error");
 		} else if (backingStore.isDirty()) {
 			LTManager.run(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));

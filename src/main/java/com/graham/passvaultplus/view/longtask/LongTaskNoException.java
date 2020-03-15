@@ -3,5 +3,5 @@ package com.graham.passvaultplus.view.longtask;
 
 public interface LongTaskNoException extends LongTask {
 		@Override
-		void runLongTask();
+		void runLongTask(LTRunner ltr);
 }

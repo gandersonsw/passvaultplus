@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.StatusBox;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 import javax.swing.*;
 
@@ -21,7 +22,7 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	@Override
-	public void doFileUpload() throws IOException {
+	public void doFileUpload(LTRunner ltr) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -155,11 +156,13 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 		return exception.getMessage();
 	}
 
-	public void allStoresAreUpToDate() {
+	@Override
+	public void allStoresAreUpToDate(LTRunner ltr) {
 		// by default, don't do anything
 	}
 
-	public boolean isUnmodifiedRemote() {
+	@Override
+	public boolean isUnmodifiedRemote(LTRunner ltr) {
 		return false;
 	}
 

@@ -111,13 +111,13 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public InputStream openInputStream() throws IOException {
+	public InputStream openInputStream(LTRunner ltr) throws IOException {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.openInputStream");
 		String id = context.prefs.getGoogleDriveDocId();
 
 		final Drive driveService;
 		try {
-			driveService = getDriveService();
+			driveService = getDriveService(ltr);
 		} catch (GeneralSecurityException e) {
 			throw new IOException(e);
 		}
@@ -135,7 +135,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			}
 		}
 
-		if (lookForFileInList(driveService)) {
+		if (lookForFileInList(ltr, driveService)) {
 			id = context.prefs.getGoogleDriveDocId();
 			return driveService.files().get(id).executeMediaAsInputStream();
 		}
@@ -143,7 +143,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		throw new FileNotFoundException();
 	}
 
-	private boolean lookForFileInList(final Drive driveService) throws IOException {
+	private boolean lookForFileInList(LTRunner ltr, final Drive driveService) throws IOException {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: looking for google doc");
 
 		final FileList result = driveService.files().list().execute();
@@ -152,7 +152,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Zero files found.");
 			return false;
 		} else {
-			final String localFileName = getFileName(false);
+			final String localFileName = getFileName(ltr, false);
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.lookForFileInList :: Files:");
 			for (File file : files) {
 				nchecks.fileExists = true;
@@ -180,10 +180,10 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		return true;
 	}
 
-	private String getFileName(boolean inFlag) {
+	private String getFileName(LTRunner ltr, boolean inFlag) {
 		if (inFlag) {
 			if (remoteFileName == null) {
-				loadFileProps(true);
+				loadFileProps(ltr, true);
 			}
 			return remoteFileName;
 		} else {
@@ -196,12 +196,12 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public void doFileUpload() throws IOException {
+	public void doFileUpload(LTRunner ltr) throws IOException {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: START" );
 
 		Drive driveService;
 		try {
-			driveService = getDriveService();
+			driveService = getDriveService(ltr);
 		} catch (GeneralSecurityException e) {
 			throw new IOException(e);
 		}
@@ -210,7 +210,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		File returnedFileMetaData = null;
 		final String id = context.prefs.getGoogleDriveDocId();
 		final File newFileMetadata = new File();
-		newFileMetadata.setName(getFileName(false));
+		newFileMetadata.setName(getFileName(ltr, false));
 
 		if (id == null || id.length() == 0) {
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: creating new file ");
@@ -236,13 +236,13 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean isCompressed(boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(getFileName(inFlag));
+	public boolean isCompressed(LTRunner ltr, boolean inFlag) {
+		return PvpPersistenceInterface.isCompressed(getFileName(ltr, inFlag));
 	}
 
 	@Override
-	public boolean isEncrypted(boolean inFlag) {
-		return PvpPersistenceInterface.isEncrypted(getFileName(inFlag));
+	public boolean isEncrypted(LTRunner ltr, boolean inFlag) {
+		return PvpPersistenceInterface.isEncrypted(getFileName(ltr, inFlag));
 	}
 
 	/**
@@ -251,8 +251,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	 * @return an authorized Credential object.
 	 * @throws IOException
 	 */
-	private Credential authorize() throws IOException {
-			LTManager.nextStep("Google Drive Authorize");
+	private Credential authorize(LTRunner ltr) throws IOException {
+			ltr.nextStep("Google Drive Authorize");
 			// Load client secrets.
 			InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
 			GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
@@ -269,11 +269,11 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 							context.ui.notifyWarning("LocalServerReceiver.stop :: failed", ioe);
 					}
 			};
-			LTManager.registerCancelFunc(cancelCB);
+			ltr.registerCancelCB(cancelCB);
 			Credential credential = new AuthorizationCodeInstalledApp(flow, lsr).authorize("user");
-			LTManager.unregisterCancelFunc(cancelCB);
+			ltr.unregisterCancelCB(cancelCB);
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.authorize :: Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-			LTManager.stepDone("Google Drive Authorize");
+			ltr.stepDone("Google Drive Authorize");
 			return credential;
 	}
 
@@ -284,26 +284,26 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	 * @throws IOException
 	 * @throws GeneralSecurityException
 	 */
-	private Drive getDriveService() throws IOException, GeneralSecurityException {
+	private Drive getDriveService(LTRunner ltr) throws IOException, GeneralSecurityException {
 		if (driveService == null) {
 			if (HTTP_TRANSPORT == null) {
 				HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 				DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
 			}
 
-			Credential credential = authorize();
+			Credential credential = authorize(ltr);
 			driveService = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 		}
 		return driveService;
 	}
 
-	void loadFileProps(boolean lookInFileList) {
+	void loadFileProps(LTRunner ltr, boolean lookInFileList) {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.loadFileProps");
-		LTManager.nextStep("Connecting to Google");
+		ltr.nextStep("Connecting to Google");
 		Drive driveService = null;
 		try {
 			final String id = context.prefs.getGoogleDriveDocId();
-			driveService = getDriveService();
+			driveService = getDriveService(ltr);
 			if (id != null && id.length() > 0) {
 				final File f = driveService.files().get(id).setFields("modifiedTime,name").execute();
 				lastUpdatedDate = f.getModifiedTime();
@@ -323,8 +323,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 
 		if (lookInFileList) {
 			try {
-				if (lookForFileInList(driveService)) {
-					loadFileProps(false);
+				if (lookForFileInList(ltr, driveService)) {
+					loadFileProps(ltr, false);
 					return;
 				}
 			} catch (Exception e2) {
@@ -339,9 +339,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public long getLastUpdatedDate() {
+	public long getLastUpdatedDate(LTRunner ltr) {
 		if (lastUpdatedDate == null) {
-			loadFileProps(true);
+			loadFileProps(ltr, true);
 		}
 		return lastUpdatedDate.getValue();
 	}
@@ -367,8 +367,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public String getDisplayableResourceLocation() {
-		return "Google™ Doc: " + getFileName(true);
+	public String getDisplayableResourceLocation(LTRunner ltr) {
+		return "Google™ Doc: " + getFileName(ltr, true);
 	}
 
 	@Override
@@ -388,24 +388,28 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public void userAskedToHandleError() {
+	public void userAskedToHandleError(LTRunner ltr) {
 		Throwable t = getException().getCause();
 		if (t instanceof UnknownHostException) {
 			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
 			if (tryReconnect) {
 				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.userAskedToHandleError :: reconnecting...");
 				//this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
-				loadFileProps(true);
+				loadFileProps(ltr, true);
 				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
 					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
 				} else {
 						// TODO clean up
-					LTManager.run(() -> context.data.getFileInterface().load(context.data.getDataInterface()), new UatheCb(this));
+					// TODO test this
+					try {
+						context.data.getFileInterface().load(ltr, context.data.getDataInterface());
+					} catch (Exception e) { e.printStackTrace(); } // TODO clean this up
+					new UatheCb(this).taskComplete(ltr);
 				}
 			}
 
 		} else if (t instanceof FileNotFoundException) {
-			new ErrUIGoogleDocFileNotFound(context, getFileName(false), this).buildDialog();
+			new ErrUIGoogleDocFileNotFound(context, getFileName(ltr, false), this).buildDialog();
 		}
 	}
 
@@ -421,9 +425,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public void allStoresAreUpToDate() {
+	public void allStoresAreUpToDate(LTRunner ltr) {
 		if (lastUpdatedDate == null) {
-			loadFileProps(true);
+			loadFileProps(ltr, true);
 		}
 		if (getBsState() == BsState.StartState) {
 				stateTrans(BsStateTrans.StartLoading);
@@ -437,34 +441,34 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean isUnmodifiedRemote() {
+	public boolean isUnmodifiedRemote(LTRunner ltr) {
 		if (lastUpdatedDate == null) {
-			loadFileProps(true);
+			loadFileProps(ltr, true);
 		}
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.isUnmodifiedRemote :: " + (lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate()) + ":" + lastUpdatedDate + ":" + new Date(context.prefs.getGoogleDriveDocUpdateDate()));
 		return lastUpdatedDate.getValue() == context.prefs.getGoogleDriveDocUpdateDate();
 	}
 
-	public static void deleteOfType(PvpContext context) {
+	public static void deleteOfType(LTRunner ltr, PvpContext context) {
 		PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
 		try {
-			bs.deleteOfType2();
+			bs.deleteOfType2(ltr);
 		} catch (IOException e) {
 			context.ui.notifyWarning("Trying to remove existing Google drive file", e);
 		}
 	}
 
-	private void deleteOfType2() throws IOException {
+	private void deleteOfType2(LTRunner ltr) throws IOException {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.deleteOfType2::START" );
 
 		Drive driveService;
 		try {
-			driveService = getDriveService();
+			driveService = getDriveService(ltr);
 		} catch (GeneralSecurityException e) {
 			throw new IOException(e);
 		}
 
-		if (lookForFileInList(driveService)) {
+		if (lookForFileInList(ltr, driveService)) {
 			final String id = context.prefs.getGoogleDriveDocId();
 			driveService.files().delete(id);
 			context.ui.notifyInfo("deleted file id::" + id);

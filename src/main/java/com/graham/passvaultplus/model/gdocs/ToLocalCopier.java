@@ -2,6 +2,7 @@
 package com.graham.passvaultplus.model.gdocs;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.util.FileUtil;
 
 import java.io.BufferedInputStream;
@@ -12,15 +13,15 @@ public class ToLocalCopier {
 		/**
 		 * note that context may not have all the correct settings at this time.
 		 */
-		public static PvpBackingStoreGoogleDocs.NewChecks doIt(PvpContext context) {
+		public static PvpBackingStoreGoogleDocs.NewChecks doIt(LTRunner ltr, PvpContext context) {
 				// TODO we open the stream in doChecksForNewFile, and open again here. There is probably a way to only open it once.
 				PvpBackingStoreGoogleDocs bs = new PvpBackingStoreGoogleDocs(context);
-				bs.loadFileProps(true);
+				bs.loadFileProps(ltr, true);
 
 				if (bs.nchecks.sameFormatExists) {
 						BufferedInputStream inStream = null;
 						try {
-								inStream = new BufferedInputStream(bs.openInputStream());
+								inStream = new BufferedInputStream(bs.openInputStream(ltr));
 								//canCancel = false;
 								FileUtil.copyFile(inStream, context.prefs.getDataFile());
 						} catch (Exception e) {

@@ -10,6 +10,7 @@ import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.core.*;
 import com.graham.passvaultplus.view.EulaDialog;
 import com.graham.passvaultplus.view.JceDialog;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LTCallback;
 import com.graham.passvaultplus.view.longtask.LTManager;
@@ -90,7 +91,7 @@ public class CommandExecuter {
 				searchBackups(args);
 			} else if (command.equals("OpenBackupRecord")) {
 				String[] sa = args.split(",");
-				new Thread(() -> openBackupRecord(sa[0], Integer.parseInt(sa[1]))).start();
+				LTManager.runWithProgress((ltr) -> openBackupRecord(ltr, sa[0], Integer.parseInt(sa[1])), "Opening backup record");
 			} else {
 				context.ui.notifyInfo("Unkown Command:" + command);
 			}
@@ -161,8 +162,8 @@ public class CommandExecuter {
 					searchText = s;
 			}
 			@Override
-			public void runLongTask() {
-					LTManager.registerCancelFunc(() -> doCancel = true);
+			public void runLongTask(LTRunner ltr) {
+					ltr.registerCancelCB(() -> doCancel = true);
 					PvpBackingStoreFile bsFileMain = new PvpBackingStoreFile(context);
 					File[] fArr = bsFileMain.getAllFiles(true);
 					int count = 0;
@@ -172,7 +173,7 @@ public class CommandExecuter {
 							try {
 									PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
 									fileReader = new PvpInStreamer(bsFileBackup, context);
-									BufferedInputStream inStream = fileReader.getStream();
+									BufferedInputStream inStream = fileReader.getStream(ltr);
 									PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
 									PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
 									for (PvpRecord r : fr.records) {
@@ -195,13 +196,13 @@ public class CommandExecuter {
 			}
 	}
 
-	private void openBackupRecord(String fileName, int id) {
+	private void openBackupRecord(LTRunner ltr, String fileName, int id) {
 			File f = new File(context.prefs.getDataFile().getParent(), fileName);
 			PvpInStreamer fileReader = null;
 			try {
 					PvpBackingStoreFile bsFileBackup = new PvpBackingStoreFile(f);
 					fileReader = new PvpInStreamer(bsFileBackup, context);
-					BufferedInputStream inStream = fileReader.getStream();
+					BufferedInputStream inStream = fileReader.getStream(ltr);
 					PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
 					PvpRecord r = newDataInterface.getRecord(id);
 					r.clearId();
@@ -219,27 +220,27 @@ public class CommandExecuter {
 			}
 	}
 
-	public void normalMethodThatCanTakeLong(int bakeTime) throws Exception {
+	public void normalMethodThatCanTakeLong(LTRunner ltr, int bakeTime) throws Exception {
 		Runnable cc = () -> context.ui.notifyInfo("CommandExecuter.normalMethodThatCanTakeLong :: canceled");
-		LTManager.registerCancelFunc(cc);
+		ltr.registerCancelCB(cc);
 		// Cancel of this task is handled by the fact that nextStep will throw an exception if it has been canceled. Which is a fine way to handle it in this case
-		LTManager.nextStep("Prepping dough");
+		ltr.nextStep("Prepping dough");
 		Thread.sleep(3000);
-		LTManager.nextStep("Rolling out dough");
+		ltr.nextStep("Rolling out dough");
 		Thread.sleep(5000);
-		LTManager.nextStep("Adding Sauce");
+		ltr.nextStep("Adding Sauce");
 		Thread.sleep(500);
-		LTManager.nextStep("Adding Cheese");
+		ltr.nextStep("Adding Cheese");
 		Thread.sleep(1000);
-		LTManager.nextStep("Adding Olives");
+		ltr.nextStep("Adding Olives");
 		Thread.sleep(1000);
-		LTManager.unregisterCancelFunc(cc); // test that cancel is disabled here
-		LTManager.nextStep("Baking (cannot cancel)");
+		ltr.unregisterCancelCB(cc); // test that cancel is disabled here
+		ltr.nextStep("Baking (cannot cancel)");
 		Thread.sleep(1000 * bakeTime);
-		LTManager.registerCancelFunc(cc);
-		LTManager.nextStep("Cutting");
+		ltr.registerCancelCB(cc);
+		ltr.nextStep("Cutting");
 		Thread.sleep(4000);
-		LTManager.stepDone("Cutting");
+		ltr.stepDone("Cutting");
 	}
 
 	class LongTaskTest implements LongTask {
@@ -248,8 +249,8 @@ public class CommandExecuter {
 			bakeTime = bt;
 		}
 		@Override
-		public void runLongTask() throws Exception {
-			normalMethodThatCanTakeLong(bakeTime);
+		public void runLongTask(LTRunner ltr) throws Exception {
+			normalMethodThatCanTakeLong(ltr, bakeTime);
 		}
 	}
 

@@ -9,6 +9,7 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextPrefsNoop;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.util.FileUtil;
 
 /**
@@ -35,30 +36,24 @@ public class PreferencesConnectionStartup extends PreferencesConnection {
 	}
 
 	@Override
-	public void doSave(final boolean wasChanges, PreferencesContext pc) {
+	public void doSave(LTRunner ltr, final boolean wasChanges, PreferencesContext pc) {
 		throw new RuntimeException("unsupported operation");
 	}
 
 	@Override
-	public void doOpen(PreferencesContext pc) {
-
-		//	com.graham.passvaultplus.PvpContextUI.checkEvtThread("3524");
+	public void doOpen(LTRunner ltr, PreferencesContext pc) {
 			copyPrefsToReal();
-			if (SwingUtilities.isEventDispatchThread()) {
-					startupOptionsFrame.setVisible(false);
-			} else {
-					try { SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false)); } catch (Exception e) { PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A"); }
-			}
-			//startupOptionsFrame.setVisible(false);
 			try {
-				context.dataFileSelectedForStartup();
+				SwingUtilities.invokeAndWait(() -> startupOptionsFrame.setVisible(false));
+			} catch (Exception e) {
+				PvpContextUI.getActiveUI().notifyWarning("PreferencesConnectionStartup.doOpen.A");
+			}
+			try {
+				context.dataFileSelectedForStartup(ltr);
 				pc.cleanup();
-				//return true;
 			} catch (Exception e1) {
 				context.ui.notifyBadException(e1, false, PvpException.GeneralErrCode.CantOpenMainWindow);
-				//return false;
 			}
-
 	}
 
 	@Override

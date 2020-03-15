@@ -14,22 +14,31 @@ public abstract class LTRunner implements Runnable {
 		private List<Runnable> cancelCallbacks = null;
 		volatile boolean wasCanceled;
 
-		abstract void nextStep(String stepDesc);
 
-		abstract void stepDone(String stepDesc);
+	/**
+	 * Will throw a LTCanceledException if the Task was successfully canceled.
+	 * Will assume the last step is completed if stepDone was not called.
+	 */
+		abstract public void nextStep(String stepDesc);
+
+	/**
+	 * Will throw a LTCanceledException if the Task was successfully canceled.
+	 * This does not need to be called. can just use nextStep.
+	 */
+		abstract public void stepDone(String stepDesc);
 
 		void interruptForUserInputEnd() {
 				// do nothing by default
 		}
 
-		void registerCancelCB(Runnable r) {
+		public void registerCancelCB(Runnable r) {
 				if (cancelCallbacks == null) {
 						cancelCallbacks = new ArrayList<>();
 				}
 				cancelCallbacks.add(r);
 		}
 
-		void unregisterCancelCB(Runnable r) {
+		public void unregisterCancelCB(Runnable r) {
 				if (cancelCallbacks == null) {
 						PvpContextUI.getActiveUI().notifyWarning("LTRunner.unregisterCancelCB :: cancelCallbacks is null");
 						return;

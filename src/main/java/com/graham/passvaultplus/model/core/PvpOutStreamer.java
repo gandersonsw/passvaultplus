@@ -13,6 +13,7 @@ import javax.crypto.CipherOutputStream;
 
 import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.UserAskToChangeFileException;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.util.FileUtil;
 
 /**
@@ -30,10 +31,10 @@ public class PvpOutStreamer {
 	private BufferedWriter bufWriter;
 	private OutputStream outStream; // do not close this, this is used as the last output
 
-	public PvpOutStreamer(final PvpBackingStore bs, final PvpContextPrefs cp) throws UserAskToChangeFileException {
+	public PvpOutStreamer(LTRunner ltr, final PvpBackingStore bs, final PvpContextPrefs cp) throws UserAskToChangeFileException {
 		backingStore = bs;
-		if (backingStore.isEncrypted(false)) {
-			password = cp.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation());
+		if (backingStore.isEncrypted(ltr, false)) {
+			password = cp.getPasswordOrAskUser(false, backingStore.getDisplayableResourceLocation(ltr));
 			encryptionStrength = cp.getEncryptionStrengthBits();
 		}
 	}
@@ -47,11 +48,11 @@ public class PvpOutStreamer {
 	/**
 	 * When writing, encryption happens first, then compression.
 	 */
-	public BufferedWriter getWriter() throws Exception {
+	public BufferedWriter getWriter(LTRunner ltr) throws Exception {
 		//DateUtil.checkBackupFileHourly(fileToWrite);
 
 		try {
-			if (backingStore.isEncrypted(false)) {
+			if (backingStore.isEncrypted(ltr, false)) {
 				final EncryptionHeader header = new EncryptionHeader(encryptionStrength);
 				Cipher cer = MyCipherFactory.createCipher(password, header, Cipher.ENCRYPT_MODE);
 				OutputStream bsos = backingStore.openOutputStream();
@@ -66,10 +67,10 @@ public class PvpOutStreamer {
 				outStream = bsOutStream;
 			}
 
-			if (backingStore.isCompressed(false)) {
+			if (backingStore.isCompressed(ltr, false)) {
 				zipStream = new ZipOutputStream(outStream);
 				String zippedFileName = FileUtil.setFileExt("PvpData",
-						backingStore.isEncrypted(false) ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
+						backingStore.isEncrypted(ltr, false) ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;
 			}

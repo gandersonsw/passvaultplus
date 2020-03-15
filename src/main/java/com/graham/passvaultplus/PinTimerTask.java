@@ -83,7 +83,7 @@ public class PinTimerTask extends TimerTask {
 		}
 		context.uiMain.getMainFrame().setVisible(false);
 
-		if (!context.prefs.isBlankEncryptedPassword() && context.prefs.getUsePin()) { // context.prefs.isPasswordSaved()) {
+		if (context.prefs.getUsePin()) {
 			int tryCount = 0;
 			while (true) {
 				final PinDialog pd = new PinDialog();
@@ -115,7 +115,7 @@ public class PinTimerTask extends TimerTask {
 				}
 			}
 		} else {
-			askUserForPassword(false);
+			context.ui.notifyWarning("PinTimerTask:PinDialog:UsePin was false");
 		}
 	}
 

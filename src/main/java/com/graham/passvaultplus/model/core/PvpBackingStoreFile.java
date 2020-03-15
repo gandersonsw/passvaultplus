@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.util.FileUtil;
@@ -49,7 +50,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public InputStream openInputStream() throws IOException {
+	public InputStream openInputStream(LTRunner ltr) throws IOException {
 		return new FileInputStream(getFile());
 	}
 
@@ -60,12 +61,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean isCompressed(boolean inFlag) {
+	public boolean isCompressed(LTRunner ltr, boolean inFlag) {
 		return PvpPersistenceInterface.isCompressed(getFile().getName());
 	}
 
 	@Override
-	public boolean isEncrypted(boolean inFlag) {
+	public boolean isEncrypted(LTRunner ltr, boolean inFlag) {
 		return PvpPersistenceInterface.isEncrypted(getFile().getName());
 	}
 
@@ -116,12 +117,12 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public long getLastUpdatedDate() {
+	public long getLastUpdatedDate(LTRunner ltr) {
 		return getFile().lastModified();
 	}
 
 	@Override
-	public String getDisplayableResourceLocation() {
+	public String getDisplayableResourceLocation(LTRunner ltr) {
 		return "File: " + getFile();
 	}
 
@@ -131,7 +132,7 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public void userAskedToHandleError() {
+	public void userAskedToHandleError(LTRunner ltr) {
 		// TODO
 	}
 

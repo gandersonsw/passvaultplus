@@ -2,5 +2,5 @@
 package com.graham.passvaultplus.view.longtask;
 
 public interface LongTask {
-		void runLongTask() throws Exception;
+		void runLongTask(LTRunner ltr) throws Exception;
 }

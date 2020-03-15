@@ -12,6 +12,7 @@ import com.graham.passvaultplus.PvpContextPrefs;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.util.FileUtil;
 
@@ -25,23 +26,21 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 	}
 
 	@Override
-	public void doSave(final boolean wasChanges, final PreferencesContext pc) {
+	public void doSave(LTRunner ltr, final boolean wasChanges, final PreferencesContext pc) {
 			// TODO support cancel "Saving..."
 			copyPrefsToReal();
 			PinTimerTask.update(context);
 			// if changes made don't require file rewrite, don't do it
 			if (wasChanges) {
-					LTManager.run(() -> context.data.getFileInterface().save(context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.init));
+					context.data.getFileInterface().save(ltr, context.data.getDataInterface(), PvpPersistenceInterface.SaveTrigger.init);
 				 // TODO if there is an exception here the changes from line 27 should not be applied
 			}
 			SwingUtilities.invokeLater(() -> context.uiMain.hideTab(OtherTab.Prefs));
-			//context.uiMain.hideTab(OtherTab.Prefs);
 			pc.cleanup();
 	}
 
 	@Override
-	public void doOpen(PreferencesContext pc) {
-			com.graham.passvaultplus.PvpContextUI.checkEvtThread("3523");
+	public void doOpen(LTRunner ltr, PreferencesContext pc) {
 		if (hasUnsavedChanges()) {
 			boolean b = context.ui.showConfirmDialog("Unsaved changes", "There are some records that have been edited but not saved. Are you sure you want to discard them?");
 			if (!b) {
@@ -53,7 +52,7 @@ public class PreferencesConnectionTab extends PreferencesConnection {
 		context.uiMain.getMainFrame().setVisible(false);
 		copyPrefsToReal();
 
-		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword(), contextPrefsForSettingsUI.getPin()); // psp.pw TODO
+		PvpContext.startApp(false, contextPrefsForSettingsUI.getPassword(), contextPrefsForSettingsUI.getPin());
 		pc.cleanup(); // TODO this should be on same thread
 	}
 

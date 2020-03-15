@@ -15,6 +15,7 @@ import com.graham.passvaultplus.model.core.PvpDataInterface;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 import com.graham.passvaultplus.view.JceDialog;
 import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 
 public class SavePrefsAction extends AbstractAction {
 
@@ -73,18 +74,18 @@ public class SavePrefsAction extends AbstractAction {
 			}
 		}
 
-		LTManager.runWithProgress(() -> {
+		LTManager.runWithProgress((ltr) -> {
 			prefsContext.remoteBS.deleteCredentials(); // creating a new database, so assume they might want to use a different remote
-			if (!prefsContext.remoteBS.presave(true)) {
+			if (!prefsContext.remoteBS.presave(ltr, true)) {
 				return;
 			}
 			try {
-				createFiles();
+				createFiles(ltr);
 			} catch (Exception ex) {
 				conn.context.ui.notifyBadException(ex, true, false, PvpException.GeneralErrCode.CantMakeNewDataFile);
 				return;
 			}
-			SwingUtilities.invokeLater(() -> conn.doOpen(prefsContext));
+			conn.doOpen(ltr, prefsContext);
 		}, "Creating Database");
 	}
 
@@ -109,12 +110,12 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		setContextPrefsValues();
-		LTManager.runWithProgress(() -> {
+		LTManager.runWithProgress((ltr) -> {
 			prefsContext.remoteBS.deleteCredentials(); // opening a different database, so assume they might want to use a different remote
-			if (!prefsContext.remoteBS.presave(false)) {
+			if (!prefsContext.remoteBS.presave(ltr, false)) {
 				return;
 			}
-			SwingUtilities.invokeLater(() -> conn.doOpen(prefsContext));
+			conn.doOpen(ltr, prefsContext);
 		}, "Loading");
 	}
 
@@ -163,9 +164,9 @@ public class SavePrefsAction extends AbstractAction {
 		}
 
 		final boolean saveFlagCopy = saveFlag;
-		LTManager.runWithProgress(() -> {
-			if (prefsContext.remoteBS.presave(false)) {
-				conn.doSave(saveFlagCopy, prefsContext);
+		LTManager.runWithProgress((ltr) -> {
+			if (prefsContext.remoteBS.presave(ltr, false)) {
+				conn.doSave(ltr, saveFlagCopy, prefsContext);
 			}
 		}, "Updating Settings");
 	}
@@ -187,9 +188,7 @@ public class SavePrefsAction extends AbstractAction {
 	}
 
 	private void setContextPrefsValues() {
-		conn.getContextPrefs().setPassword(prefsContext.getPasswordText(), prefsContext.savePassword.isSelected());
-		conn.getContextPrefs().setUsePin(prefsContext.usePin.isSelected());
-		conn.getContextPrefs().setPin(prefsContext.getPinText());
+		conn.getContextPrefs().setPasswordAndPin(prefsContext.getPasswordText(), prefsContext.savePassword.isSelected(), prefsContext.getPinText(), prefsContext.usePin.isSelected());
 		int encryptBits = 0;
 		if (this.prefsContext.encrypted.isSelected()) {
 			try { encryptBits = Integer.parseInt(prefsContext.aesBits.getSelectedItem().toString()); } catch (Exception e) { encryptBits = 128; }
@@ -225,8 +224,8 @@ public class SavePrefsAction extends AbstractAction {
 		return false;
 	}
 
-	private void createFiles() throws Exception {
-		if (prefsContext.remoteBS.createFiles()) {
+	private void createFiles(LTRunner ltr) throws Exception {
+		if (prefsContext.remoteBS.createFiles(ltr)) {
 			// the file was copied from a remote - no need to create a default
 			return;
 		}
@@ -244,7 +243,7 @@ public class SavePrefsAction extends AbstractAction {
 			PvpDataInterface newDataInterface = DatabaseReader.read(tempContext, sourceStream);
 			PvpPersistenceInterface pi = new PvpPersistenceInterface(tempContext);
 			checkSavePinToDatabase(newDataInterface);
-			pi.save(newDataInterface, PvpPersistenceInterface.SaveTrigger.init); // TODO test these lines
+			pi.save(ltr, newDataInterface, PvpPersistenceInterface.SaveTrigger.init); // TODO test these lines
 			//BCUtil.copyFile(sourceStream, conn.getContextPrefs().getDataFile());
 		} finally {
 			if (sourceStream != null) {

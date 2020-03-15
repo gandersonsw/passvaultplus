@@ -28,8 +28,8 @@ public class QuitAction extends AbstractAction {
 
 		if (shouldQuit) {
 			// TODO cancel not supported, maybe in future? test cancel
-			LTManager.runWithProgress(() -> {
-				if (context.data.getFileInterface().appQuiting()) {
+			LTManager.runWithProgress((ltr) -> {
+				if (context.data.getFileInterface().appQuiting(ltr)) {
 					System.exit(0);
 				}
 			}, "Saving");

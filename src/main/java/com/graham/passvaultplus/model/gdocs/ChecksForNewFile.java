@@ -4,6 +4,7 @@ package com.graham.passvaultplus.model.gdocs;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.model.core.PvpInStreamer;
+import com.graham.passvaultplus.view.longtask.LTRunner;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 import com.graham.passvaultplus.view.longtask.LTManager;
 
@@ -18,9 +19,9 @@ public class ChecksForNewFile implements LongTaskNoException {
 		/**
 		 * note that context may not have all the correct settings at this time.
 		 */
-		public static PvpBackingStoreGoogleDocs.NewChecks doIt(PvpContext contextParam) {
+		public static PvpBackingStoreGoogleDocs.NewChecks doIt(LTRunner ltr, PvpContext contextParam) {
 				ChecksForNewFile c = new ChecksForNewFile(contextParam);
-				c.runLongTask(); // TODO clean this up
+				c.runLongTask(ltr); // TODO clean this up
 			//	LTManager.runSync(c, "Verifying Google File");
 				return c.bs.nchecks;
 		}
@@ -31,17 +32,17 @@ public class ChecksForNewFile implements LongTaskNoException {
 		}
 
 		@Override
-		public void runLongTask() {
-				LTManager.registerCancelFunc(() -> bs.nchecks.wasCanceled = true);
-				LTManager.nextStep("loadFileProps");
+		public void runLongTask(LTRunner ltr) {
+				ltr.registerCancelCB(() -> bs.nchecks.wasCanceled = true);
+				ltr.nextStep("loadFileProps");
 				bs.nchecks.passwordWorks = true;
-				bs.loadFileProps(true);
+				bs.loadFileProps(ltr, true);
 
 				if (bs.nchecks.sameFormatExists) {
 						final PvpInStreamer fileReader = new PvpInStreamer(bs, context);
-						LTManager.nextStep("getStream");
+						ltr.nextStep("getStream");
 						try {
-								BufferedInputStream inStream = fileReader.getStream();
+								BufferedInputStream inStream = fileReader.getStream(ltr);
 								// do nothing with inStream. Just verifying it can be opened.
 						} catch (UserAskToChangeFileException ucf) {
 								bs.nchecks.passwordWorks = false;

@@ -9,10 +9,13 @@ import javax.swing.*;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpBackingStore;
 import com.graham.passvaultplus.model.core.PvpInStreamer;
+import com.graham.passvaultplus.view.longtask.LTManager;
+import com.graham.passvaultplus.view.longtask.LTRunner;
+import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.util.GenUtil;
 import com.graham.util.SwingUtil;
 
-public class ExportXmlFile extends AbstractAction implements Runnable {
+public class ExportXmlFile extends AbstractAction implements LongTask {
 	private static final long serialVersionUID = 1L;
 	final private PvpContext context;
 	final private PvpBackingStore backingStore;
@@ -25,14 +28,14 @@ public class ExportXmlFile extends AbstractAction implements Runnable {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		new Thread(this).start();
+		LTManager.runWithProgress(this, "Export Xml");
 	}
 
 	@Override
-	public void run() {
+	public void runLongTask(LTRunner ltr) {
 		final PvpInStreamer fileReader = new PvpInStreamer(backingStore, context);
 		try {
-			String rawXML = GenUtil.dumpInputStreamToString(fileReader.getStream());
+			String rawXML = GenUtil.dumpInputStreamToString(fileReader.getStream(ltr));
 			System.out.println("ExportXmlFile.actionPerformed - xml size:" + rawXML.length()); // don't use Diagnostics because this is error handle code
 
 			SwingUtilities.invokeAndWait(() -> {
