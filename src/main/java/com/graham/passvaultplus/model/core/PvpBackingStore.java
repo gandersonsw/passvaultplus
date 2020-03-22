@@ -144,7 +144,7 @@ public interface PvpBackingStore {
 	void setStatusBox(StatusBox sb);
 	StatusBox getStatusBox();
 
-	void userAskedToHandleError(LTRunner ltr);
+	void userAskedToHandleError();
 
 	/**
 	 * todo

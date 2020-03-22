@@ -165,11 +165,11 @@ public class PvpContextPrefs {
 		userPrefs.putInt("pinmaxtry", pinMaxTry);
 	}
 
+
 	/*
 	 ********************************************** Password Prefs Section **********************************************
 	 ********************************************** Password Prefs Section **********************************************
 	 */
-
 
 
 	private boolean isBlankEncryptedPassword(byte[] encryptedPassword) {
@@ -248,7 +248,7 @@ public class PvpContextPrefs {
 	 * @return
 	 */
 	public String getPasswordOrAskUser(final boolean passwordWasBad, final String resourseLocation) throws UserAskToChangeFileException {
-		if (getPassword() != null) {
+		if (!passwordWasBad && getPassword() != null) {
 			return getPassword();
 		}
 		GetPWOrAsk pw = new GetPWOrAsk(passwordWasBad, resourseLocation, this);

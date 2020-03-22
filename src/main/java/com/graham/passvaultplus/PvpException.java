@@ -21,7 +21,8 @@ public class PvpException extends Exception {
 	public enum SpecificErrCode implements ErrCode {
 		// Here are the specific errors - for creating exceptions
 		EncryptionHeaderNotRead("There was an error that prevented the data from loading", "The encryption information could not be read from the file."), // encrypt header not read
-		ZipEntryNotFound("There was an error that prevented the data from loading", "The entry in the zip file does not exist"); // zip file not as expected
+		ZipEntryNotFound("There was an error that prevented the data from loading", "The entry in the zip file does not exist"), // zip file not as expected
+		RemotePasswordBad("Incorrect Password", "Password not correct for remote database");
 		final String title;
 		final String description;
 		SpecificErrCode(final String titleParam, final String descParam) {
@@ -109,7 +110,7 @@ public class PvpException extends Exception {
 		return this;
 	}
 	
-	private ErrCode getErrCode() {
+	public ErrCode getErrCode() {
 		if (secode != null) {
 			return secode;
 		} else if (gecode != null) {

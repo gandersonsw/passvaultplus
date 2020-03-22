@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 public class SwingUtil {
 
@@ -60,6 +61,12 @@ public class SwingUtil {
 
 	public static void makeButtonSmall(final JButton b) {
 		b.putClientProperty("JComponent.sizeVariant", "small");
+	}
+
+	public static JLabel makeSmallLabel(JLabel lbl) {
+		Font f = lbl.getFont();
+		lbl.setFont(f.deriveFont(f.getSize() - 2.0f));
+		return lbl;
 	}
 
 }

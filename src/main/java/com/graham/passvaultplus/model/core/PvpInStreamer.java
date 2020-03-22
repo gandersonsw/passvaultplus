@@ -18,6 +18,7 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 
 import com.graham.passvaultplus.PvpContext;
+import com.graham.passvaultplus.PvpContextUI;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.view.longtask.LTRunner;
@@ -79,6 +80,32 @@ public class PvpInStreamer {
 		}
 		return eHeader.aesStrengthBits;
 	}
+
+	public boolean validatePassword(LTRunner ltr, String password)
+			throws IOException, PvpException, InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException {
+		try {
+			bsInputStream = backingStore.openInputStream(ltr);
+			eHeader = getEncryptHeader(bsInputStream);
+			final Cipher cer = MyCipherFactory.createCipher(password, eHeader, Cipher.DECRYPT_MODE);
+
+			cipherStream = new CipherInputStream(bsInputStream, cer);
+			inStream = cipherStream;
+
+			byte[] check = new byte[8];
+			if (inStream.read(check, 0, 8) == 8) {
+				final String s = new String(check);
+				if (s.equals("remthis7")) {
+					// this is how we know the password worked.
+					return true;
+				}
+			} else {
+				PvpContextUI.getActiveUI().notifyWarning("PvpInStreamer.openCipherInputStream: could not read 8 bytes: " + backingStore.getShortName());
+			}
+		} finally {
+			closeCipherAndFile();
+		}
+		return false;
+	}
 	
 	private void openCipherInputStream(LTRunner ltr) throws IOException, PvpException, UserAskToChangeFileException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		boolean passwordIsGood = false;
@@ -101,6 +128,11 @@ public class PvpInStreamer {
 						// this is how we know the password worked.
 						passwordIsGood = true;
 					}
+				} else {
+					PvpContextUI.getActiveUI().notifyWarning("PvpInStreamer.openCipherInputStream: could not read 8 bytes: " + backingStore.getShortName());
+				}
+				if (!passwordIsGood && backingStore.getChattyLevel().isRemote()) {
+					throw new PvpException(PvpException.SpecificErrCode.RemotePasswordBad, null);
 				}
 				passwordTried = true;
 			} finally {

@@ -384,32 +384,42 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 		} else if (t instanceof FileNotFoundException) {
 			return "File not found on Google Drive Server. A new file will be created when saving.";
 		}
-		return getException().getMessage();
+		return super.getErrorMessageForDisplay();
 	}
 
 	@Override
-	public void userAskedToHandleError(LTRunner ltr) {
+	public void userAskedToHandleError() {
+		if (getException().getErrCode().equals(PvpException.SpecificErrCode.RemotePasswordBad)) {
+			new BadPasswordHandler(this, context).askForPw(false);
+			return;
+		}
 		Throwable t = getException().getCause();
 		if (t instanceof UnknownHostException) {
-			boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
-			if (tryReconnect) {
-				context.ui.notifyInfo("PvpBackingStoreGoogleDocs.userAskedToHandleError :: reconnecting...");
-				//this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
-				loadFileProps(ltr, true);
-				if (ERRORED_FILE_NAME.equals(remoteFileName)) {
-					context.ui.showMessageDialog("Connection Failed", "Connection Failed");
-				} else {
+			LTManager.runWithProgress((ltr) -> {
+				boolean tryReconnect = context.ui.showConfirmDialog("Cannot Connect", "Would you like to try to connect to Google again?");
+				if (tryReconnect) {
+					context.ui.notifyInfo("PvpBackingStoreGoogleDocs.userAskedToHandleError :: reconnecting...");
+					//this.setException(null); // TODO not sure this is right. do we want to call super.clearTransientData ?
+					loadFileProps(ltr, true);
+					if (ERRORED_FILE_NAME.equals(remoteFileName)) {
+						context.ui.showMessageDialog("Connection Failed", "Connection Failed");
+					}
+					else {
 						// TODO clean up
-					// TODO test this
-					try {
-						context.data.getFileInterface().load(ltr, context.data.getDataInterface());
-					} catch (Exception e) { e.printStackTrace(); } // TODO clean this up
-					new UatheCb(this).taskComplete(ltr);
+						// TODO test this
+						try {
+							context.data.getFileInterface().load(ltr, context.data.getDataInterface());
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						} // TODO clean this up
+						new UatheCb(this).taskComplete(ltr);
+					}
 				}
-			}
+			}, "Working on error");
 
 		} else if (t instanceof FileNotFoundException) {
-			new ErrUIGoogleDocFileNotFound(context, getFileName(ltr, false), this).buildDialog();
+			LTManager.runWithProgress((ltr) -> new ErrUIGoogleDocFileNotFound(context, getFileName(ltr, false), this).buildDialog(), "Working on error");
 		}
 	}
 

@@ -22,13 +22,13 @@ public class BackingStoreClickHandler extends MouseAdapter {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (backingStore.getException() != null) {
-			LTManager.runWithProgress((ltr) -> backingStore.userAskedToHandleError(ltr), "Working on error");
+			backingStore.userAskedToHandleError();
 			context.ui.notifyInfo("BackingStoreClickHandler clicked : error");
 		} else if (backingStore.isDirty()) {
 			LTManager.run(context.data.getFileInterface().saveOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));
 		} else {
 			if (backingStore.getChattyLevel().isRemote()) {
-				LTManager.run(context.data.getFileInterface().loadcheckOneBackingStoreLT(context.data.getDataInterface(), backingStore), new PvpBackingStoreLTCB(backingStore));
+				LTManager.run(context.data.getFileInterface().loadcheckOneBackingStoreLT(context, backingStore, true), new PvpBackingStoreLTCB(backingStore));
 			} else {
 				context.ui.notifyInfo("BackingStoreClickHandler clicked : other");
 			}

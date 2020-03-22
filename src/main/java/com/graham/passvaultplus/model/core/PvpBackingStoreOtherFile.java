@@ -64,7 +64,7 @@ public class PvpBackingStoreOtherFile extends PvpBackingStoreAbstract {
 	}
 	
 	@Override
-	public void userAskedToHandleError(LTRunner ltr) {
+	public void userAskedToHandleError() {
 		// TODO
 	}
 

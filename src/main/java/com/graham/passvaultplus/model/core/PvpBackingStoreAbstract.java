@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.graham.passvaultplus.PvpException;
 import com.graham.passvaultplus.view.StatusBox;
 import com.graham.passvaultplus.view.longtask.LTRunner;
+import com.graham.util.StringUtil;
 
 import javax.swing.*;
 
@@ -153,6 +154,9 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	protected String getErrorMessageForDisplay() {
+		if (StringUtil.stringEmpty(exception.getMessage())) {
+			return exception.getPvpErrorTitle();
+		}
 		return exception.getMessage();
 	}
 

@@ -15,6 +15,7 @@ import com.graham.passvaultplus.UserAskToChangeFileException;
 import com.graham.passvaultplus.actions.ExportXmlFile;
 import com.graham.passvaultplus.model.gdocs.PvpBackingStoreGoogleDocs;
 import com.graham.passvaultplus.view.longtask.LTRunner;
+import com.graham.passvaultplus.view.longtask.LongTask;
 import com.graham.passvaultplus.view.longtask.LongTaskNoException;
 import com.graham.util.FileUtil;
 
@@ -155,6 +156,9 @@ public class PvpPersistenceInterface {
 			} catch (InvalidKeyException e) {
 				context.ui.notifyInfo("at InvalidKeyException");
 				bs.setException(new PvpException(PvpException.GeneralErrCode.InvalidKey, e));
+				continue;
+			} catch (PvpException pvpe) {
+				bs.setException(pvpe);
 				continue;
 			} catch (Exception e) {
 				context.ui.notifyWarning("PI load Exception: " + e); // TODO might delete this since the exceptin is hadnled by bs
@@ -388,42 +392,52 @@ public class PvpPersistenceInterface {
 		}
 	}
 
-	public LongTaskNoException loadcheckOneBackingStoreLT(PvpDataInterface dataInterface, PvpBackingStore bs) {
-		return new LongTaskLoadcheckOneBS(dataInterface, bs);
+	public LongTask loadcheckOneBackingStoreLT(PvpContext altContextParam, PvpBackingStore bs, boolean showUI) {
+		return new LongTaskLoadcheckOneBS(altContextParam, bs, showUI);
 	}
 
-	class LongTaskLoadcheckOneBS implements LongTaskNoException {
-		private PvpDataInterface dataInterface;
+	class LongTaskLoadcheckOneBS implements LongTask {
+		private PvpContext altContext;
 		private PvpBackingStore bs;
-		public LongTaskLoadcheckOneBS(PvpDataInterface dataInterfaceParam, PvpBackingStore bsParam) {
-			dataInterface = dataInterfaceParam;
+		final boolean showUI;
+		public LongTaskLoadcheckOneBS(PvpContext altContextParam, PvpBackingStore bsParam, boolean showUiParam) {
+			altContext = altContextParam;
 			bs = bsParam;
+			showUI = showUiParam;
 			bs.stateTrans(PvpBackingStore.BsStateTrans.StartLoading);
 		}
-		public void runLongTask(LTRunner ltr) {
+		public void runLongTask(LTRunner ltr) throws Exception {
 			PvpInStreamer fileReader = null;
 			try {
-				fileReader = new PvpInStreamer(bs, context);
+				fileReader = new PvpInStreamer(bs, altContext);
 				final BufferedInputStream inStream = fileReader.getStream(ltr);
-				PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-				if (dataInterface.mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
-					context.ui.showMessageDialog("Loaded Data", "There were changes that have been loaded");
+				PvpDataInterface newDataInterface = DatabaseReader.read(altContext, inStream);
+				if (altContext.data.getDataInterface().mergeData(newDataInterface) != PvpDataMerger.MergeResultState.NO_CHANGE) {
+					if (showUI) {
+						altContext.ui.showMessageDialog("Loaded Data", "There were changes that have been loaded");
+					}
 					List<PvpBackingStore> bsList = getEnabledBackingStores(ltr, true);
 					for (PvpBackingStore bsi : bsList) {
 						if (bsi != bs) {
-							context.ui.notifyInfo("LongTaskLoadcheckOneBS :: setting dirty :: " + bsi.getClass().getName());
+							altContext.ui.notifyInfo("LongTaskLoadcheckOneBS :: setting dirty :: " + bsi.getClass().getName());
 							bsi.setDirty(true);
 						}
 					}
-					if (context.uiMain != null) {
-						SwingUtilities.invokeLater(() -> context.uiMain.getViewListContext().filterUIChanged());
+					if (altContext.uiMain != null) {
+						SwingUtilities.invokeLater(() -> altContext.uiMain.getViewListContext().filterUIChanged());
 					}
 				} else {
-					context.ui.showMessageDialog("No Changes", "There were no changes. No new data was loaded.");
+					if (showUI) {
+						altContext.ui.showMessageDialog("No Changes", "There were no changes. No new data was loaded.");
+					}
 				}
 			} catch (Exception e) {
-				context.ui.notifyWarning("Error in LongTaskLoadcheckOneBS", e);
-				context.ui.showMessageDialog("Error", "There was an error. " + e.getMessage());
+				if (showUI) {
+					altContext.ui.notifyWarning("Error in LongTaskLoadcheckOneBS", e);
+					altContext.ui.showMessageDialog("Error", "There was an error. " + e.getMessage());
+				} else {
+					throw e;
+				}
 			} finally {
 				bs.stateTrans(PvpBackingStore.BsStateTrans.EndLoading);
 				if (fileReader != null) {

@@ -204,4 +204,11 @@ public class PvpContext implements AppContext, Thread.UncaughtExceptionHandler {
 			}
 	}
 
+	public PvpContext makeCopyWithPassword(String newPassword) {
+		PvpContextPrefs newPrefs = new PvpContextPrefsOverridePW(newPassword);
+		PvpContext contextCopy = new PvpContext(newPrefs, this.data, this.ui);
+		contextCopy.uiMain = this.uiMain;
+		return contextCopy;
+	}
+
 }

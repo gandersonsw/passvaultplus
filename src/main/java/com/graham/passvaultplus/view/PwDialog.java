@@ -31,15 +31,21 @@ public class PwDialog {
 	private JCheckBox show;
 	private PwAction actionHit;
 	private boolean showConfigButton = true;
+	private boolean useCancel;
 
 	public enum PwAction {
 		Okay,
 		Quit,
-		Configure
+		Configure,
+		Cancel
 	}
 	
 	public void setShowConfigButton(final boolean scb) {
 		showConfigButton = scb;
+	}
+
+	public void setUseCancelInsteadOfQuit(boolean useCancelParam) {
+		useCancel = useCancelParam;
 	}
 	
 	public PwAction askForPw(final boolean passwordWasBad, final String resourseLocation) {
@@ -100,7 +106,7 @@ public class PwDialog {
 		}
 		
 		{
-			// add some spacers to make the button align to bottom and everythign else tot he top
+			// add some spacers to make the button align to bottom and everythign else to  the top
 			final JPanel sp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			sp1.add(new JLabel(" "));
 			centerPanel.add(sp1);
@@ -111,7 +117,7 @@ public class PwDialog {
 	
 		{
 			final JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			p.add(new JButton(new QuitAction()));
+			p.add(new JButton(useCancel ? new CancelAction() : new QuitAction()));
 			if (showConfigButton) {
 				p.add(new JButton(new GoToSetupAction()));
 			}
@@ -155,7 +161,17 @@ public class PwDialog {
 			d.setVisible(false);
 		}
 	}
-	
+
+	class CancelAction extends AbstractAction {
+		CancelAction() {
+			super("Cancel");
+		}
+		public void actionPerformed(ActionEvent e) {
+			actionHit = PwAction.Cancel;
+			d.setVisible(false);
+		}
+	}
+
 	class GoToSetupAction extends AbstractAction {
 		GoToSetupAction() {
 			super("Go to Setup");
