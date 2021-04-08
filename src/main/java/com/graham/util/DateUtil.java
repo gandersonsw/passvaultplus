@@ -2,47 +2,82 @@
 package com.graham.util;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ Parse and foramt dates. There are 3 modes: localized-date, localized-datetime, serlized-dateTime
+*/
 public class DateUtil {
 
+	// Format like: "2001-07-04T12:08:56-07:00" 
+	private static final DateFormat dfForSerialization = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+	
 	// Format like: "May 2, 2010 4:41 PM"
-	private static final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
+	private static final DateFormat dfForLocalizedDisplay = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US); // TODO - actually do localization
+	
 	private static final DateFormat dfNoTime = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
 	private static final long TEN_DAYS = 10L * 24L * 60L * 60L * 1000L;
 	
-	public static String formatDate1(final Date d) {
+	public static String formatDateTime(final Date d, boolean localized) {
+		if (d == null) {
+			return "";
+		}
+		return (localized ? dfForLocalizedDisplay : dfForSerialization).format(d);
+	}
+	
+	public static String formatDateTimeForSerialization(final Date d) {
+		if (d == null) {
+			return "";
+		}
+		return dfForSerialization.format(d);
+	}
+
+	public static Date parseDateTimeForSerialization(final String d) throws ParseException {
+		if (d == null || d.length() == 0) {
+			return null;
+		}
+
+		// TODO delete this 
+		try {
+			return dfForLocalizedDisplay.parse(d);
+		} catch (Exception e) {
+		}
+		// end TODO 
+		
+		try {
+			return dfForSerialization.parse(d);
+		} catch (Exception e) {
+			return dfNoTime.parse(d);
+		}
+	}
+	
+	public static String formatDateTimeLocalized(final Date d) {
 		if (d == null) {
 			return "";
 		}
 		
-		return df.format(d);
+		return dfForLocalizedDisplay.format(d);
 	}
-
-	public static Date parseDate1(final String d) throws ParseException {
+	
+	public static Date parseDateLocalized(final String d) throws ParseException {
 		if (d == null || d.length() == 0) {
 			return null;
 		}
 
 		try {
-			return df.parse(d);
+			return dfForLocalizedDisplay.parse(d);
 		} catch (Exception e) {
-			return dfNoTime.parse(d);
+			//return dfNoTime.parse(d);
 		}
-	}
-
-	public static Date parseDate2(final String d) throws ParseException {
-		if (d == null || d.length() == 0) {
-			return null;
-		}
-
+		
 		try {
-			return dfNoTime.parse(d);
+			return dfForSerialization.parse(d);
 		} catch (Exception e) {
-			return df.parse(d);
+			return dfNoTime.parse(d);
 		}
 	}
 	
@@ -53,7 +88,7 @@ public class DateUtil {
 	public static Date parseUpcomingDate(final String s) {
 		Date d = null;
 		try {
-			d = DateUtil.parseDate1(s);
+			d = DateUtil.parseDateLocalized(s);
 			Calendar cal2 = Calendar.getInstance();
 			int curYear = cal2.get(Calendar.YEAR);
 			cal2.setTime(d);

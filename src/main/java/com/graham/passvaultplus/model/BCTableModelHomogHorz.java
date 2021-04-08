@@ -57,7 +57,7 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		if (!returnSecretRealValue && field.isClassificationSecret()) {
 			return "******";
 		}
-		return rec.getAnyField(field);
+		return rec.getAnyFieldLocalized(field);
 	}
 
 	public PvpRecord getRecordAtRow(final int rowIndex) {
@@ -93,7 +93,7 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		boolean valExists[] = new boolean[fieldsToDisplay.size()];
 		for (int i = 0; i < count; i++) {
 			for (int fi = 0; fi < fieldsToDisplay.size(); fi++) {
-				String val = filter.getRecordAtIndex(i).getAnyField(fieldsToDisplay.get(fi));
+				String val = filter.getRecordAtIndex(i).getAnyFieldLocalized(fieldsToDisplay.get(fi));
 				if (StringUtil.stringNotEmpty(val)) {
 					valExists[fi] = true;
 				}

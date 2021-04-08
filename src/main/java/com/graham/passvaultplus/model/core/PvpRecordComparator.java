@@ -64,8 +64,8 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 	int compareDates(String s1, String s2) {
 		Date d1 = null;
 		Date d2 = null;
-		try { d1 = DateUtil.parseDate2(s1); } catch (Exception e) { }
-		try { d2 = DateUtil.parseDate2(s2); } catch (Exception e) { }
+		try { d1 = DateUtil.parseDateLocalized(s1); } catch (Exception e) { }
+		try { d2 = DateUtil.parseDateLocalized(s2); } catch (Exception e) { }
 
 		if (d1 == null && d2 == null) {
 			return compareStrings(s1, s2);

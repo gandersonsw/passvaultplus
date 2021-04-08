@@ -59,7 +59,7 @@ public class BCTableModelHeterVert implements BCTableModel {
 			return getFieldsToDisplay().get(fieldIndex).getName();
 		} else if (columnIndex == 1) {
 			PvpRecord rec = getRecordAtRow(rowIndex);
-			return rec.getAnyField(getFieldsToDisplay().get(fieldIndex));
+			return rec.getAnyFieldLocalized(getFieldsToDisplay().get(fieldIndex));
 		}
 		return null;
 	}

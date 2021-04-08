@@ -86,10 +86,10 @@ public class RecordEditBuilder {
 
 		if (!isNewRecord) {
 			p.add(new JLabel(PvpField.CF_CREATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(DateUtil.formatDate1(record.getCreationDate())), editorConstraints);
+			p.add(new JLabel(DateUtil.formatDateTimeLocalized(record.getCreationDate())), editorConstraints);
 
 			p.add(new JLabel(PvpField.CF_MODIFICATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(DateUtil.formatDate1(record.getModificationDate())), editorConstraints);
+			p.add(new JLabel(DateUtil.formatDateTimeLocalized(record.getModificationDate())), editorConstraints);
 		}
 
 		JScrollPane scroll = new JScrollPane(p);

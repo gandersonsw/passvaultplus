@@ -79,7 +79,7 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 				Date d = null;
 				String completeDate = r.getCustomField("Complete Date");
 				try {
-					d = DateUtil.parseDate1(completeDate);
+					d = DateUtil.parseDateLocalized(completeDate);
 				} catch (ParseException e) {
 					//e.printStackTrace();
 				}

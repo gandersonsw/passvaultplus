@@ -52,7 +52,7 @@ public class BCTableModelHeterVertDetailed implements BCTableModel {
 		for (int i = 0; i < max; i++) {
 			final PvpRecord r = filter.getRecordAtIndex(i);
 			for (final PvpField field: getFieldsToDisplay(r, fieldsToDisplay)) {
-				final String val = r.getAnyField(field);
+				final String val = r.getAnyFieldLocalized(field);
 				if (val != null && val.length() > 0) {
 					cacheData.add(new FieldAndRecord(r, field));
 				}
@@ -91,7 +91,7 @@ public class BCTableModelHeterVertDetailed implements BCTableModel {
 			if (!returnSecretRealValue && fr.field.isClassificationSecret()) {
 				return "******";
 			}
-			return fr.record.getAnyField(fr.field);
+			return fr.record.getAnyFieldLocalized(fr.field);
 		}
 
 		return null;

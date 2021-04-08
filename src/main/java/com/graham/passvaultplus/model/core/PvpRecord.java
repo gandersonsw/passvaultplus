@@ -73,7 +73,6 @@ public class PvpRecord {
 	}
 
 	public void setCreationDate(final Date d) {
-		checkCreateDateForTime(d);
 		creationDate = checkCreateDateForTime(d);
 	}
 
@@ -91,11 +90,6 @@ public class PvpRecord {
 	Map<String, String> getCustomFields() {
 		return fields;
 	}
-/*
-  // Throws parse exception if can't parse field
-	public Date getCustomFieldAsDate(PvpField field) {
-		return DateUtil.parseDate2(getCustomField(field.getName()));
-	} */
 
 	public String getCustomField(final String fieldName) {
 		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||
@@ -138,26 +132,34 @@ public class PvpRecord {
 	/**
 	 * Also include category, creation_date, modification_date, type
 	 */
-	Map<String, String> getAllFields() {
+	Map<String, String> getAllFieldsSerialized() {
 		Map<String, String> allFields = new HashMap<>();
 		allFields.putAll(fields);
 
 		allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
-		allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDate1(creationDate));
-		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDate1(modificationDate));
+		allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(creationDate));
+		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(modificationDate));
 		allFields.put(PvpField.CF_TYPE.getName(), rtType.getName());
 
 		return allFields;
 	}
 
-	public String getAnyField(final PvpField field) {
+	public String getAnyFieldLocalized(final PvpField field) {
+		return getAnyField(field, true);
+	}
+	
+	public String getAnyFieldSerialized(final PvpField field) {
+		return getAnyField(field, false);
+	}
+	
+	private String getAnyField(final PvpField field, boolean localized) {
 		switch (field.getCoreFieldId()) {
 			case PvpField.CFID_CATEGORY:
 				return category == null ? "" : category.getCustomField(PvpField.USR_CATEGORY_TITLE);
 			case PvpField.CFID_CREATION_DATE:
-				return DateUtil.formatDate1(creationDate);
+				return DateUtil.formatDateTime(creationDate, localized);
 			case PvpField.CFID_MODIFICATION_DATE:
-				return DateUtil.formatDate1(modificationDate);
+				return DateUtil.formatDateTime(modificationDate, localized);
 			case PvpField.CFID_NOTES:
 				return fields.get(field.getName());
 			case PvpField.CFID_SUMMARY:
@@ -175,18 +177,18 @@ public class PvpRecord {
 		return null;
 	}
 
-	void setAnyField(final String fieldName, final String fieldValue) throws ParseException {
+	void setAnyFieldSerialized(final String fieldName, final String fieldValue) throws ParseException {
 		if (fieldName.equals(PvpField.CF_CATEGORY.getName())) {
 			categoryIdForValidate = fieldValue;
 		} else if (fieldName.equals(PvpField.CF_CREATION_DATE.getName())) {
 			try {
-				setCreationDate(DateUtil.parseDate1(fieldValue));
+				setCreationDate(DateUtil.parseDateTimeForSerialization(fieldValue));
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
 		} else if (fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName())) {
 			try {
-				modificationDate = DateUtil.parseDate1(fieldValue);
+				modificationDate = DateUtil.parseDateTimeForSerialization(fieldValue);
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
 			}
@@ -220,7 +222,7 @@ public class PvpRecord {
 		sb.append("ID=");
 		sb.append(this.getId());
 		sb.append("; ");
-		appendFields(sb, getAllFields(), includeEmptyFields);
+		appendFields(sb, getAllFieldsSerialized(), includeEmptyFields);
 		return sb.toString();
 	}
 
@@ -241,7 +243,7 @@ public class PvpRecord {
 	}
 
 	/**
-	 * Called after all fields have been set using setAnyField
+	 * Called after all fields have been set using setAnyFieldSerialized
 	 */
 	void initalizeAfterLoad(final PvpContext context, final PvpDataInterface dataInterface) {
 
@@ -274,7 +276,6 @@ public class PvpRecord {
 	 * Return a match rating, 0 to 100
 	 */
 	public int matchRating(final PvpRecord otherRec, boolean checkCategory, boolean checkCreationDate) {
-		PvpContextUI.getActiveUI().notifyInfo("");
 		if (otherRec == null) {
 			return 0;
 		}

@@ -51,7 +51,7 @@ public class BCTableModelHeterHorz implements BCTableModel {
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		PvpRecord rec = filter.getRecordAtIndex(rowIndex);
-		return rec.getAnyField(getFieldsToDisplay().get(columnIndex));
+		return rec.getAnyFieldLocalized(getFieldsToDisplay().get(columnIndex));
 	}
 
 	public PvpRecord getRecordAtRow(final int rowIndex) {

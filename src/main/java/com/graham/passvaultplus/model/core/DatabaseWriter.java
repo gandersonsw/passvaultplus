@@ -119,7 +119,7 @@ public class DatabaseWriter {
 
 	private void writeRecordFields(final PvpRecord r) throws IOException {
 
-		for (Entry<String, String> entry : r.getAllFields().entrySet()) {
+		for (Entry<String, String> entry : r.getAllFieldsSerialized().entrySet()) {
 			bw.write("			<");
 			final String name = XmlUtil.makeXMLName((String) entry.getKey());
 			bw.write(name);

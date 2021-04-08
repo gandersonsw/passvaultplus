@@ -263,7 +263,7 @@ public class DatabaseReader {
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			try {
-				record.setAnyField(XmlUtil.unmakeXMLName(e.getName()), XmlUtil.unmakeXMLSafe(e.getText()));
+				record.setAnyFieldSerialized(XmlUtil.unmakeXMLName(e.getName()), XmlUtil.unmakeXMLSafe(e.getText()));
 			} catch (final Exception ex) {
 				context.ui.notifyWarning("WARN110 loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
 			}
