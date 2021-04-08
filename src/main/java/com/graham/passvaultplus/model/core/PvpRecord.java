@@ -13,6 +13,8 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.PvpContextUI;
 import com.graham.util.GenUtil;
 
+import java.util.Calendar;
+
 public class PvpRecord {
 
 	public final static String FILTER_ALL_CATEGORIES = "[All]";
@@ -71,7 +73,8 @@ public class PvpRecord {
 	}
 
 	public void setCreationDate(final Date d) {
-		creationDate = d;
+		checkCreateDateForTime(d);
+		creationDate = checkCreateDateForTime(d);
 	}
 
 	public Date getModificationDate() {
@@ -177,7 +180,7 @@ public class PvpRecord {
 			categoryIdForValidate = fieldValue;
 		} else if (fieldName.equals(PvpField.CF_CREATION_DATE.getName())) {
 			try {
-				creationDate = DateUtil.parseDate1(fieldValue);
+				setCreationDate(DateUtil.parseDate1(fieldValue));
 			} catch (Exception e) {
 				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
 			}
@@ -264,23 +267,33 @@ public class PvpRecord {
 
 	}
 
+	public int matchRating(final PvpRecord otherRec) {
+		return matchRating(otherRec, true, false);
+	}
 	/**
 	 * Return a match rating, 0 to 100
 	 */
-	public int matchRating(final PvpRecord otherRec) {
+	public int matchRating(final PvpRecord otherRec, boolean checkCategory, boolean checkCreationDate) {
+		PvpContextUI.getActiveUI().notifyInfo("");
 		if (otherRec == null) {
 			return 0;
 		}
 		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
 			return 0;
 		}
-		int fieldCount = 5;
+		int fieldCount = 0;
 		int matchCount = 0;
-		if (GenUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
-			matchCount++;
+		if (checkCategory) {
+			fieldCount++;
+			if (GenUtil.equalsWithNull(this.getCategory(), otherRec.getCategory())) {
+				matchCount++;
+			}
 		}
-		if (GenUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
-			matchCount += 4;
+		if (checkCreationDate) {
+			fieldCount += 4;
+			if (GenUtil.equalsWithNull(this.getCreationDate(), otherRec.getCreationDate())) {// TODO this weight might be special
+				matchCount += 4;
+			}
 		}
 
 		final Map<String, String> fields1 = this.getCustomFields();
@@ -309,7 +322,6 @@ public class PvpRecord {
 				}
 			}
 		}
-
 		return 100 * matchCount / fieldCount;
 	}
 
@@ -318,11 +330,11 @@ public class PvpRecord {
 	 */
 	public boolean copyTo(PvpRecord otherRec) {
 		if (otherRec == null) {
-			System.out.println("PvpRecord.copyTo.A - cant copy to null");
+			PvpContextUI.getActiveUI().notifyWarning("PvpRecord.copyTo.A - cant copy to null");
 			return false;
 		}
 		if (!PvpType.sameType(this.getType(), otherRec.getType())) {
-			System.out.println("PvpRecord.copyTo.B - cant copy to other type");
+			PvpContextUI.getActiveUI().notifyWarning("PvpRecord.copyTo.B - cant copy to other type");
 			return false;
 		}
 
@@ -355,6 +367,50 @@ public class PvpRecord {
 			}
 		}
 		return changed;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		PvpContextUI.getActiveUI().notifyWarning("PvpRecord called equals method", new Exception());
+		if (o == this) {
+			return true;
+		}
+		if (!(o instanceof PvpRecord)) {
+			return false;
+		}
+		PvpRecord other = (PvpRecord)o;
+		if (other.id != 0 && other.id == this.id && GenUtil.equalsWithNullFalse(other.creationDate, this.creationDate)) {
+			return true;
+		}
+	//	return false;
+		return this.matchRating(other, false, false) == 100; // TODO - should we check the category for non-category types ?
+	}
+	
+	@Override
+	public int hashCode() {
+		PvpContextUI.getActiveUI().notifyInfo("PvpRecord called hashCode method");
+		return id;
+	}
+	
+	private static boolean checkCreateDateForTimeHappened = false;
+	private Date checkCreateDateForTime(Date d) {
+		// TODO delete this - this is just tmeporay to try to figure out why the creation date got time cleared
+		if (d == null) {
+			return d;
+		}
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		if (c.get(Calendar.HOUR) == 0 && c.get(Calendar.MINUTE) == 0 && c.get(Calendar.SECOND) == 0) {
+			if (checkCreateDateForTimeHappened) {
+				PvpContextUI.getActiveUI().notifyWarning("The create date of a record has no time. " + d, new Exception());
+			} else {
+				checkCreateDateForTimeHappened = true;
+				PvpContextUI.getActiveUI().notifyBadException(new Exception("The create date of a record has no time. This notice will happen only once, additional occurences will be logged. " + d), true, com.graham.passvaultplus.PvpException.GeneralErrCode.OtherErr);
+			}
+			return new Date(d.getTime() + 1000L); // add 1 second so this error stops happening
+		}
+		
+		return d;
 	}
 
 }

@@ -38,5 +38,12 @@ public class GenUtil {
 		}
 		return obj1.equals(obj2);
 	}
+	
+	public static boolean equalsWithNullFalse(final Object obj1, final Object obj2) {
+		if (obj1 == null || obj2 == null) {
+			return false;
+		}
+		return obj1.equals(obj2);
+	}
 
 }

@@ -255,6 +255,9 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			ltr.nextStep("Google Drive Authorize");
 			// Load client secrets.
 			InputStream in = PvpBackingStoreGoogleDocs.class.getResourceAsStream("/client_id.json");
+			if (in == null) {
+				throw new FileNotFoundException("Could not open rescource file: /client_id.json");
+			}
 			GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
 			// Build flow and trigger user authorization request.
