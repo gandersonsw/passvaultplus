@@ -372,7 +372,7 @@ public class PvpRecord {
 	
 	@Override
 	public boolean equals(Object o) {
-		PvpContextUI.getActiveUI().notifyWarning("PvpRecord called equals method", new Exception());
+		// PvpContextUI.getActiveUI().notifyWarning("PvpRecord called equals method", new Exception());
 		if (o == this) {
 			return true;
 		}
