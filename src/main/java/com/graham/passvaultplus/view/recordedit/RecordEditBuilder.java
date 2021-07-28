@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import com.graham.util.DateUtil;
 import com.graham.passvaultplus.PvpContext;
@@ -83,13 +84,21 @@ public class RecordEditBuilder {
 
 		p.add(new JLabel(PvpField.CF_CATEGORY.getName() + ":", JLabel.RIGHT), labelConstraints);
 		p.add(buildCategoryComponent(), editorConstraints);
+		
+		p.add(new JLabel(PvpField.CF_ARCHIVED_FLAG.getName() + ":", JLabel.RIGHT), labelConstraints);
+		p.add(buildArchiveFlagComponent(), editorConstraints);
 
 		if (!isNewRecord) {
 			p.add(new JLabel(PvpField.CF_CREATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(DateUtil.formatDateTimeLocalized(record.getCreationDate())), editorConstraints);
+			p.add(new JLabel(" " + DateUtil.formatDateTimeLocalized(record.getCreationDate())), editorConstraints);
 
-			p.add(new JLabel(PvpField.CF_MODIFICATION_DATE.getName() + ":", JLabel.RIGHT), labelConstraints);
-			p.add(new JLabel(DateUtil.formatDateTimeLocalized(record.getModificationDate())), editorConstraints);
+			EmptyBorder border = new EmptyBorder(8, 0, 8, 0);
+			JLabel mdlab = new JLabel(PvpField.CF_MODIFICATION_DATE.getName() + ":", JLabel.RIGHT);
+			mdlab.setBorder(border);
+			p.add(mdlab, labelConstraints);
+			mdlab = new JLabel(" " + DateUtil.formatDateTimeLocalized(record.getModificationDate()));
+			mdlab.setBorder(border);
+			p.add(mdlab, editorConstraints);
 		}
 
 		JScrollPane scroll = new JScrollPane(p);
@@ -118,25 +127,32 @@ public class RecordEditBuilder {
 		List<PvpRecord> catList = context.data.getDataInterface().getCategories();
 		Object[] comboItems = new Object[catList.size() + 1];
 		comboItems[0] = PvpRecord.NO_CATEGORY;
-		int selectedIndex = 0;
 		for (int i = 0; i < catList.size(); i++) {
-			PvpRecord cat = catList.get(i);
-			if (record.getCategory() != null && cat.getId() == record.getCategory().getId()) {
-				selectedIndex = i + 1;
-			}
-			comboItems[i+1] = cat;
+			comboItems[i+1] = catList.get(i);
 		}
 
 		JComboBox catCombo = new JComboBox(comboItems);
 		catCombo.setMaximumRowCount(20);
 		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo);
 		editContext.editFields.put(PvpField.CF_CATEGORY.getName(), refc);
-		catCombo.setSelectedIndex(selectedIndex);
+		refc.populateUIFromRecordField(record);
 
 		catCombo.addActionListener(new AnyFieldChangedAction(editContext, refc));
 
 		JPanel spacerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		spacerPanel.add(catCombo);
+		return spacerPanel;
+	}
+	
+	private Component buildArchiveFlagComponent() {
+		JCheckBox check = new JCheckBox();
+		RecordEditFieldArchiveFlag refa = new RecordEditFieldArchiveFlag(check);
+		editContext.editFields.put(PvpField.CF_ARCHIVED_FLAG.getName(), refa);
+		refa.populateUIFromRecordField(record);
+		check.addActionListener(new AnyFieldChangedAction(editContext, refa));
+		
+		JPanel spacerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		spacerPanel.add(check);
 		return spacerPanel;
 	}
 

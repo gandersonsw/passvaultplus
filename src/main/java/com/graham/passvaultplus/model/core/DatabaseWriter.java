@@ -29,7 +29,7 @@ public class DatabaseWriter {
 	private void writeInternal(final PvpDataInterface dataInterface) throws IOException {
 		writeStart();
 		writeTypes(dataInterface.getTypes());
-		writeRecords(dataInterface.getRecords(), dataInterface.getMaxId());
+		writeRecords(dataInterface.getRecordsIncDeleted(), dataInterface.getMaxId());
 		writeMetadata(dataInterface.getMetadataMap());
 		writeEnd();
 	}

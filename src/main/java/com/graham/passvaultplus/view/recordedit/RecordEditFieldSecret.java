@@ -24,9 +24,9 @@ public class RecordEditFieldSecret extends RecordEditFieldJTextComponent {
 			val = "";
 		}
 		if (isLocked) {
-			return val.equals(clearText);
+			return !val.equals(clearText);
 		}
-		return val.equals(tc.getText());
+		return !val.equals(tc.getText());
 	}
 
 	@Override

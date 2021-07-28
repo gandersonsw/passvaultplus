@@ -19,6 +19,7 @@ public class PvpRecord {
 
 	public final static String FILTER_ALL_CATEGORIES = "[All]";
 	public final static String NO_CATEGORY = "[None]";
+	private final static String ARCHIVED_FLAG_VALUE = "1";
 
 	private int id;
 	private PvpRecord category;
@@ -29,6 +30,7 @@ public class PvpRecord {
 
 	private String typeForValidate;
 	private String categoryIdForValidate;
+	private boolean archivedFlag;
 
 	PvpRecord() {
 	}
@@ -67,6 +69,14 @@ public class PvpRecord {
 	public void setCategory(final PvpRecord categoryIdParam) {
 		category = categoryIdParam;
 	}
+	
+	public boolean isArchived() {
+		return archivedFlag;
+	}
+	
+	public void setArchived(boolean a) {
+		archivedFlag = a;
+	}
 
 	public Date getCreationDate() {
 		return creationDate;
@@ -95,7 +105,8 @@ public class PvpRecord {
 		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||
 				fieldName.equals(PvpField.CF_CREATION_DATE.getName()) ||
 				fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName()) ||
-				fieldName.equals(PvpField.CF_TYPE.getName())) {
+				fieldName.equals(PvpField.CF_TYPE.getName()) ||
+				fieldName.equals(PvpField.CF_ARCHIVED_FLAG.getName())) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 /*
@@ -118,7 +129,8 @@ public class PvpRecord {
 		if (fieldName.equals(PvpField.CF_CATEGORY.getName()) ||
 				fieldName.equals(PvpField.CF_CREATION_DATE.getName()) ||
 				fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName()) ||
-				fieldName.equals(PvpField.CF_TYPE.getName())) {
+				fieldName.equals(PvpField.CF_TYPE.getName()) ||
+				fieldName.equals(PvpField.CF_ARCHIVED_FLAG.getName())) {
 			throw new RuntimeException("dont call with:" + fieldName);
 		}
 
@@ -136,10 +148,15 @@ public class PvpRecord {
 		Map<String, String> allFields = new HashMap<>();
 		allFields.putAll(fields);
 
-		allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
-		allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(creationDate));
-		allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(modificationDate));
-		allFields.put(PvpField.CF_TYPE.getName(), rtType.getName());
+		if (rtType != null) { // it is a record that was deleted - PvpDataInterface.getRecordsIncDeleted
+			allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
+			allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(creationDate));
+			allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(modificationDate));
+			allFields.put(PvpField.CF_TYPE.getName(), rtType.getName());
+			if (archivedFlag) {
+				allFields.put(PvpField.CF_ARCHIVED_FLAG.getName(), ARCHIVED_FLAG_VALUE);
+			}
+		}
 
 		return allFields;
 	}
@@ -194,6 +211,8 @@ public class PvpRecord {
 			}
 		} else if (fieldName.equals(PvpField.CF_TYPE.getName())) {
 			typeForValidate = fieldValue;
+		} else if (fieldName.equals(PvpField.CF_ARCHIVED_FLAG.getName())) {
+			archivedFlag = ARCHIVED_FLAG_VALUE.equals(fieldValue);
 		} else {
 			fields.put(fieldName, fieldValue);
 		}
@@ -391,6 +410,22 @@ public class PvpRecord {
 	public int hashCode() {
 		PvpContextUI.getActiveUI().notifyInfo("PvpRecord called hashCode method");
 		return id;
+	}
+	
+
+	public int computeHash() {
+		StringBuilder sb = new StringBuilder();
+		for (PvpField field : rtType.getFields()) {
+			sb.append(fields.get(field.getName()));
+			sb.append('^');
+		}
+		sb.append(category == null ? "" : String.valueOf(category.getId()));
+		sb.append('^');
+		sb.append(DateUtil.formatDateTimeForSerialization(creationDate));
+		sb.append('^');
+		sb.append(rtType.getName());
+
+		return sb.toString().hashCode();
 	}
 	
 	private static boolean checkCreateDateForTimeHappened = false;

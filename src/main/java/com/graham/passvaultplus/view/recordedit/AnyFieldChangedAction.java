@@ -20,11 +20,11 @@ public class AnyFieldChangedAction extends AbstractAction {
 			return;
 		}
 
-		boolean hasOriginalValue = ref.isEdited(editContext.editRecord);
+		boolean fieldEdited = ref.isEdited(editContext.editRecord);
 		
 		boolean recordHasBeenModified = true;
 		// the currently edited field has its original value, so check to see if all the other fields are the same
-		if (hasOriginalValue) {
+		if (!fieldEdited) {
 			PvpRecord tempRec = new PvpRecord(editContext.editRecord.getType());
 			editContext.populateRecordFromUI(tempRec);
 			if (tempRec.matchRating(editContext.editRecord) == 100) { // TODO test this since changed from isSimilar

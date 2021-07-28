@@ -19,6 +19,7 @@ public class PvpDataInterface {
 
 	static final public String TYPE_CATEGORY = "Category";
 	static final public String TYPE_PASSWORD_GEN = "Password Generator";
+	static final public String DELETE_HASH = "deleteHash";
 
 	static public class FilterResults {
 		public List<PvpRecord> records = new ArrayList<>();
@@ -28,6 +29,7 @@ public class PvpDataInterface {
 	private final PvpContext context;
 	private List<PvpType> types;
 	private List<PvpRecord> records;
+	private List<PvpRecordDeleted> deletedRecords = new ArrayList<>();
 	private Map<String,String> metadata;
 	private int maxID;
 
@@ -41,6 +43,33 @@ public class PvpDataInterface {
 		records = recordsParam;
 		maxID = maxIDParam;
 		metadata = metadataParam;
+		processDeletedRecords();
+	}
+	
+	void processDeletedRecords() {
+		List<PvpRecord> drList = new ArrayList<>();
+		for (PvpRecord r : records) {
+			String hash = r.getCustomField(DELETE_HASH);
+			if (StringUtil.stringNotEmpty(hash)) {
+				drList.add(r);
+				try {
+					deletedRecords.add(new PvpRecordDeleted(r.getId(), Integer.parseInt(hash)));
+				} catch (Exception e) {
+					context.notifyWarning(DELETE_HASH + " value should be an Integer: " + hash, e);
+				}
+			}
+		}
+		records.removeAll(drList);
+		
+		// TODO delete - temp logging
+		StringBuilder sb = new StringBuilder();
+		sb.append("processDeletedRecords IDs: ");
+		for (PvpRecord r : drList) {
+			sb.append(r.getId());
+			sb.append(',');
+		}
+		context.notifyInfo(sb.toString());
+		
 	}
 
 	void setData(PvpDataInterface dataTocCopyFrom) {
@@ -95,7 +124,38 @@ public class PvpDataInterface {
 	public List<PvpRecord> getRecords() {
 		return records;
 	}
-
+	
+	List<PvpRecord> getRecordsIncDeleted() {
+		List<PvpRecord> allRec = new ArrayList<>();
+		allRec.addAll(records);
+		
+		
+		// TODO delete - temp logging
+		StringBuilder sb = new StringBuilder();
+		sb.append("getRecordsIncDeleted IDs: ");
+		
+		
+		for (PvpRecordDeleted d : deletedRecords) {
+			PvpRecord r = new PvpRecord();
+			r.setId(d.getId());
+			r.setCustomField(DELETE_HASH, Integer.toString(d.getHash()));
+			allRec.add(new PvpRecord());
+			
+			sb.append(d.getId());
+			sb.append(',');
+		}
+		
+		
+		context.notifyInfo(sb.toString());
+		
+		
+		return allRec;
+	}
+	
+	List<PvpRecordDeleted> getDeletedRecords() {
+		return deletedRecords;
+	}
+	
 	public void saveRecord(final PvpRecord r) {
 		if (r.getId() == 0) {
 			int nextID = getNextMaxId();
@@ -109,6 +169,7 @@ public class PvpDataInterface {
 	 */
 	public boolean deleteRecord(final PvpRecord r) {
 		if (records.contains(r)) {
+			deletedRecords.add(new PvpRecordDeleted(r.getId(), r.computeHash()));
 			records.remove(r);
 			r.setId(0);
 			return true;

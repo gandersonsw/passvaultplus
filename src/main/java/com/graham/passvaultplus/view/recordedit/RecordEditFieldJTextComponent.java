@@ -21,7 +21,7 @@ public class RecordEditFieldJTextComponent extends RecordEditField {
 		if (val == null) {
 			val = "";
 		}
-		return val.equals(tc.getText());
+		return !val.equals(tc.getText());
 	}
 
 	@Override

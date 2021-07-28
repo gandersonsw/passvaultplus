@@ -74,6 +74,9 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 		List<PvpRecord> allRecords = context.data.getDataInterface().getRecords();
 		
 		for (PvpRecord r : allRecords) {
+			if (r.isArchived()) {
+				continue;
+			}
 			String t = r.getType().getName();
 			if (t.equals("Todo")) { // TODO : a way to link this if user changes type name ?
 				Date d = null;

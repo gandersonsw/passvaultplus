@@ -17,7 +17,7 @@ public class RecordEditFieldCategory extends RecordEditField {
 
 	@Override
 	public boolean isEdited(PvpRecord r) {
-		return GenUtil.equalsWithNull(getSelectedCategory(), r.getCategory());
+		return !GenUtil.equalsWithNull(getSelectedCategory(), r.getCategory());
 	}
 
 	private PvpRecord getSelectedCategory() {
