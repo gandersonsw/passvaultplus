@@ -115,9 +115,6 @@ public class PvpDataMerger {
 		context.ui.notifyInfo(">>>>>>>>>> start merge. toMaxId:" + dataToMergeTo.getMaxId() + " fromMaxId:" + dataToMergeFrom.getMaxId());
 
 		int thisStartingRecordCount = dataToMergeTo.getRecordCount();
-
-		
-
 		int toMaxId = dataToMergeTo.getMaxId();
 		int typesMatched = 0;
 		int toTypeCount = dataToMergeTo.getTypes().size();

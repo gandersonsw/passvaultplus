@@ -3,6 +3,8 @@ package com.graham.passvaultplus.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpDataInterface;
@@ -13,18 +15,20 @@ import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.CategoryMenuItem;
 import com.graham.util.StringUtil;
 
+import com.graham.passvaultplus.model.search.SearchResults;
+import com.graham.passvaultplus.model.search.SearchRecord;
+import com.graham.passvaultplus.model.search.DefaultSearchRecordComparator;
+import com.graham.passvaultplus.model.search.SearchRecordComparator;
+
 public class RecordFilter {
 
 	private PvpContext context;
-	private List<PvpRecord> data;
-	private boolean allTheSameTypeFlag;
-
+	private SearchResults data;
 	private BCTableModelHeterVert modelHeterVert;
 	private BCTableModelHeterHorz modelHeterHorz;
 	private BCTableModelHomogVert modelHomogVert;
 	private BCTableModelHomogHorz modelHomogHorz;
 	private BCTableModelHeterVertDetailed modelHeterVertDetailed;
-
 	private BCTableModel currentModel;
 
 	public RecordFilter(final PvpContext c) {
@@ -123,49 +127,54 @@ public class RecordFilter {
 		String filterByText = context.uiMain.getViewListContext().getFilterTextField().getText();
 		CategoryMenuItem filterByCategory = (CategoryMenuItem)context.uiMain.getViewListContext().getCategoryComboBox().getSelectedItem();
 		boolean checkCategory = !PvpRecord.FILTER_ALL_CATEGORIES.equals(filterByCategory.toString());
-
-		PvpDataInterface.FilterResults results = context.data.getDataInterface().getFilteredRecords(filterByType, filterByText, filterByCategory.getCategory(), checkCategory);
-		data = results.records;
-		allTheSameTypeFlag = results.allTheSameTypeFlag;
-		context.uiMain.getViewListContext().getRecordCountLabel().setText(data.size() + " record" + StringUtil.getPluralAppendix(data.size()));
+		data = context.data.getDataInterface().getFilteredRecords(filterByType, filterByText, filterByCategory.getCategory(), checkCategory);
+		context.uiMain.getViewListContext().getRecordCountLabel().setText(data.records.size() + " record" + StringUtil.getPluralAppendix(data.records.size()));
 		doSort();
 	}
 
 	private void doSort() {
 		PvpField sort = context.prefs.getRecordListViewOptions().getSort();
-		if (sort == null) {
-			return;
+		if (sort == null || sort.getCoreFieldId() == PvpField.CFID_SEARCH_MATCH) {
+			DefaultSearchRecordComparator.doSort(data, context.prefs.getRecordListViewOptions().getSortDir() == RecordListViewOptions.SORT_ASC);
+		} else {
+			Collections.sort(data.records, new SearchRecordComparator(sort, context.prefs.getRecordListViewOptions().getSortDir() == RecordListViewOptions.SORT_ASC));
 		}
-		Collections.sort(data, new PvpRecordComparator(sort, context.prefs.getRecordListViewOptions().getSortDir() == RecordListViewOptions.SORT_ASC));
 	}
 
 	public int getRecordCount() {
 		if (data == null) {
 			doWork();
 		}
-		return data.size();
+		return data.records.size();
 	}
 
-	public PvpRecord getRecordAtIndex(final int index) {
+	public SearchRecord getRecordAtIndex(final int index) {
 		if (data == null) {
 			doWork();
 		}
-		return data.get(index);
+		return data.records.get(index);
 	}
 
 	public boolean isAllTheSameType() {
 		if (data == null) {
 			doWork();
 		}
-		return allTheSameTypeFlag;
+		return data.allTheSameTypeFlag;
+	}
+	
+	public boolean isAllTheSameMatch() {
+		if (data == null) {
+			doWork();
+		}
+		return data.allTheSameMatchFlag;
 	}
 
 	public PvpType getTypeIfAllSame() {
 		if (data == null) {
 			doWork();
 		}
-		if (allTheSameTypeFlag && data.size() > 0) {
-			return data.get(0).getType();
+		if (data.allTheSameTypeFlag && data.records.size() > 0) {
+			return data.records.get(0).record.getType();
 		}
 		return null;
 	}

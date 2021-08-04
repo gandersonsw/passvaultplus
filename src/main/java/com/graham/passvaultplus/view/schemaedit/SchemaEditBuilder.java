@@ -26,6 +26,8 @@ import com.graham.passvaultplus.view.OtherTab;
 import com.graham.passvaultplus.view.OtherTabBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
+import com.graham.passvaultplus.model.search.SearchResults;
+
 public class SchemaEditBuilder implements OtherTabBuilder {
 	private PvpContext context;
 	private SchemaChangesContext scContext;
@@ -192,8 +194,8 @@ public class SchemaEditBuilder implements OtherTabBuilder {
 				return;
 			}
 
-			final PvpDataInterface.FilterResults fr = context.data.getDataInterface().getFilteredRecords(type.getName(), "", null, false);
-			final int recordCount = fr.records.size();
+			final SearchResults sr = context.data.getDataInterface().getFilteredRecords(type.getName(), "", null, false);
+			final int recordCount = sr.records.size();
 			final String message = "Are you sure you want to delete the type \"" + type.getName() + "\"?\n" + recordCount + " records will be deleted";
 
 			boolean b = context.ui.showConfirmDialog("Confirm Delete Type", message);
@@ -203,7 +205,7 @@ public class SchemaEditBuilder implements OtherTabBuilder {
 
 			closeTabsForType(type);
 
-			context.data.deleteRecords(fr.records);
+			context.data.deleteRecords(sr.getNestedRecords());
 
 			List<PvpType> types = context.data.getDataInterface().getTypes();
 			types.remove(type);

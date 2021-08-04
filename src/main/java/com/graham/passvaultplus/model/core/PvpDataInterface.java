@@ -11,6 +11,10 @@ import java.util.stream.Stream;
 import com.graham.passvaultplus.PvpContext;
 import com.graham.util.StringUtil;
 
+import com.graham.passvaultplus.model.search.SearchResults;
+import com.graham.passvaultplus.model.search.SearchRecordMapper;
+import com.graham.passvaultplus.model.search.SearchRecord;
+
 /**
  * This is basically a database. It represents a set of types and data records that bundle together.
  * All methods to work with RtRecords and RtTypes.
@@ -20,11 +24,6 @@ public class PvpDataInterface {
 	static final public String TYPE_CATEGORY = "Category";
 	static final public String TYPE_PASSWORD_GEN = "Password Generator";
 	static final public String DELETE_HASH = "deleteHash";
-
-	static public class FilterResults {
-		public List<PvpRecord> records = new ArrayList<>();
-		public boolean allTheSameTypeFlag = true;
-	}
 
 	private final PvpContext context;
 	private List<PvpType> types;
@@ -145,9 +144,7 @@ public class PvpDataInterface {
 			sb.append(',');
 		}
 		
-		
 		context.notifyInfo(sb.toString());
-		
 		
 		return allRec;
 	}
@@ -212,12 +209,12 @@ public class PvpDataInterface {
 	}
 
 	public List<String> getCommonFiledValues(String recordType, String recordFieldName) {
-		FilterResults filtered = getFilteredRecords(recordType, "", null, false);
+		SearchResults filtered = getFilteredRecords(recordType, "", null, false);
 
 		HashMap<String, Integer> counts = new HashMap<>();
 
-		for (PvpRecord r : filtered.records) {
-			String val = r.getCustomField(recordFieldName);
+		for (SearchRecord fr : filtered.records) {
+			String val = fr.record.getCustomField(recordFieldName);
 			if (val != null) {
 				val = val.trim();
 				if (val.length() == 0) {
@@ -242,69 +239,21 @@ public class PvpDataInterface {
 		return values;
 	}
 
-	public FilterResults getFilteredRecords(final String filterByType, final String filterByText, final PvpRecord filterByCategory, final boolean checkCategory) {
+	public SearchResults getFilteredRecords(final String filterByType, final String filterByText, final PvpRecord filterByCategory, final boolean checkCategory) {
 		final long startTime = System.nanoTime();
+		
+		SearchRecordMapper mapper = new SearchRecordMapper(filterByType, filterByText, filterByCategory, checkCategory);
+    Stream<SearchRecord> filteredStream = getRecords().stream().map(mapper).filter(fr -> fr != null);
+		SearchResults results = new SearchResults(filteredStream.collect(Collectors.toList()), mapper.getCheckType());
 
-		boolean checkType = !filterByType.equals(PvpType.FILTER_ALL_TYPES);
-		boolean checkText = filterByText.length() > 0;
-		List<PvpRecord> allRecords = getRecords();
-
-    	final String filterByTextLC = filterByText.toLowerCase();
-
-    	FilterResults results = new FilterResults();
-
-    	Stream<PvpRecord> filteredStream = allRecords.stream().filter(r -> {
-			if (checkType) {
-				if (!PvpType.sameType(r.getType(), filterByType)) {
-					return false;
-				}
-			}
-			if (checkCategory) {
-				if (filterByCategory == null) {
-					if (r.getCategory() != null) {
-						return false;
-					}
-				} else if (r.getCategory() == null) {
-					return false;
-				} else if (!(r.getCategory().getId() == filterByCategory.getId())) {
-					return false;
-				}
-			}
-			if (checkText) {
-				if (!recordContainsText(r, filterByTextLC)) {
-					return false;
-				}
-			}
-			return true;
-   	 	});
-
-    	results.records = filteredStream.collect(Collectors.toList());
-
-    	if (checkType) {
-    		results.allTheSameTypeFlag = true;
-    	} else {
-    		results.allTheSameTypeFlag = results.records.stream().map(r -> r.getType().getName()).distinct().count() == 1;
-    	}
-
-    	if (context.prefs.getShowDiagnostics()) {
-    		final long endTime = System.nanoTime();
-				final long msDelta = (endTime - startTime) / 1000000;
-				if (msDelta > 6) {
-    			context.ui.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + msDelta + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
-				}
-			}
-		return results;
-	}
-
-	private boolean recordContainsText(final PvpRecord r, final String filterByText) {
-		for (final String s : r.getCustomFields().values()) {
-			if (s != null) {
-				if (s.toLowerCase().indexOf(filterByText) != -1) {
-					return true;
-				}
+    if (context.prefs.getShowDiagnostics()) {
+    	final long endTime = System.nanoTime();
+			final long msDelta = (endTime - startTime) / 1000000;
+			if (msDelta > 6) {
+    		context.ui.notifyInfo("PvpDataInterface.getFilteredRecords :: time: " + msDelta + "ms : " + results.records.size() + " : " + filterByType + " : " + filterByText + " : " + filterByCategory);
 			}
 		}
-		return false;
+		return results;
 	}
 
 	public int getNextMaxId() {

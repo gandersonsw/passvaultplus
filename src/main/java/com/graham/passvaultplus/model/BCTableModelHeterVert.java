@@ -65,7 +65,7 @@ public class BCTableModelHeterVert implements BCTableModel {
 	}
 	
 	public PvpRecord getRecordAtRow(final int rowIndex) {
-		return filter.getRecordAtIndex(rowIndex / getFieldsToDisplay().size());
+		return filter.getRecordAtIndex(rowIndex / getFieldsToDisplay().size()).record;
 	}
 
 	private List<PvpField> getFieldsToDisplay() {

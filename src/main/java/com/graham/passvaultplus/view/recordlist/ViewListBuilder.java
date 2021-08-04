@@ -116,7 +116,7 @@ public class ViewListBuilder implements OtherTabBuilder {
 		ListTableModel model = new ListTableModel(filter);
 		JTable table = new JTable(model);
 		table.getActionMap().put("copy", new RecordListCopyAction(table));
-		table.addMouseListener(new RecordListTableMouseAdpater(context, erAction, filter));
+		table.addMouseListener(new RecordListTableMouseAdapter(context, erAction, filter));
 		context.uiMain.getViewListContext().setListTable(table, model);
 		JScrollPane scroll = new JScrollPane(table);
 		return scroll;

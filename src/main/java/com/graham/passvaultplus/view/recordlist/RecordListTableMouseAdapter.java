@@ -18,7 +18,7 @@ import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.util.GenUtil;
 
-public class RecordListTableMouseAdpater extends MouseAdapter {
+public class RecordListTableMouseAdapter extends MouseAdapter {
 	final PvpContext context;
 	final AbstractAction doubleClickAction;
 	final RecordFilter filter;
@@ -29,7 +29,7 @@ public class RecordListTableMouseAdpater extends MouseAdapter {
 	JCheckBoxMenuItem currentVertTableLayoutMI;
 	JCheckBoxMenuItem currentSortMI;
 
-	public RecordListTableMouseAdpater(final PvpContext contextParam, final AbstractAction actionParam, final RecordFilter filterParam) {
+	public RecordListTableMouseAdapter(final PvpContext contextParam, final AbstractAction actionParam, final RecordFilter filterParam) {
 		context = contextParam;
 		doubleClickAction = actionParam;
 		filter = filterParam;
@@ -81,6 +81,9 @@ public class RecordListTableMouseAdpater extends MouseAdapter {
 		popup.add(vertOpts);
 
 		sortMenu = new JMenu("Sorting");
+		currentSortMI = new SortAction(PvpField.CF_SEARCH_MATCH).createMI();
+		currentSortMI.setSelected(true);
+		sortMenu.add(currentSortMI);
 		sortMenu.add(new SortAction(PvpField.CF_IDENTITY).createMI());
 		sortMenu.add(new SortAction(PvpField.CF_CATEGORY).createMI());
 		sortMenu.add(new SortAction(PvpField.CF_TYPE).createMI());
@@ -170,7 +173,7 @@ public class RecordListTableMouseAdpater extends MouseAdapter {
 			super(fieldParam.getName());
 			field = fieldParam;
 		}
-		JMenuItem createMI() {
+		JCheckBoxMenuItem createMI() {
 			menuItem = new JCheckBoxMenuItem(this);
 			if (field.getName().equals(context.prefs.getRecordListViewOptions().getSort())) {
 				menuItem.setSelected(true);

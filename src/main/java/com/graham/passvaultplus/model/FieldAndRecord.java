@@ -2,14 +2,14 @@
 package com.graham.passvaultplus.model;
 
 import com.graham.passvaultplus.model.core.PvpField;
-import com.graham.passvaultplus.model.core.PvpRecord;
+import com.graham.passvaultplus.model.search.SearchRecord;
 
 public class FieldAndRecord {
 	public PvpField field;
-	public PvpRecord record;
+	public SearchRecord sr;
 	
-	public FieldAndRecord(final PvpRecord r, final PvpField f) {
-		record = r;
+	public FieldAndRecord(final SearchRecord r, final PvpField f) {
+		sr = r;
 		field = f;
 	}
 	

@@ -18,52 +18,21 @@ import com.graham.passvaultplus.model.core.PvpRecord;
  * Account     Home         Amazon       Amazon jsmith
  *
  */
-public class BCTableModelHeterHorz implements BCTableModel {
+public class BCTableModelHeterHorz extends BCTableModelHorz {
 
-	final RecordFilter filter;
-	final PvpContext context;
-	List<PvpField> fieldsToDisplay;
-
-	public BCTableModelHeterHorz(final RecordFilter f, final PvpContext contextParam) {
-		filter = f;
-		context = contextParam;
+	public BCTableModelHeterHorz(final RecordFilter f, final PvpContext c) {
+		super(f, c);
 	}
 
-	public void flushCache() {
-		fieldsToDisplay = null;
-	}
-
-	public int getColumnCount() {
-		return getFieldsToDisplay().size();
-	}
-
-	public int getRowCount() {
-		return filter.getRecordCount();
-	}
-
-	public String getColumnName(int columnIndex) {
-		return getFieldsToDisplay().get(columnIndex).getName();
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
-		return getValueAt(rowIndex, columnIndex);
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		PvpRecord rec = filter.getRecordAtIndex(rowIndex);
-		return rec.getAnyFieldLocalized(getFieldsToDisplay().get(columnIndex));
-	}
-
-	public PvpRecord getRecordAtRow(final int rowIndex) {
-		return filter.getRecordAtIndex(rowIndex);
-	}
-
-	private List<PvpField> getFieldsToDisplay() {
+	List<PvpField> getFieldsToDisplay() {
 		if (fieldsToDisplay != null) {
 			return fieldsToDisplay;
 		}
 
 		fieldsToDisplay = new ArrayList<>();
+		if (!filter.isAllTheSameMatch()) {
+			fieldsToDisplay.add(PvpField.CF_SEARCH_MATCH);
+		}
 		fieldsToDisplay.add(PvpField.CF_TYPE);
 		fieldsToDisplay.add(PvpField.CF_CATEGORY);
 		fieldsToDisplay.add(PvpField.CF_VIRTUAL_SUMMARY);
@@ -80,7 +49,4 @@ public class BCTableModelHeterHorz implements BCTableModel {
 		return fieldsToDisplay;
 	}
 
-	public boolean isVertModel() {
-		return false;
-	}
 }

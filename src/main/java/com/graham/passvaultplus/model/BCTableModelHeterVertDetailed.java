@@ -10,6 +10,8 @@ import com.graham.passvaultplus.PvpContext;
 import com.graham.passvaultplus.model.core.PvpField;
 import com.graham.passvaultplus.model.core.PvpRecord;
 
+import com.graham.passvaultplus.model.search.SearchRecord;
+
 /**
  * Different PvpTypes. Example:
  *
@@ -22,27 +24,21 @@ import com.graham.passvaultplus.model.core.PvpRecord;
  * Name        Amazon
  * Username    jsmith
  */
-public class BCTableModelHeterVertDetailed implements BCTableModel {
-
-	final RecordFilter filter;
-	final PvpContext context;
-	List<FieldAndRecord> cacheData = null;
+public class BCTableModelHeterVertDetailed extends BCTableModelVert {
+	
+	Map<String, List<PvpField>> fieldsToDisplayCache; //  = new HashMap<>();
 
 	public BCTableModelHeterVertDetailed(final RecordFilter f, final PvpContext c) {
-		filter = f;
-		context = c;
+		super(f, c);
 	}
 
-	public void flushCache() {
-		cacheData = null;
-	}
-
-	private List<FieldAndRecord> getCacheData() {
+	List<FieldAndRecord> getCacheData() {
 		if (cacheData != null) {
 			return cacheData;
 		}
 
-		Map<String, List<PvpField>> fieldsToDisplay = new HashMap<>();
+		//Map<String, List<PvpField>> fieldsToDisplay = new HashMap<>();
+		fieldsToDisplayCache = new HashMap<>();
 		cacheData = new ArrayList<>();
 
 		int max = filter.getRecordCount();
@@ -50,59 +46,30 @@ public class BCTableModelHeterVertDetailed implements BCTableModel {
 		final FieldAndRecord dummy = new FieldAndRecord(null, null);
 
 		for (int i = 0; i < max; i++) {
-			final PvpRecord r = filter.getRecordAtIndex(i);
-			for (final PvpField field: getFieldsToDisplay(r, fieldsToDisplay)) {
-				final String val = r.getAnyFieldLocalized(field);
+			final SearchRecord sr = filter.getRecordAtIndex(i);
+			for (final PvpField field: getFieldsToDisplay(sr.record)) {
+				final String val = sr.record.getAnyFieldLocalized(field);
 				if (val != null && val.length() > 0) {
-					cacheData.add(new FieldAndRecord(r, field));
+					cacheData.add(new FieldAndRecord(sr, field));
 				}
 			}
 			cacheData.add(dummy);
 		}
 
+		if (filter.isAllTheSameMatch()) {
+			colNumMatch = -1;
+			colNumField = 0;
+			colNumValue = 1;
+		} else {
+			colNumMatch = 0;
+			colNumField = 1;
+			colNumValue = 2;
+		}
+		
 		return cacheData;
 	}
 
-	public int getColumnCount() {
-		return 2;
-	}
-
-	public int getRowCount() {
-		return getCacheData().size();
-	}
-
-	public String getColumnName(int columnIndex) {
-		return columnIndex == 0 ? "Field" : "Value";
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		return getValueAt(rowIndex, columnIndex, false);
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
-		final FieldAndRecord fr = getCacheData().get(rowIndex);
-
-		if (columnIndex == 0) {
-			return fr.getName();
-		} else if (columnIndex == 1) {
-			if (fr.record == null) {
-				return "";
-			}
-			if (!returnSecretRealValue && fr.field.isClassificationSecret()) {
-				return "******";
-			}
-			return fr.record.getAnyFieldLocalized(fr.field);
-		}
-
-		return null;
-	}
-
-	public PvpRecord getRecordAtRow(final int rowIndex) {
-		final FieldAndRecord fr = getCacheData().get(rowIndex);
-		return fr.record;
-	}
-
-	private List<PvpField> getFieldsToDisplay(final PvpRecord r, Map<String, List<PvpField>> fieldsToDisplayCache) {
+	private List<PvpField> getFieldsToDisplay(final PvpRecord r) {
 		String tName = r.getType().getName();
 		if (fieldsToDisplayCache.containsKey(tName)) {
 			return fieldsToDisplayCache.get(tName);
@@ -120,10 +87,6 @@ public class BCTableModelHeterVertDetailed implements BCTableModel {
 		context.prefs.getRecordListViewOptions().addCommonFields(fieldsToDisplay);
 		fieldsToDisplayCache.put(tName, fieldsToDisplay);
 		return fieldsToDisplay;
-	}
-
-	public boolean isVertModel() {
-		return true;
 	}
 
 }

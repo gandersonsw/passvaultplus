@@ -97,7 +97,7 @@ public class PvpRecord {
 	/**
 	 * Get all the non-standard fields. "Notes" will be in here also.
 	 */
-	Map<String, String> getCustomFields() {
+	public Map<String, String> getCustomFields() {
 		return fields;
 	}
 

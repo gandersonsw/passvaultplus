@@ -28,6 +28,7 @@ public class PvpField {
 	final static public int CFID_FULL = 907;
 	final static public int CFID_PLACE_HOLDER = 908;
 	final static public int CFID_ARCHIVED_FLAG = 909;
+	final static public int CFID_SEARCH_MATCH = 997;
 	final static public int CFID_IDENTITY = 998;
 	final static public int CFID_UNDEF = 999;
 
@@ -41,6 +42,7 @@ public class PvpField {
 	final static public PvpField CF_VIRTUAL_FULL = new PvpField(CFID_FULL, "Full", null);
 	final static public PvpField CF_VIRTUAL_PLACE_HOLDER = new PvpField(CFID_PLACE_HOLDER, "", null);
 	final static public PvpField CF_ARCHIVED_FLAG = new PvpField(CFID_ARCHIVED_FLAG, "Archived", null);
+	final static public PvpField CF_SEARCH_MATCH = new PvpField(CFID_SEARCH_MATCH, "Match", null);
 	final static public PvpField CF_IDENTITY = new PvpField(CFID_IDENTITY, "ID", null);
 
 	private final int coreFieldId;

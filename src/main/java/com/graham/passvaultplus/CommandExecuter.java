@@ -21,6 +21,9 @@ import com.graham.passvaultplus.view.prefs.ResetPrefsAction;
 import com.graham.passvaultplus.view.recordedit.RecordEditBuilder;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 
+import com.graham.passvaultplus.model.search.SearchResults;
+import com.graham.passvaultplus.model.search.SearchRecord;
+
 import javax.swing.*;
 
 public class CommandExecuter {
@@ -175,9 +178,9 @@ public class CommandExecuter {
 									fileReader = new PvpInStreamer(bsFileBackup, context);
 									BufferedInputStream inStream = fileReader.getStream(ltr);
 									PvpDataInterface newDataInterface = DatabaseReader.read(context, inStream);
-									PvpDataInterface.FilterResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
-									for (PvpRecord r : fr.records) {
-											context.ui.notifyInfo(r.getDebugText(false));
+									SearchResults fr = newDataInterface.getFilteredRecords(PvpType.FILTER_ALL_TYPES, searchText, null, false);
+									for (SearchRecord r : fr.records) {
+											context.ui.notifyInfo(r.record.getDebugText(false));
 									}
 									count += fr.records.size();
 							} catch (Exception e) {

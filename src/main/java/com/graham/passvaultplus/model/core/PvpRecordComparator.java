@@ -22,6 +22,7 @@ public class PvpRecordComparator implements Comparator<PvpRecord> {
 		neg1 = asc ? -1 : 1;
 	}
 
+	@Override
 	public int compare(PvpRecord r1, PvpRecord r2) {
 		int retVal = 0;
 		switch (cfid) {

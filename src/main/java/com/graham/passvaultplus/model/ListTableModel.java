@@ -47,5 +47,9 @@ public class ListTableModel extends AbstractTableModel {
 	public boolean isVertModel() {
 		return filter.getCurrentModel().isVertModel();
 	}
+	
+	public boolean isAllTheSameMatch() {
+		return filter.isAllTheSameMatch();
+	}
 
 }

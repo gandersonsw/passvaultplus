@@ -42,7 +42,6 @@ public class MainFrame extends JFrame {
 		setMinimumSize(new Dimension(400, 240));
 
 		context.uiMain.showTab(OtherTab.RecordList);
-		//context.uiMain.addOtherTab("Records", ViewListBuilder.buildViewList(context));
 		context.uiMain.checkOtherTabs();
 
 		JPanel toolBar = initToolBar(context);
@@ -53,8 +52,10 @@ public class MainFrame extends JFrame {
 		mainPanel.add(footer, BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
-
+		
 		setVisible(true);
+		
+		context.uiMain.getViewListContext().setColPrefWidths();
 	}
 
 	public void refreshInfoLabelText(final PvpContext context) {

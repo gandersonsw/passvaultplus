@@ -10,6 +10,8 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.util.StringUtil;
 
+import com.graham.passvaultplus.model.search.SearchRecord;
+
 /**
  * All the same PvpType. Example:
  *
@@ -18,53 +20,13 @@ import com.graham.util.StringUtil;
  * Jane       jane@email.com
  *
  */
-public class BCTableModelHomogHorz implements BCTableModel {
-
-	final RecordFilter filter;
-	final PvpContext context;
-	List<PvpField> fieldsToDisplay;
+public class BCTableModelHomogHorz extends BCTableModelHorz {
 
 	public BCTableModelHomogHorz(final RecordFilter f, final PvpContext c) {
-		filter = f;
-		context = c;
+		super(f, c);
 	}
 
-	public void flushCache() {
-		fieldsToDisplay = null;
-	}
-
-	public int getColumnCount() {
-		return getFieldsToDisplay().size();
-	}
-
-	public int getRowCount() {
-		return filter.getRecordCount();
-	}
-
-	public String getColumnName(int columnIndex) {
-		PvpField field = getFieldsToDisplay().get(columnIndex);
-		return field.getName();
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		return getValueAt(rowIndex, columnIndex, false);
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex, boolean returnSecretRealValue) {
-		PvpRecord rec = filter.getRecordAtIndex(rowIndex);
-		PvpField field = getFieldsToDisplay().get(columnIndex);
-
-		if (!returnSecretRealValue && field.isClassificationSecret()) {
-			return "******";
-		}
-		return rec.getAnyFieldLocalized(field);
-	}
-
-	public PvpRecord getRecordAtRow(final int rowIndex) {
-		return filter.getRecordAtIndex(rowIndex);
-	}
-
-	private List<PvpField> getFieldsToDisplay() {
+	List<PvpField> getFieldsToDisplay() {
 		if (fieldsToDisplay != null) {
 			return fieldsToDisplay;
 		}
@@ -72,12 +34,10 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		fieldsToDisplay = new ArrayList<>();
 
 		if (filter.getRecordCount() == 0) {
-		//	fieldsToDisplay.add("Field");
-		//	fieldsToDisplay.add("Value");
 			return fieldsToDisplay;
 		}
-
-		PvpRecord r = filter.getRecordAtIndex(0);
+		
+		PvpRecord r = filter.getRecordAtIndex(0).record;
 		PvpType currentType = r.getType();
 
 		List<PvpField> typeFields = currentType.getFields();
@@ -93,7 +53,7 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		boolean valExists[] = new boolean[fieldsToDisplay.size()];
 		for (int i = 0; i < count; i++) {
 			for (int fi = 0; fi < fieldsToDisplay.size(); fi++) {
-				String val = filter.getRecordAtIndex(i).getAnyFieldLocalized(fieldsToDisplay.get(fi));
+				String val = filter.getRecordAtIndex(i).record.getAnyFieldLocalized(fieldsToDisplay.get(fi));
 				if (StringUtil.stringNotEmpty(val)) {
 					valExists[fi] = true;
 				}
@@ -101,6 +61,10 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		}
 
 		List<PvpField> fieldsToDisplayFiltered = new ArrayList<>();
+		if (!filter.isAllTheSameMatch()) {
+			fieldsToDisplayFiltered.add(PvpField.CF_SEARCH_MATCH);
+		}
+		
 		for (int i = 0; i < fieldsToDisplay.size(); i++) {
 			if (valExists[i]) {
 				fieldsToDisplayFiltered.add(fieldsToDisplay.get(i));
@@ -111,7 +75,4 @@ public class BCTableModelHomogHorz implements BCTableModel {
 		return fieldsToDisplay;
 	}
 
-	public boolean isVertModel() {
-		return false;
-	}
 }

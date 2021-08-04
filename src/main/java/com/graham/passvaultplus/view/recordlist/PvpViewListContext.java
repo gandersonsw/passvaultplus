@@ -90,6 +90,33 @@ public class PvpViewListContext {
 	
 	public void filterUIChanged() {
 		listTableModel.filterUIChanged();
+		setColPrefWidths();
+	}
+	
+	public void setColPrefWidths() {
+		int tablePreferredWidth = listTable.getWidth();
+
+		if (listTableModel.isVertModel()) {
+			if (listTableModel.getColumnCount() == 2) {
+				listTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+				listTable.getColumnModel().getColumn(1).setPreferredWidth(tablePreferredWidth - 150);
+			} else {
+				listTable.getColumnModel().getColumn(0).setPreferredWidth(20);
+				listTable.getColumnModel().getColumn(1).setPreferredWidth(150);
+				listTable.getColumnModel().getColumn(2).setPreferredWidth(tablePreferredWidth - 170);
+			}
+		} else if (!listTableModel.isAllTheSameMatch()) {
+			int startI = 0;
+			int w = tablePreferredWidth / listTableModel.getColumnCount();
+			if (!listTableModel.isAllTheSameMatch()) { // dup check here because will eventually do some work either way
+				listTable.getColumnModel().getColumn(0).setPreferredWidth(20);
+				w = (tablePreferredWidth - 20) / (listTableModel.getColumnCount() - 1);
+				startI = 1;
+			}
+			for (int i = startI; i < listTableModel.getColumnCount(); i++) {
+				listTable.getColumnModel().getColumn(i).setPreferredWidth(w);
+			}
+		}
 	}
 	
 }

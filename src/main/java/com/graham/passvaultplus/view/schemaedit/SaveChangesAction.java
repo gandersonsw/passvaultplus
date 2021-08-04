@@ -19,6 +19,9 @@ import com.graham.passvaultplus.model.core.PvpType;
 import com.graham.passvaultplus.view.recordedit.RecordEditContext;
 import com.graham.passvaultplus.view.schemaedit.PvpTypeModification.PvpFieldModification;
 
+import com.graham.passvaultplus.model.search.SearchResults;
+import com.graham.passvaultplus.model.search.SearchRecord;
+
 public class SaveChangesAction extends AbstractAction {
 
 	final private SchemaChangesContext scContext;
@@ -119,7 +122,7 @@ public class SaveChangesAction extends AbstractAction {
 		}
 		// ***** validation done ****
 
-		final PvpDataInterface.FilterResults fr = context.data.getDataInterface().getFilteredRecords(t.getName(), "", null, false);
+		final SearchResults fr = context.data.getDataInterface().getFilteredRecords(t.getName(), "", null, false);
 
 		for (PvpFieldModification fm : fmods) {
 			if (fm.isDeleted) {
@@ -129,8 +132,8 @@ public class SaveChangesAction extends AbstractAction {
 				} else if (isCatType && fm.originalName.equals(PvpField.USR_CATEGORY_TITLE)) {
 					context.ui.notifyWarning("can't delete Title field in Category type");
 				} else {
-					for (PvpRecord r : fr.records) {
-						r.setCustomField(fm.originalName, null);
+					for (SearchRecord r : fr.records) {
+						r.record.setCustomField(fm.originalName, null);
 					}
 					t.getFields().remove(f);
 				}
@@ -144,10 +147,10 @@ public class SaveChangesAction extends AbstractAction {
 			} else {
 				final PvpField f = t.getField(fm.originalName);
 				if (!fm.newName.equals(fm.originalName)) {
-					for (PvpRecord r : fr.records) {
-						final String val = r.getCustomField(fm.originalName);
-						r.setCustomField(fm.originalName, null);
-						r.setCustomField(fm.newName, val);
+					for (SearchRecord r : fr.records) {
+						final String val = r.record.getCustomField(fm.originalName);
+						r.record.setCustomField(fm.originalName, null);
+						r.record.setCustomField(fm.newName, val);
 					}
 					f.setName(fm.newName);
 				}
