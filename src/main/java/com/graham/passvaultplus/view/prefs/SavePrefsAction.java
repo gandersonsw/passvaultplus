@@ -155,7 +155,7 @@ public class SavePrefsAction extends AbstractAction {
 			saveFlag = true;
 		}
 
-		if (prefsContext.compressed.isSelected() != prefsContext.oCompressedFlag || prefsContext.encrypted.isSelected() != prefsContext.oEncryptedFlag) {
+		if (prefsContext.encrypted.isSelected() != prefsContext.oEncryptedFlag) {
 			saveFlag = true;
 		}
 

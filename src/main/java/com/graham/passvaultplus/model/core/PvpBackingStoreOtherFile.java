@@ -37,11 +37,6 @@ public class PvpBackingStoreOtherFile extends PvpBackingStoreAbstract {
 	public OutputStream openOutputStream() throws IOException {
 		return new FileOutputStream(f);
 	}
-
-	@Override
-	public boolean isCompressed(LTRunner ltr, boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(f.getName());
-	}
 	
 	@Override
 	public boolean isEncrypted(LTRunner ltr, boolean inFlag) {

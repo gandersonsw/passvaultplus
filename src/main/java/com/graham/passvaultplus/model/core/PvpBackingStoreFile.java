@@ -61,11 +61,6 @@ public class PvpBackingStoreFile extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public boolean isCompressed(LTRunner ltr, boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(getFile().getName());
-	}
-
-	@Override
 	public boolean isEncrypted(LTRunner ltr, boolean inFlag) {
 		return PvpPersistenceInterface.isEncrypted(getFile().getName());
 	}

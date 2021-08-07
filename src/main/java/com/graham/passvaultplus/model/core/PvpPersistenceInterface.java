@@ -33,8 +33,8 @@ public class PvpPersistenceInterface {
 		metadata // there was a change to the metadata
 	}
 
-	public static final String EXT_COMPRESS = "zip";
-	public static final String EXT_ENCRYPT = "bmn";
+	public static final String EXT_COMPRESS = "zip"; // TODO delete - replace with .pvp
+	public static final String EXT_ENCRYPT = "bmn"; // TODO delete - replace with .pvp
 	public static final String EXT_XML = "xml";
 	public static final String EXT_BOTH = EXT_COMPRESS + "." + EXT_ENCRYPT;
 
@@ -47,47 +47,32 @@ public class PvpPersistenceInterface {
 		context = contextParam;
 	}
 
-	public static boolean isCompressed(final String path) {
-		// path is .zip or .zip.bmn
-		return path.endsWith("." + EXT_COMPRESS) || path.endsWith("." + EXT_BOTH);
-	}
-
 	public static boolean isEncrypted(final String path) {
 		// path is .bmn or .zip.bmn
 		return path.endsWith("." + EXT_ENCRYPT);
 	}
 
 	public static boolean isPvpFileExt(final String fileExtension) {
-				return fileExtension.equals(EXT_COMPRESS) || fileExtension.equals(EXT_ENCRYPT) || fileExtension.equals(EXT_XML) || fileExtension.equals(EXT_BOTH);
+		// fileExtension.equals(EXT_COMPRESS) || 
+				return fileExtension.equals(EXT_ENCRYPT) || fileExtension.equals(EXT_XML) || fileExtension.equals(EXT_BOTH);
 		}
 
-	public static String formatFileName(final String fnameWithExt, final boolean compressed, final boolean encrypted) {
+	public static String formatFileName(final String fnameWithExt, final boolean encrypted) {
 		String fname = FileUtil.getFileNameNoExt(fnameWithExt, true);
-		if (compressed) {
-			fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
-		}
 		if (encrypted) {
+			//fname = fname + "." + PvpPersistenceInterface.EXT_COMPRESS;
 			fname = fname + "." + PvpPersistenceInterface.EXT_ENCRYPT;
-		}
-		if (!compressed && !encrypted) {
+		} else {
 			fname = fname + "." + PvpPersistenceInterface.EXT_XML;
 		}
 		return fname;
 	}
 
 	public static String convertFileExtensionToEnglish(final String fileExtension) {
-		if (isCompressed(fileExtension)) {
-			if (isEncrypted(fileExtension)) {
-				return "Compressed and Encrypted";
-			} else {
-				return "Compressed only";
-			}
+		if (isEncrypted(fileExtension)) {
+			return "Compressed and Encrypted";
 		} else {
-			if (isEncrypted(fileExtension)) {
-				return "Encrypted only";
-			} else {
-				return "Not Compressed or Encrypted";
-			}
+			return "Not Compressed or Encrypted";
 		}
 	}
 

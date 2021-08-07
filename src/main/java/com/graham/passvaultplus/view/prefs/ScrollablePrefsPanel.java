@@ -1,11 +1,11 @@
 /* Copyright (C) 2021 Graham Anderson gandersonsw@gmail.com - All Rights Reserved */
-package com.graham.passvaultplus.view.recordedit;
+package com.graham.passvaultplus.view.prefs;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ScrollableRecordEdit extends JPanel implements Scrollable {
-		public ScrollableRecordEdit(LayoutManager layout) {
+public class ScrollablePrefsPanel extends JPanel implements Scrollable {
+		public ScrollablePrefsPanel(LayoutManager layout) {
 				super(layout, true);
 		}
 

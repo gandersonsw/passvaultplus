@@ -63,7 +63,6 @@ public class PreferencesBuilder implements OtherTabBuilder {
 		p.add(buildActionCombo());
 		p.add(buildFileText());
 		p.add(buildFileButtons());
-		p.add(buildCompressButtons());
 		p.add(buildEncryptedButtons());
 		p.add(buildPassword());
 		p.add(buildPasswordOptions());
@@ -72,16 +71,18 @@ public class PreferencesBuilder implements OtherTabBuilder {
 		p.add(buildDashboard());
 		p.add(prefsContext.remoteBS.buildPrefsUI());
 		p.add(buildDiagnostics());
-		prefsContext.updateBecauseCompressedOrEncryptedChanged();
+		prefsContext.updateBecauseEncryptedChanged();
 
 		// set the intial password strength
 		final PasswordChangedAction pca = new PasswordChangedAction(prefsContext);
 		pca.actionPerformed(null);
 
-		JPanel bp = new JPanel(new BorderLayout());
+		JPanel bp = new ScrollablePrefsPanel(new BorderLayout());
 		bp.add(p, BorderLayout.NORTH);
 
-		return new JScrollPane(bp);
+		JScrollPane scroll = new JScrollPane(bp);
+		scroll.getViewport().setBackground(bp.getBackground());
+		return scroll;
 	}
 
 	private JPanel buildActionCombo() {
@@ -128,18 +129,10 @@ public class PreferencesBuilder implements OtherTabBuilder {
 		return p;
 	}
 
-	private JPanel buildCompressButtons() {
-		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		prefsContext.compressed = new JCheckBox("Compressed (zip)", prefsContext.oCompressedFlag);
-		prefsContext.compressed.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
-		p.add(prefsContext.compressed);
-		return p;
-	}
-
 	private JPanel buildEncryptedButtons() {
 		final JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		prefsContext.encrypted = new JCheckBox("Encrypted", prefsContext.oEncryptedFlag);
-		prefsContext.encrypted.addActionListener(e -> prefsContext.updateBecauseCompressedOrEncryptedChanged());
+		prefsContext.encrypted.addActionListener(e -> prefsContext.updateBecauseEncryptedChanged());
 		p.add(prefsContext.encrypted);
 		return p;
 	}

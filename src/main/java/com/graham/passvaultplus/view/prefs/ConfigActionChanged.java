@@ -29,27 +29,17 @@ public class ConfigActionChanged extends AbstractAction {
 		context.saveButton.setText(ca.getButtonLabel());
 		if (ca == ConfigAction.Create) {
 			context.setDataFile(contextPrefs.getDataFile(), 0);
-			context.compressed.setEnabled(true);
-			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(true);
 			context.encrypted.setSelected(false);
-			//context.password.setText("");
-			//context.aesBits.setEnabled(false);
-			context.updateBecauseCompressedOrEncryptedChanged();
+			context.updateBecauseEncryptedChanged();
 		} else if (ca == ConfigAction.Open) {
-			context.compressed.setEnabled(false);
-			context.compressed.setSelected(false);
 			context.encrypted.setEnabled(false);
 			context.encrypted.setSelected(false);
-			//context.password.setText("");
-			//context.aesBits.setEnabled(false);
 
 			File f = context.getDataFile();
 			if (f != null && f.isFile()) {
-				// a file exists here,
-				// context.setCompressAndEncryptFromFile(f);
+				// a file exists here
 				final String fname = f.getName();
-				context.compressed.setSelected(PvpPersistenceInterface.isCompressed(fname));
 				context.encrypted.setSelected(PvpPersistenceInterface.isEncrypted(fname));
 			} else {
 				context.setDataFile(null, 0);
@@ -57,8 +47,6 @@ public class ConfigActionChanged extends AbstractAction {
 			context.setItemsDependentOnEncryptedEnabled();
 		} else if (ca == ConfigAction.Change) {
 			context.setDataFile(new File(contextPrefs.getDataFilePath()), contextPrefs.getEncryptionStrengthBits());
-			context.compressed.setEnabled(true);
-			context.compressed.setSelected(context.oCompressedFlag);
 			context.encrypted.setEnabled(true);
 			context.encrypted.setSelected(context.oEncryptedFlag);
 			context.password.setText(contextPrefs.getPassword());

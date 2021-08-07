@@ -115,8 +115,6 @@ public interface PvpBackingStore {
 	BsState getBsState();
 	void stateTrans(BsStateTrans trans);
 
-	boolean isCompressed(LTRunner ltr, boolean inFlag);
-
 	boolean isEncrypted(LTRunner ltr, boolean inFlag);
 
 	/**

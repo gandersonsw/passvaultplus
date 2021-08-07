@@ -16,12 +16,10 @@ import javax.swing.JTextField;
 import com.graham.passvaultplus.model.core.PvpPersistenceInterface;
 
 public class PreferencesContext {
-	final boolean oCompressedFlag; // this is not updated, original value only
 	final boolean oEncryptedFlag;  // this is not updated, original value only
 	final PreferencesConnection conn;
 	final RemoteBSPrefHandler remoteBS;
 
-	JCheckBox compressed;
 	JCheckBox encrypted;
 	JCheckBox savePassword;
 	JCheckBox showPassword;
@@ -51,7 +49,6 @@ public class PreferencesContext {
 	public PreferencesContext(final PreferencesConnection connParam) {
 		conn = connParam;
 		dataFileString = connParam.getContextPrefs().getDataFilePath();
-		oCompressedFlag = PvpPersistenceInterface.isCompressed(dataFileString);
 		oEncryptedFlag = PvpPersistenceInterface.isEncrypted(dataFileString);
 		remoteBS = new RemoteBSPrefHandler(this);
 	}
@@ -89,12 +86,10 @@ public class PreferencesContext {
 			dataFileString = "";
 		} else {
 			String fname = f.getName();
-			boolean isCompressed = PvpPersistenceInterface.isCompressed(fname);
 			boolean isEncrypted = PvpPersistenceInterface.isEncrypted(fname);
-			fname = PvpPersistenceInterface.formatFileName(fname, isCompressed, isEncrypted);
+			fname = PvpPersistenceInterface.formatFileName(fname, isEncrypted);
 			dataFile = new File(f.getParentFile(), fname);
 			dataFileString = dataFile.getAbsolutePath();
-			compressed.setSelected(isCompressed);
 			encrypted.setSelected(isEncrypted);
 			setSelectedBits(aesBits);
 		}
@@ -139,11 +134,11 @@ public class PreferencesContext {
 	}
 
 	/**
-	 * Call when the compressed checkbox or encrypted checkbox changed
+	 * Call when the encrypted checkbox changed
 	 */
-	void updateBecauseCompressedOrEncryptedChanged() {
+	void updateBecauseEncryptedChanged() {
 		if (dataFile != null) {
-			final String fname = PvpPersistenceInterface.formatFileName(dataFile.getName(), compressed.isSelected(), encrypted.isSelected());
+			final String fname = PvpPersistenceInterface.formatFileName(dataFile.getName(), encrypted.isSelected());
 			dataFile = new File(dataFile.getParentFile(), fname);
 			dataFileString = dataFile.getAbsolutePath();
 			dataFileLabel.setText(dataFileString);

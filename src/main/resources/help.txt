@@ -161,10 +161,9 @@ If you are upgrading from an earlier version of Pass Vault Plus, you need to man
 
 Steps to upgrade file format:
 1. If you are using an unencrypted and uncompressed file format, there is nothing you need to do.
-2. If you are using a compressed and encrypted file format, skip to step 5.
+2. If you are using a compressed and encrypted file format, there is nothing you need to do.
 3. Open your existing version of Pass Vault Plus.
 4. Open the Settings and check "Compressed", save and quit.
-5. Find the Pass Vault Plus Database file on your system, and change the file name extension from ".zip.bmn" to ".pvp"
 
 How to know where the Pass Vault data file is:
 1. Open Pass Vault Plus, open the Settings screen.

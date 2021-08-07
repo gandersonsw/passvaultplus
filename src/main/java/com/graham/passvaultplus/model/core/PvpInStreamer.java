@@ -48,12 +48,6 @@ public class PvpInStreamer {
 			// 4 possible file extensions: .xml .zip .bmn.zip .bmn
 			if (backingStore.isEncrypted(ltr, true)) {
 				openCipherInputStream(ltr);
-			} else {
-				bsInputStream = backingStore.openInputStream(ltr);
-				inStream = bsInputStream;
-			}
-			
-			if (backingStore.isCompressed(ltr, true)) {
 				zipfile = new ZipInputStream(inStream);
 				ZipEntry entry = zipfile.getNextEntry();
 				if (entry != null) {
@@ -61,6 +55,9 @@ public class PvpInStreamer {
 				} else {
 					throw new PvpException(PvpException.SpecificErrCode.ZipEntryNotFound, null);
 				}
+			} else {
+				bsInputStream = backingStore.openInputStream(ltr);
+				inStream = bsInputStream;
 			}
 			
 			bufInStream = new BufferedInputStream(inStream);

@@ -188,10 +188,7 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			return remoteFileName;
 		} else {
 			final String localFile = context.prefs.getDataFile().getName();
-			return PvpPersistenceInterface.formatFileName(
-					DOC_NAME,
-					PvpPersistenceInterface.isCompressed(localFile),
-					PvpPersistenceInterface.isEncrypted(localFile));
+			return PvpPersistenceInterface.formatFileName(DOC_NAME, PvpPersistenceInterface.isEncrypted(localFile));
 		}
 	}
 
@@ -233,11 +230,6 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			context.prefs.setGoogleDriveDocId(returnedFileMetaData.getId());
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: File ID: " + returnedFileMetaData.getId());
 		}
-	}
-
-	@Override
-	public boolean isCompressed(LTRunner ltr, boolean inFlag) {
-		return PvpPersistenceInterface.isCompressed(getFileName(ltr, inFlag));
 	}
 
 	@Override

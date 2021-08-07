@@ -62,17 +62,15 @@ public class PvpOutStreamer {
 
 				// write the code so we know it decrypted successfully
 				outStream.write("remthis7".getBytes());
-			} else {
-				bsOutStream = backingStore.openOutputStream();
-				outStream = bsOutStream;
-			}
-
-			if (backingStore.isCompressed(ltr, false)) {
+				
 				zipStream = new ZipOutputStream(outStream);
 				String zippedFileName = FileUtil.setFileExt("PvpData",
 						backingStore.isEncrypted(ltr, false) ? PvpPersistenceInterface.EXT_ENCRYPT : PvpPersistenceInterface.EXT_XML, true);
 				zipStream.putNextEntry(new ZipEntry(zippedFileName));
 				outStream = zipStream;
+			} else {
+				bsOutStream = backingStore.openOutputStream();
+				outStream = bsOutStream;
 			}
 
 			writer = new OutputStreamWriter(outStream, "UTF-8");

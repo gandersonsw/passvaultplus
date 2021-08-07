@@ -114,7 +114,7 @@ public class RemoteBSPrefHandler {
 			} else {
 				String message;
 				if (nc.fileExists) {
-					message = "Files were found on Google Drive, but file type does not match local settings. \n(" + nc.existingFileFormats + "). \n\nClick OK to create a new file on Google Drive. \n\nClick Cancel and then change local settings to match Google Drive file \nformats to use them. (Compressed and Encrypted must match)";
+					message = "Files were found on Google Drive, but file type does not match local settings. \n(" + nc.existingFileFormats + "). \n\nClick OK to create a new file on Google Drive. \n\nClick Cancel and then change local settings to match Google Drive file \nformats to use them. (Encrypted setting must match)";
 				} else {
 					message = "No existing file was found on Google drive, your local database will be copied there.";
 				}
