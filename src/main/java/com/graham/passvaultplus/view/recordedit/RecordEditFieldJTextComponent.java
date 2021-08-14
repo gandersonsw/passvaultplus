@@ -5,12 +5,13 @@ import javax.swing.text.JTextComponent;
 
 import com.graham.passvaultplus.model.core.PvpRecord;
 
-public class RecordEditFieldJTextComponent extends RecordEditField {
+public class RecordEditFieldJTextComponent extends RecordEditFieldText {
 	
 	final JTextComponent tc;
 	final String fieldName;
 	
-	public RecordEditFieldJTextComponent(JTextComponent tcParam, final String fieldNameParam) {
+	public RecordEditFieldJTextComponent(JTextComponent tcParam, final String fieldNameParam, final RecordEditContext editContextParam) {
+		super(editContextParam);
 		tc = tcParam;
 		fieldName = fieldNameParam;
 	}
@@ -41,6 +42,11 @@ public class RecordEditFieldJTextComponent extends RecordEditField {
 	@Override
 	public String getFieldTextForCopy() {
 		return tc.getText();
+	}
+	
+	@Override
+	public void setFieldText(String t) {
+		tc.setText(t);
 	}
 	
 }

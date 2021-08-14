@@ -72,21 +72,28 @@ class RecordEditFieldBuilder {
 			reb.rcPopup.addListener(tf);
 		}
 
-		RecordEditField ref;
+		RecordEditFieldText ref;
 		if (field.isClassificationSecret() && !reb.isNewRecord) {
-			final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name);
+			final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name, reb.editContext);
 			ref = refs;
 			JButton showSecretFieldButton = new JButton(new UnlockFieldAction(ResourceUtil.getIcon("unlock-small"), refs, reb.editContext));
 			showSecretFieldButton.setFocusable(false);
 			showSecretFieldButton.setToolTipText("show value");
-			rightWidget = showSecretFieldButton;
+			
+			JButton generatePasswordMenu = GenPasswordMenu.createButton(ref);
+
+			FlowLayout layout = new FlowLayout();
+			layout.setVgap(0);
+			rightWidget = new JPanel(layout);
+			rightWidget.add(showSecretFieldButton);
+			rightWidget.add(generatePasswordMenu);
 		} else {
-			ref = new RecordEditFieldJTextComponent(tf, name);
+			ref = new RecordEditFieldJTextComponent(tf, name, reb.editContext);
 		}
 
 		tf.getDocument().addUndoableEditListener(reb.context.uiMain.getUndoManager());
 		tf.addCaretListener(reb.context.uiMain.getUndoManager());
-		tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(new AnyFieldChangedAction(reb.editContext, ref)));
+		tf.getDocument().addDocumentListener(new TextFieldChangeForwarder(ref.afcAction));
 
 		reb.editContext.editFields.put(name, ref);
 		EmptyBorder eBorder = new EmptyBorder(3,3,3,3);

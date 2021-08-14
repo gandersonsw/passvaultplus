@@ -11,7 +11,8 @@ public class RecordEditFieldCategory extends RecordEditField {
 
 	private JComboBox catCombo;
 
-	public RecordEditFieldCategory(final JComboBox catComboParam) {
+	public RecordEditFieldCategory(final JComboBox catComboParam, final RecordEditContext editContextParam) {
+		super(editContextParam);
 		catCombo = catComboParam;
 	}
 
@@ -45,11 +46,4 @@ public class RecordEditFieldCategory extends RecordEditField {
 	public void populateUIFromRecordField(PvpRecord r) {
 		setSelectedCategory(r.getCategory());
 	}
-
-	@Override
-	public String getFieldTextForCopy() {
-		PvpContextUI.getActiveUI().notifyWarning("RecordEditFieldCategory.getFieldTextForCopy :: should not be called");
-		return "";
-	}
-
 }

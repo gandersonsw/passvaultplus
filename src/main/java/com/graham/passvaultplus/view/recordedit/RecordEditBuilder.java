@@ -133,11 +133,11 @@ public class RecordEditBuilder {
 
 		JComboBox catCombo = new JComboBox(comboItems);
 		catCombo.setMaximumRowCount(20);
-		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo);
+		RecordEditFieldCategory refc = new RecordEditFieldCategory(catCombo, editContext);
 		editContext.editFields.put(PvpField.CF_CATEGORY.getName(), refc);
 		refc.populateUIFromRecordField(record);
 
-		catCombo.addActionListener(new AnyFieldChangedAction(editContext, refc));
+		catCombo.addActionListener(refc.afcAction);
 
 		JPanel spacerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		spacerPanel.add(catCombo);
@@ -146,10 +146,10 @@ public class RecordEditBuilder {
 	
 	private Component buildArchiveFlagComponent() {
 		JCheckBox check = new JCheckBox();
-		RecordEditFieldArchiveFlag refa = new RecordEditFieldArchiveFlag(check);
+		RecordEditFieldArchiveFlag refa = new RecordEditFieldArchiveFlag(check, editContext);
 		editContext.editFields.put(PvpField.CF_ARCHIVED_FLAG.getName(), refa);
 		refa.populateUIFromRecordField(record);
-		check.addActionListener(new AnyFieldChangedAction(editContext, refa));
+		check.addActionListener(refa.afcAction);
 		
 		JPanel spacerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		spacerPanel.add(check);

@@ -5,6 +5,12 @@ import com.graham.passvaultplus.model.core.PvpRecord;
 
 public abstract class RecordEditField {
 	
+	public final AnyFieldChangedAction afcAction;
+	
+	public RecordEditField(final RecordEditContext editContextParam) {
+		afcAction = new AnyFieldChangedAction(editContextParam, this);
+	}
+	
 	/**
 	 * @return has this one field been edited compared to given record.
 	 */
@@ -13,7 +19,4 @@ public abstract class RecordEditField {
 	public abstract void populateRecordFieldFromUI(final PvpRecord r);
 	
 	public abstract void populateUIFromRecordField(final PvpRecord r);
-	
-	public abstract String getFieldTextForCopy();
-
 }

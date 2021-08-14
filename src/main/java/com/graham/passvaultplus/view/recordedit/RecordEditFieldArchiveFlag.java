@@ -11,7 +11,8 @@ public class RecordEditFieldArchiveFlag extends RecordEditField {
 
 	private JCheckBox check;
 
-	public RecordEditFieldArchiveFlag(final JCheckBox c) {
+	public RecordEditFieldArchiveFlag(final JCheckBox c, final RecordEditContext editContextParam) {
+		super(editContextParam);
 		check = c;
 	}
 
@@ -29,11 +30,4 @@ public class RecordEditFieldArchiveFlag extends RecordEditField {
 	public void populateUIFromRecordField(PvpRecord r) {
     check.setSelected(r.isArchived());
 	}
-
-	@Override
-	public String getFieldTextForCopy() {
-		PvpContextUI.getActiveUI().notifyWarning("RecordEditFieldArchiveFlag.getFieldTextForCopy :: should not be called");
-		return "";
-	}
-
 }

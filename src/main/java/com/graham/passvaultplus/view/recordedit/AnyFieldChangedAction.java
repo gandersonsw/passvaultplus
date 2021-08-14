@@ -15,7 +15,7 @@ public class AnyFieldChangedAction extends AbstractAction {
 		editContext = editContextParam;
 		ref = refParam;
 	}
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent evt) {
 		if (editContext.shouldIngoreChanges()) {
 			return;
 		}

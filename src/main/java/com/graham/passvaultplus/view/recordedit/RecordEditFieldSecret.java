@@ -12,8 +12,8 @@ public class RecordEditFieldSecret extends RecordEditFieldJTextComponent {
 	private String clearText; // the UI field may be "*******" so this has the real value, if isLocked is false, this value may not be up to date
 	private boolean isLocked; // is the field locked, and the clearText value is hidden
 
-	public RecordEditFieldSecret(JTextComponent tcParam, String fieldNameParam) {
-		super(tcParam, fieldNameParam);
+	public RecordEditFieldSecret(JTextComponent tcParam, String fieldNameParam, final RecordEditContext editContextParam) {
+		super(tcParam, fieldNameParam, editContextParam);
 		setIsLockedAndHidden(true);
 	}
 	
@@ -76,6 +76,17 @@ public class RecordEditFieldSecret extends RecordEditFieldJTextComponent {
 			return clearText;
 		}
 		return tc.getText();
+	}
+	
+	@Override
+	public void setFieldText(String t) {
+		com.graham.passvaultplus.PvpContextUI.checkEvtThread("0092");
+		if (isLocked) {
+			clearText = t;
+			afcAction.actionPerformed(null);
+		} else {
+			tc.setText(t);
+		}
 	}
 
 }

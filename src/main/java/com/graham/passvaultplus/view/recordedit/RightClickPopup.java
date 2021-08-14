@@ -39,19 +39,19 @@ public class RightClickPopup extends MouseAdapter {
   private void showPopup(MouseEvent e) {
     com.graham.passvaultplus.PvpContextUI.checkEvtThread("0099");
       if (e.isPopupTrigger()) {
-        JTextComponent tc = (JTextComponent)e.getComponent();
-        getPopupMenu(tc).show(tc, e.getX(), e.getY());
+      //  TODO JTextComponent tc = (JTextComponent)e.getComponent();
+      //  getPopupMenu(tc).show(tc, e.getX(), e.getY());
       }
   }
 
-  JPopupMenu getPopupMenu(JTextComponent tc) {
+  JPopupMenu getPopupMenu(RecordEditFieldText ref) {
     com.graham.passvaultplus.PvpContextUI.checkEvtThread("0097");
 		JPopupMenu popupMenu = new JPopupMenu("Edit");
-  	popupMenu.add(new JMenuItem(new ClearFieldAction(tc)));
-  	popupMenu.add(new JMenuItem(new ClearAndPasteAction(tc)));
+  	popupMenu.add(new JMenuItem(new ClearFieldAction(ref)));
+  	popupMenu.add(new JMenuItem(new ClearAndPasteAction(ref)));
 
 		JMenu passwordMenu = new JMenu("Generate Password");
-    addPasswordGen(passwordMenu, tc);
+    addPasswordGen(passwordMenu, ref);
     //passwordMenu.addSeparator();
   	//passwordMenu.add(new JMenuItem("Create New Password Generator"));
 
@@ -60,108 +60,71 @@ public class RightClickPopup extends MouseAdapter {
 		return popupMenu;
 	}
 
-  void addPasswordGen(JMenu passwordMenu, JTextComponent tc) {
+  static public void addPasswordGen(JMenu passwordMenu, RecordEditFieldText ref) {
     com.graham.passvaultplus.PvpContextUI.checkEvtThread("0095");
     //List<PvpRecord> pwGenList = context.data.getDataInterface().getRecordsOfType(PvpDataInterface.TYPE_PASSWORD_GEN);
     //if (pwGenList.size() == 0) {
     PasswordGenerator.PwGenParams params = new PasswordGenerator.PwGenParams();
-    passwordMenu.add(new GenPasswordAction("Default Password Generator", 1, tc));
-    passwordMenu.add(new GenPasswordAction("8 Basic", 2, tc));
-    passwordMenu.add(new GenPasswordAction("12 Strong", 3, tc));
-    passwordMenu.add(new GenPasswordAction("20 Strong", 4, tc));
-    passwordMenu.add(new GenPasswordAction("10 Upper+Lower+Digit+Special", 5, tc));
+    passwordMenu.add(new GenPasswordAction("Default Password Generator", 1, ref));
+    passwordMenu.add(new GenPasswordAction("8 Basic", 2, ref));
+    passwordMenu.add(new GenPasswordAction("12 Strong", 3, ref));
+    passwordMenu.add(new GenPasswordAction("20 Strong", 4, ref));
+    passwordMenu.add(new GenPasswordAction("10 Upper+Lower+Digit+Special", 5, ref));
+    //} else {
+    //}
+  }
+  
+  static public void addPasswordGen(JPopupMenu passwordMenu, RecordEditFieldText ref) {
+    com.graham.passvaultplus.PvpContextUI.checkEvtThread("0095");
+    //List<PvpRecord> pwGenList = context.data.getDataInterface().getRecordsOfType(PvpDataInterface.TYPE_PASSWORD_GEN);
+    //if (pwGenList.size() == 0) {
+    PasswordGenerator.PwGenParams params = new PasswordGenerator.PwGenParams();
+    passwordMenu.add(new GenPasswordAction("Default Password Generator", 1, ref));
+    passwordMenu.add(new GenPasswordAction("8 Basic", 2, ref));
+    passwordMenu.add(new GenPasswordAction("12 Strong", 3, ref));
+    passwordMenu.add(new GenPasswordAction("20 Strong", 4, ref));
+    passwordMenu.add(new GenPasswordAction("10 Upper+Lower+Digit+Special", 5, ref));
     //} else {
     //}
   }
 
 	class ClearFieldAction extends AbstractAction {
-    JTextComponent tc;
-		public ClearFieldAction(JTextComponent tcParam) {
+    RecordEditFieldText ref;
+		public ClearFieldAction(RecordEditFieldText refParam) {
 			super("Clear Field");
-      tc = tcParam;
+      ref = refParam;
 		}
 		public void actionPerformed(ActionEvent e) {
-      tc.setText("");
+      ref.setFieldText("");
 		}
 	}
 
   class ClearAndPasteAction extends AbstractAction {
-    JTextComponent tc;
-    public ClearAndPasteAction(JTextComponent tcParam) {
+    RecordEditFieldText ref;
+    public ClearAndPasteAction(RecordEditFieldText refParam) {
       super("Paste (Replace)");
-      tc = tcParam;
+      ref = refParam;
     }
     public void actionPerformed(ActionEvent e) {
-      tc.setText("");
+      
+      try {
+        String data = (String) java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().getData(java.awt.datatransfer.DataFlavor.stringFlavor);
+        if (com.graham.util.StringUtil.stringNotEmpty(data)) {
+          ref.setFieldText(data);
+        }
+      } catch (Exception exc) {
+        
+      }
+      
+      /* tc.setText("");
+      TODO TODO 
       Action a = tc.getActionMap().get("paste");
       if (a != null) {
         ActionEvent ae = new ActionEvent(tc, ActionEvent.ACTION_PERFORMED, "");
         a.actionPerformed(ae);
       }
+      */
     }
   }
 
-  class GenPasswordAction extends AbstractAction {
-    JTextComponent tc;
-    int id;
-    public GenPasswordAction(String name, int idParam, JTextComponent tcParam) {
-      super(name);
-      id = idParam;
-      tc = tcParam;
-    }
-    public void actionPerformed(ActionEvent e) {
-      try {
-      PasswordGenerator.PwGenParams pwParams = new PasswordGenerator.PwGenParams();
-      switch (id) {
-        case 1: // Default Password Generator
-          break;
-        case 2: // 8 Basic
-          pwParams.setLengths(8,8);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.digit, 3, false);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.lower, 10, false);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.upper, 3, false);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.special, 0, false);
-          break;
-        case 3: // 12 Strong
-          pwParams.setLengths(12,12);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.digit, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.lower, 10, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.upper, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.special, 0, false);
-          break;
-        case 4: // 20 Strong
-          pwParams.setLengths(20,20);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.digit, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.lower, 10, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.upper, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.special, 0, false);
-          break;
-        case 5: // 10 Upper+Lower+Digit+Special
-          pwParams.setLengths(10,10);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.digit, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.lower, 10, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.upper, 3, true);
-          pwParams.setCharCat(PasswordGenerator.CharCategory.special, 2, true);
-          break;
-      }
-      tc.setText(PasswordGenerator.makePassword(pwParams));
-    } catch (Exception eee) {
-      context.ui.notifyWarning("GenPasswordAction", eee);
-    }
-    }
-  }
-  /*
-  class GenPasswordAction extends AbstractAction {
-    JTextComponent tc;
-    PasswordGenerator.PwGenParams pwParams;
-    public GenPasswordAction(String name, PasswordGenerator.PwGenParams pw, JTextComponent tcParam) {
-      super(name);
-      pwParams = pw;
-      tc = tcParam;
-    }
-    public void actionPerformed(ActionEvent e) {
-      tc.setText(PasswordGenerator.makePassword(pwParams));
-    }
-  }
-*/
 }
