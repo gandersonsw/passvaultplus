@@ -23,52 +23,32 @@ public class PvpDataInterface {
 
 	static final public String TYPE_CATEGORY = "Category";
 	static final public String TYPE_PASSWORD_GEN = "Password Generator";
-	static final public String DELETE_HASH = "deleteHash";
 
 	private final PvpContext context;
 	private List<PvpType> types;
 	private List<PvpRecord> records;
-	private List<PvpRecordDeleted> deletedRecords = new ArrayList<>();
+	private List<PvpRecordDeleted> deletedRecords;
 	private Map<String,String> metadata;
 	private int maxID;
 
 	public PvpDataInterface(final PvpContext contextParam) {
 		context = contextParam;
+		deletedRecords = new ArrayList<>();
 	}
 
-	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, List<PvpRecord> recordsParam, int maxIDParam, Map<String,String> metadataParam) {
+	public PvpDataInterface(final PvpContext contextParam, List<PvpType> typesParam, 
+				List<PvpRecord> recordsParam, int maxIDParam, List<PvpRecordDeleted> delRecordsParam, 
+				Map<String,String> metadataParam) {
 		context = contextParam;
 		types = typesParam;
 		records = recordsParam;
 		maxID = maxIDParam;
 		metadata = metadataParam;
-		processDeletedRecords();
-	}
-	
-	void processDeletedRecords() {
-		List<PvpRecord> drList = new ArrayList<>();
+		deletedRecords = delRecordsParam;
+		// do any initialization after all the data is loaded
 		for (PvpRecord r : records) {
-			String hash = r.getCustomField(DELETE_HASH);
-			if (StringUtil.stringNotEmpty(hash)) {
-				drList.add(r);
-				try {
-					deletedRecords.add(new PvpRecordDeleted(r.getId(), Integer.parseInt(hash)));
-				} catch (Exception e) {
-					context.notifyWarning(DELETE_HASH + " value should be an Integer: " + hash, e);
-				}
-			}
+			r.initalizeAfterLoad(context, this);
 		}
-		records.removeAll(drList);
-		
-		// TODO delete - temp logging
-		StringBuilder sb = new StringBuilder();
-		sb.append("processDeletedRecords IDs: ");
-		for (PvpRecord r : drList) {
-			sb.append(r.getId());
-			sb.append(',');
-		}
-		context.notifyInfo(sb.toString());
-		
 	}
 
 	void setData(PvpDataInterface dataTocCopyFrom) {
@@ -122,31 +102,6 @@ public class PvpDataInterface {
 	 */
 	public List<PvpRecord> getRecords() {
 		return records;
-	}
-	
-	List<PvpRecord> getRecordsIncDeleted() {
-		List<PvpRecord> allRec = new ArrayList<>();
-		allRec.addAll(records);
-		
-		
-		// TODO delete - temp logging
-		StringBuilder sb = new StringBuilder();
-		sb.append("getRecordsIncDeleted IDs: ");
-		
-		
-		for (PvpRecordDeleted d : deletedRecords) {
-			PvpRecord r = new PvpRecord();
-			r.setId(d.getId());
-			r.setCustomField(DELETE_HASH, Integer.toString(d.getHash()));
-			allRec.add(new PvpRecord());
-			
-			sb.append(d.getId());
-			sb.append(',');
-		}
-		
-		context.notifyInfo(sb.toString());
-		
-		return allRec;
 	}
 	
 	List<PvpRecordDeleted> getDeletedRecords() {

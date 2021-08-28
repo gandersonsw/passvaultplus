@@ -4,11 +4,11 @@ package com.graham.passvaultplus.model.search;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.function.Function;
-
 import java.util.Map;
 
 import com.graham.passvaultplus.model.core.PvpRecord;
 import com.graham.passvaultplus.model.core.PvpType;
+import com.graham.passvaultplus.PvpContextUI;
 
 public class SearchRecordMapper implements Function<PvpRecord, SearchRecord> {
   
@@ -34,6 +34,10 @@ public class SearchRecordMapper implements Function<PvpRecord, SearchRecord> {
   @Override
   public SearchRecord	apply(PvpRecord r) {
     int match = 5;
+    if (r.getType() == null) {
+      PvpContextUI.getActiveUI().notifyWarning("Record with no type. Id=" + r.getId());
+      return null; // don't include records that have no type. This just causes errors. This should never happen though.
+    }
     if (checkType) {
       if (!PvpType.sameType(r.getType(), filterByType)) {
         return null;

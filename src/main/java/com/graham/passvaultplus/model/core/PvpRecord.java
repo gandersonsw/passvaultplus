@@ -21,19 +21,15 @@ public class PvpRecord {
 	public final static String NO_CATEGORY = "[None]";
 	private final static String ARCHIVED_FLAG_VALUE = "1";
 
+	private PvpType rtType;
 	private int id;
 	private PvpRecord category;
 	private Date creationDate;
 	private Date modificationDate;
-	private Map<String, String> fields = new HashMap<>();
-	private PvpType rtType;
-
-	private String typeForValidate;
-	private String categoryIdForValidate;
 	private boolean archivedFlag;
-
-	PvpRecord() {
-	}
+	private Map<String, String> fields = new HashMap<>();
+	
+	private String categoryIdForValidate;
 
 	public PvpRecord(final PvpType t) {
 		if (t == null) {
@@ -59,8 +55,8 @@ public class PvpRecord {
 	}
 
 	public boolean isPersisted() {
-				return this.id > 0;
-		}
+		return this.id > 0;
+	}
 
 	public PvpRecord getCategory() {
 		return category;
@@ -177,8 +173,6 @@ public class PvpRecord {
 				return DateUtil.formatDateTime(creationDate, localized);
 			case PvpField.CFID_MODIFICATION_DATE:
 				return DateUtil.formatDateTime(modificationDate, localized);
-			case PvpField.CFID_NOTES:
-				return fields.get(field.getName());
 			case PvpField.CFID_SUMMARY:
 				return toString();
 			case PvpField.CFID_FULL:
@@ -187,6 +181,9 @@ public class PvpRecord {
 				return rtType.getName();
 			case PvpField.CFID_PLACE_HOLDER:
 				return "";
+			case PvpField.CFID_ARCHIVED_FLAG:
+				return Boolean.toString(archivedFlag);
+			case PvpField.CFID_NOTES:
 			case PvpField.CFID_UNDEF:
 				return fields.get(field.getName());
 		}
@@ -194,27 +191,43 @@ public class PvpRecord {
 		return null;
 	}
 
-	void setAnyFieldSerialized(final String fieldName, final String fieldValue) throws ParseException {
-		if (fieldName.equals(PvpField.CF_CATEGORY.getName())) {
-			categoryIdForValidate = fieldValue;
-		} else if (fieldName.equals(PvpField.CF_CREATION_DATE.getName())) {
-			try {
-				setCreationDate(DateUtil.parseDateTimeForSerialization(fieldValue));
-			} catch (Exception e) {
-				PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
-			}
-		} else if (fieldName.equals(PvpField.CF_MODIFICATION_DATE.getName())) {
-			try {
-				modificationDate = DateUtil.parseDateTimeForSerialization(fieldValue);
-			} catch (Exception e) {
-				PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
-			}
-		} else if (fieldName.equals(PvpField.CF_TYPE.getName())) {
-			typeForValidate = fieldValue;
-		} else if (fieldName.equals(PvpField.CF_ARCHIVED_FLAG.getName())) {
-			archivedFlag = ARCHIVED_FLAG_VALUE.equals(fieldValue);
-		} else {
-			fields.put(fieldName, fieldValue);
+	void setAnyFieldSerialized(final PvpField field, final String fieldValue) throws ParseException {
+		switch (field.getCoreFieldId()) {
+			case PvpField.CFID_CATEGORY:
+				categoryIdForValidate = fieldValue;
+				break;
+			case PvpField.CFID_CREATION_DATE:
+				try {
+					setCreationDate(DateUtil.parseDateTimeForSerialization(fieldValue));
+				} catch (Exception e) {
+					PvpContextUI.getActiveUI().notifyWarning("creation date parse error:" + fieldValue, e);
+				}
+				break;
+			case PvpField.CFID_MODIFICATION_DATE:
+				try {
+					modificationDate = DateUtil.parseDateTimeForSerialization(fieldValue);
+				} catch (Exception e) {
+					PvpContextUI.getActiveUI().notifyWarning("modification date parse error:" + fieldValue, e);
+				}
+				break;
+			case PvpField.CFID_SUMMARY:
+				PvpContextUI.getActiveUI().notifyWarning("should not call setAnyFieldSerialized with CFID_SUMMARY:" + fieldValue);
+				break;
+			case PvpField.CFID_FULL:
+				PvpContextUI.getActiveUI().notifyWarning("should not call setAnyFieldSerialized with CFID_FULL:" + fieldValue);
+				break;
+			case PvpField.CFID_TYPE:
+				// type should already be set - ignore this call
+				break;
+			case PvpField.CFID_PLACE_HOLDER:
+				break;
+			case PvpField.CFID_ARCHIVED_FLAG:
+				archivedFlag = ARCHIVED_FLAG_VALUE.equals(fieldValue);
+				break;
+			case PvpField.CFID_NOTES:
+			case PvpField.CFID_UNDEF:
+				fields.put(field.getName(), fieldValue);
+				break;
 		}
 	}
 
@@ -265,12 +278,6 @@ public class PvpRecord {
 	 * Called after all fields have been set using setAnyFieldSerialized
 	 */
 	void initalizeAfterLoad(final PvpContext context, final PvpDataInterface dataInterface) {
-
-		rtType = dataInterface.getType(typeForValidate);
-		if (rtType == null) {
-			context.ui.notifyWarning("WARN113 type not found:" + typeForValidate);
-		}
-
 		if (categoryIdForValidate == null || categoryIdForValidate.length() == 0) {
 			category = null;
 		} else {
@@ -285,7 +292,6 @@ public class PvpRecord {
 				category = null;
 			}
 		}
-
 	}
 
 	public int matchRating(final PvpRecord otherRec) {

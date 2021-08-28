@@ -205,7 +205,7 @@ public class SchemaEditBuilder implements OtherTabBuilder {
 
 			closeTabsForType(type);
 
-			context.data.deleteRecords(sr.getNestedRecords());
+			context.data.deleteRecords(sr.getNestedRecords(), false); // false because we do an update a few lines below
 
 			List<PvpType> types = context.data.getDataInterface().getTypes();
 			types.remove(type);

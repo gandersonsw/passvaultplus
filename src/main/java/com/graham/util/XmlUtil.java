@@ -31,34 +31,29 @@ public class XmlUtil {
 	}
 
 	/**
-	 * Convert "first-name" to "First Name"
-	 */
-	public static String unmakeXMLName(final String txt) {
-		String ret = txt.trim();
-		int dashLoc;
-		while ((dashLoc = ret.indexOf("-")) != -1) {
-			//	String aa = ret.substring(0, dashLoc);
-			//	String bb = ret.substring(dashLoc + 1, dashLoc + 2);
-			//	String cc = ret.substring(dashLoc + 2);
-
-			if (dashLoc + 2 > ret.length()) {
-				ret = ret.substring(0, dashLoc) + " ";
-			} else {
-				ret = ret.substring(0, dashLoc) + " " + ret.substring(dashLoc + 1, dashLoc + 2).toUpperCase() + ret.substring(dashLoc + 2);
-			}
-		}
-		ret = ret.substring(0,1).toUpperCase() + ret.substring(1);
-		return ret;
-	}
-
-	/**
 	 * Convert "First Name" to "first-name"
 	 */
 	public static String makeXMLName(final String txt) {
-		String ret = txt;
-		ret = StringUtil.replaceAll(ret," ","-");
-		ret = ret.toLowerCase();
-		return ret;
+		StringBuilder ret = new StringBuilder();
+		for (int i = 0; i < txt.length(); i++) {
+			int cp = txt.codePointAt(i);
+			if (Character.isSpaceChar(cp)) {
+				if (i == 0) {
+					ret.append("_");
+				} else {
+					ret.append("-");
+				}
+			} else if (Character.isAlphabetic(cp)) {
+				ret.appendCodePoint(cp);
+			} else if (Character.isDigit(cp)) {
+				if (i == 0) {
+					ret.append("_");
+				}
+				ret.appendCodePoint(cp);
+			}
+		}
+		
+		return ret.toString().toLowerCase();
 	}
 
 	public static void addOrSetContent(Element parent, String elementName, String text) {

@@ -85,7 +85,7 @@ public class TypeAheadSelector extends AbstractPopupWidget<JTextField> {
 		valueTable.getSelectionModel().addListSelectionListener(new TableSelectionChangedListener());
 		
 		valueTableScroll = new JScrollPane(valueTable);
-		valueTableScroll.setPreferredSize(new Dimension(170,100));
+		valueTableScroll.setPreferredSize(new Dimension(240,140));
 		
 		return valueTableScroll;
 	}

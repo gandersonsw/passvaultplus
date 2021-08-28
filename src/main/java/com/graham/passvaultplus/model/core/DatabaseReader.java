@@ -28,6 +28,7 @@ import com.graham.util.XmlUtil;
 public class DatabaseReader {
 	private final PvpContext context;
 	private int maxID;
+	private Map<String, PvpType> types;
 
 	public static PvpDataInterface read(final PvpContext contextParam, InputStream inStream) throws Exception {
 		return new DatabaseReader(contextParam).readInternal(inStream);
@@ -109,44 +110,47 @@ public class DatabaseReader {
 	}
 	
 	private PvpDataInterface readInternal(InputStream inStream) throws Exception {
-		PvpDataInterface dataInterface;
-		List<PvpType> types = null;
-		List<PvpRecord> records = null;
+		
+		List<PvpType> typeList = null;
+		List<PvpRecord> recordList = null;
+		List<PvpRecordDeleted> deletedRecordList = null;
 		Map<String,String> metadata = null;
 		final Document jdomDoc = getJDom(inStream);
 		final Element root = jdomDoc.getRootElement();
 		if (!root.getName().equals("mydb")) {
 			context.ui.notifyWarning("WARN101 unexpected element:" + root.getName());
 		}
+		
 		final List children = root.getChildren();
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			if (e.getName().equals("types")) {
-				types = loadTypes(e);
-			} else if (e.getName().equals("records")) {
-				records = loadRecords(e);
+				typeList = loadTypes(e);
 			} else if (e.getName().equals("metadata")) {
 				metadata = loadMetadata(e);
-			} else {
-				context.ui.notifyWarning("WARN102 unexpected element:" + e.getName());
+			} else if (e.getName().equals("deleted")) {
+				deletedRecordList = loadDeletedRecords(e);
 			}
 		}
-
-		if (types == null) {
+		if (typeList == null) {
 			throw new Exception("types XML element not found");
 		}
-
-		if (records == null) {
+		types = new HashMap<>();
+		for (PvpType type : typeList) {
+			types.put(type.getName(), type);
+		}
+		
+		for (int i = 0; i < children.size(); i++) {
+			Element e = (Element) children.get(i);
+			if (e.getName().equals("records")) {
+				recordList = loadRecords(e);
+			}
+		}
+		if (recordList == null) {
 			throw new Exception("records XML element not found");
 		}
 
-		dataInterface = new PvpDataInterface(context, types, records, maxID, metadata);
-
-		// do any initialization after all the data is loaded
-		for (PvpRecord r : records) {
-			r.initalizeAfterLoad(context, dataInterface);
-		}
-
+		PvpDataInterface dataInterface = new PvpDataInterface(context, typeList, recordList, maxID, deletedRecordList, metadata);
 		return dataInterface;
 	}
 
@@ -258,12 +262,29 @@ public class DatabaseReader {
 		} catch (Exception e) {
 			context.ui.notifyWarning("WARN109 no id attribute for " + recordElement.getName(), e);
 		}
-		PvpRecord record = new PvpRecord();
+		
+		PvpType recType = null;
+		try {
+			String typeName = recordElement.getChildText("type");
+			recType = types.get(typeName);
+			if (recType == null) {
+				context.ui.notifyWarning("WARN109a no type field for " + recordElement.getName());
+			}
+		} catch (Exception e) {
+			context.ui.notifyWarning("WARN109b no type field for " + recordElement.getName(), e);
+		}
+		
+		PvpRecord record = new PvpRecord(recType);
 		record.setId(id);
 		for (int i = 0; i < children.size(); i++) {
 			Element e = (Element) children.get(i);
 			try {
-				record.setAnyFieldSerialized(XmlUtil.unmakeXMLName(e.getName()), XmlUtil.unmakeXMLSafe(e.getText()));
+				PvpField f = recType.getFieldByXmlName(e.getName());
+				if (f == null) {
+					context.ui.notifyWarning("WARN109d no field for " + e.getName());
+				} else {
+					record.setAnyFieldSerialized(f, XmlUtil.unmakeXMLSafe(e.getText()));
+				}
 			} catch (final Exception ex) {
 				context.ui.notifyWarning("WARN110 loading id=" + id + " name:" + e.getName() + " text:" + e.getText(), ex);
 			}
@@ -275,6 +296,33 @@ public class DatabaseReader {
 		}
 
 		return record;
+	}
+
+
+
+
+	private List<PvpRecordDeleted> loadDeletedRecords(final Element recordsElement) {
+		List children = recordsElement.getChildren();
+		List<PvpRecordDeleted> records = new ArrayList<>();
+		for (int i = 0; i < children.size(); i++) {
+			Element e = (Element) children.get(i);
+			if (!e.getName().equals("delrec")) {
+				context.ui.notifyWarning("WARN108 unexpected element:" + e.getName());
+			}
+			try {
+				records.add(loadOneDeletedRecord(e));
+			} catch (Exception ex) {
+				context.ui.notifyWarning("WARN116", ex);
+			}
+		}
+
+		return records;
+	}
+
+	private PvpRecordDeleted loadOneDeletedRecord(final Element recordElement) throws Exception {
+		return new PvpRecordDeleted(
+				recordElement.getAttribute("id").getIntValue(), 
+				recordElement.getAttribute("hash").getIntValue());
 	}
 
 	private Map<String,String> loadMetadata(final Element metadataElement) {

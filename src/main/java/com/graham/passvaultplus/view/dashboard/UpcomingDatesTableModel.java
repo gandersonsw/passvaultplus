@@ -77,7 +77,7 @@ public class UpcomingDatesTableModel extends AbstractTableModel {
 			if (r.isArchived()) {
 				continue;
 			}
-			String t = r.getType().getName();
+			String t = r.getType() == null ? "" : r.getType().getName();
 			if (t.equals("Todo")) { // TODO : a way to link this if user changes type name ?
 				Date d = null;
 				String completeDate = r.getCustomField("Complete Date");

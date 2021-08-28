@@ -29,7 +29,8 @@ public class DatabaseWriter {
 	private void writeInternal(final PvpDataInterface dataInterface) throws IOException {
 		writeStart();
 		writeTypes(dataInterface.getTypes());
-		writeRecords(dataInterface.getRecordsIncDeleted(), dataInterface.getMaxId());
+		writeRecords(dataInterface.getRecords(), dataInterface.getMaxId());
+		writeDeletedRecords(dataInterface.getDeletedRecords());
 		writeMetadata(dataInterface.getMetadataMap());
 		writeEnd();
 	}
@@ -130,6 +131,25 @@ public class DatabaseWriter {
 			bw.write(">");
 			bw.newLine();
 		}
+	}
+	
+	private void writeDeletedRecords(final List<PvpRecordDeleted> records) throws IOException {
+		bw.write("	<deleted>");
+		bw.newLine();
+
+		if (records != null) {
+			for (final PvpRecordDeleted r : records) {
+				bw.write("		<delrec id=\"");
+				bw.write(String.valueOf(r.getId()));
+				bw.write("\" hash=\"");
+				bw.write(String.valueOf(r.getHash()));
+				bw.write("\" />");
+				bw.newLine();
+			}
+		}
+
+		bw.write("	</deleted>");
+		bw.newLine();
 	}
 
 	private void writeMetadata(final Map<String, String> data) throws IOException {

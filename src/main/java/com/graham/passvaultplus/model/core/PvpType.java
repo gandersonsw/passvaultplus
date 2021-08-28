@@ -39,6 +39,41 @@ public class PvpType {
 		return null;
 	}
 	
+	public PvpField getFieldByXmlName(final String fieldName) {
+		// TODO pull this ut and optimize ( in reader )
+		for (PvpField f : fields) {
+			if (f.getXmlName().equals(fieldName)) {
+				return f;
+			}
+		}
+		if (PvpField.CF_NOTES.getXmlName().equals(fieldName)) {
+			// The notes field is different because it is always present.
+			return PvpField.CF_NOTES;
+		}
+		
+		if (PvpField.CF_CATEGORY.getXmlName().equals(fieldName)) {
+			return PvpField.CF_CATEGORY;
+		}
+		
+		if (PvpField.CF_CREATION_DATE.getXmlName().equals(fieldName)) {
+			return PvpField.CF_CREATION_DATE;
+		}
+		
+		if (PvpField.CF_MODIFICATION_DATE.getXmlName().equals(fieldName)) {
+			return PvpField.CF_MODIFICATION_DATE;
+		}
+		
+		if (PvpField.CF_TYPE.getXmlName().equals(fieldName)) {
+			return PvpField.CF_TYPE;
+		}
+		
+		if (PvpField.CF_ARCHIVED_FLAG.getXmlName().equals(fieldName)) {
+			return PvpField.CF_ARCHIVED_FLAG;
+		}
+		
+		return null;
+	}
+	
 	public List<PvpField> getFields() {
 		return fields;
 	}

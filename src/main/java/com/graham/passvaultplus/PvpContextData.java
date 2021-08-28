@@ -56,7 +56,7 @@ public class PvpContextData {
 		dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
 	}
 
-	public void deleteRecords(final Collection<PvpRecord> rCol) {
+	public void deleteRecords(final Collection<PvpRecord> rCol, boolean broadcastChangeFlag) {
 		if (rCol == null || rCol.size() == 0) {
 			return;
 		}
@@ -66,7 +66,7 @@ public class PvpContextData {
 				changed = true;
 			}
 		}
-		if (changed) {
+		if (changed && broadcastChangeFlag) {
 			dataChanged(PvpPersistenceInterface.SaveTrigger.cud);
 		}
 	}

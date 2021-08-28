@@ -2,6 +2,7 @@
 package com.graham.passvaultplus.model.core;
 
 import com.graham.util.StringUtil;
+import com.graham.util.XmlUtil;
 
 public class PvpField {
 
@@ -47,6 +48,7 @@ public class PvpField {
 
 	private final int coreFieldId;
 	private String name;
+	private String xmlName;
 	private String type;
 	private String classification; // may be null
 
@@ -74,12 +76,14 @@ public class PvpField {
 
 	public PvpField(final String nameParam, final String typeParam) {
 		name = nameParam;
+		xmlName = XmlUtil.makeXMLName(name);
 		type = typeParam;
 		coreFieldId = CFID_UNDEF;
 	}
 
 	public PvpField(final String nameParam, final String typeParam, final String classificationParam) {
 		name = nameParam;
+		xmlName = XmlUtil.makeXMLName(name);
 		type = typeParam;
 		classification = classificationParam;
 		coreFieldId = CFID_UNDEF;
@@ -87,12 +91,17 @@ public class PvpField {
 
 	public PvpField(final int coreTypeIdParam, final String nameParam, final String typeParam) {
 		name = nameParam;
+		xmlName = XmlUtil.makeXMLName(name);
 		type = typeParam;
 		coreFieldId = coreTypeIdParam;
 	}
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getXmlName() {
+		return xmlName;
 	}
 	
 	public String getType() {
@@ -121,6 +130,7 @@ public class PvpField {
 	
 	public void setName(String n) {
 		name = n;
+		xmlName = XmlUtil.makeXMLName(name);
 	}
 	
 	public void setType(String t) {
