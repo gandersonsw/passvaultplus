@@ -3,8 +3,8 @@ package com.graham.passvaultplus.model.core;
 
 public class PvpRecordDeleted {
     
-  	private int id;
-    private int hash;
+  	private final int id;
+    private final int hash;
     
     public PvpRecordDeleted(int idParam, int hashParam) {
       id = idParam;

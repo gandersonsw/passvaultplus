@@ -144,7 +144,7 @@ public class PvpRecord {
 		Map<String, String> allFields = new HashMap<>();
 		allFields.putAll(fields);
 
-		if (rtType != null) { // it is a record that was deleted - PvpDataInterface.getRecordsIncDeleted
+	//	if (rtType != null) { // it is a record that was deleted - PvpDataInterface.getRecordsIncDeleted
 			allFields.put(PvpField.CF_CATEGORY.getName(), category == null ? "" : String.valueOf(category.getId()));
 			allFields.put(PvpField.CF_CREATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(creationDate));
 			allFields.put(PvpField.CF_MODIFICATION_DATE.getName(), DateUtil.formatDateTimeForSerialization(modificationDate));
@@ -152,7 +152,7 @@ public class PvpRecord {
 			if (archivedFlag) {
 				allFields.put(PvpField.CF_ARCHIVED_FLAG.getName(), ARCHIVED_FLAG_VALUE);
 			}
-		}
+	//	}
 
 		return allFields;
 	}

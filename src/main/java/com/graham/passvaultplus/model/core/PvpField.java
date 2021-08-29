@@ -70,6 +70,12 @@ public class PvpField {
 				return CF_VIRTUAL_FULL;
 			case CFID_PLACE_HOLDER:
 				return CF_VIRTUAL_PLACE_HOLDER;
+			case CFID_ARCHIVED_FLAG:
+				return CF_ARCHIVED_FLAG;
+			case CFID_SEARCH_MATCH:
+				return CF_SEARCH_MATCH;
+			case CFID_IDENTITY:
+				return CF_IDENTITY;
 		}
 		return null;
 	}

@@ -86,11 +86,11 @@
          </field>
          <field>
             <name>Priority</name>
-            <type>int</type>
+            <type>String</type>
          </field>
          <field>
             <name>Complete</name>
-            <type>boolean</type>
+            <type>String</type>
          </field>
          <field>
             <name>Complete Date</name>
@@ -106,11 +106,7 @@
          </field>
          <field>
             <name>Text</name>
-            <type>String</type>
-         </field>
-         <field>
-            <name>Related Idea</name>
-            <type>Idea</type>
+            <type>Long String</type>
          </field>
       </type>
       <type>

@@ -95,7 +95,7 @@ public class DatabaseReader {
 		} catch (CharConversionException originalException) {
 			context.ui.notifyWarning("WARN119 builder.build CharConversionException", originalException);
 			try {
-				if  (inStream.markSupported()) {
+				if (inStream.markSupported()) {
 					inStream.reset();
 					inStream = cleanStreamUTF8(inStream);
 					jdomDoc = builder.build(inStream);
@@ -297,9 +297,6 @@ public class DatabaseReader {
 
 		return record;
 	}
-
-
-
 
 	private List<PvpRecordDeleted> loadDeletedRecords(final Element recordsElement) {
 		List children = recordsElement.getChildren();

@@ -106,7 +106,7 @@ public class HelpBuilder implements OtherTabBuilder {
 			}
 
 			{
-				final JLabel l = new JLabel("Copyright © 2017 Graham Anderson.");
+				final JLabel l = new JLabel("Copyright © 2017-2021 Graham Anderson.");
 				l.setHorizontalAlignment(SwingConstants.CENTER);
 				final JPanel cp = new JPanel(new BorderLayout());
 				cp.add(l, BorderLayout.CENTER);

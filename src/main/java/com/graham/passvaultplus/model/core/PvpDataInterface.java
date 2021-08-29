@@ -43,8 +43,8 @@ public class PvpDataInterface {
 		types = typesParam;
 		records = recordsParam;
 		maxID = maxIDParam;
-		metadata = metadataParam;
 		deletedRecords = delRecordsParam;
+		metadata = metadataParam;
 		// do any initialization after all the data is loaded
 		for (PvpRecord r : records) {
 			r.initalizeAfterLoad(context, this);
@@ -55,6 +55,7 @@ public class PvpDataInterface {
 		types = dataTocCopyFrom.types;
 		records = dataTocCopyFrom.records;
 		maxID = dataTocCopyFrom.maxID;
+		deletedRecords = dataTocCopyFrom.deletedRecords;
 		metadata = dataTocCopyFrom.metadata;
 	}
 

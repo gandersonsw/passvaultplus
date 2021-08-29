@@ -73,7 +73,7 @@ class RecordEditFieldBuilder {
 		}
 
 		RecordEditFieldText ref;
-		if (field.isClassificationSecret() && !reb.isNewRecord) {
+		if (field.isClassificationSecret()) {
 			final RecordEditFieldSecret refs = new RecordEditFieldSecret(tf, name, reb.editContext);
 			ref = refs;
 			JButton showSecretFieldButton = new JButton(new UnlockFieldAction(ResourceUtil.getIcon("unlock-small"), refs, reb.editContext));

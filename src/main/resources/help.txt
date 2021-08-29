@@ -1,6 +1,6 @@
 # Copyright (C) 2020 Graham Anderson gandersonsw@gmail.com - All Rights Reserved
 # The pound sign starts a commented line
-# The dash character is used for control and formatting. If a non-whitespace char is before the dash, the dash will be treated s normal text
+# The dash character is used for control and formatting. If a non-whitespace char is before the dash, the dash will be treated as normal text
 # A single dash indicates a link. It must have a space after the dash. (use tabs to have a hierarchy)
 #    If no section is found in the document, the link will just be text
 # A section uses 4 dashes and spaces. example: "- - - - Test - - - -"
@@ -81,8 +81,9 @@ Right clicking in an text field editor allows you to generate passwords
 - - - - Records - - - -
 When first starting, the Records tab is shown. Is shows all the records you have saved. You can narrow the displayed records by
 typing text into the “Filter” field. It is not case sensitive and will match against any of the fields of the record.
-You can also limit to a certain
-type of record or to a certain category. Double-clicking on the list will open up the detailed editor for that record.
+When filtering by text, a rating may be shown in the first column. 5 is best - a word match in the title, 4 - match in title,
+3 - match in any field, 2 - match in notes field or a long string typed field, 1 - match on an archived record.
+You can also limit to a certain type of record or to a certain category. Double-clicking on the list will open up the detailed editor for that record.
 
 - - Views - -
 A vertical view is when there are two columns, the "Field" and "Value" columns. When displayed this way, when you click anywhere
@@ -117,7 +118,7 @@ In the record editor
 panel, there are buttons on the left to copy the entire field. If it is a hidden field, it will still be copied. If a field
 has values that are reused 3 or more times, a drop down menu will appear on the right of that field to auto-fill the value.
 If the field is a secure field, its value will be shown as “******” and an unlock button will show up on the right that will
-allow you to see the field and edit it. On the bottom there is a button to revert all the field. A button to cancel -
+allow you to see the field and edit it. On the bottom there is a button to revert all the fields. A button to cancel -
 closing the tab and disregarding any edits you made. And a save button to save all the values and close the tab. The first time
 you save a record, the creation date will be set. Whenever you edit a record and save it, the modification date will be updated.
 
