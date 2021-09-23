@@ -2,6 +2,7 @@
 package com.graham.passvaultplus.model.gdocs;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -193,7 +194,8 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 	}
 
 	@Override
-	public void doFileUpload(LTRunner ltr) throws IOException {
+	public void doFileUpload(LTRunner ltr) throws IOException, PvpException {
+		try {
 		context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: START" );
 
 		Drive driveService;
@@ -226,10 +228,18 @@ public class PvpBackingStoreGoogleDocs extends PvpBackingStoreAbstract {
 			}
 		}
 
-		if  (returnedFileMetaData != null) {
+		if (returnedFileMetaData != null) {
 			context.prefs.setGoogleDriveDocId(returnedFileMetaData.getId());
 			context.ui.notifyInfo("PvpBackingStoreGoogleDocs.doFileUpload :: File ID: " + returnedFileMetaData.getId());
 		}
+	} catch (Exception e) {
+		if (e instanceof ConnectException) {
+			context.ui.showMessageDialog("Error Connecting", "Data was not saved to Google because connection failed.");
+			throw new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e).setRecoverableFlag(true);
+		} else {
+			throw e;
+		}
+	}
 	}
 
 	@Override

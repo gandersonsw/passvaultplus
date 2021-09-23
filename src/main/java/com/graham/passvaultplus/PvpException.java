@@ -87,6 +87,11 @@ public class PvpException extends Exception {
 	final private GeneralErrCode gecode;
 	private Action optionalAction;
 	private String additionalDescription;
+	/**
+	 * if true, the exception was handled, and execution can continue.
+	 * the exception should still be logged for information
+	 */
+	private boolean recoverableFlag;
 	
 	public PvpException(final SpecificErrCode c, final String technicalMessage) {
 		super(technicalMessage);
@@ -107,6 +112,11 @@ public class PvpException extends Exception {
 	
 	public PvpException setAdditionalDescription(final String d) {
 		additionalDescription = d;
+		return this;
+	}
+	
+	public PvpException setRecoverableFlag(boolean b) {
+		recoverableFlag = b;
 		return this;
 	}
 	
@@ -138,6 +148,10 @@ public class PvpException extends Exception {
 	
 	public Action getPvpOptionalAction() {
 		return optionalAction;
+	}
+	
+	public boolean isRecoverable() {
+		return recoverableFlag;
 	}
 
 }

@@ -348,6 +348,12 @@ public class PvpPersistenceInterface {
 				}
 			}
 			bs.setDirty(false);
+		} catch (PvpException e) {
+			bs.setException(e);
+			if (!e.isRecoverable()) {
+				errorHappened = true;
+				context.ui.notifyBadException(e, true, PvpException.GeneralErrCode.CantWriteDataFile);
+			}
 		} catch (Exception e) {
 			errorHappened = true;
 			bs.setException(new PvpException(PvpException.GeneralErrCode.CantWriteDataFile, e));

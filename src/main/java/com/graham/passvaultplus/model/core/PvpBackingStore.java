@@ -107,7 +107,7 @@ public interface PvpBackingStore {
 
 	boolean supportsFileUpload();
 
-	void doFileUpload(LTRunner ltr) throws IOException;
+	void doFileUpload(LTRunner ltr) throws IOException, PvpException;
 
 	boolean isDirty();
 	void setDirty(boolean dirty);

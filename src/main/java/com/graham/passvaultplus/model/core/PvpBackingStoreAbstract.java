@@ -23,7 +23,7 @@ public abstract class PvpBackingStoreAbstract implements PvpBackingStore {
 	}
 
 	@Override
-	public void doFileUpload(LTRunner ltr) throws IOException {
+	public void doFileUpload(LTRunner ltr) throws IOException, PvpException {
 		throw new UnsupportedOperationException();
 	}
 
