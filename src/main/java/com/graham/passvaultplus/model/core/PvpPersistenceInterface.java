@@ -167,8 +167,7 @@ public class PvpPersistenceInterface {
 			} catch (UserAskToChangeFileException ucf) {
 				throw ucf;
 			} catch (Exception e) {
-				context.ui.notifyInfo("at 37 Exception: " + e.getMessage());
-				e.printStackTrace();
+				context.ui.notifyWarning("at 37 Exception: ", e);
 				bs.setException(new PvpException(PvpException.GeneralErrCode.CantParseXml, e).setOptionalAction(new ExportXmlFile(context, bs)).setAdditionalDescription(bs.getDisplayableResourceLocation(ltr)));
 			} finally {
 				// note that close is called 2 times when an error happens

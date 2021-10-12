@@ -43,7 +43,7 @@ public class PvpDataInterface {
 		types = typesParam;
 		records = recordsParam;
 		maxID = maxIDParam;
-		deletedRecords = delRecordsParam;
+		deletedRecords = delRecordsParam == null ? new ArrayList<>() : delRecordsParam;
 		metadata = metadataParam;
 		// do any initialization after all the data is loaded
 		for (PvpRecord r : records) {
